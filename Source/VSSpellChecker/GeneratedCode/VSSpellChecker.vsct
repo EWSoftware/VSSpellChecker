@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!--  This is the file that defines the actual layout and type of the commands.
+        It is divided in different sections (e.g. command definition, command
+        placement, ...), with each defining a specific set of properties.
+        See the comment before each section for more details about how to
+        use it. -->
+
+  <!--  The VSCT compiler (the tool that translates this file into the binary 
+        format that VisualStudio will consume) has the ability to run a preprocessor 
+        on the vsct file; this preprocessor is (usually) the C++ preprocessor, so 
+        it is possible to define includes and macros with the same syntax used 
+        in C++ files. Using this ability of the compiler here, we include some files 
+        defining some of the constants that we will use inside the file. -->
+
+  <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
+  <Extern href="stdidcmd.h"/>
+
+  <!--This header contains the command ids for the menus provided by the shell. -->
+  <Extern href="vsshlids.h"/>
+
+  <!--Definition of some VSCT specific constants. In this sample we use it for the IDs inside the guidOfficeIcon group. -->
+  <Extern href="msobtnid.h"/>
+
+  <Extern href="VSDbgCmd.h" />
+  <Extern href="VsDebugGuids.h"/>
+
+  
+  <!--The Commands section is where we the commands, menus and menu groups are defined.
+      This section uses a Guid to identify the package that provides the command defined inside it. -->
+  <Commands package="guidPackage">
+  
+  <Groups>
+    <Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0101"/>
+	  <Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" priority="0xFFF0"/>
+	  <Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" priority="0x0100"/>
+	</Groups>
+
+  <Buttons>
+    <Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfiguration" priority="0x0100">
+				<Strings>
+            <CommandName>cmdidSpellCheckerConfiguration</CommandName>
+            <ButtonText>Edit Configuration</ButtonText>
+            <MenuText>Edit Configuration</MenuText>
+            <ToolTipText>Edit spell checker configuration</ToolTipText>
+		    </Strings>
+	  </Button>
+	  <Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
+				<Strings>
+            <CommandName>cmdidSpellCheckInteractive</CommandName>
+            <ButtonText>Spell Check Current Document</ButtonText>
+            <MenuText>Spell Check Current Document</MenuText>
+            <ToolTipText>Spell check the current document</ToolTipText>
+		    </Strings>
+	  </Button>
+	</Buttons>
+
+  <Menus>
+    <Menu guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" type="Menu" priority="0x0100">
+			   <Strings>
+	       <CommandName>Spell Checker</CommandName>
+         <ButtonText>Spell Checker</ButtonText>
+         <MenuText>Spell Checker</MenuText>
+         <ToolTipText>Spell checker options</ToolTipText>
+		   		</Strings>
+		</Menu> 
+
+    		  </Menus>
+
+
+
+  </Commands>
+
+  <CommandPlacements>
+     <CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfiguration" priority="0x0100"> 
+	         <Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" />
+		   </CommandPlacement> 
+	     <CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100"> 
+	         <Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
+		   </CommandPlacement> 
+	     <CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0101">
+	         <Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
+		   </CommandPlacement> 
+	     <CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" priority="0xFFF0">
+	         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+		   </CommandPlacement> 
+	     <CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" priority="0x0100">
+	         <Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
+		   </CommandPlacement> 
+		     <CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" priority="0x0100">
+	         <Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" />
+		   </CommandPlacement> 
+	</CommandPlacements>
+  
+
+  <Symbols>
+    <!-- This is the package guid. -->
+    <GuidSymbol name="guidPackage" value="{86b8a6ea-6a96-4e31-b31d-943e86581421}" />
+    
+    <!-- This is the guid used to group the menu commands together -->
+    <GuidSymbol name="guidVSSpellCheckerCommandSet" value="{34482677-bc69-4bd3-8b8b-1ecd347f609d}">
+	     <IDSymbol name="SpellCheckerConfig" value="0x0001" />
+     <IDSymbol name="SpellCheckerGroup" value="0x0004" />
+     <IDSymbol name="SpellCheckerActions" value="0x0008" />
+     <IDSymbol name="SpellCheckerConfiguration" value="0x0003" />
+	     <IDSymbol name="SpellCheckInteractive" value="0x0007" />
+	     <IDSymbol name="SpellCheckerMenu" value="0x0002" />
+	  </GuidSymbol>
+	</Symbols>
+
+</CommandTable>
+

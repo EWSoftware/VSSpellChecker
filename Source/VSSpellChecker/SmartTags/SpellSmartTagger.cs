@@ -1,0 +1,227 @@
+//===============================================================================================================
+// System  : Visual Studio Spell Checker Package
+// File    : SpellSmartTagger.cs
+// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
+// Updated : 05/02/2013
+// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Compiler: Microsoft Visual C#
+//
+// This file contains a class used to implement the tagger for spelling smart tags
+//
+// This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
+// distributed with the code.  It can also be found at the project website: http://VSSpellChecker.CodePlex.com.
+// This notice, the author's name, and all copyright notices must remain intact in all applications,
+// documentation, and source files.
+//
+// Version     Date     Who  Comments
+//===============================================================================================================
+// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
+//
+// Change History:
+// 04/26/2013 - EFW - Added support for disabling spell checking as you type
+// 05/02/2013 - EFW - Added support for Replace All
+// 05/31/2013 - EFW - Added support for Ignore Once
+//===============================================================================================================
+
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel.Composition;
+
+using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Tagging;
+using Microsoft.VisualStudio.Utilities;
+
+using VisualStudio.SpellChecker;
+using VisualStudio.SpellChecker.Definitions;
+
+namespace VisualStudio.SpellChecker.SmartTags
+{
+    /// <summary>
+    /// Tagger for Spelling smart tags.
+    /// </summary>
+    internal class SpellSmartTagger : ITagger<SpellSmartTag>, IDisposable
+    {
+        #region Private Fields
+
+        private ITextBuffer _buffer;
+        private ISpellingDictionary _dictionary;
+        private ITagAggregator<IMisspellingTag> _misspellingAggregator;
+        private bool disposed = false;
+        internal const string SpellingErrorType = "Spelling Error Smart Tag";
+        #endregion
+
+        #region MEF Imports / Exports
+        //=====================================================================
+
+        /// <summary>
+        /// Spelling smart tagger provider
+        /// </summary>
+        [Export(typeof(IViewTaggerProvider)), ContentType("any"),
+          TagType(typeof(Microsoft.VisualStudio.Language.Intellisense.SmartTag))]
+        internal class SpellSmartTaggerProvider : IViewTaggerProvider
+        {
+            [Import]
+            ISpellingDictionaryService DictionaryService = null;
+
+            [Import]
+            internal IViewTagAggregatorFactoryService TagAggregatorFactory = null;
+
+            /// <summary>
+            /// Creates a tag provider for the specified view and buffer
+            /// </summary>
+            /// <typeparam name="T">The tag type</typeparam>
+            /// <param name="textView">The text view</param>
+            /// <param name="buffer">The text buffer</param>
+            /// <returns>The tag provider for the specified view and buffer or null if the buffer is not editable
+            /// or spell checking as you type is disabled.</returns>
+            public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
+            {
+                // If this view isn't editable, then there isn't a good reason to be showing these.
+                if(!textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
+                  !textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument))
+                    return null;
+
+                // Make sure we only tagging top buffer and only if wanted
+                if(buffer != textView.TextBuffer || !SpellCheckerConfiguration.SpellCheckAsYouType)
+                    return null;
+
+                return new SpellSmartTagger(buffer, DictionaryService.GetDictionary(buffer),
+                    TagAggregatorFactory.CreateTagAggregator<IMisspellingTag>(textView)) as ITagger<T>;
+            }
+        }
+        #endregion
+
+        #region Constructor
+        //=====================================================================
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="buffer">The text buffer</param>
+        /// <param name="dictionary">The spelling dictionary</param>
+        /// <param name="misspellingAggregator">The misspelling aggregator</param>
+        public SpellSmartTagger(ITextBuffer buffer, ISpellingDictionary dictionary,
+          ITagAggregator<IMisspellingTag> misspellingAggregator)
+        {
+            _buffer = buffer;
+            _dictionary = dictionary;
+            _misspellingAggregator = misspellingAggregator;
+
+            _misspellingAggregator.TagsChanged += (sender, args) =>
+            {
+                foreach(var span in args.Span.GetSpans(_buffer))
+                    RaiseTagsChangedEvent(span);
+            };
+        }
+        #endregion
+
+        #region ITagger<SpellSmartTag> Members
+        /// <summary>
+        /// Returns tags on demand.
+        /// </summary>
+        /// <param name="spans">Spans collection to get tags for.</param>
+        /// <returns>Squiggle tags in provided spans.</returns>
+        public IEnumerable<ITagSpan<SpellSmartTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+        {
+            if(spans.Count == 0)
+                yield break;
+
+            ITextSnapshot snapshot = spans[0].Snapshot;
+
+            foreach(var misspelling in _misspellingAggregator.GetTags(spans))
+            {
+                var misspellingSpans = misspelling.Span.GetSpans(snapshot);
+
+                if(misspellingSpans.Count != 1)
+                    continue;
+
+                SnapshotSpan errorSpan = misspellingSpans[0];
+
+                yield return new TagSpan<SpellSmartTag>(errorSpan,
+                    new SpellSmartTag(GetSmartTagActions(errorSpan, misspelling.Tag.Suggestions)));
+            }
+        }
+
+        public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+        #endregion
+
+        #region IDisposable
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if(!this.disposed)
+            {
+                if(disposing)
+                {
+                    _misspellingAggregator.Dispose();
+                    _misspellingAggregator = null;
+                }
+
+                disposed = true;
+            }
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private ReadOnlyCollection<SmartTagActionSet> GetSmartTagActions(SnapshotSpan errorSpan,
+          IEnumerable<string> suggestions)
+        {
+            List<SmartTagActionSet> smartTagSets = new List<SmartTagActionSet>();
+
+            ITrackingSpan trackingSpan = errorSpan.Snapshot.CreateTrackingSpan(errorSpan,
+                SpanTrackingMode.EdgeExclusive);
+
+            // Add spelling suggestions (if there are any)
+            List<ISmartTagAction> actions = new List<ISmartTagAction>();
+
+            foreach(var suggestion in suggestions)
+                actions.Add(new SpellSmartTagAction(trackingSpan, suggestion, _dictionary));
+
+            if(actions.Count > 0)
+            {
+                // This acts as a place holder to tell the user to hold the Ctrl key down to replace all
+                // occurrences of the selected word.
+                actions.Insert(0, new SpellSmartTagAction(null, "Hold Ctrl to replace all", null));
+
+                smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
+            }
+
+            // Add Dictionary operations (ignore all)
+            List<ISmartTagAction> dictionaryActions = new List<ISmartTagAction>();
+            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore Once",
+                DictionaryAction.IgnoreOnce));
+            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore All",
+                DictionaryAction.IgnoreAll));
+            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Add to Dictionary",
+                DictionaryAction.AddWord));
+            smartTagSets.Add(new SmartTagActionSet(dictionaryActions.AsReadOnly()));
+
+            return smartTagSets.AsReadOnly();
+        }
+
+        #endregion
+
+        #region Event handlers
+
+        private void RaiseTagsChangedEvent(SnapshotSpan subjectSpan)
+        {
+            EventHandler<SnapshotSpanEventArgs> handler = this.TagsChanged;
+            if(handler != null)
+            {
+                handler(this, new SnapshotSpanEventArgs(subjectSpan));
+            }
+        }
+
+        #endregion
+    }
+}
