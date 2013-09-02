@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 06/01/2013
+// Updated : 06/10/2013
 // Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -301,7 +301,9 @@ namespace VisualStudio.SpellChecker
                         // this point if it was changed.
 
                         // Match the case of the first letter if necessary
-                        if(replacementWord.Length > 1 && Char.IsUpper(replacementWord[0]) != Char.IsUpper(replacementWord[1]))
+                        if(replacementWord.Length > 1 &&
+                          (Char.IsUpper(replacementWord[0]) != Char.IsUpper(replacementWord[1]) ||
+                          (Char.IsLower(replacementWord[0]) && Char.IsLower(replacementWord[1]))))
                             if(Char.IsUpper(currentWord[0]) && !Char.IsUpper(replacementWord[0]))
                             {
                                 replacementWord = replacementWord.Substring(0, 1).ToUpper(
