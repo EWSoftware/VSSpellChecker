@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfigDlg.cs
 // Author  : Eric Woodruff
-// Updated : 05/23/2013
+// Updated : 10/23/2013
 // Note    : Copyright 2013, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -25,6 +25,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+using Microsoft.Win32;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 
@@ -70,7 +72,6 @@ namespace VisualStudio.SpellChecker.UI
 
             lbIgnoredXmlElements.Items.SortDescriptions.Add(sd);
             lbSpellCheckedAttributes.Items.SortDescriptions.Add(sd);
-            lbUserDictionary.Items.SortDescriptions.Add(sd);
         }
         #endregion
 
@@ -122,7 +123,7 @@ namespace VisualStudio.SpellChecker.UI
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void cboDefaultLanguage_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void cboDefaultLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string filename = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
                 ((CultureInfo)cboDefaultLanguage.SelectedItem).Name + "_Ignored.dic");
@@ -141,6 +142,11 @@ namespace VisualStudio.SpellChecker.UI
                 {
                     MessageBox.Show("Unable to load user dictionary.  Reason: " + ex.Message,
                         PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+                finally
+                {
+                    var sd = new SortDescription { Direction = ListSortDirection.Ascending };
+                    lbUserDictionary.Items.SortDescriptions.Add(sd);
                 }
         }
 
@@ -229,6 +235,9 @@ namespace VisualStudio.SpellChecker.UI
 
             foreach(string el in SpellCheckerConfiguration.DefaultIgnoredXmlElements)
                 lbIgnoredXmlElements.Items.Add(el);
+
+            var sd = new SortDescription { Direction = ListSortDirection.Ascending };
+            lbIgnoredXmlElements.Items.SortDescriptions.Add(sd);
         }
 
         /// <summary>
@@ -294,6 +303,9 @@ namespace VisualStudio.SpellChecker.UI
 
             foreach(string el in SpellCheckerConfiguration.DefaultSpellCheckedAttributes)
                 lbSpellCheckedAttributes.Items.Add(el);
+
+            var sd = new SortDescription { Direction = ListSortDirection.Ascending };
+            lbSpellCheckedAttributes.Items.SortDescriptions.Add(sd);
         }
         #endregion
 
@@ -336,6 +348,93 @@ namespace VisualStudio.SpellChecker.UI
             {
                 MessageBox.Show("Unable to save user dictionary.  Reason: " + ex.Message,
                     PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+        }
+
+        /// <summary>
+        /// Import words from a text file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (.txt)|*.txt|All Files (*.*)|*.*";
+            dlg.CheckPathExists = dlg.CheckFileExists = true;
+
+            if((dlg.ShowDialog() ?? false))
+            {
+                try
+                {
+                    // Parse words based on the common word break characters and add unique instances to the
+                    // user dictionary if not already there excluding those containing digits and those less than
+                    // three characters in length.
+                    var uniqueWords = File.ReadAllText(dlg.FileName).Split(new[] { ',', '/', '<', '>', '?', ';',
+                        ':', '\"', '[', ']', '\\', '{', '}', '|', '-', '=', '+', '~', '!', '#', '$', '%', '^',
+                        '&', '*', '(', ')', ' ', '_', '.', '\'', '@', '\t', '\r', '\n' },
+                        StringSplitOptions.RemoveEmptyEntries)
+                            .Except(lbUserDictionary.Items.OfType<string>())
+                            .Distinct()
+                            .Where(w => w.Length > 2 && w.IndexOfAny(
+                                new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
+
+                    CultureInfo culture = (CultureInfo)cboDefaultLanguage.SelectedItem;
+                    string filename = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
+                        culture.Name + "_Ignored.dic");
+
+                    try
+                    {
+                        File.WriteAllLines(filename, uniqueWords);
+
+                        GlobalDictionary.LoadIgnoredWordsFile(culture);
+
+                        cboDefaultLanguage_SelectionChanged(sender, new SelectionChangedEventArgs(
+                            e.RoutedEvent, new object[] {}, new object[] {}));
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show("Unable to save user dictionary.  Reason: " + ex.Message,
+                            PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(String.Format("Unable to load user dictionary from '{0}'.  Reason: {1}",
+                        dlg.FileName, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
+                        MessageBoxImage.Exclamation);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// Export words to a text file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnExport_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            dlg.FileName = "UserDictionary.dic";
+            dlg.DefaultExt = ".dic";
+            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (.txt)|*.txt|All Files (*.*)|*.*";
+
+            if((dlg.ShowDialog() ?? false))
+            {
+                try
+                {
+                    File.WriteAllLines(dlg.FileName, lbUserDictionary.Items.OfType<string>());
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(String.Format("Unable to save user dictionary to '{0}'.  Reason: {1}",
+                        dlg.FileName, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
+                        MessageBoxImage.Exclamation);
+                }
             }
         }
         #endregion

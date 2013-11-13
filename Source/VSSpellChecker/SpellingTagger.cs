@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 06/10/2013
+// Updated : 10/23/2013
 // Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -652,6 +652,16 @@ namespace VisualStudio.SpellChecker
                             textToParse += "'s";
                         }
 
+                        // Some dictionaries include a trailing period on certain words such as "etc." which
+                        // we don't include.  If the word is followed by a period, try it with the period to see
+                        // if we get a match.  If so, consider it valid.
+                        if(word.Start + word.Length < text.Length && text[word.Start + word.Length] == '.')
+                        {
+                            if(_dictionary.ShouldIgnoreWord(textToParse + ".") ||
+                              _dictionary.IsSpelledCorrectly(textToParse + "."))
+                                continue;
+                        }
+
                         SnapshotSpan errorSpan = new SnapshotSpan(span.Start + word.Start, word.Length);
 
                         // Return the misspelled word and correction suggestions
@@ -724,6 +734,8 @@ namespace VisualStudio.SpellChecker
         /// <returns>An enumerable list of word spans</returns>
         internal static IEnumerable<Microsoft.VisualStudio.Text.Span> GetWordsInText(string text)
         {
+            int len, start, end;
+
             if(String.IsNullOrWhiteSpace(text))
                 yield break;
 
@@ -757,19 +769,26 @@ namespace VisualStudio.SpellChecker
                             case 'u':
                             case 'U':
                             case 'x':
-                                i++;
-
                                 // Special handling for \x, \u, and \U.  Skip the hex digits too.
-                                if(i + 1 < text.Length)
+                                if(i + 2 < text.Length)
                                 {
+                                    start = i;
+                                    i++;
+                                    len = 0;
+
                                     do
                                     {
                                         i++;
+                                        len++;
 
-                                    } while(i < text.Length && (Char.IsDigit(text[i]) ||
+                                    } while(len < 5 && i < text.Length && (Char.IsDigit(text[i]) ||
                                       (Char.ToLower(text[i]) >= 'a' && Char.ToLower(text[i]) <= 'f')));
 
                                     i--;
+
+                                    // Ignore invalid hex and Unicode escape sequences
+                                    if(len == 1 || (text[start + 1] != 'x' && len != 5))
+                                        i = start;
                                 }
                                 break;
 
@@ -780,7 +799,7 @@ namespace VisualStudio.SpellChecker
                     continue;
                 }
 
-                int end = i;
+                end = i;
 
                 for(; end < text.Length; end++)
                     if(IsWordBreakCharacter(text[end]))

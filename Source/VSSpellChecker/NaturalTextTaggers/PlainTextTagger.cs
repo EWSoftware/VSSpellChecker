@@ -50,7 +50,8 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
         /// <summary>
         /// Plain text tagger provider
         /// </summary>
-        [Export(typeof(ITaggerProvider)), ContentType("plaintext"), TagType(typeof(NaturalTextTag))]
+        [Export(typeof(ITaggerProvider)), ContentType("plaintext"), ContentType("text"),
+          TagType(typeof(NaturalTextTag))]
         internal class PlainTextTaggerProvider : ITaggerProvider
         {
             /// <summary>
@@ -62,7 +63,10 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
             /// checking as you type is disabled.</returns>
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null || !SpellCheckerConfiguration.SpellCheckAsYouType)
+                // If no buffer, not enabled, or the content type is one of the more derived types, don't use
+                // this one.
+                if(buffer == null || !SpellCheckerConfiguration.SpellCheckAsYouType ||
+                  buffer.ContentType.IsOfType("code") || buffer.ContentType.IsOfType("html"))
                     return null;
 
                 return new PlainTextTagger(buffer) as ITagger<T>;

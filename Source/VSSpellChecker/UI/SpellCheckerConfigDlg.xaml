@@ -97,8 +97,20 @@ display item.</TextBlock>
 					<Label Grid.Row="0" Name="lblUserDictLang" Content="User dictionary for default language (en-US)"
 						Margin="3" />
 					<ListBox Grid.Row="1" Name="lbUserDictionary" Margin="3" />
-					<Button Grid.Row="2" Name="btnRemoveWord" Content="Remove" Width="80" Margin="3"
-						ToolTip="Remove selected word from user dictionary" HorizontalAlignment="Left" Click="btnRemoveWord_Click" />
+					<Grid Grid.Row="2">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+						<Button Grid.Column="0" Name="btnRemoveWord" Content="Remove" Width="80" Margin="3"
+							ToolTip="Remove selected word from user dictionary" HorizontalAlignment="Left"
+							Click="btnRemoveWord_Click" />
+						<Button Grid.Column="1" Name="btnImport" Content="_Import" Width="80" Margin="3"
+							ToolTip="Import words from a file" Click="btnImport_Click" />
+						<Button Grid.Column="2" Name="btnExport" Content="_Export" Width="80" Margin="3"
+							ToolTip="Export words to a file" Click="btnExport_Click" />
+					</Grid>
 				</Grid>
 			</TabItem>
 		</TabControl>

@@ -216,6 +216,15 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
                 if(p.Char() == '/' && p.NextChar() == '/' && p.NextNextChar() == '/') // doc comment.
                 {
                     p.Advance(3);
+/*
+                    // TODO: Make this an option
+                    // If "////", allow skipping it (i.e. commented out code)
+                    if(p.Char() == '/')
+                    {
+                        p.AdvanceToEndOfLine();
+                        return;
+                    }*/
+
                     p.State = State.DocComment;
                     ScanDocComment(p);
                 }
