@@ -42,6 +42,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\AssemblyInfoShared.cs" />
     <Compile Include="IBufferSpecificDictionaryProvider.cs" />
     <Compile Include="IMisspellingTag.cs" />
     <Compile Include="INaturalTextTag.cs" />

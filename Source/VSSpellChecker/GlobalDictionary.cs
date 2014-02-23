@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff
-// Updated : 05/23/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
+// Updated : 02/23/2014
+// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the global dictionary
@@ -13,9 +13,9 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
+//    Date     Who  Comments
 //===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Created the code
+// 04/14/2013  EFW  Created the code
 //===============================================================================================================
 
 using System;
@@ -192,6 +192,7 @@ namespace VisualStudio.SpellChecker
         public static GlobalDictionary CreateGlobalDictionary(CultureInfo culture)
         {
             GlobalDictionary globalDictionary = null;
+            string affixFile, dictionaryFile;
 
             try
             {
@@ -216,24 +217,37 @@ namespace VisualStudio.SpellChecker
                     }
 
                     // Look in the configuration folder first for user-supplied dictionaries
-                    string dictionaryFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                        culture.Name.Replace("-", "_") + ".aff");
+                    affixFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
+                        culture.Name + ".aff");
+                    dictionaryFile = Path.ChangeExtension(affixFile, ".dic");
+
+                    // Dictionary file names may use a dash or an underscore as the separator.  Try both ways
+                    // in case they aren't named consistently which does happen.
+                    if(!File.Exists(affixFile))
+                        affixFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
+                            culture.Name.Replace('-', '_') + ".aff");
+
+                    if(!File.Exists(dictionaryFile))
+                        dictionaryFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
+                            culture.Name.Replace('-', '_') + ".dic");
 
                     // If not found, default to the English dictionary supplied with the package.  This can at
                     // least clue us in that it didn't find the language-specific dictionary when the suggestions
                     // are in English.
-                    if(!File.Exists(dictionaryFile))
-                        dictionaryFile = Path.Combine(dllPath, "en_US.aff");
+                    if(!File.Exists(affixFile) || !File.Exists(dictionaryFile))
+                    {
+                        affixFile = Path.Combine(dllPath, "en_US.aff");
+                        dictionaryFile = Path.ChangeExtension(affixFile, ".dic");
+                    }
 
-                    LanguageConfig lc = new LanguageConfig();
-                    lc.LanguageCode = culture.Name;
-                    lc.HunspellAffFile = dictionaryFile;
-                    lc.HunspellDictFile = Path.ChangeExtension(dictionaryFile, ".dic");
+                    spellEngine.AddLanguage(new LanguageConfig
+                    {
+                        LanguageCode = culture.Name,
+                        HunspellAffFile = affixFile,
+                        HunspellDictFile = dictionaryFile
+                    });
 
-                    spellEngine.AddLanguage(lc);
-
-                    globalDictionaries.Add(culture.Name, new GlobalDictionary(culture,
-                        spellEngine[culture.Name]));
+                    globalDictionaries.Add(culture.Name, new GlobalDictionary(culture, spellEngine[culture.Name]));
                 }
 
                 globalDictionary = globalDictionaries[culture.Name];

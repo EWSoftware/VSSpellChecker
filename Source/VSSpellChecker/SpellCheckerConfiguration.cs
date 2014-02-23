@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff
-// Updated : 05/16/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
+// Updated : 02/23/2014
+// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -13,9 +13,9 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
+//    Date     Who  Comments
 //===============================================================================================================
-// 1.0.0.0  04/26/2013  EFW  Created the code
+// 04/26/2013  EFW  Created the code
 //===============================================================================================================
 
 using System;
@@ -137,21 +137,25 @@ namespace VisualStudio.SpellChecker
                 // This is supplied with the application and is always available
                 yield return new CultureInfo("en-US");
 
-                foreach(string dictionary in Directory.EnumerateFiles(ConfigurationFilePath, "??_??.dic"))
-                {
-                    try
+                // Culture names can vary in format (en-US, arn, az-Cyrl, az-Cyrl-AZ, az-Latn, az-Latn-AZ, etc.)
+                // so look for any affix files with a related dictionary file and see if they are valid cultures.
+                // If so, we'll take them.
+                foreach(string dictionary in Directory.EnumerateFiles(ConfigurationFilePath, "*.aff"))
+                    if(File.Exists(Path.ChangeExtension(dictionary, ".dic")))
                     {
-                        info = new CultureInfo(Path.GetFileNameWithoutExtension(dictionary).Replace("_", "-"));
-                    }
-                    catch(CultureNotFoundException )
-                    {
-                        // Ignore the file if not found
-                        info = null;
-                    }
+                        try
+                        {
+                            info = new CultureInfo(Path.GetFileNameWithoutExtension(dictionary).Replace("_", "-"));
+                        }
+                        catch(CultureNotFoundException )
+                        {
+                            // Ignore filenames that are not cultures
+                            info = null;
+                        }
 
-                    if(info != null)
-                        yield return info;
-                }
+                        if(info != null)
+                            yield return info;
+                    }
             }
         }
 

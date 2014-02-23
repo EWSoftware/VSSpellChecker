@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\SpellCheckerDefinitions\Properties\AssemblyInfoShared.cs">
+      <Link>Properties\AssemblyInfoShared.cs</Link>
+    </Compile>
     <Compile Include="GeneratedCode\Guids.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
