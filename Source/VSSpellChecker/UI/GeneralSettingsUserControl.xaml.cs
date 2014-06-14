@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/10/2014
+// Updated : 06/14/2014
 // Note    : Copyright 2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -52,6 +52,12 @@ namespace VisualStudio.SpellChecker.UI
         public string Title
         {
             get { return "General Settings"; }
+        }
+
+        /// <inheritdoc />
+        public string HelpUrl
+        {
+            get { return this.Title; }
         }
 
         /// <inheritdoc />

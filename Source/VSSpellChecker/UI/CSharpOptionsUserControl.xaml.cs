@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpOptionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/13/2014
+// Updated : 06/14/2014
 // Note    : Copyright 2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -52,6 +52,12 @@ namespace VisualStudio.SpellChecker.UI
         public string Title
         {
             get { return "C# Options"; }
+        }
+
+        /// <inheritdoc />
+        public string HelpUrl
+        {
+            get { return "CSharpOptions"; }
         }
 
         /// <inheritdoc />

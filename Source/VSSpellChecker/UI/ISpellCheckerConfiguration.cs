@@ -38,6 +38,11 @@ namespace VisualStudio.SpellChecker.UI
         string Title { get; }
 
         /// <summary>
+        /// This read-only property returns the help URL
+        /// </summary>
+        string HelpUrl { get; }
+
+        /// <summary>
         /// This read-only property is used to validate the configuration settings in the user control
         /// </summary>
         /// <returns>True if valid, false if not</returns>
