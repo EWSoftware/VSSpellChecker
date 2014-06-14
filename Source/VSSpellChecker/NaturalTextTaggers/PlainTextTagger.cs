@@ -1,9 +1,10 @@
 //===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : PlainTextTagger.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 04/26/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Updated : 06/06/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for plain text files
@@ -13,12 +14,11 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
-//
-// Change History:
-// 04/26/2013 - EFW - Added support for disabling spell checking as you type
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project
+// 04/26/2013  EFW  Added support for disabling spell checking as you type
+// 06/06/2014  EFW  Added support for excluding from spell checking by filename extension
 //===============================================================================================================
 
 using System;
@@ -63,9 +63,10 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
             /// checking as you type is disabled.</returns>
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
-                // If no buffer, not enabled, or the content type is one of the more derived types, don't use
-                // this one.
+                // If no buffer, not enabled, excluded by extension, or the content type is one of the more
+                // derived types, don't use this one.
                 if(buffer == null || !SpellCheckerConfiguration.SpellCheckAsYouType ||
+                  SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()) ||
                   buffer.ContentType.IsOfType("code") || buffer.ContentType.IsOfType("html"))
                     return null;
 

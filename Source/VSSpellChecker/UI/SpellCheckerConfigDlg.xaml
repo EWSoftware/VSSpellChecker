@@ -1,133 +1,50 @@
 ﻿<Window x:Class="VisualStudio.SpellChecker.UI.SpellCheckerConfigDlg"
 			xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 			xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-			Title="Spell Checker Configuration" Height="350" Width="525"
+			Title="Spell Checker Configuration" Height="420" Width="750"
 			WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
 			Icon="/VisualStudio.SpellChecker;component/Resources/Package.ico">
-	<Grid Margin="6">
+	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition />
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
-		<TabControl Name="tabConfig" Grid.Row="0" Margin="3">
-			<TabItem Header="_General" Name="tabGeneral">
-				<Grid>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto" />
-						<RowDefinition />
-					</Grid.RowDefinitions>
-					<StackPanel Margin="3, 6, 3, 10" Orientation="Horizontal" Grid.Row="0">
-						<Label Content="_Default Language" />
-						<ComboBox Name="cboDefaultLanguage"
-								SelectionChanged="cboDefaultLanguage_SelectionChanged" />
-					</StackPanel>
-					<StackPanel Margin="3" Grid.Row="1">
-						<CheckBox Content="S_pell check as you type" Name="chkSpellCheckAsYouType" Margin="3" />
-						<CheckBox Content="Ignore words with d_igits" Name="chkIgnoreWordsWithDigits" Margin="3"  />
-						<CheckBox Content="Ignore words in all upper_case" Name="chkIgnoreAllUppercase" Margin="3"  />
-						<CheckBox Content="Ignore words that look like _filenames and e-mail addresses"
-							Name="chkIgnoreFilenamesAndEMail" Margin="3"  />
-						<CheckBox Content="Ignore words that look like X_ML elements in spell checked text"
-							Name="chkIgnoreXmlInText" Margin="3"  />
-						<CheckBox Content="Treat u_nderscores as separators" Name="chkTreatUnderscoresAsSeparators"
-							Margin="3"  />
-						<TextBlock Margin="3, 10, 3, 3" TextWrapping="WrapWithOverflow">To set the spelling tag underline
-color, select <Bold>Tools | Options | Environment | Fonts and Colors</Bold> and select the <Bold>Spelling Error</Bold>
-display item.</TextBlock>
-					</StackPanel>
-				</Grid>
-			</TabItem>
-			<TabItem Header="_XML Files" Name="tabXmlFiles">
-				<Grid>
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition />
-						<ColumnDefinition />
-					</Grid.ColumnDefinitions>
-					<GroupBox Header="Ignored XML _Elements" Grid.Column="0">
-						<Grid>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto" />
-								<RowDefinition />
-								<RowDefinition Height="Auto" />
-							</Grid.RowDefinitions>
-							<StackPanel Orientation="Horizontal" Grid.Row="0" Margin="3">
-								<TextBox Name="txtIgnoredElement" Width="170" Margin="0, 0, 3, 0" />
-								<Button Name="btnAddIgnored" Content="Add" Width="50" ToolTip="Add new ignored XML element"
-										Click="btnAddIgnored_Click" />
-							</StackPanel>
-							<ListBox Name="lbIgnoredXmlElements" Grid.Row="1" Margin="3" />
-							<StackPanel Orientation="Horizontal" Grid.Row="2" Margin="3">
-								<Button Name="btnRemoveIgnored" Content="Remove" Width="80" Margin="0, 0, 3, 0"
-										ToolTip="Remove selected ignored XML element" Click="btnRemoveIgnored_Click" />
-								<Button Name="btnDefaultIgnored" Content="Default" Width="80"
-										ToolTip="Reset to default list of ignored XML elements" Click="btnDefaultIgnored_Click" />
-							</StackPanel>
-						</Grid>
-					</GroupBox>
-					<GroupBox Header="Spell Checked _Attributes" Grid.Column="1">
-						<Grid>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto" />
-								<RowDefinition />
-								<RowDefinition Height="Auto" />
-							</Grid.RowDefinitions>
-							<StackPanel Orientation="Horizontal" Grid.Row="0" Margin="3">
-								<TextBox Name="txtAttributeName" Width="170" Margin="0, 0, 3, 0" />
-								<Button Name="btnAddAttribute" Content="Add" Width="50" ToolTip="Add new spell checked XML attribute"
-										Click="btnAddAttribute_Click" />
-							</StackPanel>
-							<ListBox Name="lbSpellCheckedAttributes" Grid.Row="1" Margin="3" />
-							<StackPanel Orientation="Horizontal" Grid.Row="2" Margin="3">
-								<Button Name="btnRemoveAttribute" Content="Remove" Width="80" Margin="0, 0, 3, 0" 
-										ToolTip="Remove selected spell checked XML attribute" Click="btnRemoveAttribute_Click" />
-								<Button Name="btnDefaultAttributes" Content="Default" Width="80"
-										ToolTip="Reset to default list of spell checked XML attributes" Click="btnDefaultAttributes_Click" />
-							</StackPanel>
-						</Grid>
-					</GroupBox>
-				</Grid>
-			</TabItem>
-			<TabItem Header="_User Dictionary" Name="tabUserDictionary">
-				<Grid>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="Auto" />
-						<RowDefinition />
-						<RowDefinition Height="Auto" />
-					</Grid.RowDefinitions>
-					<Label Grid.Row="0" Name="lblUserDictLang" Content="User dictionary for default language (en-US)"
-						Margin="3" />
-					<ListBox Grid.Row="1" Name="lbUserDictionary" Margin="3" />
-					<Grid Grid.Row="2">
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition />
-							<ColumnDefinition Width="Auto" />
-							<ColumnDefinition Width="Auto" />
-						</Grid.ColumnDefinitions>
-						<Button Grid.Column="0" Name="btnRemoveWord" Content="Remove" Width="80" Margin="3"
-							ToolTip="Remove selected word from user dictionary" HorizontalAlignment="Left"
-							Click="btnRemoveWord_Click" />
-						<Button Grid.Column="1" Name="btnImport" Content="_Import" Width="80" Margin="3"
-							ToolTip="Import words from a file" Click="btnImport_Click" />
-						<Button Grid.Column="2" Name="btnExport" Content="_Export" Width="80" Margin="3"
-							ToolTip="Export words to a file" Click="btnExport_Click" />
-					</Grid>
-				</Grid>
-			</TabItem>
-		</TabControl>
+		<Grid Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition MinWidth="150" />
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition MinWidth="250" Width="2*" />
+			</Grid.ColumnDefinitions>
+			<TreeView Grid.Column="0" Name="tvPages" Margin="3" PreviewMouseDown="tvPages_PreviewMouseDown" SelectedItemChanged="tvPages_SelectedItemChanged" />
+			<GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center"
+        ShowsPreview="False" Background="LightGray" TabIndex="4" />
+			<Border Grid.Column="2" Margin="3" BorderThickness="0.5" BorderBrush="Black">
+				<DockPanel Name="pnlPages" Margin="3">
+				</DockPanel>
+			</Border>
+		</Grid>
 		<Grid Grid.Row="1" Margin="3">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition />
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition />
 			</Grid.ColumnDefinitions>
-			<Button Grid.Column="0" Name="btnSave" Content="_Save" Width="80" HorizontalAlignment="Left"
+			<StackPanel Orientation="Horizontal" Grid.Column="0">
+				<Button Name="btnSave" Content="_Save" Width="80" Margin="0,0,10,0"
 					IsDefault="True" ToolTip="Save changes" Click="btnSave_Click" />
+				<Button Name="btnReset" Content="Reset" Width="80"
+					ToolTip="Reset the configuration to its defaults" Click="btnReset_Click" />
+			</StackPanel>
 			<TextBlock Margin="3" Grid.Column="1" ToolTip="View project website">
 				<Hyperlink Name="lnkCodePlex" NavigateUri="http://VSSpellChecker.CodePlex.com"
 						Click="lnkCodePlex_Click">http://VSSpellChecker.CodePlex.com</Hyperlink>
 			</TextBlock>
-			<Button Grid.Column="2" Name="btnCancel" Content="Cancel" Width="80" HorizontalAlignment="Right"
+			<StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+				<Button Name="btnHelp" Content="Help" Width="80" Margin="0, 0, 10, 0"
+					ToolTip="Show help for the selected category" Click="btnHelp_Click" />
+				<Button Name="btnCancel" Content="Cancel" Width="80"
 					IsCancel="True" ToolTip="Close without saving changes" Click="btnCancel_Click" />
+			</StackPanel>
 		</Grid>
 	</Grid>
 </Window>

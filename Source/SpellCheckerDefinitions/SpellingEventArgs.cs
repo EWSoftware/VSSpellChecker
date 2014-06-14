@@ -1,7 +1,7 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Definitions
 // File    : SpellingEventArgs.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
 // Updated : 05/31/2013
 // Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -13,13 +13,11 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
-//
-// Change History
-// 05/02/2013 - EFW - Add support for defining a replacement word
-// 05/31/2013 - EFW - Added support for defining the word's position in the editor's buffer
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project
+// 05/02/2013  EFW  Add support for defining a replacement word
+// 05/31/2013  EFW  Added support for defining the word's position in the editor's buffer
 //===============================================================================================================
 
 using System;

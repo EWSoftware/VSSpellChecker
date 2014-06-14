@@ -1,7 +1,7 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
-// Author  : Eric Woodruff
+// Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 05/25/2013
 // Note    : Copyright 2013, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -13,9 +13,9 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  05/20/2013  EFW  Created the code
+//    Date     Who  Comments
+// ==============================================================================================================
+// 05/20/2013  EFW  Created the code
 //===============================================================================================================
 
 using System;

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/06/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
+// Updated : 06/06/2014
+// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -13,9 +13,9 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
+//    Date     Who  Comments
 // ==============================================================================================================
-// 1.0.0.0  05/28/2013  EFW  Created the code
+// 05/28/2013  EFW  Created the code
 //===============================================================================================================
 
 using System;
@@ -62,7 +62,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         currentTagger.TagsChanged -= tagger_TagsChanged;
 
                     if(value != null)
-                        currentTagger = value.Properties[typeof(SpellingTagger)] as SpellingTagger;
+                    {
+                        if(!value.Properties.TryGetProperty(typeof(SpellingTagger), out currentTagger))
+                            currentTagger = null;
+                    }
                     else
                         currentTagger = null;
 
@@ -135,7 +138,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 lblMisspelledWord.ToolTip = null;
                 lbSuggestions.Items.Clear();
 
-                if(!SpellCheckerConfiguration.SpellCheckAsYouType)
+                if(!SpellCheckerConfiguration.SpellCheckAsYouType || currentTextView == null)
                 {
                     lblDisabled.Visibility = Visibility.Visible;
                     return;
@@ -154,15 +157,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 var issue = misspellings[0];
 
-/* TODO:
                 if(!issue.IsMisspelling)
                 {
                     lblIssue.Text = "Doubled Word";
-                    btnReplace.Enabled = btnIgnoreOnce.Enabled = true;
+                    btnReplace.IsEnabled = btnIgnoreOnce.IsEnabled = true;
                     lbSuggestions.Items.Add("(Delete word)");
                 }
                 else
-                {*/
+                {
                     btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled = true;
 
                     if(issue.Suggestions.Count() != 0)
@@ -174,7 +176,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
                     else
                         lbSuggestions.Items.Add("(No suggestions)");
-//                }
+                }
 
                 lblMisspelledWord.Text = issue.Word;
                 lblMisspelledWord.ToolTip = issue.Word;
@@ -246,6 +248,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void btnReplace_Click(object sender, RoutedEventArgs e)
         {
+            ITrackingSpan span;
+
             if(lbSuggestions.SelectedIndex < 0 || misspellings.Count == 0 || misspellings[0].Word.Length == 0)
             {
                 if(lbSuggestions.Items.Count != 0 && lbSuggestions.SelectedIndex < 0)
@@ -254,11 +258,16 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 return;
             }
 
-// TODO:            string replacement = misspellings[0].IsMisspelling ? (string)lbSuggestions.SelectedItem : String.Empty;
-            string replacement = (string)lbSuggestions.SelectedItem;
-            var span = misspellings[0].Span;
-
-            span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), replacement);
+            if(misspellings[0].IsMisspelling)
+            {
+                span = misspellings[0].Span;
+                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), (string)lbSuggestions.SelectedItem);
+            }
+            else
+            {
+                span = misspellings[0].DeleteWordSpan;
+                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), String.Empty);
+            }
         }
 
         /// <summary>

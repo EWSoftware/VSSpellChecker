@@ -1,9 +1,10 @@
 //===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 05/23/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Updated : 06/13/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for source code files of any type
@@ -13,17 +14,16 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
-//
-// Change History
-// 04/14/2013 - EFW - Added a condition to include "XML Text" elements so that it spell checks XML element inner
-// text.  Added code to ignore strings following C/C++ preprocessor keywords so as not to spell check stuff like
-// include file directives.
-// 04/26/2013 - EFW - Added condition to exclude the content of named XML elements from spell checking.  Added
-// support for disabling spell checking as you type.
-// 05/23/2013 - EFW - Added conditions to exclude XAML elements and include XAML attributes
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project
+// 04/14/2013  EFW  Added a condition to include "XML Text" elements so that it spell checks XML element inner
+//                  text.  Added code to ignore strings following C/C++ preprocessor keywords so as not to spell
+//                  check stuff like include file directives.
+// 04/26/2013  EFW  Added condition to exclude the content of named XML elements from spell checking.  Added
+//                  support for disabling spell checking as you type.
+// 05/23/2013  EFW  Added conditions to exclude XAML elements and include XAML attributes
+// 06/06/2014  EFW  Added support for excluding from spell checking by filename extension
 //===============================================================================================================
 
 using System;
@@ -80,12 +80,28 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
             /// checking as you type is disabled.</returns>
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null || !SpellCheckerConfiguration.SpellCheckAsYouType)
+                if(buffer == null || !SpellCheckerConfiguration.SpellCheckAsYouType ||
+                  SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
                     return null;
 
-                // Due to an issue with the built-in C# classifier, we avoid using it
+                // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
+                // configuration options to exclude certain elements from being spell checked if not wanted.
                 if(buffer.ContentType.IsOfType("csharp"))
-                    return new CSharpCommentTextTagger(buffer) as ITagger<T>;
+                {
+                    // The C# options are passed to the tagger for local use since it tracks the state of the
+                    // lines in the buffer.  Changing the global options will require that any open editors be
+                    // closed and reopened for the changes to take effect.
+                    return new CSharpCommentTextTagger(buffer)
+                    {
+                        IgnoreXmlDocComments = SpellCheckerConfiguration.IgnoreXmlDocComments,
+                        IgnoreDelimitedComments = SpellCheckerConfiguration.IgnoreDelimitedComments,
+                        IgnoreStandardSingleLineComments = SpellCheckerConfiguration.IgnoreStandardSingleLineComments,
+                        IgnoreQuadrupleSlashComments = SpellCheckerConfiguration.IgnoreQuadrupleSlashComments,
+                        IgnoreNormalStrings = SpellCheckerConfiguration.IgnoreNormalStrings,
+                        IgnoreVerbatimStrings = SpellCheckerConfiguration.IgnoreVerbatimStrings
+
+                    } as ITagger<T>;
+                }
 
                 var tagger = new CommentTextTagger(buffer, ClassifierAggregatorService.GetClassifier(buffer));
 

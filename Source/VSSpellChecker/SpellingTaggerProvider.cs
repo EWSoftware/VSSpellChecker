@@ -1,9 +1,10 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTaggerProvider.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 05/01/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Updated : 06/06/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to create the spelling tagger
@@ -13,12 +14,10 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
-//
-// Change History:
-// 04/26/2013 - EFW - Added support for disabling spell checking as you type
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project
+// 04/26/2013  EFW  Added support for disabling spell checking as you type
 //===============================================================================================================
 
 using System.ComponentModel.Composition;
@@ -66,7 +65,8 @@ namespace VisualStudio.SpellChecker
             SpellingTagger spellingTagger;
 
             // Make sure we only tagging top buffer and only if wanted
-            if(textView.TextBuffer != buffer || !SpellCheckerConfiguration.SpellCheckAsYouType)
+            if(textView.TextBuffer != buffer || !SpellCheckerConfiguration.SpellCheckAsYouType ||
+              SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
                 return null;
 
             if(textView.Properties.TryGetProperty(typeof(SpellingTagger), out spellingTagger))

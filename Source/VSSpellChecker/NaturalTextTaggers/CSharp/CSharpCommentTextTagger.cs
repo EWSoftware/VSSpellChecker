@@ -1,9 +1,10 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 04/14/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Updated : 06/13/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for C# code
@@ -13,12 +14,11 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project.
-//
-// Change History
-// 04/14/2013 - EFW - Added a check for #region directives so that the region title is spell checked too
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project.
+// 04/14/2013  EFW  Added a check for #region directives so that the region title is spell checked too
+// 06/12/2014  EFW  Added support for ignoring certain items (verbatim string, quad-slash comments, etc.
 //===============================================================================================================
 
 using System;
@@ -36,7 +36,8 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
     /// </summary>
     /// <remarks>Due to issues with the built-in C# classifier, we write our own NaturalTextTagger that looks for 
     /// comments (single, multi-line, and doc comment) and strings (single and multi-line) and tags them with
-    /// NaturalTextTag.</remarks>
+    /// NaturalTextTag.  This also lets us provide configuration options to exclude certain elements from being
+    /// spell checked if not wanted.</remarks>
     internal class CSharpCommentTextTagger : ITagger<NaturalTextTag>, IDisposable
     {
         #region Private data members
@@ -47,10 +48,56 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
         private List<State> _lineCache;
         #endregion
 
+        #region Properties
+        //=====================================================================
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore XML documentation comments (<c>/** ... */</c> or
+        /// <c>/// ...</c>)
+        /// </summary>
+        /// <value>The default is false to include XML documentation comments</value>
+        public bool IgnoreXmlDocComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore delimited comments (<c>/* ... */</c>)
+        /// </summary>
+        /// <value>The default is false to include delimited comments</value>
+        public bool IgnoreDelimitedComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore standard single line comments (<c>// ...</c>)
+        /// </summary>
+        /// <value>The default is false to include standard single line comments</value>
+        public bool IgnoreStandardSingleLineComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore quadruple slash comments (<c>//// ...</c>)
+        /// </summary>
+        /// <value>The default is false to include quadruple slash comments</value>
+        /// <remarks>This is useful for ignoring commented out blocks of code while still spell checking the
+        /// other comment styles.</remarks>
+        public bool IgnoreQuadrupleSlashComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore normal strings (<c>"..."</c>)
+        /// </summary>
+        /// <value>The default is false to include normal strings</value>
+        public bool IgnoreNormalStrings { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore verbatim strings (<c>@"..."</c>)
+        /// </summary>
+        /// <value>The default is false to include verbatim strings</value>
+        public bool IgnoreVerbatimStrings { get; set; }
+        #endregion
+
         #region Constructor
         //=====================================================================
 
-
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="buffer">The text buffer to use</param>
         public CSharpCommentTextTagger(ITextBuffer buffer)
         {
             _buffer = buffer;
@@ -72,6 +119,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
         #region IDisposable implementation
         //=====================================================================
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _buffer.Changed -= OnTextBufferChanged;
@@ -123,7 +171,14 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
                 if(change.LineCountDelta > 0)
                 {
                     int line = snapshot.GetLineFromPosition(change.NewPosition).LineNumber;
-                    _lineCache.InsertRange(line, Enumerable.Repeat(State.Default, change.LineCountDelta));
+                    State state = State.Default;
+
+                    // Copy the state of the line to continue multi-line comments and strings.  If not,
+                    // we lose the state and it doesn't parse the spans correctly.
+                    if(line < _lineCache.Count)
+                        state = _lineCache[line];
+
+                    _lineCache.InsertRange(line, Enumerable.Repeat(state, change.LineCountDelta));
                 }
                 else if(change.LineCountDelta < 0)
                 {
@@ -193,18 +248,33 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
 
             while(!p.EndOfLine)
             {
-                if(p.State == State.Default)
-                    ScanDefault(p);
-                else if(p.State == State.MultiLineComment)
-                    ScanMultiLineComment(p);
-                else if(p.State == State.MultiLineString)
-                    ScanMultiLineString(p);
-                else
-                    Debug.Fail("Invalid state at beginning of line.");
+                switch(p.State)
+                {
+                    case State.Default:
+                        ScanDefault(p);
+                        break;
+
+                    case State.MultiLineComment:
+                        ScanMultiLineComment(p);
+                        break;
+                    
+                    case State.MultiLineDocComment:
+                        ScanMultiLineDocComment(p);
+                        break;
+
+                    case State.MultiLineString:
+                        ScanMultiLineString(p);
+                        break;
+
+                    default:
+                        Debug.Fail("Invalid state at beginning of line.");
+                        break;
+                }
             }
 
             // End Of Line state must be one of these.
-            Debug.Assert(p.State == State.Default || p.State == State.MultiLineString || p.State == State.MultiLineComment);
+            Debug.Assert(p.State == State.Default || p.State == State.MultiLineString ||
+                p.State == State.MultiLineComment || p.State == State.MultiLineDocComment);
 
             return p.State;
         }
@@ -213,50 +283,70 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
         {
             while(!p.EndOfLine)
             {
-                if(p.Char() == '/' && p.NextChar() == '/' && p.NextNextChar() == '/') // doc comment.
+                if(p.Char() == '/' && p.NextChar() == '/' && p.NextNextChar() == '/') // Doc comment
                 {
                     p.Advance(3);
-/*
-                    // TODO: Make this an option
-                    // If "////", allow skipping it (i.e. commented out code)
-                    if(p.Char() == '/')
+
+                    if(this.IgnoreXmlDocComments && (p.EndOfLine || p.Char() != '/'))
                     {
                         p.AdvanceToEndOfLine();
                         return;
-                    }*/
+                    }
+
+                    if(this.IgnoreQuadrupleSlashComments && !p.EndOfLine && p.Char() == '/')
+                    {
+                        p.AdvanceToEndOfLine();
+                        return;
+                    }
 
                     p.State = State.DocComment;
                     ScanDocComment(p);
                 }
-                else if(p.Char() == '/' && p.NextChar() == '/') // single line comment
+                else if(p.Char() == '/' && p.NextChar() == '/') // Single line comment
                 {
                     p.Advance(2);
-                    p.StartNaturalText();
-                    p.AdvanceToEndOfLine();
-                    p.EndNaturalText();
+
+                    if(!this.IgnoreStandardSingleLineComments)
+                    {
+                        p.StartNaturalText();
+                        p.AdvanceToEndOfLine();
+                        p.EndNaturalText();
+                    }
+                    else
+                        p.AdvanceToEndOfLine();
 
                     p.State = State.Default;
                     return;
                 }
-                else if(p.Char() == '/' && p.NextChar() == '*') // multi-line comment
+                else if(p.Char() == '/' && p.NextChar() == '*') // Multi-line comment or multi-line doc comment
                 {
                     p.Advance(2);
-                    p.State = State.MultiLineComment;
-                    ScanMultiLineComment(p);
+
+                    // "/***" is just a regular multi-line comment, not a doc comment
+                    if(p.EndOfLine || p.Char() != '*' || p.NextChar() == '*')
+                    {
+                        p.State = State.MultiLineComment;
+                        ScanMultiLineComment(p);
+                    }
+                    else
+                    {
+                        p.State = State.MultiLineDocComment;
+                        ScanMultiLineDocComment(p);
+                    }
                 }
-                else if(p.Char() == '@' && p.NextChar() == '"') // multi-line string
+                else if(p.Char() == '@' && p.NextChar() == '"') // Verbatim string
                 {
                     p.Advance(2);
                     p.State = State.MultiLineString;
                     ScanMultiLineString(p);
                 }
-                else if(p.Char() == '"') // single-line string
+                else if(p.Char() == '"') // Single-line string
                 {
                     p.Advance(1);
                     p.State = State.String;
                     ScanString(p);
                 }
-                else if(p.Char() == '\'') // character literal
+                else if(p.Char() == '\'') // Character literal
                 {
                     p.Advance(1);
                     p.State = State.Character;
@@ -278,15 +368,14 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
                     }
                 }
                 else
-                {
                     p.Advance();
-                }
             }
         }
 
         private void ScanDocComment(LineProgress p)
         {
             p.StartNaturalText();
+
             while(!p.EndOfLine)
             {
                 if(p.Char() == '<')
@@ -300,9 +389,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
                     p.StartNaturalText();
                 }
                 else
-                {
                     p.Advance();
-                }
             }
 
             // End of line.  Record what we have and revert to default state.
@@ -320,17 +407,16 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
                     p.State = State.DocCommentXmlString;
                     ScanDocCommentXmlString(p);
                 }
-                else if(p.Char() == '>')
-                {
-                    p.Advance();
-                    p.State = State.DocComment;
-
-                    return; // Done with xml tag in doc comment.
-                }
                 else
-                {
-                    p.Advance();
-                }
+                    if(p.Char() == '>')
+                    {
+                        p.Advance();
+                        p.State = State.DocComment;
+
+                        return; // Done with XML tag in doc comment.
+                    }
+                    else
+                        p.Advance();
             }
 
             // End of line.  Never found the '>' for the tag, but whatever.  We revert to default state.
@@ -346,12 +432,10 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
                     p.Advance(1);
                     p.State = State.DocCommentXml;
 
-                    return; // Done with string in doc comment xml.
+                    return; // Done with string in doc comment XML.
                 }
-                else
-                {
-                    p.Advance();
-                }
+
+                p.Advance();
             }
 
             // End of line.  Never found the '"' to close the string, but whatever.  We revert to default state.
@@ -360,84 +444,143 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
 
         private void ScanMultiLineComment(LineProgress p)
         {
-            p.StartNaturalText();
+            bool markText = !this.IgnoreDelimitedComments;
+
+            if(markText)
+                p.StartNaturalText();
 
             while(!p.EndOfLine)
             {
-                if(p.Char() == '*' && p.NextChar() == '/') // close comment
+                if(p.Char() == '*' && p.NextChar() == '/') // Close comment
                 {
-                    p.EndNaturalText();
+                    if(markText)
+                        p.EndNaturalText();
+
                     p.Advance(2);
                     p.State = State.Default;
 
-                    return; // done with multi-line comment.
+                    return; // Done with multi-line comment
                 }
-                else
-                {
-                    p.Advance();
-                }
+
+                p.Advance();
             }
 
             // End of line.  Emit as human readable, but remain in MultiLineComment state.
-            p.EndNaturalText();
+            if(markText)
+                p.EndNaturalText();
+
             Debug.Assert(p.State == State.MultiLineComment);
+        }
+
+        private void ScanMultiLineDocComment(LineProgress p)
+        {
+            bool markText = !this.IgnoreXmlDocComments;
+
+            if(markText)
+                p.StartNaturalText();
+
+            while(!p.EndOfLine)
+            {
+                if(p.Char() == '*' && p.NextChar() == '/') // Close comment
+                {
+                    if(markText)
+                        p.EndNaturalText();
+
+                    p.Advance(2);
+                    p.State = State.Default;
+
+                    return; // Done with multi-line doc comment
+                }
+
+                if(p.Char() == '<')
+                {
+                    if(markText)
+                        p.EndNaturalText();
+
+                    p.Advance();
+                    p.State = State.DocCommentXml;
+                    ScanDocCommentXml(p);
+
+                    p.State = State.MultiLineDocComment;
+
+                    if(markText)
+                        p.StartNaturalText();
+                }
+                else
+                    p.Advance();
+            }
+
+            // End of line.  Emit as human readable, but remain in MultiLineComment state.
+            if(markText)
+                p.EndNaturalText();
+
+            Debug.Assert(p.State == State.MultiLineDocComment);
         }
 
         private void ScanMultiLineString(LineProgress p)
         {
-            p.StartNaturalText();
+            bool markText = !this.IgnoreVerbatimStrings;
+
+            if(markText)
+                p.StartNaturalText();
 
             while(!p.EndOfLine)
             {
-                if(p.Char() == '"' && p.NextChar() == '"') // "" is allowed within multiline string.
+                if(p.Char() == '"' && p.NextChar() == '"') // "" is allowed within multi-line string.
                 {
                     p.Advance(2);
                 }
-                else if(p.Char() == '"') // end of multi-line string
+                else if(p.Char() == '"') // End of multi-line string
                 {
-                    p.EndNaturalText();
+                    if(markText)
+                        p.EndNaturalText();
 
                     p.Advance();
                     p.State = State.Default;
                     return;
                 }
                 else
-                {
                     p.Advance();
-                }
             }
 
             // End of line.  Emit as human readable, but remain in MultiLineString state.
-            p.EndNaturalText();
+            if(markText)
+                p.EndNaturalText();
+
             Debug.Assert(p.State == State.MultiLineString);
         }
 
         private void ScanString(LineProgress p)
         {
-            p.StartNaturalText();
+            bool markText = !this.IgnoreNormalStrings;
+
+            if(markText)
+                p.StartNaturalText();
 
             while(!p.EndOfLine)
             {
-                if(p.Char() == '\\') // escaped character.  Skip over it.
+                if(p.Char() == '\\') // Escaped character.  Skip over it.
                 {
                     p.Advance(2);
                 }
-                else if(p.Char() == '"') // end of string.
+                else if(p.Char() == '"') // End of string
                 {
-                    p.EndNaturalText();
+                    if(markText)
+                        p.EndNaturalText();
+
                     p.Advance();
                     p.State = State.Default;
 
                     return;
                 }
                 else
-                {
                     p.Advance();
-                }
             }
 
             // End of line.  String wasn't closed.  Oh well.  Revert to Default state.
-            p.EndNaturalText();
+            if(markText)
+                p.EndNaturalText();
+
             p.State = State.Default;
         }
 

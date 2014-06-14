@@ -2,8 +2,8 @@
 // System  : Sandcastle Help File Builder Visual Studio Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/25/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
+// Updated : 06/06/2014
+// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a utility class with extension and utility methods.
@@ -13,17 +13,19 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
+//    Date     Who  Comments
 // ==============================================================================================================
-// 1.0.0.0  05/25/2013  EFW  Created the code
+// 05/25/2013  EFW  Created the code
 //===============================================================================================================
 
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
 
 using VisualStudio.SpellChecker.Properties;
 
@@ -98,6 +100,23 @@ namespace VisualStudio.SpellChecker
             }
 
             return new Font("Segoe UI", 9.0f);
+        }
+
+        /// <summary>
+        /// Get the filename extension from the given text buffer
+        /// </summary>
+        /// <param name="buffer">The text buffer from which to get the filename</param>
+        /// <returns>The filename extension or null if it could not be obtained</returns>
+        public static string GetFilenameExtension(this ITextBuffer buffer)
+        {
+            ITextDocument textDoc;
+            string extension = null;
+
+            if(buffer != null && buffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc))
+                if(textDoc != null && !String.IsNullOrEmpty(textDoc.FilePath))
+                    extension = Path.GetExtension(textDoc.FilePath);
+
+            return extension;
         }
         #endregion
     }

@@ -1,9 +1,10 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : State.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 04/14/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
+// Updated : 06/12/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains an enumeration used to indicate the line progress state
@@ -13,9 +14,10 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project
+// 06/12/2014  EFW  Added support for MultiLineDocComment
 //===============================================================================================================
 
 namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
@@ -32,6 +34,8 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
         Comment,
         /// <summary>Multi-line comment (/*...*/)</summary>
         MultiLineComment,
+        /// <summary>Multi-line doc comment (/**...*/)</summary>
+        MultiLineDocComment,
 
         /// <summary>XML doc comment (/// ...)</summary>
         DocComment,

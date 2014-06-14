@@ -13,9 +13,9 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
+//    Date     Who  Comments
 // ==============================================================================================================
-// 1.0.0.0  05/25/2013  EFW  Created the code
+// 05/25/2013  EFW  Created the code
 //===============================================================================================================
 
 using System;

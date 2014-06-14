@@ -1,9 +1,10 @@
 //===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 05/02/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Updated : 06/06/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to implement the tagger for spelling smart tags
@@ -13,14 +14,13 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
-//
-// Change History:
-// 04/26/2013 - EFW - Added support for disabling spell checking as you type
-// 05/02/2013 - EFW - Added support for Replace All
-// 05/31/2013 - EFW - Added support for Ignore Once
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project
+// 04/26/2013  EFW  Added support for disabling spell checking as you type
+// 05/02/2013  EFW  Added support for Replace All
+// 05/31/2013  EFW  Added support for Ignore Once
+// 06/06/2014  EFW  Added support for doubled word smart tags
 //===============================================================================================================
 
 using System;
@@ -44,13 +44,16 @@ namespace VisualStudio.SpellChecker.SmartTags
     /// </summary>
     internal class SpellSmartTagger : ITagger<SpellSmartTag>, IDisposable
     {
-        #region Private Fields
+        #region Private data members
+        //=====================================================================
 
         private ITextBuffer _buffer;
         private ISpellingDictionary _dictionary;
         private ITagAggregator<IMisspellingTag> _misspellingAggregator;
         private bool disposed = false;
+
         internal const string SpellingErrorType = "Spelling Error Smart Tag";
+
         #endregion
 
         #region MEF Imports / Exports
@@ -85,7 +88,8 @@ namespace VisualStudio.SpellChecker.SmartTags
                     return null;
 
                 // Make sure we only tagging top buffer and only if wanted
-                if(buffer != textView.TextBuffer || !SpellCheckerConfiguration.SpellCheckAsYouType)
+                if(buffer != textView.TextBuffer || !SpellCheckerConfiguration.SpellCheckAsYouType ||
+                  SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
                     return null;
 
                 return new SpellSmartTagger(buffer, DictionaryService.GetDictionary(buffer),
@@ -119,11 +123,13 @@ namespace VisualStudio.SpellChecker.SmartTags
         #endregion
 
         #region ITagger<SpellSmartTag> Members
+        //=====================================================================
+
         /// <summary>
-        /// Returns tags on demand.
+        /// Returns tags on demand
         /// </summary>
-        /// <param name="spans">Spans collection to get tags for.</param>
-        /// <returns>Squiggle tags in provided spans.</returns>
+        /// <param name="spans">Spans collection for which to get tags</param>
+        /// <returns>Squiggle tags in the provided spans</returns>
         public IEnumerable<ITagSpan<SpellSmartTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             if(spans.Count == 0)
@@ -140,15 +146,29 @@ namespace VisualStudio.SpellChecker.SmartTags
 
                 SnapshotSpan errorSpan = misspellingSpans[0];
 
-                yield return new TagSpan<SpellSmartTag>(errorSpan,
-                    new SpellSmartTag(GetSmartTagActions(errorSpan, misspelling.Tag.Suggestions)));
+                if(misspelling.Tag.IsMisspelling)
+                {
+                    yield return new TagSpan<SpellSmartTag>(errorSpan,
+                        new SpellSmartTag(GetMisspellingSmartTagActions(errorSpan, misspelling.Tag.Suggestions)));
+                }
+                else
+                {
+                    yield return new TagSpan<SpellSmartTag>(errorSpan,
+                        new SpellSmartTag(GetDoubledWordSmartTagActions(errorSpan, misspelling.Tag.DeleteWordSpan)));
+                }
             }
         }
 
+        /// <summary>
+        /// This event is raised when the tags change
+        /// </summary>
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+
         #endregion
 
         #region IDisposable
+        //=====================================================================
+
         public void Dispose()
         {
             Dispose(true);
@@ -171,9 +191,16 @@ namespace VisualStudio.SpellChecker.SmartTags
 
         #endregion
 
-        #region Helpers
+        #region Helper methods
+        //=====================================================================
 
-        private ReadOnlyCollection<SmartTagActionSet> GetSmartTagActions(SnapshotSpan errorSpan,
+        /// <summary>
+        /// Get the smart tag actions for misspelled words
+        /// </summary>
+        /// <param name="errorSpan">The error span for the misspelled word</param>
+        /// <param name="suggestions">The suggestions to use as the replacement</param>
+        /// <returns>A read-only collection of smart tag action sets</returns>
+        private ReadOnlyCollection<SmartTagActionSet> GetMisspellingSmartTagActions(SnapshotSpan errorSpan,
           IEnumerable<string> suggestions)
         {
             List<SmartTagActionSet> smartTagSets = new List<SmartTagActionSet>();
@@ -209,19 +236,47 @@ namespace VisualStudio.SpellChecker.SmartTags
             return smartTagSets.AsReadOnly();
         }
 
+        /// <summary>
+        /// Get the smart tag actions for doubled words
+        /// </summary>
+        /// <param name="errorSpan">The error span for the misspelled word</param>
+        /// <param name="suggestions">The suggestions to use as the replacement</param>
+        /// <returns>A read-only collection of smart tag action sets</returns>
+        private ReadOnlyCollection<SmartTagActionSet> GetDoubledWordSmartTagActions(SnapshotSpan errorSpan,
+          ITrackingSpan deleteWordSpan)
+        {
+            List<SmartTagActionSet> smartTagSets = new List<SmartTagActionSet>();
+
+            ITrackingSpan trackingSpan = errorSpan.Snapshot.CreateTrackingSpan(errorSpan,
+                SpanTrackingMode.EdgeExclusive);
+
+            // Add Dictionary operations (ignore all)
+            List<ISmartTagAction> doubledWordActions = new List<ISmartTagAction>();
+
+            doubledWordActions.Add(new DoubledWordSmartTagAction(deleteWordSpan));
+
+            doubledWordActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore Once",
+                DictionaryAction.IgnoreOnce));
+            smartTagSets.Add(new SmartTagActionSet(doubledWordActions.AsReadOnly()));
+
+            return smartTagSets.AsReadOnly();
+        }
         #endregion
 
         #region Event handlers
+        //=====================================================================
 
+        /// <summary>
+        /// Raise the <see cref="TagsChanged"/> event
+        /// </summary>
+        /// <param name="subjectSpan">The snapshot span to use for the event arguments</param>
         private void RaiseTagsChangedEvent(SnapshotSpan subjectSpan)
         {
             EventHandler<SnapshotSpanEventArgs> handler = this.TagsChanged;
-            if(handler != null)
-            {
-                handler(this, new SnapshotSpanEventArgs(subjectSpan));
-            }
-        }
 
+            if(handler != null)
+                handler(this, new SnapshotSpanEventArgs(subjectSpan));
+        }
         #endregion
     }
 }

@@ -1,9 +1,10 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlTextTagger.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 02/23/2014
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Updated : 06/06/2014
 // Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for HTML files
@@ -14,12 +15,11 @@
 // documentation, and source files.
 //
 //    Date     Who  Comments
-//===============================================================================================================
+// ==============================================================================================================
 // 04/14/2013  EFW  Imported the code into the project
-//
-// Change History:
-// 04/26/2013 - EFW - Added support for disabling spell checking as you type
-// 02/23/2014 - EFW - Added support for project files using the derived HTML type "htmlx"
+// 04/26/2013  EFW  Added support for disabling spell checking as you type
+// 02/23/2014  EFW  Added support for project files using the derived HTML type "htmlx"
+// 06/06/2014  EFW  Added support for excluding from spell checking by filename extension
 //===============================================================================================================
 
 using System;
@@ -76,7 +76,8 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
             /// checking as you type is disabled.</returns>
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null || !SpellCheckerConfiguration.SpellCheckAsYouType)
+                if(buffer == null || !SpellCheckerConfiguration.SpellCheckAsYouType ||
+                  SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
                     return null;
 
                 return new HtmlTextTagger(buffer, ClassifierAggregatorService.GetClassifier(buffer)) as ITagger<T>;

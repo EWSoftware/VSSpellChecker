@@ -60,7 +60,9 @@
       <DependentUpon>ToolWindowBase.tt</DependentUpon>
     </Compile>
     <Compile Include="GlobalDictionary.cs" />
+    <Compile Include="IgnoredCharacterClass.cs" />
     <Compile Include="SmartTags\DictionaryAction.cs" />
+    <Compile Include="SmartTags\DoubledWordSmartTagAction.cs" />
     <Compile Include="ToolWindows\InteractiveSpellCheckControl.xaml.cs">
       <DependentUpon>InteractiveSpellCheckControl.xaml</DependentUpon>
     </Compile>
@@ -93,8 +95,24 @@
     <Compile Include="SpellingTaggerProvider.cs" />
     <Compile Include="Squiggles\SpellSquiggleTag.cs" />
     <Compile Include="Squiggles\SquiggleTagger.cs" />
+    <Compile Include="UI\CSharpOptionsUserControl.xaml.cs">
+      <DependentUpon>CSharpOptionsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\GeneralSettingsUserControl.xaml.cs">
+      <DependentUpon>GeneralSettingsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\IgnoredWordsUserControl.xaml.cs">
+      <DependentUpon>IgnoredWordsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ISpellCheckerConfiguration.cs" />
     <Compile Include="UI\SpellCheckerConfigDlg.xaml.cs">
       <DependentUpon>SpellCheckerConfigDlg.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\UserDictionaryUserControl.xaml.cs">
+      <DependentUpon>UserDictionaryUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\XmlFilesUserControl.xaml.cs">
+      <DependentUpon>XmlFilesUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utility.cs" />
     <Compile Include="VSSpellCheckerPackage.cs" />
@@ -119,9 +137,9 @@
     <Content Include="NHunspell\README_en_US.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="VSIXPackage.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="VSIXPackage.png">
       <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="VSIXPreview.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -223,6 +241,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -302,9 +321,29 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\CSharpOptionsUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\GeneralSettingsUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\IgnoredWordsUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\SpellCheckerConfigDlg.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\UserDictionaryUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\XmlFilesUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <PropertyGroup>

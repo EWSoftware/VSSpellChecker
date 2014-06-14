@@ -1,9 +1,9 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : SpellCheckerConfigDlg.cs
-// Author  : Eric Woodruff
-// Updated : 10/23/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
+// File    : SpellCheckerConfigDlg.xaml.cs
+// Author  : Eric Woodruff  (Eric@EWoodruff.us)
+// Updated : 06/13/2014
+// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a window used to edit the spell checker configuration settings
@@ -13,20 +13,18 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Created the code
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Created the code
+// 06/09/2014  EFW  Reworked to use a tree view and user controls for the various configuration categories
 //===============================================================================================================
 
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
+using System.Web;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 
@@ -47,108 +45,54 @@ namespace VisualStudio.SpellChecker.UI
         /// </summary>
         public SpellCheckerConfigDlg()
         {
+            ISpellCheckerConfiguration page;
+            TreeViewItem node;
+
             InitializeComponent();
 
-            foreach(var lang in SpellCheckerConfiguration.AvailableDictionaryLanguages.OrderBy(c => c.Name))
-                cboDefaultLanguage.Items.Add(lang);
+            // The property pages will be listed in this order
+            Type[] propertyPages = new[] {
+                typeof(GeneralSettingsUserControl),
+                typeof(UserDictionaryUserControl),
+                typeof(IgnoredWordsUserControl),
+                typeof(XmlFilesUserControl),
+                typeof(CSharpOptionsUserControl)
+            };
 
-            if(cboDefaultLanguage.Items.Contains(SpellCheckerConfiguration.DefaultLanguage))
-                cboDefaultLanguage.SelectedItem = SpellCheckerConfiguration.DefaultLanguage;
+            try
+            {
+                tvPages.BeginInit();
 
-            chkSpellCheckAsYouType.IsChecked = SpellCheckerConfiguration.SpellCheckAsYouType;
-            chkIgnoreWordsWithDigits.IsChecked = SpellCheckerConfiguration.IgnoreWordsWithDigits;
-            chkIgnoreAllUppercase.IsChecked = SpellCheckerConfiguration.IgnoreWordsInAllUppercase;
-            chkIgnoreFilenamesAndEMail.IsChecked = SpellCheckerConfiguration.IgnoreFilenamesAndEMailAddresses;
-            chkIgnoreXmlInText.IsChecked = SpellCheckerConfiguration.IgnoreXmlElementsInText;
-            chkTreatUnderscoresAsSeparators.IsChecked = SpellCheckerConfiguration.TreatUnderscoreAsSeparator;
+                // Create the property pages
+                foreach(Type pageType in propertyPages)
+                {
+                    page = (ISpellCheckerConfiguration)Activator.CreateInstance(pageType);
+                    page.Control.Visibility = Visibility.Collapsed;
 
-            foreach(string el in SpellCheckerConfiguration.IgnoredXmlElements)
-                lbIgnoredXmlElements.Items.Add(el);
+                    node = new TreeViewItem();
+                    node.Header = page.Title;
+                    node.Name = pageType.Name;
+                    node.Tag = page;
 
-            foreach(string el in SpellCheckerConfiguration.SpellCheckedXmlAttributes)
-                lbSpellCheckedAttributes.Items.Add(el);
+                    tvPages.Items.Add(node);
+                    pnlPages.Children.Add(page.Control);
+                }
 
-            var sd = new SortDescription { Direction = ListSortDirection.Ascending };
+                foreach(TreeViewItem item in tvPages.Items)
+                    ((ISpellCheckerConfiguration)item.Tag).LoadConfiguration();
+            }
+            finally
+            {
+                tvPages.EndInit();
 
-            lbIgnoredXmlElements.Items.SortDescriptions.Add(sd);
-            lbSpellCheckedAttributes.Items.SortDescriptions.Add(sd);
+                if(tvPages.Items.Count != 0)
+                    ((TreeViewItem)tvPages.Items[0]).IsSelected = true;
+            }
         }
         #endregion
 
-        #region General event handlers
+        #region Event handlers
         //=====================================================================
-
-        /// <summary>
-        /// Close this form
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        /// <summary>
-        /// Save changes to the configuration
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            SpellCheckerConfiguration.DefaultLanguage = (CultureInfo)cboDefaultLanguage.SelectedItem;
-
-            SpellCheckerConfiguration.SpellCheckAsYouType = chkSpellCheckAsYouType.IsChecked.Value;
-            SpellCheckerConfiguration.IgnoreWordsWithDigits = chkIgnoreWordsWithDigits.IsChecked.Value;
-            SpellCheckerConfiguration.IgnoreWordsInAllUppercase = chkIgnoreAllUppercase.IsChecked.Value;
-            SpellCheckerConfiguration.IgnoreFilenamesAndEMailAddresses = chkIgnoreFilenamesAndEMail.IsChecked.Value;
-            SpellCheckerConfiguration.IgnoreXmlElementsInText = chkIgnoreXmlInText.IsChecked.Value;
-            SpellCheckerConfiguration.TreatUnderscoreAsSeparator = chkTreatUnderscoresAsSeparators.IsChecked.Value;
-
-            SpellCheckerConfiguration.SetIgnoredXmlElements(lbIgnoredXmlElements.Items.OfType<string>());
-            SpellCheckerConfiguration.SetSpellCheckedXmlAttributes(lbSpellCheckedAttributes.Items.OfType<string>());
-
-            if(!SpellCheckerConfiguration.SaveConfiguration())
-                MessageBox.Show("Unable to save spell checking configuration", PackageResources.PackageTitle,
-                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
-
-            this.Close();
-        }
-        #endregion
-
-        #region General tab event handlers
-        //=====================================================================
-
-        /// <summary>
-        /// Load the user dictionary file when the selected language changes
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void cboDefaultLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            string filename = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                ((CultureInfo)cboDefaultLanguage.SelectedItem).Name + "_Ignored.dic");
-
-            lbUserDictionary.Items.Clear();
-            lblUserDictLang.Content = String.Format(CultureInfo.CurrentCulture,
-                "User dictionary for default language ({0})", cboDefaultLanguage.SelectedItem.ToString());
-
-            if(File.Exists(filename))
-                try
-                {
-                    foreach(string word in File.ReadAllLines(filename))
-                        lbUserDictionary.Items.Add(word);
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show("Unable to load user dictionary.  Reason: " + ex.Message,
-                        PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                }
-                finally
-                {
-                    var sd = new SortDescription { Direction = ListSortDirection.Ascending };
-                    lbUserDictionary.Items.SortDescriptions.Add(sd);
-                }
-        }
 
         /// <summary>
         /// View the project website
@@ -167,274 +111,120 @@ namespace VisualStudio.SpellChecker.UI
                     PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
-        #endregion
-
-        #region XML files tab event handlers
-        //=====================================================================
 
         /// <summary>
-        /// Add a new ignored XML element name to the list
+        /// View help for the selected property category
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnAddIgnored_Click(object sender, RoutedEventArgs e)
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
         {
-            int idx;
+            TreeViewItem item = (TreeViewItem)tvPages.SelectedItem;
 
-            txtIgnoredElement.Text = txtIgnoredElement.Text.Trim();
-
-            if(txtIgnoredElement.Text.Length != 0)
+            if(item != null)
             {
-                idx = lbIgnoredXmlElements.Items.IndexOf(txtIgnoredElement.Text);
+                ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
 
-                if(idx == -1)
-                    idx = lbIgnoredXmlElements.Items.Add(txtIgnoredElement.Text);
-
-                if(idx != -1)
-                {
-                    lbIgnoredXmlElements.SelectedIndex = idx;
-                    lbIgnoredXmlElements.ScrollIntoView(lbIgnoredXmlElements.Items[idx]);
-                }
-
-                txtIgnoredElement.Text = null;
-            }
-        }
-
-        /// <summary>
-        /// Remove the selected element from the list of ignored elements
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnRemoveIgnored_Click(object sender, RoutedEventArgs e)
-        {
-            int idx = lbIgnoredXmlElements.SelectedIndex;
-
-            if(idx != -1)
-                lbIgnoredXmlElements.Items.RemoveAt(idx);
-
-            if(lbIgnoredXmlElements.Items.Count != 0)
-            {
-                if(idx < 0)
-                    idx = 0;
-                else
-                    if(idx >= lbIgnoredXmlElements.Items.Count)
-                        idx = lbIgnoredXmlElements.Items.Count - 1;
-
-                lbIgnoredXmlElements.SelectedIndex = idx;
-            }
-        }
-
-        /// <summary>
-        /// Reset the ignored XML elements to the default list
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnDefaultIgnored_Click(object sender, RoutedEventArgs e)
-        {
-            lbIgnoredXmlElements.Items.Clear();
-
-            foreach(string el in SpellCheckerConfiguration.DefaultIgnoredXmlElements)
-                lbIgnoredXmlElements.Items.Add(el);
-
-            var sd = new SortDescription { Direction = ListSortDirection.Ascending };
-            lbIgnoredXmlElements.Items.SortDescriptions.Add(sd);
-        }
-
-        /// <summary>
-        /// Add a new spell checked attribute name to the list
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnAddAttribute_Click(object sender, RoutedEventArgs e)
-        {
-            int idx;
-
-            txtAttributeName.Text = txtAttributeName.Text.Trim();
-
-            if(txtAttributeName.Text.Length != 0)
-            {
-                idx = lbSpellCheckedAttributes.Items.IndexOf(txtAttributeName.Text);
-
-                if(idx == -1)
-                    idx = lbSpellCheckedAttributes.Items.Add(txtAttributeName.Text);
-
-                if(idx != -1)
-                {
-                    lbSpellCheckedAttributes.SelectedIndex = idx;
-                    lbSpellCheckedAttributes.ScrollIntoView(lbSpellCheckedAttributes.Items[idx]);
-                }
-
-                txtAttributeName.Text = null;
-            }
-        }
-
-        /// <summary>
-        /// Remove the selected attribute from the list of spell checked attributes
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnRemoveAttribute_Click(object sender, RoutedEventArgs e)
-        {
-            int idx = lbSpellCheckedAttributes.SelectedIndex;
-
-            if(idx != -1)
-                lbSpellCheckedAttributes.Items.RemoveAt(idx);
-
-            if(lbSpellCheckedAttributes.Items.Count != 0)
-            {
-                if(idx < 0)
-                    idx = 0;
-                else
-                    if(idx >= lbSpellCheckedAttributes.Items.Count)
-                        idx = lbSpellCheckedAttributes.Items.Count - 1;
-
-                lbSpellCheckedAttributes.SelectedIndex = idx;
-            }
-        }
-
-        /// <summary>
-        /// Reset the spell checked attributes to the default list
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnDefaultAttributes_Click(object sender, RoutedEventArgs e)
-        {
-            lbSpellCheckedAttributes.Items.Clear();
-
-            foreach(string el in SpellCheckerConfiguration.DefaultSpellCheckedAttributes)
-                lbSpellCheckedAttributes.Items.Add(el);
-
-            var sd = new SortDescription { Direction = ListSortDirection.Ascending };
-            lbSpellCheckedAttributes.Items.SortDescriptions.Add(sd);
-        }
-        #endregion
-
-        #region User dictionary tab event handlers
-        //=====================================================================
-
-        /// <summary>
-        /// Remove the selected word from the user dictionary
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnRemoveWord_Click(object sender, RoutedEventArgs e)
-        {
-            int idx = lbUserDictionary.SelectedIndex;
-
-            if(idx != -1)
-                lbUserDictionary.Items.RemoveAt(idx);
-
-            if(lbUserDictionary.Items.Count != 0)
-            {
-                if(idx < 0)
-                    idx = 0;
-                else
-                    if(idx >= lbUserDictionary.Items.Count)
-                        idx = lbUserDictionary.Items.Count - 1;
-
-                lbUserDictionary.SelectedIndex = idx;
-            }
-
-            CultureInfo culture = (CultureInfo)cboDefaultLanguage.SelectedItem;
-            string filename = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                culture.Name + "_Ignored.dic");
-
-            try
-            {
-                File.WriteAllLines(filename, lbUserDictionary.Items.OfType<string>());
-                GlobalDictionary.LoadIgnoredWordsFile(culture);
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show("Unable to save user dictionary.  Reason: " + ex.Message,
-                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
-        }
-
-        /// <summary>
-        /// Import words from a text file
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnImport_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (.txt)|*.txt|All Files (*.*)|*.*";
-            dlg.CheckPathExists = dlg.CheckFileExists = true;
-
-            if((dlg.ShowDialog() ?? false))
-            {
                 try
                 {
-                    // Parse words based on the common word break characters and add unique instances to the
-                    // user dictionary if not already there excluding those containing digits and those less than
-                    // three characters in length.
-                    var uniqueWords = File.ReadAllText(dlg.FileName).Split(new[] { ',', '/', '<', '>', '?', ';',
-                        ':', '\"', '[', ']', '\\', '{', '}', '|', '-', '=', '+', '~', '!', '#', '$', '%', '^',
-                        '&', '*', '(', ')', ' ', '_', '.', '\'', '@', '\t', '\r', '\n' },
-                        StringSplitOptions.RemoveEmptyEntries)
-                            .Except(lbUserDictionary.Items.OfType<string>())
-                            .Distinct()
-                            .Where(w => w.Length > 2 && w.IndexOfAny(
-                                new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
+                    string targetUrl = lnkCodePlex.NavigateUri.AbsoluteUri + "/wikipage?title=" +
+                        HttpUtility.UrlEncode(page.Title);
 
-                    CultureInfo culture = (CultureInfo)cboDefaultLanguage.SelectedItem;
-                    string filename = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                        culture.Name + "_Ignored.dic");
-
-                    try
-                    {
-                        File.WriteAllLines(filename, uniqueWords);
-
-                        GlobalDictionary.LoadIgnoredWordsFile(culture);
-
-                        cboDefaultLanguage_SelectionChanged(sender, new SelectionChangedEventArgs(
-                            e.RoutedEvent, new object[] {}, new object[] {}));
-                    }
-                    catch(Exception ex)
-                    {
-                        MessageBox.Show("Unable to save user dictionary.  Reason: " + ex.Message,
-                            PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                    }
+                    Process.Start(targetUrl);
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show(String.Format("Unable to load user dictionary from '{0}'.  Reason: {1}",
-                        dlg.FileName, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
-                        MessageBoxImage.Exclamation);
+                    MessageBox.Show("Unable to navigate to website.  Reason: " + ex.Message,
+                        PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
-
             }
         }
 
         /// <summary>
-        /// Export words to a text file
+        /// Close this form
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnExport_Click(object sender, RoutedEventArgs e)
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
+            this.Close();
+        }
 
-            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlg.FileName = "UserDictionary.dic";
-            dlg.DefaultExt = ".dic";
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (.txt)|*.txt|All Files (*.*)|*.*";
-
-            if((dlg.ShowDialog() ?? false))
+        /// <summary>
+        /// Save changes to the configuration
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            foreach(TreeViewItem item in tvPages.Items)
             {
-                try
+                ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
+
+                if(!page.SaveConfiguration())
                 {
-                    File.WriteAllLines(dlg.FileName, lbUserDictionary.Items.OfType<string>());
+                    item.IsSelected = true;
+                    return;
                 }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(String.Format("Unable to save user dictionary to '{0}'.  Reason: {1}",
-                        dlg.FileName, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
-                        MessageBoxImage.Exclamation);
-                }
+            }
+
+            if(!SpellCheckerConfiguration.SaveConfiguration())
+                MessageBox.Show("Unable to save spell checking configuration", PackageResources.PackageTitle,
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+            this.Close();
+        }
+
+        /// <summary>
+        /// Reset the configuration to its default settings excluding the user dictionary
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnReset_Click(object sender, RoutedEventArgs e)
+        {
+            if(MessageBox.Show("Are you sure you want to reset the configuration to its default settings " +
+              "(excluding the user dictionary)?", PackageResources.PackageTitle, MessageBoxButton.YesNo,
+              MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
+            {
+                SpellCheckerConfiguration.ResetConfiguration(true);
+
+                foreach(TreeViewItem item in tvPages.Items)
+                    ((ISpellCheckerConfiguration)item.Tag).LoadConfiguration();
+            }
+        }
+
+        /// <summary>
+        /// Prevent the user from changing the selected tree view item if the page is not valid
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void tvPages_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            TreeViewItem item = (TreeViewItem)tvPages.SelectedItem;
+
+            if(item != null)
+            {
+                ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
+
+                e.Handled = !page.IsValid;
+            }
+        }
+
+        /// <summary>
+        /// Change the displayed property page based on the selected tree view item
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void tvPages_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            foreach(TreeViewItem item in tvPages.Items)
+            {
+                ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
+
+                if(item.IsSelected)
+                    page.Control.Visibility = Visibility.Visible;
+                else
+                    page.Control.Visibility = Visibility.Collapsed;
             }
         }
         #endregion

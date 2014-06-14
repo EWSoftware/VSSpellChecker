@@ -5,7 +5,7 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 		xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
 		mc:Ignorable="d" 
-		d:DesignHeight="300" d:DesignWidth="300" Name="ucInteractiveSpellCheck">
+		d:DesignHeight="325" d:DesignWidth="300" Name="ucInteractiveSpellCheck">
 	<Grid Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -29,8 +29,10 @@
 			</Grid.RowDefinitions>
 			<TextBlock Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow"
 				Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
-				Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}">The spell checker is currently
-disabled.  Use the <Bold>Tools | Spell Checker | Edit Configuration</Bold> option to enable it.</TextBlock>
+				Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}">No text editor is selected, the
+spell checker is currently disabled, or the file is excluded by filename extension.
+<LineBreak /><LineBreak />Select a text editor or use the <Bold>Tools | Spell Checker | Edit Configuration</Bold>
+option to enable spell checking or remove the excluded filename extension.</TextBlock>
 			<Label Grid.Row="1" Target="{Binding ElementName=lbSuggestions}">_Suggestions</Label>
 			<Grid Grid.Row="2">
 				<Grid.ColumnDefinitions>

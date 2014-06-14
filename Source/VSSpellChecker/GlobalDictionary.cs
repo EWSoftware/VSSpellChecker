@@ -1,8 +1,8 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
-// Author  : Eric Woodruff
-// Updated : 02/23/2014
+// Author  : Eric Woodruff  (Eric@EWoodruff.us)
+// Updated : 06/13/2014
 // Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 using NHunspell;
 
@@ -44,9 +45,10 @@ namespace VisualStudio.SpellChecker
         private static SpellEngine spellEngine;
 
         private List<WeakReference> registeredServices;
-        private HashSet<string> ignoredWords;
+        private HashSet<string> dictionaryWords, ignoredWords;
+        private CultureInfo culture;
         private SpellFactory spellFactory;
-        private string ignoredWordsFile;
+        private string dictionaryWordsFile;
 
         #endregion
 
@@ -60,14 +62,18 @@ namespace VisualStudio.SpellChecker
         /// <param name="spellFactory">The spell factory to use when checking words</param>
         private GlobalDictionary(CultureInfo culture, SpellFactory spellFactory)
         {
+            this.culture = culture;
             this.spellFactory = spellFactory;
 
             registeredServices = new List<WeakReference>();
-            ignoredWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            ignoredWordsFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                culture.Name + "_Ignored.dic");
 
-            this.LoadIgnoredWordsFile();
+            dictionaryWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            dictionaryWordsFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
+                culture.Name + "_User.dic");
+
+            ignoredWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+
+            this.LoadUserDictionaryFile();
         }
         #endregion
 
@@ -84,8 +90,8 @@ namespace VisualStudio.SpellChecker
             }
             catch(Exception ex)
             {
+                // Ignore exceptions, there's not much we can do
                 System.Diagnostics.Debug.WriteLine(ex);
-                // Eat exceptions, there's not much we can do
             }
 
             return true;
@@ -103,8 +109,8 @@ namespace VisualStudio.SpellChecker
             }
             catch(Exception ex)
             {
+                // Ignore exceptions, there's not much we can do
                 System.Diagnostics.Debug.WriteLine(ex);
-                // Eat exceptions, there's not much we can do
             }
 
             return (suggestions ?? new List<string>());
@@ -119,12 +125,20 @@ namespace VisualStudio.SpellChecker
             if(this.ShouldIgnoreWord(word))
                 return true;
 
-            using(StreamWriter writer = new StreamWriter(ignoredWordsFile, true))
+            using(StreamWriter writer = new StreamWriter(dictionaryWordsFile, true))
             {
                 writer.WriteLine(word);
             }
 
-            return this.IgnoreWord(word);
+            lock(dictionaryWords)
+            {
+                dictionaryWords.Add(word);
+            }
+
+            this.AddSuggestion(word);
+            this.NotifySpellingServicesOfChange(word);
+
+            return true;
         }
 
         /// <inheritdoc />
@@ -154,8 +168,11 @@ namespace VisualStudio.SpellChecker
         {
             lock(ignoredWords)
             {
-                return ignoredWords.Contains(word);
+                if(ignoredWords.Contains(word))
+                    return true;
             }
+
+            return SpellCheckerConfiguration.ShouldIgnoreWord(word);
         }
 
 #pragma warning disable 0067
@@ -295,33 +312,35 @@ namespace VisualStudio.SpellChecker
         }
 
         /// <summary>
-        /// This is used to load the ignored words file for a specific language if it exists
+        /// This is used to load the user dictionary words file for a specific language if it exists
         /// </summary>
-        public static void LoadIgnoredWordsFile(CultureInfo language)
+        public static void LoadUserDictionaryFile(CultureInfo language)
         {
             GlobalDictionary g;
 
             if(globalDictionaries != null && globalDictionaries.TryGetValue(language.Name, out g))
             {
-                g.LoadIgnoredWordsFile();
+                g.LoadUserDictionaryFile();
                 g.NotifySpellingServicesOfChange(null);
             }
         }
 
         /// <summary>
-        /// This is used to load the ignored words file
+        /// This is used to load the user dictionary words file
         /// </summary>
-        private void LoadIgnoredWordsFile()
+        private void LoadUserDictionaryFile()
         {
-            ignoredWords.Clear();
+            dictionaryWords.Clear();
 
-            if(File.Exists(ignoredWordsFile))
+            if(File.Exists(dictionaryWordsFile))
             {
                 try
                 {
-                    foreach(string word in File.ReadLines(ignoredWordsFile))
+                    foreach(string word in File.ReadLines(dictionaryWordsFile))
                         if(!String.IsNullOrWhiteSpace(word))
-                            ignoredWords.Add(word.Trim());
+                            dictionaryWords.Add(word.Trim());
+
+                    this.AddSuggestions();
                 }
                 catch(Exception ex)
                 {
@@ -329,6 +348,199 @@ namespace VisualStudio.SpellChecker
                     System.Diagnostics.Debug.WriteLine(ex);
                 }
             }
+            else
+            {
+                // Older versions used a different filename.  If found, rename it and use it.
+                string oldFilename = dictionaryWordsFile.Replace("_User", "_Ignored");
+
+                try
+                {
+                    if(File.Exists(oldFilename))
+                    {
+                        if(File.Exists(dictionaryWordsFile))
+                            File.Delete(dictionaryWordsFile);
+
+                        File.Move(oldFilename, dictionaryWordsFile);
+                        LoadUserDictionaryFile();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    // Ignore exceptions.  We just won't load the old file.
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Add a new word as a suggestion to the Hunspell instances
+        /// </summary>
+        /// <remarks>The word is not added to the Hunspell dictionary files, just the speller instances</remarks>
+        private void AddSuggestion(string word)
+        {
+            // Since we're using the factory, we've got to get at the internals using reflection
+            Type sf = spellFactory.GetType();
+
+            FieldInfo fi = sf.GetField("processors", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            int releaseCount = 0, processors = (int)fi.GetValue(spellFactory);
+
+            fi = sf.GetField("hunspellSemaphore", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Semaphore hunspellSemaphore = (Semaphore)fi.GetValue(spellFactory);
+
+            fi = sf.GetField("hunspells", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
+
+            if(hunspellSemaphore != null && hunspells != null)
+                try
+                {
+                    // Make sure we get all semaphores since we will be touching all spellers
+                    while(releaseCount < processors)
+                    {
+                        // Don't wait too long.  If we can't get them all, we just won't add the words
+                        // as suggestions this time around.
+                        if(!hunspellSemaphore.WaitOne(2000))
+                            break;
+
+                        releaseCount++;
+                    }
+
+                    if(releaseCount == processors)
+                        foreach(var hs in hunspells.ToArray())
+                            if(!hs.Spell(word))
+                                hs.Add(word.ToLower(culture));
+                }
+                catch(Exception ex)
+                {
+                    // Ignore any exceptions.  Worst case, some words won't be added as suggestions.
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    if(releaseCount != 0)
+                        hunspellSemaphore.Release(releaseCount);
+                }
+        }
+
+        /// <summary>
+        /// Add the user dictionary words as suggestions to the Hunspell instances
+        /// </summary>
+        /// <remarks>The words are not added to the Hunspell dictionary files, just the speller instances</remarks>
+        private void AddSuggestions()
+        {
+            // Since we're using the factory, we've got to get at the internals using reflection
+            Type sf = spellFactory.GetType();
+
+            FieldInfo fi = sf.GetField("processors", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            int releaseCount = 0, processors = (int)fi.GetValue(spellFactory);
+
+            fi = sf.GetField("hunspellSemaphore", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Semaphore hunspellSemaphore = (Semaphore)fi.GetValue(spellFactory);
+
+            fi = sf.GetField("hunspells", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
+
+            if(hunspellSemaphore != null && hunspells != null)
+                try
+                {
+                    // Make sure we get all semaphores since we will be touching all spellers
+                    while(releaseCount < processors)
+                    {
+                        // Don't wait too long.  If we can't get them all, we just won't add the words
+                        // as suggestions this time around.
+                        if(!hunspellSemaphore.WaitOne(2000))
+                            break;
+
+                        releaseCount++;
+                    }
+
+                    if(releaseCount == processors)
+                        foreach(var hs in hunspells.ToArray())
+                            foreach(string word in dictionaryWords)
+                                if(!hs.Spell(word))
+                                    hs.Add(word.ToLower(culture));
+                }
+                catch(Exception ex)
+                {
+                    // Ignore any exceptions.  Worst case, some words won't be added as suggestions.
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    if(releaseCount != 0)
+                        hunspellSemaphore.Release(releaseCount);
+                }
+        }
+
+        /// <summary>
+        /// Remove the given word from the global dictionaries
+        /// </summary>
+        /// <param name="word">The word to remove</param>
+        public static void RemoveWord(CultureInfo language, string word)
+        {
+            GlobalDictionary g;
+
+            if(!String.IsNullOrWhiteSpace(word) && globalDictionaries != null &&
+              globalDictionaries.TryGetValue(language.Name, out g))
+                g.RemoveWord(word);
+        }
+
+        /// <summary>
+        /// Remove the given word from the Hunspell instances 
+        /// </summary>
+        /// <param name="word">The word to remove</param>
+        /// <remarks>The word is not removed from the Hunspell dictionary files, just the speller instances</remarks>
+        private void RemoveWord(string word)
+        {
+            // Since we're using the factory, we've got to get at the internals using reflection
+            Type sf = spellFactory.GetType();
+
+            FieldInfo fi = sf.GetField("processors", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            int releaseCount = 0, processors = (int)fi.GetValue(spellFactory);
+
+            fi = sf.GetField("hunspellSemaphore", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Semaphore hunspellSemaphore = (Semaphore)fi.GetValue(spellFactory);
+
+            fi = sf.GetField("hunspells", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
+
+            if(hunspellSemaphore != null && hunspells != null)
+                try
+                {
+                    // Make sure we get all semaphores since we will be touching all spellers
+                    while(releaseCount < processors)
+                    {
+                        // Don't wait too long.  If we can't get them all, we just won't add the words
+                        // as suggestions this time around.
+                        if(!hunspellSemaphore.WaitOne(2000))
+                            break;
+
+                        releaseCount++;
+                    }
+
+                    if(releaseCount == processors)
+                        foreach(var hs in hunspells.ToArray())
+                            if(hs.Spell(word))
+                                hs.Remove(word.ToLower(culture));
+                }
+                catch(Exception ex)
+                {
+                    // Ignore any exceptions.  Worst case, some words won't be added as suggestions.
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    if(releaseCount != 0)
+                        hunspellSemaphore.Release(releaseCount);
+                }
         }
         #endregion
     }

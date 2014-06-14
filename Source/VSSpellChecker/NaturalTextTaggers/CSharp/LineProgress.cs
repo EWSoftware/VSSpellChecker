@@ -1,9 +1,10 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : LineProgress.cs
-// Author  : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 04/14/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Updated : 06/06/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to track line progress while parsing C# code for natural text regions
@@ -13,12 +14,10 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-// Version     Date     Who  Comments
-//===============================================================================================================
-// 1.0.0.0  04/14/2013  EFW  Imported the code into the project
-//
-// Change History
-// 04/14/2013 - EFW - Added the NextSegment() method
+//    Date     Who  Comments
+// ==============================================================================================================
+// 04/14/2013  EFW  Imported the code into the project
+// 04/14/2013  EFW  Added the NextSegment() method
 //===============================================================================================================
 
 using System;

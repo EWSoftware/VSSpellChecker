@@ -1,13 +1,12 @@
-//===============================================================================================================
+﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : SpellSmartTagAction.cs
-// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// File    : DoubledWordSmartTagAction.cs
+// Authors : Eric Woodruff
 // Updated : 06/06/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Note    : Copyright 2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
-// This file contains a class used to provide a smart tag action for inserting spelling suggestions
+// This file contains a class used to provide a smart tag action for deleting doubled words
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code.  It can also be found at the project website: http://VSSpellChecker.CodePlex.com.
@@ -16,10 +15,10 @@
 //
 //    Date     Who  Comments
 // ==============================================================================================================
-// 04/14/2013  EFW  Imported the code into the project
-// 05/02/2013  EFW  Added support for Replace All
+// 06/06/2014  EFW  Created the code
 //===============================================================================================================
 
+using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -31,32 +30,26 @@ using VisualStudio.SpellChecker.Definitions;
 namespace VisualStudio.SpellChecker.SmartTags
 {
     /// <summary>
-    /// Smart tag action for inserting spelling suggestions
+    /// Smart tag action for deleting doubled words
     /// </summary>
-    internal class SpellSmartTagAction : ISmartTagAction
+    internal class DoubledWordSmartTagAction : ISmartTagAction
     {
         #region Private data members
         //=====================================================================
 
         private ITrackingSpan span;
-        private string replaceWith;
-        private ISpellingDictionary dictionary;
         #endregion
 
         #region Constructor
         //=====================================================================
 
         /// <summary>
-        /// Constructor for spelling suggestions smart tag actions
+        /// Constructor for doubled word deletion smart tag action
         /// </summary>
-        /// <param name="span">The word span to replace</param>
-        /// <param name="replaceWith">Text to replace misspelled word with</param>
-        /// <param name="dictionary">The dictionary used to perform the Replace All action</param>
-        public SpellSmartTagAction(ITrackingSpan span, string replaceWith, ISpellingDictionary dictionary)
+        /// <param name="span">The word span to delete</param>
+        public DoubledWordSmartTagAction(ITrackingSpan span)
         {
             this.span = span;
-            this.replaceWith = replaceWith;
-            this.dictionary = dictionary;
         }
         #endregion
 
@@ -68,7 +61,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// </summary>
         public string DisplayText
         {
-            get { return replaceWith; }
+            get { return "Delete word"; }
         }
 
         /// <summary>
@@ -84,10 +77,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// </summary>
         public void Invoke()
         {
-            if(dictionary != null && Keyboard.Modifiers == ModifierKeys.Control)
-                dictionary.ReplaceAllOccurrences(span.GetText(span.TextBuffer.CurrentSnapshot), replaceWith);
-            else
-                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), replaceWith);
+            span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), String.Empty);
         }
 
         /// <summary>

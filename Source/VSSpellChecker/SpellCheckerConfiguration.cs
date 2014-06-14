@@ -1,8 +1,8 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
-// Author  : Eric Woodruff
-// Updated : 02/23/2014
+// Author  : Eric Woodruff  (Eric@EWoodruff.us)
+// Updated : 06/13/2014
 // Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -23,6 +23,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace VisualStudio.SpellChecker
@@ -37,7 +38,10 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        private static HashSet<string> ignoredXmlElements, spellCheckedXmlAttributes;
+        private static Regex reSplitExtensions = new Regex(@"[^\.\w]");
+
+        private static HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes,
+            extensionExclusions;
         #endregion
 
         #region Properties
@@ -64,6 +68,7 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This is used to get or set the default language for the spell checker
         /// </summary>
+        /// <remarks>The default is to use the English US dictionary (en-US)</remarks>
         public static CultureInfo DefaultLanguage { get; set; }
 
         /// <summary>
@@ -85,6 +90,12 @@ namespace VisualStudio.SpellChecker
         public static bool IgnoreWordsInAllUppercase { get; set; }
 
         /// <summary>
+        /// This is used to get or set whether or not to ignore .NET and C-style format string specifiers
+        /// </summary>
+        /// <value>This is true by default</value>
+        public static bool IgnoreFormatSpecifiers { get; set; }
+
+        /// <summary>
         /// This is used to get or set whether or not to ignore words that look like filenames or e-mail
         /// addresses.
         /// </summary>
@@ -95,15 +106,107 @@ namespace VisualStudio.SpellChecker
         /// This is used to get or set whether or not to ignore XML elements in the text being spell checked
         /// (text within '&amp;lt;' and '&amp;gt;').
         /// </summary>
-        /// <value>The default is true</value>
+        /// <value>This is true by default</value>
         public static bool IgnoreXmlElementsInText { get; set; }
 
+        /// <summary>
+        /// This is used to get or set whether or not to ignore words by character class
+        /// </summary>
+        /// <remarks>This provides a simplistic way of ignoring some words in mixed language files.  It works
+        /// best for spell checking English text in files that also contain Cyrillic or Asian text.  The default
+        /// is <c>None</c> to include all words regardless of the characters they contain.</remarks>
+        public static IgnoredCharacterClass IgnoreCharacterClass { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not underscores are treated as a word separator
         /// </summary>
         /// <value>This is false by default</value>
         public static bool TreatUnderscoreAsSeparator { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore XML documentation comments in C# files
+        /// (<c>/** ... */</c> or <c>/// ...</c>)
+        /// </summary>
+        /// <value>The default is false to include XML documentation comments</value>
+        public static bool IgnoreXmlDocComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore delimited comments in C# files (<c>/* ... */</c>)
+        /// </summary>
+        /// <value>The default is false to include delimited comments</value>
+        public static bool IgnoreDelimitedComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore standard single line comments in C# files
+        /// (<c>// ...</c>)
+        /// </summary>
+        /// <value>The default is false to include standard single line comments</value>
+        public static bool IgnoreStandardSingleLineComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore quadruple slash comments in C# files
+        /// (<c>//// ...</c>)
+        /// </summary>
+        /// <value>The default is false to include quadruple slash comments</value>
+        /// <remarks>This is useful for ignoring commented out blocks of code while still spell checking the
+        /// other comment styles.</remarks>
+        public static bool IgnoreQuadrupleSlashComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore normal strings in C# files (<c>"..."</c>)
+        /// </summary>
+        /// <value>The default is false to include normal strings</value>
+        public static bool IgnoreNormalStrings { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore verbatim strings in C# files (<c>@"..."</c>)
+        /// </summary>
+        /// <value>The default is false to include verbatim strings</value>
+        public static bool IgnoreVerbatimStrings { get; set; }
+
+        /// <summary>
+        /// This is used to get or set the exclusions by filename extension
+        /// </summary>
+        /// <remarks>Filenames with an extension in this set will not be spell checked.  Extensions are specified
+        /// in a space or comma-separated list with or without a preceding period.  A single period will exclude
+        /// files without an extension.</remarks>
+        public static string ExcludeByFilenameExtension
+        {
+            get
+            {
+                return String.Join(" ", extensionExclusions.OrderBy(e => e));
+            }
+            set
+            {
+                if(extensionExclusions == null)
+                    extensionExclusions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                else
+                    extensionExclusions.Clear();
+
+                if(!String.IsNullOrWhiteSpace(value))
+                    foreach(string ext in reSplitExtensions.Split(value))
+                        if(!String.IsNullOrEmpty(ext))
+                        {
+                            string addExt;
+
+                            if(ext[0] != '.')
+                                addExt = "." + ext;
+                            else
+                                addExt = ext;
+
+                            extensionExclusions.Add(addExt);
+                        }
+            }
+        }
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of ignored words that will not be spell
+        /// checked.
+        /// </summary>
+        public static IEnumerable<string> IgnoredWords
+        {
+            get { return ignoredWords; }
+        }
 
         /// <summary>
         /// This read-only property returns an enumerable list of ignored XML element names that will not have
@@ -174,6 +277,24 @@ namespace VisualStudio.SpellChecker
         }
 
         /// <summary>
+        /// This read-only property returns the default list of ignored words
+        /// </summary>
+        /// <remarks>The default list includes words starting with what looks like an escape sequence such as
+        /// various Doxygen documentation tags (i.e. \anchor, \ref, \remarks, etc.).</remarks>
+        public static IEnumerable<string> DefaultIgnoredWords
+        {
+            get
+            {
+                return new string[] { "\\addindex", "\\addtogroup", "\\anchor", "\\arg", "\\attention",
+                    "\\author", "\\authors", "\\brief", "\\bug", "\\file", "\\fn", "\\name", "\\namespace",
+                    "\\nosubgrouping", "\\note", "\\ref", "\\refitem", "\\related", "\\relates", "\\relatedalso",
+                    "\\relatesalso", "\\remark", "\\remarks", "\\result", "\\return", "\\returns", "\\retval",
+                    "\\rtfonly", "\\tableofcontents", "\\test", "\\throw", "\\throws", "\\todo", "\\tparam",
+                    "\\typedef", "\\var", "\\verbatim", "\\verbinclude", "\\version", "\\vhdlflow"};
+            }
+        }
+
+        /// <summary>
         /// This read-only property returns the default list of spell checked XML attributes
         /// </summary>
         public static IEnumerable<string> DefaultSpellCheckedAttributes
@@ -195,21 +316,44 @@ namespace VisualStudio.SpellChecker
         static SpellCheckerConfiguration()
         {
             if(!LoadConfiguration())
-            {
-                SpellCheckAsYouType = IgnoreWordsWithDigits = IgnoreWordsInAllUppercase =
-                    IgnoreFilenamesAndEMailAddresses = IgnoreXmlElementsInText = true;
-
-                ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
-
-                spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
-
-                DefaultLanguage = new CultureInfo("en-US");
-            }
+                ResetConfiguration(false);
         }
         #endregion
 
         #region Helper methods
         //=====================================================================
+
+        /// <summary>
+        /// This is used to determine if a file is to be excluded from spell checking by its extension
+        /// </summary>
+        /// <param name="extension">The filename extension to check</param>
+        /// <returns>True to exclude the file from spell checking, false to include it</returns>
+        public static bool IsExcludedByExtension(string extension)
+        {
+            if(extension == null)
+                return false;
+
+            if(extension.Length == 0 || extension[0] != '.')
+                extension = "." + extension;
+
+            return extensionExclusions.Contains(extension);
+        }
+
+        /// <summary>
+        /// This method provides a thread-safe way to check for a globally ignored word
+        /// </summary>
+        /// <param name="word">The word to check</param>
+        /// <returns>True if it should be ignored, false if not</returns>
+        public static bool ShouldIgnoreWord(string word)
+        {
+            if(String.IsNullOrWhiteSpace(word))
+                return true;
+
+            lock(ignoredWords)
+            {
+                return ignoredWords.Contains(word);
+            }
+        }
 
         /// <summary>
         /// Set the list of ignored XML elements
@@ -218,6 +362,15 @@ namespace VisualStudio.SpellChecker
         public static void SetIgnoredXmlElements(IEnumerable<string> ignoredElements)
         {
             ignoredXmlElements = new HashSet<string>(ignoredElements);
+        }
+
+        /// <summary>
+        /// Set the list of ignored words
+        /// </summary>
+        /// <param name="ignored">The list of words to ignore</param>
+        public static void SetIgnoredWords(IEnumerable<string> ignored)
+        {
+            ignoredWords = new HashSet<string>(ignored);
         }
 
         /// <summary>
@@ -235,6 +388,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>True if loaded successfully or false if the file does not exist or could not be loaded</returns>
         private static bool LoadConfiguration()
         {
+            IgnoredCharacterClass ignoredClass;
             string filename = Path.Combine(ConfigurationFilePath, "SpellChecker.config");
             bool success = true;
 
@@ -255,9 +409,38 @@ namespace VisualStudio.SpellChecker
                 SpellCheckAsYouType = (root.Element("SpellCheckAsYouType") != null);
                 IgnoreWordsWithDigits = (root.Element("IgnoreWordsWithDigits") != null);
                 IgnoreWordsInAllUppercase = (root.Element("IgnoreWordsInAllUppercase") != null);
+                IgnoreFormatSpecifiers = (root.Element("IgnoreFormatSpecifiers") != null);
                 IgnoreFilenamesAndEMailAddresses = (root.Element("IgnoreFilenamesAndEMailAddresses") != null);
                 IgnoreXmlElementsInText = (root.Element("IgnoreXmlElementsInText") != null);
                 TreatUnderscoreAsSeparator = (root.Element("TreatUnderscoreAsSeparator") != null);
+
+                IgnoreXmlDocComments = (root.Element("IgnoreXmlDocComments") != null);
+                IgnoreDelimitedComments = (root.Element("IgnoreDelimitedComments") != null);
+                IgnoreStandardSingleLineComments = (root.Element("IgnoreStandardSingleLineComments") != null);
+                IgnoreQuadrupleSlashComments = (root.Element("IgnoreQuadrupleSlashComments") != null);
+                IgnoreNormalStrings = (root.Element("IgnoreNormalStrings") != null);
+                IgnoreVerbatimStrings = (root.Element("IgnoreVerbatimStrings") != null);
+
+                node = root.Element("IgnoredCharacterClass");
+
+                if(node == null || !Enum.TryParse<IgnoredCharacterClass>(node.Value, out ignoredClass))
+                    ignoredClass = IgnoredCharacterClass.None;
+
+                IgnoreCharacterClass = ignoredClass;
+
+                node = root.Element("ExcludeByFilenameExtension");
+
+                if(node != null)
+                    ExcludeByFilenameExtension = node.Value;
+                else
+                    ExcludeByFilenameExtension = null;
+
+                node = root.Element("IgnoredWords");
+
+                if(node != null)
+                    ignoredWords = new HashSet<string>(node.Descendants().Select(n => n.Value));
+                else
+                    ignoredWords = new HashSet<string>(DefaultIgnoredWords);
 
                 node = root.Element("IgnoredXmlElements");
 
@@ -299,9 +482,23 @@ namespace VisualStudio.SpellChecker
                     SpellCheckAsYouType ? new XElement("SpellCheckAsYouType") : null,
                     IgnoreWordsWithDigits ? new XElement("IgnoreWordsWithDigits") : null,
                     IgnoreWordsInAllUppercase ? new XElement("IgnoreWordsInAllUppercase") : null,
+                    IgnoreFormatSpecifiers ? new XElement("IgnoreFormatSpecifiers") : null,
                     IgnoreFilenamesAndEMailAddresses ? new XElement("IgnoreFilenamesAndEMailAddresses") : null,
                     IgnoreXmlElementsInText ? new XElement("IgnoreXmlElementsInText") : null,
-                    TreatUnderscoreAsSeparator ? new XElement("TreatUnderscoreAsSeparator") : null);
+                    TreatUnderscoreAsSeparator ? new XElement("TreatUnderscoreAsSeparator") : null,
+                    new XElement("ExcludeByFilenameExtension", ExcludeByFilenameExtension),
+                    new XElement("IgnoredCharacterClass", IgnoreCharacterClass.ToString()),
+                    IgnoreXmlDocComments ? new XElement("IgnoreXmlDocComments") : null,
+                    IgnoreDelimitedComments ? new XElement("IgnoreDelimitedComments") : null,
+                    IgnoreStandardSingleLineComments ? new XElement("IgnoreStandardSingleLineComments") : null,
+                    IgnoreQuadrupleSlashComments ? new XElement("IgnoreQuadrupleSlashComments") : null,
+                    IgnoreNormalStrings ? new XElement("IgnoreNormalStrings") : null,
+                    IgnoreVerbatimStrings ? new XElement("IgnoreVerbatimStrings") : null);
+
+                if(ignoredWords.Count != DefaultIgnoredWords.Count() ||
+                  DefaultIgnoredWords.Except(ignoredWords).Count() != 0)
+                    root.Add(new XElement("IgnoredWords",
+                        ignoredWords.Select(i => new XElement("Ignore") { Value = i })));
 
                 if(ignoredXmlElements.Count != DefaultIgnoredXmlElements.Count() ||
                   DefaultIgnoredXmlElements.Except(ignoredXmlElements).Count() != 0)
@@ -322,6 +519,47 @@ namespace VisualStudio.SpellChecker
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// This is used to reset the configuration to its default state
+        /// </summary>
+        /// <param name="deleteConfigurationFile">True to delete the configuration file if it exists, false to
+        /// just set the default values</param>
+        /// <returns></returns>
+        public static void ResetConfiguration(bool deleteConfigurationFile)
+        {
+            SpellCheckAsYouType = IgnoreWordsWithDigits = IgnoreWordsInAllUppercase =
+                IgnoreFormatSpecifiers = IgnoreFilenamesAndEMailAddresses = IgnoreXmlElementsInText = true;
+
+            TreatUnderscoreAsSeparator = IgnoreXmlDocComments = IgnoreDelimitedComments =
+                IgnoreStandardSingleLineComments = IgnoreQuadrupleSlashComments = IgnoreNormalStrings =
+                IgnoreVerbatimStrings = false;
+
+            IgnoreCharacterClass = IgnoredCharacterClass.None;
+
+            ignoredWords = new HashSet<string>(DefaultIgnoredWords, StringComparer.OrdinalIgnoreCase);
+            ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
+            spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
+            extensionExclusions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            DefaultLanguage = new CultureInfo("en-US");
+
+            if(deleteConfigurationFile)
+            {
+                string filename = Path.Combine(ConfigurationFilePath, "SpellChecker.config");
+
+                try
+                {
+                    if(File.Exists(filename))
+                        File.Delete(filename);
+                }
+                catch(Exception ex)
+                {
+                    // Ignore exception encountered while trying to delete the configuration file
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+            }
         }
         #endregion
     }
