@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/06/2014
+// Updated : 06/20/2014
 // Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -21,6 +21,7 @@
 // 05/02/2013  EFW  Added support for Replace All
 // 05/31/2013  EFW  Added support for Ignore Once
 // 06/06/2014  EFW  Added support for doubled word smart tags
+// 06/20/2014  EFW  Added support for use in VS 2013 Peek Definition windows
 //===============================================================================================================
 
 using System;
@@ -82,12 +83,13 @@ namespace VisualStudio.SpellChecker.SmartTags
             /// or spell checking as you type is disabled.</returns>
             public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
             {
-                // If this view isn't editable, then there isn't a good reason to be showing these.
+                // If this view isn't editable, then there isn't a good reason to be showing these
                 if(!textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
-                  !textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument))
+                  (!textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument) &&
+                  !textView.Roles.Contains(Utility.EmbeddedPeekTextView)))
                     return null;
 
-                // Make sure we only tagging top buffer and only if wanted
+                // Make sure we are only tagging the top buffer and only if wanted
                 if(buffer != textView.TextBuffer || !SpellCheckerConfiguration.SpellCheckAsYouType ||
                   SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
                     return null;

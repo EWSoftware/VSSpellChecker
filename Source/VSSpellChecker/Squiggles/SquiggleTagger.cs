@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SquiggleTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 04/14/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Updated : 06/20/2014
+// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the tagger class for spelling squiggles
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 04/14/2013  EFW  Imported the code into the project
+// 06/20/2014  EFW  Added support for use in VS 2013 Peek Definition windows
 //===============================================================================================================
 
 using System;
@@ -86,11 +87,13 @@ namespace VisualStudio.SpellChecker.Squiggles
             #region ITaggerProvider
             public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
             {
-                // If this view isn't editable, then there isn't a good reason to be showing these.
-                if(!textView.Roles.Contains(PredefinedTextViewRoles.Editable) || !textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument))
+                // If this view isn't editable, then there isn't a good reason to be showing these
+                if(!textView.Roles.Contains(PredefinedTextViewRoles.Editable) || (
+                  !textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument) &&
+                  !textView.Roles.Contains(Utility.EmbeddedPeekTextView)))
                     return null;
 
-                // Make sure we only tagging top buffer
+                // Make sure we are only tagging the top buffer
                 if(buffer != textView.TextBuffer)
                     return null;
 

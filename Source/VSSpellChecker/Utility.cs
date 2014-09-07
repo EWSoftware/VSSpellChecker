@@ -2,7 +2,7 @@
 // System  : Sandcastle Help File Builder Visual Studio Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/06/2014
+// Updated : 06/20/2014
 // Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -36,6 +36,17 @@ namespace VisualStudio.SpellChecker
     /// </summary>
     public static class Utility
     {
+        #region Constants
+        //=====================================================================
+
+        /// <summary>
+        /// This is an extra <c>PredefinedTextViewRoles</c> value that only exists in VS 2013.  It defines the
+        /// Peek Definition window view role which doesn't exist in earlier versions of Visual Studio.  As such,
+        /// we define it here.
+        /// </summary>
+        public const string EmbeddedPeekTextView = "EMBEDDED_PEEK_TEXT_VIEW";
+        #endregion
+
         #region General utility methods
         //=====================================================================
 

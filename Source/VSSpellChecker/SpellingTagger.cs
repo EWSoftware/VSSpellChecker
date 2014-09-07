@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/12/2014
+// Updated : 08/08/2014
 // Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -946,9 +946,12 @@ namespace VisualStudio.SpellChecker
                         // Flags
                         switch(text[end])
                         {
+                            // NOTE: A space is also a valid flag character but we can't tell if it's part of
+                            // the format or just a percentage followed by a word without some lookahead which
+                            // probably isn't worth the effort (i.e. "% i" vs "100% stuff").  As such, the space
+                            // flag character is not included here.
                             case '-':
                             case '+':
-                            case ' ':
                             case '#':
                             case '0':
                                 end++;
