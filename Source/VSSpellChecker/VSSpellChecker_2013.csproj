@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -11,12 +12,14 @@
     <RootNamespace>VisualStudio.SpellChecker</RootNamespace>
     <AssemblyName>VisualStudio.SpellChecker</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,24 +43,12 @@
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
     <Compile Include="GeneratedCode\Guids.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Guids.tt</DependentUpon>
     </Compile>
     <Compile Include="GeneratedCode\Package.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Package.tt</DependentUpon>
     </Compile>
     <Compile Include="GeneratedCode\PkgCmdID.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PkgCmdID.tt</DependentUpon>
     </Compile>
     <Compile Include="GeneratedCode\ToolWindowBase.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ToolWindowBase.tt</DependentUpon>
     </Compile>
     <Compile Include="GlobalDictionary.cs" />
     <Compile Include="IgnoredCharacterClass.cs" />
@@ -144,43 +135,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <None Include="GeneratedCode\VSSpellChecker.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>VSSpellChecker.vsct</LastGenOutput>
-    </None>
-    <None Include="GeneratedCode\Guids.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Guids.cs</LastGenOutput>
-    </None>
-    <None Include="GeneratedCode\ToolWindowBase.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ToolWindowBase.cs</LastGenOutput>
-    </None>
-    <None Include="GeneratedCode\ToolWindow.tt">
-    </None>
-    <None Include="GeneratedCode\Package.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Package.cs</LastGenOutput>
-    </None>
-    <None Include="GeneratedCode\WinFormControl.tt">
-    </None>
-    <None Include="GeneratedCode\WinFormControlCS.tt">
-    </None>
-    <None Include="GeneratedCode\WpfControl.tt">
-    </None>
-    <None Include="GeneratedCode\WpfControlXaml.tt">
-    </None>
-    <None Include="GeneratedCode\PkgCmdID.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PkgCmdID.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <VSCTCompile Include="GeneratedCode\VSSpellChecker.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>VSSpellChecker.tt</DependentUpon>
+      <SubType>Designer</SubType>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
@@ -206,8 +167,6 @@
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
-    </None>
-    <None Include="VSSpellChecker.vspackage">
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -304,9 +263,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Button Bitmaps\" />
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
@@ -348,8 +304,13 @@
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>
   </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" />
+  <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" Condition="false" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <PropertyGroup>
     <PostBuildEvent>IF "$(ConfigurationName)"=="Debug" Goto Exit

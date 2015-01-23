@@ -36,8 +36,8 @@
 					ToolTip="Reset the configuration to its defaults" Click="btnReset_Click" />
 			</StackPanel>
 			<TextBlock Margin="3" Grid.Column="1" ToolTip="View project website">
-				<Hyperlink Name="lnkCodePlex" NavigateUri="http://VSSpellChecker.CodePlex.com"
-						Click="lnkCodePlex_Click">http://VSSpellChecker.CodePlex.com</Hyperlink>
+				<Hyperlink Name="lnkProjectSite" NavigateUri="https://github.com/EWSoftware/VSSpellChecker"
+						Click="lnkProjectSite_Click">https://github.com/EWSoftware/VSSpellChecker</Hyperlink>
 			</TextBlock>
 			<StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
 				<Button Name="btnHelp" Content="Help" Width="80" Margin="0, 0, 10, 0"

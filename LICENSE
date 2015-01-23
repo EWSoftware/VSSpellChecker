@@ -65,12 +65,12 @@ Copyright Notices
 -----------------
 The core Visual Studio package code related to the spell checker implementation
 was originally written by Noah Richards, Roman Golovin, and Michael Lehenbauer
-and is Copyright (c) 2010-2013 Microsoft Corporation, All Rights Reserved.
+and is Copyright (c) 2010-2015 Microsoft Corporation, All Rights Reserved.
 
-The NHunspell library is Copyright (c) 2009-2013 Maierhofer Software,
+The NHunspell library is Copyright (c) 2009-2015 Maierhofer Software,
 All Rights Reserved.
 
-All other code is Copyright (c) 2013 Eric Woodruff, All Rights Reserved.
+All other code is Copyright (c) 2013-2015 Eric Woodruff, All Rights Reserved.
 
 The English US dictionary is based on a subset of the original English wordlist
 created by Kevin Atkinson for Pspell and Aspell and thus is covered by his

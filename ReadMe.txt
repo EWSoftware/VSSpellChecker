@@ -24,3 +24,5 @@ Building the Project
 --------------------
 To build the project, open the .\Source\VSSpellChecker.sln solution file and build it.  You can also run the
 MasterBuild.bat script from a command prompt to build the projects.
+
+TODO: Add info on setting up the VSPackage project for debugging (.user file settings).

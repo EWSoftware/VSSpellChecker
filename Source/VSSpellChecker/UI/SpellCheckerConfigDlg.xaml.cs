@@ -9,7 +9,7 @@
 // This file contains a window used to edit the spell checker configuration settings
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
-// distributed with the code.  It can also be found at the project website: http://VSSpellChecker.CodePlex.com.
+// distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
@@ -99,11 +99,11 @@ namespace VisualStudio.SpellChecker.UI
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void lnkCodePlex_Click(object sender, RoutedEventArgs e)
+        private void lnkProjectSite_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                Process.Start(lnkCodePlex.NavigateUri.AbsoluteUri);
+                Process.Start(lnkProjectSite.NavigateUri.AbsoluteUri);
             }
             catch(Exception ex)
             {
@@ -127,7 +127,7 @@ namespace VisualStudio.SpellChecker.UI
 
                 try
                 {
-                    string targetUrl = lnkCodePlex.NavigateUri.AbsoluteUri + "/wikipage?title=" +
+                    string targetUrl = lnkProjectSite.NavigateUri.AbsoluteUri + "/wiki?title=" +
                         HttpUtility.UrlEncode(page.HelpUrl);
 
                     Process.Start(targetUrl);
