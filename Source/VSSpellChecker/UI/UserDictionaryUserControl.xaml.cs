@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : UserDictionaryUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/14/2014
-// Note    : Copyright 2014, Eric Woodruff, All rights reserved
+// Updated : 01/25/2015
+// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the language and user dictionary spell checker configuration
@@ -68,7 +68,7 @@ namespace VisualStudio.SpellChecker.UI
         /// <inheritdoc />
         public string HelpUrl
         {
-            get { return "DefLangUserDict"; }
+            get { return "Default-Language-and-User-Dictionary"; }
         }
 
         /// <inheritdoc />

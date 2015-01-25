@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfigDlg.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/14/2014
-// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 01/25/2015
+// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a window used to edit the spell checker configuration settings
@@ -127,7 +127,7 @@ namespace VisualStudio.SpellChecker.UI
 
                 try
                 {
-                    string targetUrl = lnkProjectSite.NavigateUri.AbsoluteUri + "/wiki?title=" +
+                    string targetUrl = lnkProjectSite.NavigateUri.AbsoluteUri + "/wiki/" +
                         HttpUtility.UrlEncode(page.HelpUrl);
 
                     Process.Start(targetUrl);
