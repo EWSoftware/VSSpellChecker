@@ -59,6 +59,7 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 
 # Non-distributable and private local stuff
+Deployment/
 NonDist/
 
 # =========================
