@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/25/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
+// Updated : 01/27/2015
+// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
@@ -19,6 +19,7 @@
 //===============================================================================================================
 
 using System;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -33,33 +34,28 @@ namespace VisualStudio.SpellChecker
     /// <summary>
     /// This is the class that implements the Visual Studio Spell Checker package
     /// </summary>
-    // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is
-    // a package.
+    /// <remarks>The minimum requirement for a class to be considered a valid package for Visual Studio is to
+    /// implement the <c>IVsPackage</c> interface and register itself with the shell.  This package uses the
+    /// helper classes defined inside the Managed Package Framework (MPF) to do it.  It derives from the
+    /// <c>Package</c> class that provides the implementation of the <c>IVsPackage</c> interface and uses the
+    /// registration attributes defined in the framework to  register itself and its components with the shell.</remarks>
+    // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is a package
     [PackageRegistration(UseManagedResourcesOnly = true)]
-    // This attribute is used to register the information needed to show the this package
-    // in the Help/About dialog of Visual Studio.
+    // This attribute is used to register the information needed to show this package in the Help/About dialog of
+    // Visual Studio.
     [InstalledProductRegistration("#110", "#111", "VSSpellChecker", IconResourceID = 400)]
-    // Define the package GUID
+    // This defines the package GUID
     [Guid(GuidList.guidVSSpellCheckerPkgString)]
-    // This attribute is needed to let the shell know that this package exposes some menus.
+    // This attribute lets the shell know that this package exposes some menus
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    // This attribute lets the shell know that this package exposes a tool window
+    [ProvideToolWindow(typeof(ToolWindows.InteractiveSpellCheckToolWindow),
+      Orientation = ToolWindowOrientation.Right, Style = VsDockStyle.Float, MultiInstances = false,
+      Transient = false, PositionX = 100, PositionY = 100, Width = 300, Height = 300)]
     // Provide a binding path for finding custom assemblies in this package
     [ProvideBindingPath()]
-    public class VSSpellCheckerPackage : VSSpellCheckerPackageBase
+    public class VSSpellCheckerPackage : Package
     {
-        #region Constructor
-        //=====================================================================
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public VSSpellCheckerPackage()
-        {
-            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}",
-                this.ToString()));
-        }
-        #endregion
-
         #region Properties
         //=====================================================================
 
@@ -70,10 +66,29 @@ namespace VisualStudio.SpellChecker
 
         #endregion
 
+        #region Constructor
+        //=====================================================================
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <remarks>Inside this method you can place any initialization code that does not require any Visual
+        /// Studio service because at this point the package object is created but not sited yet inside Visual
+        /// Studio environment. The place to do all the other initialization is the Initialize method.</remarks>
+        public VSSpellCheckerPackage()
+        {
+            Trace.WriteLine(String.Format(CultureInfo.CurrentCulture, "Entering constructor for {0}",
+                this.ToString()));
+        }
+        #endregion
+
         #region General method overrides
         //=====================================================================
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Clean up any resources being used
+        /// </summary>
+        /// <param name="disposing">True if managed resources should be disposed; otherwise, false</param>
         protected override void Dispose(bool disposing)
         {
             VSSpellCheckerPackage.Instance = null;
@@ -88,15 +103,32 @@ namespace VisualStudio.SpellChecker
         /// put all the initialization code that relies on services provided by Visual Studio.</remarks>
         protected override void Initialize()
         {
-            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}",
+            Trace.WriteLine(String.Format(CultureInfo.CurrentCulture, "Entering Initialize() of {0}",
                 this.ToString()));
             base.Initialize();
 
             VSSpellCheckerPackage.Instance = this;
+
+            // Add our command handlers for menu items (commands must exist in the .vsct file)
+            OleMenuCommandService mcs = this.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+
+            if(mcs != null)
+            {
+                // Create the command for button SpellCheckerConfiguration
+                CommandID commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
+                    (int)PkgCmdIDList.SpellCheckerConfiguration);
+                OleMenuCommand menuItem = new OleMenuCommand(SpellCheckerConfigurationExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
+                // Create the command for button SpellCheckInteractive
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckInteractive);
+                menuItem = new OleMenuCommand(SpellCheckInteractiveExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+            }
         }
         #endregion
 
-        #region Command method overrides
+        #region Command event handlers
         //=====================================================================
 
         /// <summary>
@@ -104,7 +136,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        protected override void SpellCheckerConfigurationExecuteHandler(object sender, EventArgs e)
+        private void SpellCheckerConfigurationExecuteHandler(object sender, EventArgs e)
         {
             var dlg = new SpellCheckerConfigDlg();
             dlg.ShowDialog();
@@ -115,12 +147,12 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        protected override void SpellCheckInteractiveExecuteHandler(object sender, EventArgs e)
+        private void SpellCheckInteractiveExecuteHandler(object sender, EventArgs e)
         {
             var window = this.FindToolWindow(typeof(ToolWindows.InteractiveSpellCheckToolWindow), 0, true);
 
             if(window == null || window.Frame == null)
-                throw new NotSupportedException("Unable to create Entity References tool window");
+                throw new NotSupportedException("Unable to create Interactive Spell Checker tool window");
 
             var windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());

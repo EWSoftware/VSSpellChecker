@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/31/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
+// Updated : 01/27/2015
+// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to implement the interactive spell check tool window
@@ -31,11 +31,13 @@ using Microsoft.VisualStudio.Text.Editor;
 namespace VisualStudio.SpellChecker.ToolWindows
 {
     /// <summary>
-    /// This is used to spell check the current document window
+    /// This class implements the tool window used to spell check the current document window.
     /// </summary>
+    /// <remarks>In Visual Studio, tool windows are composed of a frame (implemented by the shell) and a pane, 
+    /// usually implemented by the package implementer.  This class derives from the <c>ToolWindowPane</c> class
+    /// provided from the MPF in order to use its implementation of the <c>IVsUIElementPane</c> interface.</remarks>
     [Guid("fd92f3d8-cebf-47b9-bb98-674a1618f364")]
-    public class InteractiveSpellCheckToolWindow : InteractiveSpellCheckToolWindowBase, IVsSelectionEvents,
-      IVsRunningDocTableEvents
+    public class InteractiveSpellCheckToolWindow : ToolWindowPane, IVsSelectionEvents, IVsRunningDocTableEvents
     {
         #region Private data members
         //=====================================================================
@@ -50,10 +52,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <summary>
         /// Constructor
         /// </summary>
-        public InteractiveSpellCheckToolWindow()
+        public InteractiveSpellCheckToolWindow() : base(null)
         {
             ucSpellCheck = new InteractiveSpellCheckControl();
-            base.Content = ucSpellCheck;
+
+            this.Caption = "Spell Check Active Document";
+            this.Content = ucSpellCheck;
         }
         #endregion
 
