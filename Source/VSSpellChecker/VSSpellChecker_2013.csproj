@@ -12,6 +12,8 @@
     <RootNamespace>VisualStudio.SpellChecker</RootNamespace>
     <AssemblyName>VisualStudio.SpellChecker</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\SpellChecker.snk</AssemblyOriginatorKeyFile>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
@@ -32,6 +34,7 @@
     <CopyVsixExtensionFiles>False</CopyVsixExtensionFiles>
     <CopyVsixExtensionLocation>
     </CopyVsixExtensionLocation>
+    <CodeAnalysisRuleSet>..\SpellChecker.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -48,6 +51,7 @@
     <Compile Include="..\SpellCheckerDefinitions\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Guids.cs">
     </Compile>
     <Compile Include="PkgCmdID.cs">

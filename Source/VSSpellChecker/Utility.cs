@@ -2,8 +2,8 @@
 // System  : Sandcastle Help File Builder Visual Studio Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/20/2014
-// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 01/30/2015
+// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a utility class with extension and utility methods.
@@ -92,25 +92,6 @@ namespace VisualStudio.SpellChecker
                 Resources.PackageTitle, String.Format(CultureInfo.CurrentCulture, message, parameters),
                 String.Empty, 0, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST, icon, 0,
                 out result));
-        }
-
-        /// <summary>
-        /// This is used to get the current dialog font for use in property pages, etc.
-        /// </summary>
-        /// <returns>The current dialog font or a Segoe UI 9pt font if it is not available</returns>
-        public static Font GetDialogFont()
-        {
-            IUIHostLocale host = GetServiceFromPackage<IUIHostLocale, IUIHostLocale>(false);
-
-            if(host != null)
-            {
-                UIDLGLOGFONT[] pLOGFONT = new UIDLGLOGFONT[1];
-
-                if(host.GetDialogFont(pLOGFONT) == 0)
-                    return Font.FromLogFont(pLOGFONT[0]);
-            }
-
-            return new Font("Segoe UI", 9.0f);
         }
 
         /// <summary>

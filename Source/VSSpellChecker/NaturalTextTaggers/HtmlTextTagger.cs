@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/06/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+// Updated : 01/30/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -44,7 +44,6 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer _buffer;
         private IClassifier _classifier;
         #endregion
 
@@ -80,7 +79,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
                   SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
                     return null;
 
-                return new HtmlTextTagger(buffer, ClassifierAggregatorService.GetClassifier(buffer)) as ITagger<T>;
+                return new HtmlTextTagger(ClassifierAggregatorService.GetClassifier(buffer)) as ITagger<T>;
             }
         }
         #endregion
@@ -91,11 +90,9 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="buffer">The text buffer</param>
         /// <param name="classifier">The classifier</param>
-        public HtmlTextTagger(ITextBuffer buffer, IClassifier classifier)
+        public HtmlTextTagger(IClassifier classifier)
         {
-            _buffer = buffer;
             _classifier = classifier;
         }
         #endregion

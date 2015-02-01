@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/13/2014
-// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 01/31/2015
+// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the global dictionary
@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -285,6 +286,12 @@ namespace VisualStudio.SpellChecker
         /// <param name="service">The dictionary service to register</param>
         public void RegisterSpellingDictionaryService(SpellingDictionaryService service)
         {
+            // Clear out ones that have been disposed of
+            foreach(var svc in registeredServices.Where(s => !s.IsAlive).ToArray())
+                registeredServices.Remove(svc);
+
+            System.Diagnostics.Debug.WriteLine("Registered services count: {0}", registeredServices.Count);
+
             registeredServices.Add(new WeakReference(service));
         }
 
@@ -295,7 +302,11 @@ namespace VisualStudio.SpellChecker
         /// <param name="word">The word that triggered the change</param>
         private void NotifySpellingServicesOfChange(string word)
         {
-            var referencesToRemove = new List<WeakReference>();
+            // Clear out ones that have been disposed of
+            foreach(var service in registeredServices.Where(s => !s.IsAlive).ToArray())
+                registeredServices.Remove(service);
+
+            System.Diagnostics.Debug.WriteLine("Registered services count: {0}", registeredServices.Count);
 
             foreach(var service in registeredServices)
             {
@@ -303,12 +314,7 @@ namespace VisualStudio.SpellChecker
 
                 if(target != null)
                     target.GlobalDictionaryUpdated(word);
-                else
-                    referencesToRemove.Add(service);
             }
-
-            foreach(var reference in referencesToRemove)
-                registeredServices.Remove(reference);
         }
 
         /// <summary>

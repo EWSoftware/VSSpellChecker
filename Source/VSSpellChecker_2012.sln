@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker", "VSSpellChecker\VSSpellChecker_2012.csproj", "{F460D725-7970-4A16-8CD5-EAE719F7BD1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker_2012", "VSSpellChecker\VSSpellChecker_2012.csproj", "{F460D725-7970-4A16-8CD5-EAE719F7BD1F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpellCheckerDefinitions", "SpellCheckerDefinitions\SpellCheckerDefinitions.csproj", "{07122622-A8CA-495D-9A15-D980D69F7EF3}"
 EndProject

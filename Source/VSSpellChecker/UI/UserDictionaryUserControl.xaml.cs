@@ -242,11 +242,10 @@ namespace VisualStudio.SpellChecker.UI
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show(String.Format("Unable to load user dictionary from '{0}'.  Reason: {1}",
-                        dlg.FileName, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
-                        MessageBoxImage.Exclamation);
+                    MessageBox.Show(String.Format(CultureInfo.CurrentCulture, "Unable to load user dictionary " +
+                        "from '{0}'.  Reason: {1}", dlg.FileName, ex.Message), PackageResources.PackageTitle,
+                        MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
-
             }
         }
 
@@ -272,9 +271,9 @@ namespace VisualStudio.SpellChecker.UI
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show(String.Format("Unable to save user dictionary to '{0}'.  Reason: {1}",
-                        dlg.FileName, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
-                        MessageBoxImage.Exclamation);
+                    MessageBox.Show(String.Format(CultureInfo.CurrentCulture, "Unable to save user dictionary " +
+                        "to '{0}'.  Reason: {1}", dlg.FileName, ex.Message), PackageResources.PackageTitle,
+                        MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
             }
         }

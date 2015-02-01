@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionaryService.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/06/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+// Updated : 01/31/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -144,7 +144,7 @@ namespace VisualStudio.SpellChecker
                 if(dictionary.ShouldIgnoreWord(word))
                     return true;
 
-            return (globalDictionary != null) ? globalDictionary.ShouldIgnoreWord(word) : false;
+            return globalDictionary.ShouldIgnoreWord(word);
         }
 
         /// <inheritdoc />

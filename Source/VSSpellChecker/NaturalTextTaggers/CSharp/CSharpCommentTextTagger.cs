@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/13/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+// Updated : 01/30/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -44,7 +44,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
         //=====================================================================
 
         private ITextBuffer _buffer;
-        private ITextSnapshot _lineCacheSnapshot = null;
+        private ITextSnapshot _lineCacheSnapshot;
         private List<State> _lineCache;
         #endregion
 
@@ -102,9 +102,9 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
         {
             _buffer = buffer;
 
-            // Populate our cache initially.
+            // Populate our cache initially
             ITextSnapshot snapshot = _buffer.CurrentSnapshot;
-            int lines = snapshot.LineCount;
+
             _lineCache = new List<State>(snapshot.LineCount);
             _lineCache.AddRange(Enumerable.Repeat(State.Default, snapshot.LineCount));
 
@@ -122,7 +122,8 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
         /// <inheritdoc />
         public void Dispose()
         {
-            _buffer.Changed -= OnTextBufferChanged;
+            if(_buffer != null)
+                _buffer.Changed -= OnTextBufferChanged;
         }
         #endregion
 
@@ -372,7 +373,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
             }
         }
 
-        private void ScanDocComment(LineProgress p)
+        private static void ScanDocComment(LineProgress p)
         {
             p.StartNaturalText();
 
@@ -397,7 +398,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
             p.State = State.Default;
         }
 
-        private void ScanDocCommentXml(LineProgress p)
+        private static void ScanDocCommentXml(LineProgress p)
         {
             while(!p.EndOfLine)
             {
@@ -423,7 +424,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
             p.State = State.Default;
         }
 
-        private void ScanDocCommentXmlString(LineProgress p)
+        private static void ScanDocCommentXmlString(LineProgress p)
         {
             while(!p.EndOfLine)
             {
@@ -584,7 +585,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers.CSharp
             p.State = State.Default;
         }
 
-        private void ScanCharacter(LineProgress p)
+        private static void ScanCharacter(LineProgress p)
         {
             if(!p.EndOfLine && p.Char() == '\\') // escaped character.  Eat it.
             {

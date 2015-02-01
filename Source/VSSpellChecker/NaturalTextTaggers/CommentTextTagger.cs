@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/13/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+// Updated : 01/30/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -208,8 +208,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
 
                     // As long as the attribute value appears on the same line as the attribute name, we can
                     // spell check attribute values if wanted.
-                    if(name == "xml attribute" || name == "xaml attribute" ||
-                      name.StartsWith("vb xml attribute name", StringComparison.Ordinal))
+                    if(name == "xml attribute" || name == "xaml attribute" || name.Contains("attribute name"))
                     {
                         // XAML attribute names may include leading and trailing white space
                         attributeName = classificationSpan.Span.GetText().Trim();
@@ -218,22 +217,23 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
                         if(attributeName.IndexOf(':') != -1)
                             attributeName = attributeName.Substring(attributeName.IndexOf(':') + 1);
                     }
-                    else
-                        if(name == "xml attribute value" || name == "xaml attribute value" ||
-                          name == "vb xml attribute value")
-                        {
-                            // If the name matches one to be spell checked, treat the value as XML text
-                            if(spellCheckedXmlAttributes.Contains(attributeName))
-                                name = "xml text";
 
-                            attributeName = null;
-                        }
-
-                    if((name.Contains("comment") || name.Contains("string") || name.Contains("xml text")) &&
+                    if((name.Contains("comment") || name.Contains("string") || name.Contains("xml text") ||
+                      name.Contains("xaml text") || name.Contains("attribute value")) &&
                       !name.Contains("xml doc tag"))
                     {
+                        // If it's not a wanted attribute name, don't spell check its value
+                        if(attributeName != null && name.Contains("attribute value") &&
+                          !spellCheckedXmlAttributes.Contains(attributeName))
+                        {
+                            attributeName = null;
+                            continue;
+                        }
+
+                        attributeName = null;
+
                         // If it's an unwanted element, don't spell check its XML text
-                        if(elementName != null && name.Contains("xml text") && ignoredXmlElements.Contains(elementName))
+                        if(elementName != null && !name.Contains("attribute value") && ignoredXmlElements.Contains(elementName))
                             continue;
 
                         // Include files in C/C++ are tagged as a string but we don't want to spell check them

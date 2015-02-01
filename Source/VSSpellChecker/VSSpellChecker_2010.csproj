@@ -11,6 +11,8 @@
     <RootNamespace>VisualStudio.SpellChecker</RootNamespace>
     <AssemblyName>VisualStudio.SpellChecker</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\SpellChecker.snk</AssemblyOriginatorKeyFile>
     <SccProjectName>
     </SccProjectName>
     <SccLocalPath>

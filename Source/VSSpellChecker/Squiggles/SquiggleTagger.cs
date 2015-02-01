@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SquiggleTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 06/20/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
+// Updated : 01/30/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the tagger class for spelling squiggles
@@ -97,7 +97,9 @@ namespace VisualStudio.SpellChecker.Squiggles
                 if(buffer != textView.TextBuffer)
                     return null;
 
-                return new SquiggleTagger(buffer, TagAggregatorFactory.CreateTagAggregator<IMisspellingTag>(textView)) as ITagger<T>;
+                return textView.Properties.GetOrCreateSingletonProperty(() =>
+                    new SquiggleTagger(buffer, TagAggregatorFactory.CreateTagAggregator<IMisspellingTag>(textView)))
+                    as ITagger<T>;
             }
             #endregion
         }
@@ -165,14 +167,6 @@ namespace VisualStudio.SpellChecker.Squiggles
 
                 disposed = true;
             }
-        }
-        #endregion
-
-        #region Event Handlers
-        void SpellingChangedHandler(object sender, SpellingEventArgs e)
-        {
-            ITextSnapshot snapshot = _buffer.CurrentSnapshot;
-            RaiseTagsChangedEvent(new SnapshotSpan(snapshot, new Span(0, snapshot.Length)));
         }
         #endregion
 

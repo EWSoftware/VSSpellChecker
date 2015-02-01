@@ -38,12 +38,6 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
     /// </summary>
     internal class PlainTextTagger : ITagger<NaturalTextTag>
     {
-        #region Private Fields
-        //=====================================================================
-
-        private ITextBuffer _buffer;
-        #endregion
-
         #region MEF Imports / Exports
         //=====================================================================
 
@@ -70,7 +64,7 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
                   buffer.ContentType.IsOfType("code") || buffer.ContentType.IsOfType("html"))
                     return null;
 
-                return new PlainTextTagger(buffer) as ITagger<T>;
+                return new PlainTextTagger() as ITagger<T>;
             }
         }
         #endregion
@@ -81,10 +75,8 @@ namespace VisualStudio.SpellChecker.NaturalTextTaggers
         /// <summary>
         /// Constructor for Natural Text Tagger.
         /// </summary>
-        /// <param name="buffer">Relevant buffer.</param>
-        public PlainTextTagger(ITextBuffer buffer)
+        public PlainTextTagger()
         {
-            _buffer = buffer;
         }
         #endregion
 

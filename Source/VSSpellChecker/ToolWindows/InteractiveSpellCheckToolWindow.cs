@@ -37,7 +37,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
     /// usually implemented by the package implementer.  This class derives from the <c>ToolWindowPane</c> class
     /// provided from the MPF in order to use its implementation of the <c>IVsUIElementPane</c> interface.</remarks>
     [Guid("fd92f3d8-cebf-47b9-bb98-674a1618f364")]
-    public class InteractiveSpellCheckToolWindow : ToolWindowPane, IVsSelectionEvents, IVsRunningDocTableEvents
+    public sealed class InteractiveSpellCheckToolWindow : ToolWindowPane, IVsSelectionEvents, IVsRunningDocTableEvents
     {
         #region Private data members
         //=====================================================================
@@ -73,10 +73,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             var ms = Utility.GetServiceFromPackage<IVsMonitorSelection, SVsShellMonitorSelection>(true);
 
-            if(ms != null)
+            if(ms != null && ms.AdviseSelectionEvents(this, out selectionMonitorCookie) == VSConstants.S_OK)
             {
-                ms.AdviseSelectionEvents(this, out selectionMonitorCookie);
-
                 // Get the current window frame and connect to it if it's a document editor
                 object value;
 

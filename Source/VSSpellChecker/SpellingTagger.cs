@@ -214,6 +214,7 @@ namespace VisualStudio.SpellChecker
                 _dictionary.DictionaryUpdated -= DictionaryUpdated;
                 _dictionary.ReplaceAll -= ReplaceAll;
                 _dictionary.IgnoreOnce -= IgnoreOnce;
+                _dictionary = null;
             }
         }
 
@@ -407,6 +408,7 @@ namespace VisualStudio.SpellChecker
                 return new NormalizedSnapshotSpanCollection();
 
             ITextSnapshot snapshot = dirtySpan.Snapshot;
+
             var spans = new NormalizedSnapshotSpanCollection(
                 _naturalTextAggregator.GetTags(dirtySpan)
                                       .SelectMany(tag => tag.Span.GetSpans(snapshot))
@@ -415,9 +417,8 @@ namespace VisualStudio.SpellChecker
                                       .Select(s => s.Value));
 
             // Now, subtract out IUrlTag spans, since we never want to spell check URLs
-            var urlSpans = new NormalizedSnapshotSpanCollection(
-                _urlAggregator.GetTags(spans)
-                              .SelectMany(tagSpan => tagSpan.Span.GetSpans(snapshot)));
+            var urlSpans = new NormalizedSnapshotSpanCollection(_urlAggregator.GetTags(spans).SelectMany(
+                tagSpan => tagSpan.Span.GetSpans(snapshot)));
 
             return NormalizedSnapshotSpanCollection.Difference(spans, urlSpans);
         }
