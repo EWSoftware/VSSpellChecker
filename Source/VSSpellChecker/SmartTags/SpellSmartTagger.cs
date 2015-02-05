@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/20/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 02/01/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to implement the tagger for spelling smart tags
@@ -36,7 +36,8 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
 using VisualStudio.SpellChecker;
-using VisualStudio.SpellChecker.Definitions;
+using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.SmartTags
 {
@@ -49,8 +50,8 @@ namespace VisualStudio.SpellChecker.SmartTags
         //=====================================================================
 
         private ITextBuffer _buffer;
-        private ISpellingDictionary _dictionary;
-        private ITagAggregator<IMisspellingTag> _misspellingAggregator;
+        private SpellingDictionary _dictionary;
+        private ITagAggregator<MisspellingTag> _misspellingAggregator;
         private bool disposed = false;
 
         internal const string SpellingErrorType = "Spelling Error Smart Tag";
@@ -68,10 +69,10 @@ namespace VisualStudio.SpellChecker.SmartTags
         internal class SpellSmartTaggerProvider : IViewTaggerProvider
         {
             [Import]
-            ISpellingDictionaryService DictionaryService = null;
+            private SpellingServiceFactory spellingService = null;
 
             [Import]
-            internal IViewTagAggregatorFactoryService TagAggregatorFactory = null;
+            private IViewTagAggregatorFactoryService tagAggregatorFactory = null;
 
             /// <summary>
             /// Creates a tag provider for the specified view and buffer
@@ -83,19 +84,24 @@ namespace VisualStudio.SpellChecker.SmartTags
             /// or spell checking as you type is disabled.</returns>
             public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
             {
-                // If this view isn't editable, then there isn't a good reason to be showing these
-                if(!textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
+                // If this view isn't editable, then there isn't a good reason to be showing these.  Also,
+                // make sure we are only tagging the top buffer.
+                if(textView == null || buffer == null || spellingService == null ||
+                  textView.TextBuffer != buffer || !textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
                   (!textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument) &&
                   !textView.Roles.Contains(Utility.EmbeddedPeekTextView)))
+                {
+                    return null;
+                }
+
+                // Getting the dictionary determines if spell checking is enabled for this file
+                var dictionary = spellingService.GetDictionary(buffer);
+
+                if(dictionary == null)
                     return null;
 
-                // Make sure we are only tagging the top buffer and only if wanted
-                if(buffer != textView.TextBuffer || !SpellCheckerConfiguration.SpellCheckAsYouType ||
-                  SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
-                    return null;
-
-                return new SpellSmartTagger(buffer, DictionaryService.GetDictionary(buffer),
-                    TagAggregatorFactory.CreateTagAggregator<IMisspellingTag>(textView)) as ITagger<T>;
+                return new SpellSmartTagger(buffer, dictionary,
+                    tagAggregatorFactory.CreateTagAggregator<MisspellingTag>(textView)) as ITagger<T>;
             }
         }
         #endregion
@@ -109,8 +115,8 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <param name="buffer">The text buffer</param>
         /// <param name="dictionary">The spelling dictionary</param>
         /// <param name="misspellingAggregator">The misspelling aggregator</param>
-        public SpellSmartTagger(ITextBuffer buffer, ISpellingDictionary dictionary,
-          ITagAggregator<IMisspellingTag> misspellingAggregator)
+        public SpellSmartTagger(ITextBuffer buffer, SpellingDictionary dictionary,
+          ITagAggregator<MisspellingTag> misspellingAggregator)
         {
             _buffer = buffer;
             _dictionary = dictionary;

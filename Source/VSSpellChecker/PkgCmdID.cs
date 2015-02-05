@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PkgCmdID.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/27/2015
+// Updated : 02/06/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -33,5 +33,23 @@ namespace VisualStudio.SpellChecker
         /// Open the interactive spell checker tool window
         /// </summary>
         public const uint SpellCheckInteractive = 0x0007;
+        /// <summary>
+        /// Add a spell checker configuration file to the solution/project based for the file item selected in
+        /// the Solution Explorer.
+        /// </summary>
+        /// <remarks>Performs the same action but has different wording on the menu item</remarks>
+        public const uint AddSpellCheckerConfigForItem = 0x0009;
+        /// <summary>
+        /// Add a spell checker configuration file to the solution/project based on the selected item (File |
+        /// New menu)
+        /// </summary>
+        /// <remarks>Performs the same action but has different wording on the menu item</remarks>
+        public const uint AddSpellCheckerConfigForSelItem = 0x000A;
+        /// <summary>
+        /// Add a spell checker configuration file to the solution/project based on the selected item (various
+        /// Solution Explorer Add context menus).
+        /// </summary>
+        /// <remarks>Performs the same action but has different wording on the menu item</remarks>
+        public const uint AddSpellCheckerConfigCtx = 0x000B;
     };
 }

@@ -1,16 +1,16 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker_2012", "VSSpellChecker\VSSpellChecker_2012.csproj", "{F460D725-7970-4A16-8CD5-EAE719F7BD1F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpellCheckerDefinitions", "SpellCheckerDefinitions\SpellCheckerDefinitions.csproj", "{07122622-A8CA-495D-9A15-D980D69F7EF3}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DA5D2B74-541A-41CE-AB16-47E6CC33EC62}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker_2012", "VSSpellChecker\VSSpellChecker_2012.csproj", "{F460D725-7970-4A16-8CD5-EAE719F7BD1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellCheckerDefinitions", "VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj", "{07122622-A8CA-495D-9A15-D980D69F7EF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

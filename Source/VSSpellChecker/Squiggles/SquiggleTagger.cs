@@ -31,7 +31,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-using VisualStudio.SpellChecker.Definitions;
+using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.Squiggles
 {
@@ -42,7 +42,7 @@ namespace VisualStudio.SpellChecker.Squiggles
     {
         #region Private Fields
         private ITextBuffer _buffer;
-        private ITagAggregator<IMisspellingTag> _misspellingAggregator;
+        private ITagAggregator<MisspellingTag> _misspellingAggregator;
         private bool disposed = false;
         internal const string SpellingErrorType = "Spelling Error";
         #endregion
@@ -98,7 +98,7 @@ namespace VisualStudio.SpellChecker.Squiggles
                     return null;
 
                 return textView.Properties.GetOrCreateSingletonProperty(() =>
-                    new SquiggleTagger(buffer, TagAggregatorFactory.CreateTagAggregator<IMisspellingTag>(textView)))
+                    new SquiggleTagger(buffer, TagAggregatorFactory.CreateTagAggregator<MisspellingTag>(textView)))
                     as ITagger<T>;
             }
             #endregion
@@ -106,7 +106,7 @@ namespace VisualStudio.SpellChecker.Squiggles
         #endregion
 
         #region Constructors
-        public SquiggleTagger(ITextBuffer buffer, ITagAggregator<IMisspellingTag> misspellingAggregator)
+        public SquiggleTagger(ITextBuffer buffer, ITagAggregator<MisspellingTag> misspellingAggregator)
         {
             _buffer = buffer;
             _misspellingAggregator = misspellingAggregator;

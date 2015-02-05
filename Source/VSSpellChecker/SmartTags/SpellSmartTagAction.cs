@@ -26,8 +26,6 @@ using System.Windows.Input;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Definitions;
-
 namespace VisualStudio.SpellChecker.SmartTags
 {
     /// <summary>
@@ -40,7 +38,7 @@ namespace VisualStudio.SpellChecker.SmartTags
 
         private ITrackingSpan span;
         private string replaceWith;
-        private ISpellingDictionary dictionary;
+        private SpellingDictionary dictionary;
         #endregion
 
         #region Constructor
@@ -52,7 +50,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <param name="span">The word span to replace</param>
         /// <param name="replaceWith">Text to replace misspelled word with</param>
         /// <param name="dictionary">The dictionary used to perform the Replace All action</param>
-        public SpellSmartTagAction(ITrackingSpan span, string replaceWith, ISpellingDictionary dictionary)
+        public SpellSmartTagAction(ITrackingSpan span, string replaceWith, SpellingDictionary dictionary)
         {
             this.span = span;
             this.replaceWith = replaceWith;

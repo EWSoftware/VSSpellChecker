@@ -28,8 +28,6 @@ using System.Diagnostics;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Definitions;
-
 namespace VisualStudio.SpellChecker.SmartTags
 {
     /// <summary>
@@ -41,7 +39,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         //=====================================================================
 
         private ITrackingSpan span;
-        private ISpellingDictionary dictionary;
+        private SpellingDictionary dictionary;
         private DictionaryAction action;
         #endregion
 
@@ -55,7 +53,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <param name="dictionary">The dictionary used to ignore the word or add the word.</param>
         /// <param name="displayText">Text to show in the context menu for this action.</param>
         /// <param name="action">The action to take.</param>
-        public SpellDictionarySmartTagAction(ITrackingSpan span, ISpellingDictionary dictionary,
+        public SpellDictionarySmartTagAction(ITrackingSpan span, SpellingDictionary dictionary,
           string displayText, DictionaryAction action)
         {
             this.span = span;

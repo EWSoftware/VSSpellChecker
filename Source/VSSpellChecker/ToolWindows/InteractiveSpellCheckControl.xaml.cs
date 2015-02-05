@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/06/2014
-// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 02/04/2015
+// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -24,10 +24,12 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using System.Windows.Media;
+
+using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -138,7 +140,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 lblMisspelledWord.ToolTip = null;
                 lbSuggestions.Items.Clear();
 
-                if(!SpellCheckerConfiguration.SpellCheckAsYouType || currentTextView == null)
+                if(currentTextView == null)
                 {
                     lblDisabled.Visibility = Visibility.Visible;
                     return;

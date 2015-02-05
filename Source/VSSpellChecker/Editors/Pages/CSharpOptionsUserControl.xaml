@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.Editors.Pages.CSharpOptionsUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="450">
+	<StackPanel>
+		<StackPanel Orientation="Horizontal">
+			<ComboBox Name="cboIgnoreXmlDocComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+			<Label Margin="3" Content="Ignore XM_L documentation comments (/// ... and /** ... */)" />
+		</StackPanel>
+		<StackPanel Orientation="Horizontal">
+			<ComboBox Name="cboIgnoreDelimitedComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+			<Label Margin="3" Content="Ignore delimited comments (/* ... */)" />
+		</StackPanel>
+		<StackPanel Orientation="Horizontal">
+			<ComboBox Name="cboIgnoreStandardSingleLineComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+			<Label Margin="3" Content="Ignore standard single line comments (// ...)" />
+		</StackPanel>
+		<StackPanel Orientation="Horizontal">
+			<ComboBox Name="cboIgnoreQuadrupleSlashComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+			<Label Margin="3" Content="Ignore quadruple slash single line comments (//// ...)" />
+		</StackPanel>
+		<StackPanel Orientation="Horizontal">
+			<ComboBox Name="cboIgnoreNormalStrings" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+			<Label Margin="3" Content="Ignore normal string literals (&quot;...&quot;)" />
+		</StackPanel>
+		<StackPanel Orientation="Horizontal">
+			<ComboBox Name="cboIgnoreVerbatimStrings" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+			<Label Margin="3" Content="Ignore verbatim string literals (@&quot;...&quot;)" />
+		</StackPanel>
+	</StackPanel>
+</UserControl>

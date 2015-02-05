@@ -25,8 +25,6 @@ using System.Windows.Input;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Definitions;
-
 namespace VisualStudio.SpellChecker.SmartTags
 {
     /// <summary>
