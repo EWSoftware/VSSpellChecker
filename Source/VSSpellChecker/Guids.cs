@@ -39,5 +39,9 @@ namespace VisualStudio.SpellChecker
         /// Command set GUID
         /// </summary>
         public static readonly Guid guidVSSpellCheckerCmdSet = new Guid(guidVSSpellCheckerCmdSetString);
+        /// <summary>
+        /// Spelling configuration file editor factory GUID string
+        /// </summary>
+        public const string guidSpellingConfigurationEditorFactoryString = "837501D0-C07D-47C6-AAB7-9BA4D78D0038";
     };
 }

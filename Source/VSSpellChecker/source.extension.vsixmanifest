@@ -3,7 +3,7 @@
 	<Identifier Id="34482677-bc69-4bd3-8b8b-1ecd347f609d">
 		<Name>Visual Studio Spell Checker</Name>
 		<Author>EWSoftware</Author>
-		<Version>2014.9.7.0</Version>
+		<Version>2015.2.21.0</Version>
 		<Description xml:space="preserve">An editor extension that checks the spelling of comments, strings, and plain text as you type or interactively with a tool window.  Extra options are available to control how elements and attributes in XML and MAML files are spell checked.</Description>
 		<Locale>1033</Locale>
 		<MoreInfoUrl>https://github.com/EWSoftware/VSSpellChecker/wiki</MoreInfoUrl>

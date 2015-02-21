@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/08/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 02/19/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the spelling tagger
@@ -43,7 +43,9 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 
+using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
+using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker
 {
@@ -93,14 +95,16 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        // Word break characters.  Specifically excludes: _ . ' @
-        private const string wordBreakChars = ",/<>?;:\"[]\\{}|-=+~!#$%^&*() \t";
+        // Word break characters (\u2026 = Ellipsis character).  Specifically excludes: _ . ' @
+        private const string wordBreakChars = " \t!\"#$%&()*+,-/:;<=>?[\\]^`{|}~\u2026";
 
         private ITextBuffer _buffer;
         private ITagAggregator<INaturalTextTag> _naturalTextAggregator;
         private ITagAggregator<IUrlTag> _urlAggregator;
         private Dispatcher _dispatcher;
-        private ISpellingDictionary _dictionary;
+
+        private SpellCheckerConfiguration configuration;
+        private SpellingDictionary _dictionary;
 
         private List<SnapshotSpan> _dirtySpans;
 
@@ -136,7 +140,7 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This read-only property returns the spelling dictionary instance
         /// </summary>
-        public ISpellingDictionary Dictionary
+        public SpellingDictionary Dictionary
         {
             get { return _dictionary; }
         }
@@ -152,16 +156,18 @@ namespace VisualStudio.SpellChecker
         /// <param name="view">The text view</param>
         /// <param name="naturalTextAggregator">The tag aggregator</param>
         /// <param name="urlAggregator">The URL aggregator</param>
-        /// <param name="dictionary">The spelling dictionary</param>
+        /// <param name="configuration">The spell checker configuration to use</param>
+        /// <param name="dictionary">The spelling dictionary to use</param>
         public SpellingTagger(ITextBuffer buffer, ITextView view,
           ITagAggregator<INaturalTextTag> naturalTextAggregator, ITagAggregator<IUrlTag> urlAggregator,
-          ISpellingDictionary dictionary)
+          SpellCheckerConfiguration configuration, SpellingDictionary dictionary)
         {
             _isClosed = false;
             _buffer = buffer;
             _naturalTextAggregator = naturalTextAggregator;
             _urlAggregator = urlAggregator;
             _dispatcher = Dispatcher.CurrentDispatcher;
+            this.configuration = configuration;
             _dictionary = dictionary;
 
             _dirtySpans = new List<SnapshotSpan>();
@@ -299,19 +305,22 @@ namespace VisualStudio.SpellChecker
                         string currentWord = misspelling.Span.GetText(snapshot);
                         string replacementWord = e.ReplacementWord;
 
+                        // TODO: language should be passed in event arguments to support multi-language spell checking
+                        var language = configuration.DefaultLanguage;
+
                         // Match the case of the first letter if necessary
                         if(replacementWord.Length > 1 &&
                           (Char.IsUpper(replacementWord[0]) != Char.IsUpper(replacementWord[1]) ||
                           (Char.IsLower(replacementWord[0]) && Char.IsLower(replacementWord[1]))))
                             if(Char.IsUpper(currentWord[0]) && !Char.IsUpper(replacementWord[0]))
                             {
-                                replacementWord = replacementWord.Substring(0, 1).ToUpper(
-                                    SpellCheckerConfiguration.DefaultLanguage) + replacementWord.Substring(1);
+                                replacementWord = replacementWord.Substring(0, 1).ToUpper(language) +
+                                    replacementWord.Substring(1);
                             }
                             else
                                 if(Char.IsLower(currentWord[0]) && !Char.IsLower(replacementWord[0]))
-                                    replacementWord = replacementWord.Substring(0, 1).ToLower(
-                                        SpellCheckerConfiguration.DefaultLanguage) + replacementWord.Substring(1);
+                                    replacementWord = replacementWord.Substring(0, 1).ToLower(language) +
+                                        replacementWord.Substring(1);
 
                         edit.Replace(span, replacementWord);
 
@@ -631,7 +640,7 @@ namespace VisualStudio.SpellChecker
                 text = span.GetText();
 
                 // Note the location of all XML elements if needed
-                if(SpellCheckerConfiguration.IgnoreXmlElementsInText)
+                if(configuration.IgnoreXmlElementsInText)
                     xmlTags = reXml.Matches(text).OfType<Match>().ToList();
 
                 lastWord = new Microsoft.VisualStudio.Text.Span();
@@ -730,7 +739,7 @@ namespace VisualStudio.SpellChecker
         ///     <description>The word is camel cased.</description>
         /// </list>
         /// </returns>
-        internal static bool IsProbablyARealWord(string word)
+        internal bool IsProbablyARealWord(string word)
         {
             if(String.IsNullOrWhiteSpace(word))
                 return false;
@@ -742,7 +751,7 @@ namespace VisualStudio.SpellChecker
                 return false;
 
             // Check for underscores and digits
-            if(word.Any(c => c == '_' || (Char.IsDigit(c) && SpellCheckerConfiguration.IgnoreWordsWithDigits)))
+            if(word.Any(c => c == '_' || (Char.IsDigit(c) && configuration.IgnoreWordsWithDigits)))
                 return false;
 
             // Ignore if all digits (this only happens if the Ignore Words With Digits option is false)
@@ -751,7 +760,7 @@ namespace VisualStudio.SpellChecker
 
             // Ignore if all uppercase, accounting for apostrophes and digits
             if(word.All(c => Char.IsUpper(c) || !Char.IsLetter(c)))
-                return !SpellCheckerConfiguration.IgnoreWordsInAllUppercase;
+                return !configuration.IgnoreWordsInAllUppercase;
 
             // Ignore if camel cased
             if(Char.IsLetter(word[0]) && word.Skip(1).Any(c => Char.IsUpper(c)))
@@ -759,14 +768,12 @@ namespace VisualStudio.SpellChecker
 
             // Ignore by character class.  A rather simplistic way to ignore some foreign language words in files
             // with mixed English/non-English text.
-            if(SpellCheckerConfiguration.IgnoreCharacterClass != IgnoredCharacterClass.None)
+            if(configuration.IgnoreCharacterClass != IgnoredCharacterClass.None)
             {
-                if(SpellCheckerConfiguration.IgnoreCharacterClass == IgnoredCharacterClass.NonAscii &&
-                  word.Any(c => c > '\x07F'))
+                if(configuration.IgnoreCharacterClass == IgnoredCharacterClass.NonAscii && word.Any(c => c > '\x07F'))
                     return false;
 
-                if(SpellCheckerConfiguration.IgnoreCharacterClass == IgnoredCharacterClass.NonLatin &&
-                  word.Any(c => c > '\x0FF'))
+                if(configuration.IgnoreCharacterClass == IgnoredCharacterClass.NonLatin && word.Any(c => c > '\x0FF'))
                     return false;
             }
 
@@ -778,7 +785,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="text">The text to break into words</param>
         /// <returns>An enumerable list of word spans</returns>
-        internal static IEnumerable<Microsoft.VisualStudio.Text.Span> GetWordsInText(string text)
+        internal IEnumerable<Microsoft.VisualStudio.Text.Span> GetWordsInText(string text)
         {
             if(String.IsNullOrWhiteSpace(text))
                 yield break;
@@ -817,8 +824,7 @@ namespace VisualStudio.SpellChecker
                                 while(++wordEnd < text.Length && !IsWordBreakCharacter(text[wordEnd]))
                                     ;
 
-                                if(SpellCheckerConfiguration.ShouldIgnoreWord(
-                                  text.Substring(end - 1, --wordEnd - i + 1)))
+                                if(configuration.ShouldIgnoreWord(text.Substring(end - 1, --wordEnd - i + 1)))
                                 {
                                     i = wordEnd;
                                     continue;
@@ -909,7 +915,7 @@ namespace VisualStudio.SpellChecker
 
                 // Skip .NET format string specifiers if so indicated.  This ignores stuff like date formats
                 // such as "{0:MM/dd/yyyy hh:nn tt}".
-                if(text[i] == '{' && SpellCheckerConfiguration.IgnoreFormatSpecifiers)
+                if(text[i] == '{' && configuration.IgnoreFormatSpecifiers)
                 {
                     end = i + 1;
 
@@ -938,7 +944,7 @@ namespace VisualStudio.SpellChecker
                 // Skip C-style format string specifiers if so indicated.  These can cause spelling errors in
                 // cases where there are multiple characters such as "%ld".  My C/C++ skills are very rusty but
                 // this should cover it.
-                if(text[i] == '%' && SpellCheckerConfiguration.IgnoreFormatSpecifiers)
+                if(text[i] == '%' && configuration.IgnoreFormatSpecifiers)
                 {
                     end = i + 1;
 
@@ -1067,11 +1073,11 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="c">The character to check</param>
         /// <returns>True if the character is a word break, false if not</returns>
-        private static bool IsWordBreakCharacter(char c)
+        private bool IsWordBreakCharacter(char c)
         {
             return wordBreakChars.Contains(c) || Char.IsWhiteSpace(c) ||
-                (c == '_' && SpellCheckerConfiguration.TreatUnderscoreAsSeparator) ||
-                ((c == '.' || c == '@') && !SpellCheckerConfiguration.IgnoreFilenamesAndEMailAddresses);
+                (c == '_' && configuration.TreatUnderscoreAsSeparator) ||
+                ((c == '.' || c == '@') && !configuration.IgnoreFilenamesAndEMailAddresses);
         }
 
         /// <summary>

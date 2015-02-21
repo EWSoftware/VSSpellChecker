@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : AssemblyInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/23/2014
-// Note    : Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 02/16/2015
+// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // Visual Studio spell checker definition attributes.
@@ -25,4 +25,5 @@ using System.Reflection;
 [assembly: AssemblyTitle("Visual Studio Spell Checker Package")]
 [assembly: AssemblyDescription("This assembly contains a package that implement the Visual Studio spell checker")]
 
+// This assembly is not CLS compliant
 [assembly: CLSCompliant(false)]

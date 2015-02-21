@@ -11,13 +11,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DA5D2B
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker_2013", "VSSpellChecker\VSSpellChecker_2013.csproj", "{F460D725-7970-4A16-8CD5-EAE719F7BD1F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpellCheckerDefinitions", "SpellCheckerDefinitions\SpellCheckerDefinitions.csproj", "{07122622-A8CA-495D-9A15-D980D69F7EF3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{07122622-A8CA-495D-9A15-D980D69F7EF3} = {07122622-A8CA-495D-9A15-D980D69F7EF3}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FBC5F2AE-03F3-4BF4-8A39-8396C31FD06E}"
 	ProjectSection(SolutionItems) = preProject
 		SpellChecker.ruleset = SpellChecker.ruleset
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellCheckerDefinitions", "VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj", "{07122622-A8CA-495D-9A15-D980D69F7EF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

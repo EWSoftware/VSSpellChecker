@@ -42,27 +42,54 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\SpellCheckerDefinitions\Properties\AssemblyInfoShared.cs">
+    <Compile Include="..\VSSpellCheckerDefinitions\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="Configuration\ConfigurationType.cs" />
+    <Compile Include="Configuration\CSharpOptions.cs" />
+    <Compile Include="Configuration\SpellCheckerDictionary.cs" />
+    <Compile Include="Configuration\PropertyNames.cs" />
+    <Compile Include="Configuration\SpellingConfigurationFile.cs" />
+    <Compile Include="Editors\CommandTargetArguments.cs" />
+    <Compile Include="Editors\ICommonCommandSupport.cs" />
+    <Compile Include="Editors\Pages\ExcludedExtensionsUserControl.xaml.cs">
+      <DependentUpon>ExcludedExtensionsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\Pages\FileInfoUserControl.xaml.cs">
+      <DependentUpon>FileInfoUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\PropertyState.cs" />
+    <Compile Include="Editors\SimpleEditorFactory.cs" />
+    <Compile Include="Editors\SimpleEditorPane.cs" />
+    <Compile Include="Editors\SpellingConfigurationEditorControl.xaml.cs">
+      <DependentUpon>SpellingConfigurationEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\SpellingConfigurationEditorFactory.cs" />
+    <Compile Include="Editors\SpellingConfigurationEditorPane.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Guids.cs">
+    </Compile>
+    <Compile Include="PkgCmdID.cs">
+    </Compile>
     <Compile Include="GlobalDictionary.cs" />
-    <Compile Include="Guids.cs" />
     <Compile Include="IgnoredCharacterClass.cs" />
-    <Compile Include="PkgCmdID.cs" />
+    <Compile Include="Configuration\SpellCheckerConfiguration.cs" />
     <Compile Include="SmartTags\DictionaryAction.cs" />
     <Compile Include="SmartTags\DoubledWordSmartTagAction.cs" />
+    <Compile Include="SpellingEventArgs.cs" />
+    <Compile Include="SpellingServiceProxy.cs" />
     <Compile Include="ToolWindows\InteractiveSpellCheckControl.xaml.cs">
       <DependentUpon>InteractiveSpellCheckControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ToolWindows\InteractiveSpellCheckToolWindow.cs" />
-    <Compile Include="MisspellingTag.cs" />
-    <Compile Include="NaturalTextTaggers\CommentTextTagger.cs" />
-    <Compile Include="NaturalTextTaggers\CSharp\CSharpCommentTextTagger.cs" />
-    <Compile Include="NaturalTextTaggers\CSharp\LineProgress.cs" />
-    <Compile Include="NaturalTextTaggers\CSharp\State.cs" />
-    <Compile Include="NaturalTextTaggers\HtmlTextTagger.cs" />
-    <Compile Include="NaturalTextTaggers\NaturalTextTag.cs" />
-    <Compile Include="NaturalTextTaggers\PlainTextTagger.cs" />
+    <Compile Include="Tagging\MisspellingTag.cs" />
+    <Compile Include="Tagging\CommentTextTagger.cs" />
+    <Compile Include="Tagging\CSharp\CSharpCommentTextTagger.cs" />
+    <Compile Include="Tagging\CSharp\LineProgress.cs" />
+    <Compile Include="Tagging\CSharp\State.cs" />
+    <Compile Include="Tagging\HtmlTextTagger.cs" />
+    <Compile Include="Tagging\NaturalTextTag.cs" />
+    <Compile Include="Tagging\PlainTextTagger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -76,30 +103,26 @@
     <Compile Include="SmartTags\SpellSmartTag.cs" />
     <Compile Include="SmartTags\SpellSmartTagAction.cs" />
     <Compile Include="SmartTags\SpellSmartTagger.cs" />
-    <Compile Include="SpellCheckerConfiguration.cs" />
-    <Compile Include="SpellingDictionaryService.cs" />
-    <Compile Include="SpellingDictionaryServiceFactory.cs" />
+    <Compile Include="SpellingDictionary.cs" />
+    <Compile Include="SpellingServiceFactory.cs" />
     <Compile Include="SpellingTagger.cs" />
     <Compile Include="SpellingTaggerProvider.cs" />
     <Compile Include="Squiggles\SpellSquiggleTag.cs" />
     <Compile Include="Squiggles\SquiggleTagger.cs" />
-    <Compile Include="UI\CSharpOptionsUserControl.xaml.cs">
+    <Compile Include="Editors\Pages\CSharpOptionsUserControl.xaml.cs">
       <DependentUpon>CSharpOptionsUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\GeneralSettingsUserControl.xaml.cs">
+    <Compile Include="Editors\Pages\GeneralSettingsUserControl.xaml.cs">
       <DependentUpon>GeneralSettingsUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\IgnoredWordsUserControl.xaml.cs">
+    <Compile Include="Editors\Pages\IgnoredWordsUserControl.xaml.cs">
       <DependentUpon>IgnoredWordsUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\ISpellCheckerConfiguration.cs" />
-    <Compile Include="UI\SpellCheckerConfigDlg.xaml.cs">
-      <DependentUpon>SpellCheckerConfigDlg.xaml</DependentUpon>
+    <Compile Include="Editors\ISpellCheckerConfiguration.cs" />
+    <Compile Include="Editors\Pages\DictionarySettingsUserControl.xaml.cs">
+      <DependentUpon>DictionarySettingsUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\UserDictionaryUserControl.xaml.cs">
-      <DependentUpon>UserDictionaryUserControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="UI\XmlFilesUserControl.xaml.cs">
+    <Compile Include="Editors\Pages\XmlFilesUserControl.xaml.cs">
       <DependentUpon>XmlFilesUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utility.cs" />
@@ -138,7 +161,7 @@
       <ResourceName>Menus.ctmenu</ResourceName>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>VSSpellChecker.tt</DependentUpon>
+      <SubType>Designer</SubType>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
@@ -259,42 +282,49 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\SpellCheckerDefinitions\SpellCheckerDefinitions.csproj">
-      <Project>{07122622-A8CA-495D-9A15-D980D69F7EF3}</Project>
-      <Name>SpellCheckerDefinitions</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <Page Include="Editors\Pages\ExcludedExtensionsUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Editors\Pages\FileInfoUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\SpellingConfigurationEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ToolWindows\InteractiveSpellCheckControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\CSharpOptionsUserControl.xaml">
+    <Page Include="Editors\Pages\CSharpOptionsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\GeneralSettingsUserControl.xaml">
+    <Page Include="Editors\Pages\GeneralSettingsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\IgnoredWordsUserControl.xaml">
+    <Page Include="Editors\Pages\IgnoredWordsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\SpellCheckerConfigDlg.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="UI\UserDictionaryUserControl.xaml">
+    <Page Include="Editors\Pages\DictionarySettingsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\XmlFilesUserControl.xaml">
+    <Page Include="Editors\Pages\XmlFilesUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj">
+      <Project>{07122622-A8CA-495D-9A15-D980D69F7EF3}</Project>
+      <Name>VSSpellCheckerDefinitions</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>
@@ -312,7 +342,7 @@ Copy "$(TargetDir)$(TargetName).vsix" "$(SolutionDir)..\Deployment\"
 :Exit
 </PostBuildEvent>
   </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

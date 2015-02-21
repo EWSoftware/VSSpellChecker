@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/31/2015
+// Updated : 02/16/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -28,16 +28,14 @@ using System.Threading;
 
 using NHunspell;
 
-using Microsoft.VisualStudio.Text;
-
-using VisualStudio.SpellChecker.Definitions;
+using VisualStudio.SpellChecker.Configuration;
 
 namespace VisualStudio.SpellChecker
 {
     /// <summary>
     /// This class implements the global dictionary
     /// </summary>
-    internal sealed class GlobalDictionary : ISpellingDictionary
+    internal sealed class GlobalDictionary : IDisposable
     {
         #region Private data members
         //=====================================================================
@@ -45,11 +43,12 @@ namespace VisualStudio.SpellChecker
         private static Dictionary<string, GlobalDictionary> globalDictionaries;
         private static SpellEngine spellEngine;
 
+        private IServiceProvider serviceProvider;
         private List<WeakReference> registeredServices;
         private HashSet<string> dictionaryWords, ignoredWords;
         private CultureInfo culture;
         private SpellFactory spellFactory;
-        private string dictionaryWordsFile;
+        private string dictionaryFile, dictionaryWordsFile;
 
         #endregion
 
@@ -61,16 +60,29 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="culture">The language to use for the dictionary</param>
         /// <param name="spellFactory">The spell factory to use when checking words</param>
-        private GlobalDictionary(CultureInfo culture, SpellFactory spellFactory)
+        /// <param name="dictionaryFile">The dictionary file</param>
+        /// <param name="userWordsFile">The user dictionary words file</param>
+        /// <param name="serviceProvider">A service provider for interacting with the solution/project</param>
+        private GlobalDictionary(CultureInfo culture, SpellFactory spellFactory, string dictionaryFile,
+          string userWordsFile, IServiceProvider serviceProvider)
         {
             this.culture = culture;
             this.spellFactory = spellFactory;
+            this.dictionaryFile = dictionaryFile;
+            this.serviceProvider = serviceProvider;
+
+            if(String.IsNullOrWhiteSpace(dictionaryFile))
+                throw new ArgumentException("Dictionary filename cannot be null or empty", "dictionaryFile");
 
             registeredServices = new List<WeakReference>();
 
             dictionaryWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-            dictionaryWordsFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                culture.Name + "_User.dic");
+
+            if(String.IsNullOrWhiteSpace(userWordsFile))
+                dictionaryWordsFile = Path.Combine(SpellingConfigurationFile.GlobalConfigurationFilePath,
+                    culture.Name + "_User.dic");
+            else
+                dictionaryWordsFile = userWordsFile;
 
             ignoredWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -78,15 +90,35 @@ namespace VisualStudio.SpellChecker
         }
         #endregion
 
-        #region ISpellingDictionary Members
+        #region IDisposable members
         //=====================================================================
 
         /// <inheritdoc />
+        public void Dispose()
+        {
+            if(spellFactory != null)
+            {
+                spellFactory.Dispose();
+                spellFactory = null;
+
+                registeredServices.Clear();
+            }
+        }
+        #endregion
+
+        #region Dictionary service interaction methods
+        //=====================================================================
+
+        /// <summary>
+        /// This is used to spell check a word
+        /// </summary>
+        /// <param name="word">The word to spell check</param>
+        /// <returns>True if spelled correctly, false if not</returns>
         public bool IsSpelledCorrectly(string word)
         {
             try
             {
-                if(spellFactory != null && !String.IsNullOrWhiteSpace(word))
+                if(spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
                     return spellFactory.Spell(word);
             }
             catch(Exception ex)
@@ -98,14 +130,18 @@ namespace VisualStudio.SpellChecker
             return true;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// This is used to suggest corrections for a misspelled word
+        /// </summary>
+        /// <param name="word">The misspelled word for which to get suggestions</param>
+        /// <returns>An enumerable list of zero or more suggested correct spellings</returns>
         public IEnumerable<string> SuggestCorrections(string word)
         {
             List<string> suggestions = null;
 
             try
             {
-                if(spellFactory != null && !String.IsNullOrWhiteSpace(word))
+                if(spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
                     suggestions = spellFactory.Suggest(word);
             }
             catch(Exception ex)
@@ -117,7 +153,12 @@ namespace VisualStudio.SpellChecker
             return (suggestions ?? new List<string>());
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Add the given word to the dictionary so that it will no longer show up as an incorrect spelling.
+        /// </summary>
+        /// <param name="word">The word to add to the dictionary.</param>
+        /// <returns><c>true</c> if the word was successfully added to the dictionary, even if it was already in
+        /// the dictionary.</returns>
         public bool AddWordToDictionary(string word)
         {
             if(String.IsNullOrWhiteSpace(word))
@@ -125,6 +166,9 @@ namespace VisualStudio.SpellChecker
 
             if(this.ShouldIgnoreWord(word))
                 return true;
+
+            if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile, serviceProvider))
+                return false;
 
             using(StreamWriter writer = new StreamWriter(dictionaryWordsFile, true))
             {
@@ -142,13 +186,11 @@ namespace VisualStudio.SpellChecker
             return true;
         }
 
-        /// <inheritdoc />
-        /// <remarks>The global dictionary does not support ignoring words once</remarks>
-        public void IgnoreWordOnce(ITrackingSpan span)
-        {
-        }
-
-        /// <inheritdoc />
+        /// <summary>
+        /// Ignore all occurrences of the given word, but don't add it to the dictionary.
+        /// </summary>
+        /// <param name="word">The word to be ignored.</param>
+        /// <returns><c>true</c> if the word was successfully marked as ignored.</returns>
         public bool IgnoreWord(string word)
         {
             if(String.IsNullOrWhiteSpace(word) || this.ShouldIgnoreWord(word))
@@ -164,62 +206,47 @@ namespace VisualStudio.SpellChecker
             return true;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Check the ignored words dictionary for the given word.
+        /// </summary>
+        /// <param name="word">The word for which to check</param>
+        /// <returns>True if the word should be ignored, false if not</returns>
         public bool ShouldIgnoreWord(string word)
         {
             lock(ignoredWords)
             {
-                if(ignoredWords.Contains(word))
-                    return true;
+                return ignoredWords.Contains(word);
             }
-
-            return SpellCheckerConfiguration.ShouldIgnoreWord(word);
-        }
-
-#pragma warning disable 0067
-
-        /// <inheritdoc />
-        /// <remarks>This event is not used by the global dictionary</remarks>
-        public event EventHandler<SpellingEventArgs> DictionaryUpdated;
-
-        /// <inheritdoc />
-        /// <remarks>This event is not used by the global dictionary</remarks>
-        public event EventHandler<SpellingEventArgs> IgnoreOnce;
-
-        /// <inheritdoc />
-        /// <remarks>This event is not used by the global dictionary</remarks>
-        public event EventHandler<SpellingEventArgs> ReplaceAll;
-
-#pragma warning restore 0067
-
-        /// <inheritdoc />
-        /// <remarks>This method is not used by the global dictionary</remarks>
-        public void ReplaceAllOccurrences(string word, string replacement)
-        {
         }
         #endregion
 
-        #region Methods
+        #region General methods
         //=====================================================================
 
         /// <summary>
         /// Create a global dictionary for the specified culture
         /// </summary>
-        /// <param name="culture">The language to use for the dictionary</param>
-        /// <returns>The spell factory to use or null if one could not be created</returns>
-        public static GlobalDictionary CreateGlobalDictionary(CultureInfo culture)
+        /// <param name="culture">The language to use for the dictionary.</param>
+        /// <param name="serviceProvider">A service provider used to interact with the solution/project</param>
+        /// <param name="additionalDictionaryFolders">An enumerable list of additional folders to search for
+        /// other dictionaries.</param>
+        /// <returns>The global dictionary to use or null if one could not be created.</returns>
+        public static GlobalDictionary CreateGlobalDictionary(CultureInfo culture, IServiceProvider serviceProvider,
+          IEnumerable<string> additionalDictionaryFolders)
         {
             GlobalDictionary globalDictionary = null;
-            string affixFile, dictionaryFile;
+            string affixFile, dictionaryFile, userWordsFile;
 
             try
             {
+                // The configuration editor should disallow creating a configuration without at least one
+                // language but if someone edits the file manually, they could remove them all.  If that
+                // happens, just use the English-US dictionary.
+                if(culture == null)
+                    culture = new CultureInfo("en-US");
+
                 if(globalDictionaries == null)
                     globalDictionaries = new Dictionary<string, GlobalDictionary>();
-
-                // If no culture is specified, use the default culture
-                if(culture == null)
-                    culture = SpellCheckerConfiguration.DefaultLanguage;
 
                 // If not already loaded, create the dictionary and the thread-safe spell factory instance for
                 // the given culture.
@@ -234,28 +261,29 @@ namespace VisualStudio.SpellChecker
                         spellEngine = new SpellEngine();
                     }
 
-                    // Look in the configuration folder first for user-supplied dictionaries
-                    affixFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                        culture.Name + ".aff");
-                    dictionaryFile = Path.ChangeExtension(affixFile, ".dic");
+                    // Look for all available dictionaries and get the one for the requested culture
+                    var dictionaries = SpellCheckerDictionary.AvailableDictionaries(additionalDictionaryFolders);
+                    SpellCheckerDictionary userDictionary;
 
-                    // Dictionary file names may use a dash or an underscore as the separator.  Try both ways
-                    // in case they aren't named consistently which does happen.
-                    if(!File.Exists(affixFile))
-                        affixFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                            culture.Name.Replace('-', '_') + ".aff");
-
-                    if(!File.Exists(dictionaryFile))
-                        dictionaryFile = Path.Combine(SpellCheckerConfiguration.ConfigurationFilePath,
-                            culture.Name.Replace('-', '_') + ".dic");
+                    if(dictionaries.TryGetValue(culture.Name, out userDictionary))
+                    {
+                        affixFile = userDictionary.AffixFilePath;
+                        dictionaryFile = userDictionary.DictionaryFilePath;
+                        userWordsFile = userDictionary.UserDictionaryFilePath;
+                    }
+                    else
+                        affixFile = dictionaryFile = userWordsFile = null;
 
                     // If not found, default to the English dictionary supplied with the package.  This can at
                     // least clue us in that it didn't find the language-specific dictionary when the suggestions
                     // are in English.
-                    if(!File.Exists(affixFile) || !File.Exists(dictionaryFile))
+                    if(affixFile == null || dictionaryFile == null || !File.Exists(affixFile) ||
+                      !File.Exists(dictionaryFile))
                     {
                         affixFile = Path.Combine(dllPath, "en_US.aff");
                         dictionaryFile = Path.ChangeExtension(affixFile, ".dic");
+                        userWordsFile = Path.Combine(SpellingConfigurationFile.GlobalConfigurationFilePath,
+                            "en-US_User.dic");
                     }
 
                     spellEngine.AddLanguage(new LanguageConfig
@@ -265,14 +293,15 @@ namespace VisualStudio.SpellChecker
                         HunspellDictFile = dictionaryFile
                     });
 
-                    globalDictionaries.Add(culture.Name, new GlobalDictionary(culture, spellEngine[culture.Name]));
+                    globalDictionaries.Add(culture.Name, new GlobalDictionary(culture,
+                        spellEngine[culture.Name], dictionaryFile, userWordsFile, serviceProvider));
                 }
 
                 globalDictionary = globalDictionaries[culture.Name];
             }
             catch(Exception ex)
             {
-                // Ignore exceptions.  Not much we can do, we'll just not spell check anything.
+                // Ignore exceptions.  Not much we can do, we just won't spell check anything.
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 
@@ -280,11 +309,34 @@ namespace VisualStudio.SpellChecker
         }
 
         /// <summary>
+        /// This is called to clear the dictionary cache and dispose of the spelling engine
+        /// </summary>
+        /// <remarks>This is done whenever a change in solution is detected.  This allows for solution and
+        /// project-specific dictionaries to override global dictionaries that may have been in use in a previous
+        /// solution.</remarks>
+        public static void ClearDictionaryCache()
+        {
+            if(globalDictionaries != null)
+            {
+                foreach(var gd in globalDictionaries.Values)
+                    gd.Dispose();
+
+                globalDictionaries.Clear();
+            }
+
+            if(spellEngine != null)
+            {
+                spellEngine.Dispose();
+                spellEngine = null;
+            }
+        }
+
+        /// <summary>
         /// This is used to register a spelling dictionary service with the global dictionary so that it is
         /// notified of changes to the global dictionary.
         /// </summary>
         /// <param name="service">The dictionary service to register</param>
-        public void RegisterSpellingDictionaryService(SpellingDictionaryService service)
+        public void RegisterSpellingDictionaryService(SpellingDictionary service)
         {
             // Clear out ones that have been disposed of
             foreach(var svc in registeredServices.Where(s => !s.IsAlive).ToArray())
@@ -310,7 +362,7 @@ namespace VisualStudio.SpellChecker
 
             foreach(var service in registeredServices)
             {
-                var target = service.Target as SpellingDictionaryService;
+                var target = service.Target as SpellingDictionary;
 
                 if(target != null)
                     target.GlobalDictionaryUpdated(word);

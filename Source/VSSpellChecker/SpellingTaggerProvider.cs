@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTaggerProvider.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/06/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 02/19/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to create the spelling tagger
@@ -27,7 +27,9 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
+using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
+using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker
 {
@@ -40,13 +42,11 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        // The Import attribute causes the composition container to assign a value to this when an instance is
-        // created.  It is not assigned to within this class.
         [Import]
         private IViewTagAggregatorFactoryService aggregatorFactory = null;
 
         [Import]
-        private ISpellingDictionaryService spellingDictionaryFactory = null;
+        private SpellingServiceFactory spellingService = null;
         #endregion
 
         #region IViewTaggerProvider Members
@@ -62,27 +62,33 @@ namespace VisualStudio.SpellChecker
         /// one in the view or spell checking as you type is disabled.</returns>
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
-            SpellingTagger spellingTagger;
+            SpellingTagger spellingTagger = null;
 
-            // Make sure we only tagging top buffer and only if wanted
-            if(textView.TextBuffer != buffer || !SpellCheckerConfiguration.SpellCheckAsYouType ||
-              SpellCheckerConfiguration.IsExcludedByExtension(buffer.GetFilenameExtension()))
+            // Make sure we are only tagging the top buffer
+            if(textView == null || buffer == null || spellingService == null || textView.TextBuffer != buffer)
                 return null;
 
-            if(textView.Properties.TryGetProperty(typeof(SpellingTagger), out spellingTagger))
-                return spellingTagger as ITagger<T>;
+            if(!textView.Properties.TryGetProperty(typeof(SpellingTagger), out spellingTagger))
+            {
+                // Getting the configuration determines if spell checking is enabled for this file
+                var config = spellingService.GetConfiguration(buffer);
 
-            var dictionary = spellingDictionaryFactory.GetDictionary(buffer);
+                if(config != null)
+                {
+                    var dictionary = spellingService.GetDictionary(buffer);
 
-            if(dictionary == null)
-                return null;
+                    if(dictionary != null)
+                    {
+                        var naturalTextAggregator = aggregatorFactory.CreateTagAggregator<INaturalTextTag>(textView,
+                            TagAggregatorOptions.MapByContentType);
+                        var urlAggregator = aggregatorFactory.CreateTagAggregator<IUrlTag>(textView);
 
-            var naturalTextAggregator = aggregatorFactory.CreateTagAggregator<INaturalTextTag>(textView,
-                TagAggregatorOptions.MapByContentType);
-            var urlAggregator = aggregatorFactory.CreateTagAggregator<IUrlTag>(textView);
-
-            spellingTagger = new SpellingTagger(buffer, textView, naturalTextAggregator, urlAggregator, dictionary);
-            textView.Properties[typeof(SpellingTagger)] = spellingTagger;
+                        spellingTagger = new SpellingTagger(buffer, textView, naturalTextAggregator, urlAggregator,
+                            config, dictionary);
+                        textView.Properties[typeof(SpellingTagger)] = spellingTagger;
+                    }
+                }
+            }
 
             return spellingTagger as ITagger<T>;
         }

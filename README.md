@@ -1,5 +1,9 @@
 Welcome to the **Visual Studio Spell Checker** project.
 
+* [Get the current release](https://github.com/EWSoftware/VSSpellChecker/releases)
+* [Ask a question or open an issue](https://github.com/EWSoftware/VSSpellChecker/issues)
+* [Getting Started](https://github.com/EWSoftware/VSSpellChecker/wiki)
+
 This project is a Visual Studio editor extension that checks the spelling of comments, strings, and plain text
 as you type or interactively with a tool window.  It is based largely on the spell checker extension originally
 created by Noah Richards, Roman Golovin, and Michael Lehenbauer.  This version has been extended as follows:
@@ -28,6 +32,9 @@ can be configured.  Configurable options include:
   * Exclude files from spell checking by filename extension.
   * Specify a list of XML elements in which the content should be ignored when spell checking XML files.
   * Specify a list of XML attributes for which the value should be spell checked when spell checking XML files.
+  * Specify additional folders to search for dictionaries.
+  * Determine localized resource file language from the filename
+  * Configurations can be specified at any level (solution, project, folder, or file).  Options can be inherited or overridden.
 
 See the [Project Wiki](https://github.com/EWSoftware/VSSpellChecker/wiki) for information on requirements for
 building the code, contributing to the project, and using and configuring the spell checker extension in Visual
