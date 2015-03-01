@@ -51,10 +51,10 @@
 				<TextBlock TextWrapping="Wrap" Grid.Row="0" Margin="3">This option provides a simplistic way of ignoring
 non-English words containing specific classes of characters.  It works best when spell checking English text in
 files containing Cyrillic or Asian text.</TextBlock>
-				<StackPanel Grid.Row="1" Margin="30, 3, 3, 3">
-					<RadioButton Content="Inhe_rit ignored character class setting" Name="rbInheritIgnoredCharClass"
+				<StackPanel Grid.Row="1" Margin="20, 3, 3, 3">
+					<RadioButton Content="Inherit ignored character class setting" Name="rbInheritIgnoredCharClass"
 						Checked="Property_Changed" />
-					<RadioButton Content="_Include all words" Name="rbIncludeAll" Checked="Property_Changed" />
+					<RadioButton Content="Include all words" Name="rbIncludeAll" Checked="Property_Changed" />
 					<RadioButton Content="Ignore words containing non-Latin characters" Name="rbIgnoreNonLatin"
 						Checked="Property_Changed" />
 					<RadioButton Content="Ignore words containing non-ASCII characters" Name="rbIgnoreNonAscii"

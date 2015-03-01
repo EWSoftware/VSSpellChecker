@@ -2,11 +2,11 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/18/2015
+// Updated : 02/26/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
-// This file contains the class containing the configuration property name constants and some helper methods
+// This file contains the class containing the configuration property name constants
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -21,7 +21,7 @@
 namespace VisualStudio.SpellChecker.Configuration
 {
     /// <summary>
-    /// This class contains the configuration property name constants and some helper methods
+    /// This class contains the configuration property name constants
     /// </summary>
     internal static class PropertyNames
     {
@@ -177,6 +177,36 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Spell checked XML attributes item
         /// </summary>
         public const string SpellCheckedXmlAttributesItem = "SpellCheck";
+
+        /// <summary>
+        /// Code analysis dictionary - Import code analysis dictionaries
+        /// </summary>
+        public const string CadOptionsImportCodeAnalysisDictionaries = "CadOptions.ImportCodeAnalysisDictionaries";
+
+        /// <summary>
+        /// Code analysis dictionary - Recognized word handling
+        /// </summary>
+        public const string CadOptionsRecognizedWordHandling = "CadOptions.RecognizedWordHandling";
+
+        /// <summary>
+        /// Code analysis dictionary - Treat unrecognized words as misspelled
+        /// </summary>
+        public const string CadOptionsTreatUnrecognizedWordsAsMisspelled = "CadOptions.TreatUnrecognizedWordsAsMisspelled";
+
+        /// <summary>
+        /// Code analysis dictionary - Treat deprecated terms as misspelled
+        /// </summary>
+        public const string CadOptionsTreatDeprecatedTermsAsMisspelled = "CadOptions.TreatDeprecatedTermsAsMisspelled";
+
+        /// <summary>
+        /// Code analysis dictionary - Treat compound terms as misspelled
+        /// </summary>
+        public const string CadOptionsTreatCompoundTermsAsMisspelled = "CadOptions.TreatCompoundTermsAsMisspelled";
+
+        /// <summary>
+        /// Code analysis dictionary - Treat casing exceptions as ignored words
+        /// </summary>
+        public const string CadOptionsTreatCasingExceptionsAsIgnoredWords = "CadOptions.TreatCasingExceptionsAsIgnoredWords";
 
         #endregion
     }

@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MisspellingTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/06/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 02/28/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that represents a misspelling tag
@@ -18,8 +18,10 @@
 // ==============================================================================================================
 // 04/14/2013  EFW  Imported the code into the project
 // 05/30/2013  EFW  Added a Word property to return the misspelled word
+// 02/28/2015  EFW  Added support for code analysis dictionary options
 //===============================================================================================================
 
+using System;
 using System.Collections.Generic;
 
 using Microsoft.VisualStudio.Text;
@@ -36,10 +38,9 @@ namespace VisualStudio.SpellChecker.Tagging
         //=====================================================================
 
         /// <summary>
-        /// This read-only property returns true if this represents a misspelled word of false if it represents
-        /// a doubled word.
+        /// This read-only property returns the misspelling type
         /// </summary>
-        public bool IsMisspelling { get; private set; }
+        public MisspellingType MisspellingType { get; private set; }
 
         /// <summary>
         /// This read-only property returns the span containing the misspelled word
@@ -58,7 +59,7 @@ namespace VisualStudio.SpellChecker.Tagging
         public IEnumerable<string> Suggestions { get; private set; }
 
         /// <summary>
-        /// This read-only property returns the misspelled word
+        /// This read-only property returns the misspelled or doubled word
         /// </summary>
         public string Word
         {
@@ -70,16 +71,31 @@ namespace VisualStudio.SpellChecker.Tagging
         //=====================================================================
 
         /// <summary>
+        /// This constructor is used for misspelled words with a specific type
+        /// </summary>
+        /// <param name="misspellingType">The misspelling type</param>
+        /// <param name="span">The span containing the misspelled word</param>
+        /// <param name="suggestions">The suggestions that can be used to replace the misspelled word</param>
+        /// <overloads>There are two overloads for the constructor</overloads>
+        public MisspellingTag(MisspellingType misspellingType, SnapshotSpan span, IEnumerable<string> suggestions)
+        {
+            if(misspellingType == MisspellingType.DoubledWord)
+                throw new ArgumentException("Misspelling type cannot be doubled word");
+
+            this.MisspellingType = misspellingType;
+            this.Span = this.DeleteWordSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
+            this.Suggestions = suggestions;
+        }
+
+        /// <summary>
         /// This constructor is used for misspelled words
         /// </summary>
         /// <param name="span">The span containing the misspelled word</param>
         /// <param name="suggestions">The suggestions that can be used to replace the misspelled word</param>
         /// <overloads>There are two overloads for the constructor</overloads>
-        public MisspellingTag(SnapshotSpan span, IEnumerable<string> suggestions)
+        public MisspellingTag(SnapshotSpan span, IEnumerable<string> suggestions) :
+          this(MisspellingType.MisspelledWord, span, suggestions)
         {
-            this.IsMisspelling = true;
-            this.Span = this.DeleteWordSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
-            this.Suggestions = suggestions;
         }
 
         /// <summary>
@@ -89,6 +105,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="deleteWordSpan">The span to use when deleting the doubled word</param>
         public MisspellingTag(SnapshotSpan span, SnapshotSpan deleteWordSpan)
         {
+            this.MisspellingType = MisspellingType.DoubledWord;
             this.Span = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
             this.DeleteWordSpan = deleteWordSpan.Snapshot.CreateTrackingSpan(deleteWordSpan, SpanTrackingMode.EdgeExclusive);
             this.Suggestions = new string[0];

@@ -2,7 +2,7 @@
 // System  : Sandcastle Help File Builder Visual Studio Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/16/2015
+// Updated : 02/27/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -20,8 +20,9 @@
 
 using System;
 using System.Globalization;
-using System.IO
-;
+using System.IO;
+using System.Text.RegularExpressions;
+
 using EnvDTE80;
 
 using Microsoft.VisualStudio;
@@ -39,7 +40,7 @@ namespace VisualStudio.SpellChecker
     /// </summary>
     public static class Utility
     {
-        #region Constants
+        #region Constants and private data members
         //=====================================================================
 
         /// <summary>
@@ -48,6 +49,9 @@ namespace VisualStudio.SpellChecker
         /// we define it here.
         /// </summary>
         public const string EmbeddedPeekTextView = "EMBEDDED_PEEK_TEXT_VIEW";
+
+        private static Regex reUppercase = new Regex("([A-Z])");
+
         #endregion
 
         #region General utility methods
@@ -198,6 +202,19 @@ namespace VisualStudio.SpellChecker
             }
 
             return (hasBackslash) ? relPath + "\\" : relPath;
+        }
+
+        /// <summary>
+        /// Convert a camel cased term to one or more space-separated words
+        /// </summary>
+        /// <param name="term">The term to convert</param>
+        /// <returns>The term with spaces inserted before each word</returns>
+        public static string ToWords(this string term)
+        {
+            if(String.IsNullOrWhiteSpace(term))
+                return term;
+
+            return reUppercase.Replace(term, " $1").Trim();
         }
         #endregion
 

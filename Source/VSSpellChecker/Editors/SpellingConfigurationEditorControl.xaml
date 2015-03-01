@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="700">
-	<Grid KeyboardNavigation.TabNavigation="Local">
+             d:DesignHeight="450" d:DesignWidth="700" FontSize="12">
+	<Grid KeyboardNavigation.TabNavigation="Local"
+		Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition />
@@ -23,8 +24,9 @@
 			<TreeView Grid.Column="0" Name="tvPages" Margin="3" SelectedItemChanged="tvPages_SelectedItemChanged"
 				KeyboardNavigation.TabIndex="0" />
 			<GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center"
-        ShowsPreview="False" Background="LightGray" TabIndex="4" />
-			<Border Grid.Column="2" Margin="3" BorderThickness="0.5" BorderBrush="Black">
+        ShowsPreview="False" Background="DarkGray" TabIndex="4" />
+			<Border Grid.Column="2" Margin="3" BorderThickness="0.5" BorderBrush="Black"
+				Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}">
 				<DockPanel Name="pnlPages" Margin="3">
 				</DockPanel>
 			</Border>

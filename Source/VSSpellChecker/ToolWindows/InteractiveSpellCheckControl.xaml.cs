@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/04/2015
+// Updated : 02/28/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 05/28/2013  EFW  Created the code
+// 02/28/2015  EFW  Added support for code analysis dictionary options
 //===============================================================================================================
 
 using System;
@@ -25,10 +26,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-
+using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-
+using Microsoft.VisualStudio.Text.Outlining;
 using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.ToolWindows
@@ -42,6 +43,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         //=====================================================================
 
         private IWpfTextView currentTextView;
+        private IOutliningManager outliningManager;
         private SpellingTagger currentTagger;
         private List<MisspellingTag> misspellings;
         private bool updatingState, parentFocused;
@@ -76,10 +78,26 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         currentTextView = value;
                         currentTagger.TagsChanged += tagger_TagsChanged;
 
+                        var componentModel = Utility.GetServiceFromPackage<IComponentModel, SComponentModel>(false);
+
+                        if(componentModel != null)
+                        {
+                            var outliningManagerService = componentModel.GetService<IOutliningManagerService>();
+
+                            if(outliningManagerService != null)
+                                outliningManager = outliningManagerService.GetOutliningManager(currentTextView);
+                        } 
+
                         tagger_TagsChanged(this, null);
                     }
                     else
+                    {
                         currentTextView = null;
+
+                        // The outlining manager is disposable but we should not dispose of it since it is
+                        // still in use by the view.
+                        outliningManager = null;
+                    }
 
                     this.UpdateState();
                 }
@@ -135,7 +153,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 btnReplace.IsEnabled = btnReplaceAll.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled =
                     btnAddWord.IsEnabled = false;
-                lblIssue.Text = "Misspelled Word:";
+                lblIssue.Text = "Misspelled Word";
                 lblMisspelledWord.Text = null;
                 lblMisspelledWord.ToolTip = null;
                 lbSuggestions.Items.Clear();
@@ -159,7 +177,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 var issue = misspellings[0];
 
-                if(!issue.IsMisspelling)
+                if(issue.MisspellingType == MisspellingType.DoubledWord)
                 {
                     lblIssue.Text = "Doubled Word";
                     btnReplace.IsEnabled = btnIgnoreOnce.IsEnabled = true;
@@ -169,9 +187,28 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 {
                     btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled = true;
 
+                    switch(issue.MisspellingType)
+                    {
+                        case MisspellingType.CompoundTerm:
+                            lblIssue.Text = "Compound Term";
+                            break;
+
+                        case MisspellingType.DeprecatedTerm:
+                            lblIssue.Text = "Deprecated Term";
+                            break;
+
+                        case MisspellingType.UnrecognizedWord:
+                            lblIssue.Text = "Unrecognized Word";
+                            break;
+
+                        default:
+                            break;
+                    }
+
                     if(issue.Suggestions.Count() != 0)
                     {
-                        btnReplace.IsEnabled = btnReplaceAll.IsEnabled = btnAddWord.IsEnabled = true;
+                        btnReplace.IsEnabled = btnReplaceAll.IsEnabled = true;
+                        btnAddWord.IsEnabled = (issue.MisspellingType == MisspellingType.MisspelledWord);
 
                         foreach(string s in issue.Suggestions)
                             lbSuggestions.Items.Add(s);
@@ -187,6 +224,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 if(parentFocused)
                 {
                     var span = issue.Span.GetSpan(issue.Span.TextBuffer.CurrentSnapshot);
+
+                    // If in a collapsed region, expand the region
+                    if(outliningManager != null)
+                        foreach(var region in outliningManager.GetCollapsedRegions(span, false))
+                            if(region.IsCollapsed)
+                                outliningManager.Expand(region);
 
                     currentTextView.Caret.MoveTo(span.Start);
                     currentTextView.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.AlwaysCenter);
@@ -260,7 +303,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 return;
             }
 
-            if(misspellings[0].IsMisspelling)
+            if(misspellings[0].MisspellingType != MisspellingType.DoubledWord)
             {
                 span = misspellings[0].Span;
                 span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), (string)lbSuggestions.SelectedItem);

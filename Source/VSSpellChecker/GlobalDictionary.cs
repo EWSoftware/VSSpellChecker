@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/16/2015
+// Updated : 02/27/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -45,7 +45,7 @@ namespace VisualStudio.SpellChecker
 
         private IServiceProvider serviceProvider;
         private List<WeakReference> registeredServices;
-        private HashSet<string> dictionaryWords, ignoredWords;
+        private HashSet<string> dictionaryWords, ignoredWords, recognizedWords;
         private CultureInfo culture;
         private SpellFactory spellFactory;
         private string dictionaryFile, dictionaryWordsFile;
@@ -85,6 +85,7 @@ namespace VisualStudio.SpellChecker
                 dictionaryWordsFile = userWordsFile;
 
             ignoredWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            recognizedWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
             this.LoadUserDictionaryFile();
         }
@@ -230,9 +231,11 @@ namespace VisualStudio.SpellChecker
         /// <param name="serviceProvider">A service provider used to interact with the solution/project</param>
         /// <param name="additionalDictionaryFolders">An enumerable list of additional folders to search for
         /// other dictionaries.</param>
+        /// <param name="recognizedWords">An optional list of recognized words that will be added to the
+        /// dictionary (i.e. from a code analysis dictionary).</param>
         /// <returns>The global dictionary to use or null if one could not be created.</returns>
         public static GlobalDictionary CreateGlobalDictionary(CultureInfo culture, IServiceProvider serviceProvider,
-          IEnumerable<string> additionalDictionaryFolders)
+          IEnumerable<string> additionalDictionaryFolders, IEnumerable<string> recognizedWords)
         {
             GlobalDictionary globalDictionary = null;
             string affixFile, dictionaryFile, userWordsFile;
@@ -293,11 +296,14 @@ namespace VisualStudio.SpellChecker
                         HunspellDictFile = dictionaryFile
                     });
 
-                    globalDictionaries.Add(culture.Name, new GlobalDictionary(culture,
-                        spellEngine[culture.Name], dictionaryFile, userWordsFile, serviceProvider));
+                    globalDictionaries.Add(culture.Name, new GlobalDictionary(culture, spellEngine[culture.Name],
+                        dictionaryFile, userWordsFile, serviceProvider));
                 }
 
                 globalDictionary = globalDictionaries[culture.Name];
+
+                // Add recognized words that are not already there
+                globalDictionary.AddRecognizedWords(recognizedWords);
             }
             catch(Exception ex)
             {
@@ -431,6 +437,29 @@ namespace VisualStudio.SpellChecker
         }
 
         /// <summary>
+        /// This is used to add an enumerable list of recognized words from a source such as a code analysis
+        /// dictionary to the Hunspell dictionaries.
+        /// </summary>
+        /// <param name="words">The list of words to add</param>
+        /// <remarks>Note that since dictionaries are global, the recognized words will be aggregated from all
+        /// sources.  As such, you may see words from a code analysis dictionary in one project suggested as
+        /// corrections while in another unrelated project.</remarks>
+        public void AddRecognizedWords(IEnumerable<string> words)
+        {
+            bool addSuggestions = false;
+
+            foreach(string word in words)
+                if(!recognizedWords.Contains(word))
+                {
+                    recognizedWords.Add(word);
+                    addSuggestions = true;
+                }
+
+            if(addSuggestions)
+                this.AddSuggestions();
+        }
+
+        /// <summary>
         /// Add a new word as a suggestion to the Hunspell instances
         /// </summary>
         /// <remarks>The word is not added to the Hunspell dictionary files, just the speller instances</remarks>
@@ -483,7 +512,7 @@ namespace VisualStudio.SpellChecker
         }
 
         /// <summary>
-        /// Add the user dictionary words as suggestions to the Hunspell instances
+        /// Add the user dictionary and recognized words as suggestions to the Hunspell instances
         /// </summary>
         /// <remarks>The words are not added to the Hunspell dictionary files, just the speller instances</remarks>
         private void AddSuggestions()
@@ -519,7 +548,7 @@ namespace VisualStudio.SpellChecker
 
                     if(releaseCount == processors)
                         foreach(var hs in hunspells.ToArray())
-                            foreach(string word in dictionaryWords)
+                            foreach(string word in dictionaryWords.Concat(recognizedWords))
                                 if(!hs.Spell(word))
                                     hs.Add(word.ToLower(culture));
                 }

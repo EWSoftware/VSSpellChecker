@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/18/2015
+// Updated : 02/28/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -24,6 +24,8 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace VisualStudio.SpellChecker.Configuration
 {
@@ -38,8 +40,13 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         private CSharpOptions csharpOptions;
-        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, excludedExtensions;
+        private CodeAnalysisDictionaryOptions cadOptions;
+
+        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, excludedExtensions,
+            recognizedWords;
         private List<string> additionalDictionaryFolders;
+        private Dictionary<string, string> deprecatedTerms, compoundTerms;
+        private Dictionary<string, IList<string>> unrecognizedWords;
         #endregion
 
         #region Properties
@@ -129,6 +136,14 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This read-only property returns the code analysis dictionary options
+        /// </summary>
+        public CodeAnalysisDictionaryOptions CadOptions
+        {
+            get { return cadOptions; }
+        }
+
+        /// <summary>
         /// This is used to indicate whether or not excluded extensions are inherited by other configurations
         /// </summary>
         /// <value>The default is true so that sub-configurations inherit all excluded extensions from higher
@@ -209,6 +224,41 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This read-only property returns the recognized words loaded from code analysis dictionaries
+        /// </summary>
+        public IEnumerable<string> RecognizedWords
+        {
+            get { return recognizedWords; }
+        }
+
+        /// <summary>
+        /// This read-only property returns the unrecognized words loaded from code analysis dictionaries
+        /// </summary>
+        /// <value>The key is the unrecognized word and the value is the list of spelling alternatives</value>
+        public IDictionary<string, IList<string>> UnrecognizedWords
+        {
+            get { return unrecognizedWords; }
+        }
+
+        /// <summary>
+        /// This read-only property returns the deprecated terms loaded from code analysis dictionaries
+        /// </summary>
+        /// <value>The key is the deprecated term and the value is the preferred alternate</value>
+        public IDictionary<string, string> DeprecatedTerms
+        {
+            get { return deprecatedTerms; }
+        }
+
+        /// <summary>
+        /// This read-only property returns the compound terms loaded from code analysis dictionaries
+        /// </summary>
+        /// <value>The key is the discrete term and the value is the compound alternate</value>
+        public IDictionary<string, string> CompoundTerms
+        {
+            get { return compoundTerms; }
+        }
+
+        /// <summary>
         /// This read-only property returns the default list of ignored words
         /// </summary>
         /// <remarks>The default list includes words starting with what looks like an escape sequence such as
@@ -247,8 +297,8 @@ namespace VisualStudio.SpellChecker.Configuration
         {
             get
             {
-                return new[] { "altText", "Caption", "Content", "Header", "lead", "title", "term", "Text",
-                    "ToolTip" };
+                return new[] { "altText", "Caption", "CompoundAlternate", "Content", "Header", "lead",
+                    "PreferredAlternate", "SpellingAlternates", "title", "term", "Text", "ToolTip" };
             }
         }
         #endregion
@@ -262,6 +312,7 @@ namespace VisualStudio.SpellChecker.Configuration
         public SpellCheckerConfiguration()
         {
             csharpOptions = new CSharpOptions();
+            cadOptions = new CodeAnalysisDictionaryOptions();
 
             this.DefaultLanguage = new CultureInfo("en-US");
 
@@ -272,13 +323,19 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.InheritIgnoredWords = this.InheritXmlSettings = true;
 
             this.TreatUnderscoreAsSeparator = false;
-            this.IgnoreCharacterClass = IgnoredCharacterClass.None;
 
             ignoredWords = new HashSet<string>(DefaultIgnoredWords, StringComparer.OrdinalIgnoreCase);
             ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
             spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
             excludedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            recognizedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             additionalDictionaryFolders = new List<string>();
+
+            deprecatedTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            compoundTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            unrecognizedWords = new Dictionary<string, IList<string>>(StringComparer.OrdinalIgnoreCase);
+
         }
         #endregion
 
@@ -362,6 +419,19 @@ namespace VisualStudio.SpellChecker.Configuration
                     PropertyNames.CSharpOptionsIgnoreNormalStrings);
                 csharpOptions.IgnoreVerbatimStrings = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreVerbatimStrings);
+
+                cadOptions.ImportCodeAnalysisDictionaries = configuration.ToBoolean(
+                    PropertyNames.CadOptionsImportCodeAnalysisDictionaries);
+                cadOptions.RecognizedWordHandling = configuration.ToEnum<RecognizedWordHandling>(
+                    PropertyNames.CadOptionsRecognizedWordHandling);
+                cadOptions.TreatUnrecognizedWordsAsMisspelled = configuration.ToBoolean(
+                    PropertyNames.CadOptionsTreatUnrecognizedWordsAsMisspelled);
+                cadOptions.TreatDeprecatedTermsAsMisspelled = configuration.ToBoolean(
+                    PropertyNames.CadOptionsTreatDeprecatedTermsAsMisspelled);
+                cadOptions.TreatCompoundTermsAsMisspelled = configuration.ToBoolean(
+                    PropertyNames.CadOptionsTreatCompoundTermsAsMisspelled);
+                cadOptions.TreatCasingExceptionsAsIgnoredWords = configuration.ToBoolean(
+                    PropertyNames.CadOptionsTreatCasingExceptionsAsIgnoredWords);
 
                 this.InheritExcludedExtensions = configuration.ToBoolean(PropertyNames.InheritExcludedExtensions);
 
@@ -461,6 +531,75 @@ namespace VisualStudio.SpellChecker.Configuration
                 // Ignore errors and just use the defaults
                 System.Diagnostics.Debug.WriteLine(ex);
             }
+        }
+
+        /// <summary>
+        /// This is used to import spelling words and ignored words from a code analysis dictionary file
+        /// </summary>
+        /// <param name="filename">The code analysis dictionary file to import</param>
+        public void ImportCodeAnalysisDictionary(string filename)
+        {
+            XDocument settings = XDocument.Load(filename);
+            XElement root = settings.Root, option;
+
+            option = root.XPathSelectElement("Words/Recognized");
+
+            if(this.CadOptions.RecognizedWordHandling != RecognizedWordHandling.None && option != null)
+                foreach(var word in option.Elements("Word"))
+                    if(!String.IsNullOrWhiteSpace(word.Value))
+                        switch(this.CadOptions.RecognizedWordHandling)
+                        {
+                            case RecognizedWordHandling.IgnoreAllWords:
+                                ignoredWords.Add(word.Value);
+                                break;
+
+                            case RecognizedWordHandling.AddAllWords:
+                                recognizedWords.Add(word.Value);
+                                break;
+
+                            default:    // Attribute determines usage
+                                if((string)word.Attribute("Spelling") == "Add")
+                                    recognizedWords.Add(word.Value);
+                                else
+                                    if((string)word.Attribute("Spelling") == "Ignore")
+                                        ignoredWords.Add(word.Value);
+
+                                // Any other value is treated as None and it passes through to the spell checker
+                                // like any other word.
+                                break;
+                        }
+
+            option = root.XPathSelectElement("Words/Unrecognized");
+
+            if(this.CadOptions.TreatUnrecognizedWordsAsMisspelled && option != null)
+                foreach(var word in option.Elements("Word"))
+                    if(!String.IsNullOrWhiteSpace(word.Value))
+                    {
+                        unrecognizedWords[word.Value] = new List<string>(
+                            ((string)word.Attribute("SpellingAlternates") ?? String.Empty).Split(
+                                new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
+                    }
+
+            option = root.XPathSelectElement("Words/Deprecated");
+
+            if(this.CadOptions.TreatDeprecatedTermsAsMisspelled && option != null)
+                foreach(var term in option.Elements("Term"))
+                    if(!String.IsNullOrWhiteSpace(term.Value))
+                        deprecatedTerms[term.Value] = ((string)term.Attribute("PreferredAlternate")).ToWords();
+
+            option = root.XPathSelectElement("Words/Compound");
+
+            if(this.CadOptions.TreatCompoundTermsAsMisspelled && option != null)
+                foreach(var term in option.Elements("Term"))
+                    if(!String.IsNullOrWhiteSpace(term.Value))
+                        compoundTerms[term.Value] = ((string)term.Attribute("CompoundAlternate")).ToWords();
+
+            option = root.XPathSelectElement("Acronyms/CasingExceptions");
+
+            if(this.CadOptions.TreatCasingExceptionsAsIgnoredWords && option != null)
+                foreach(var acronym in option.Elements("Acronym"))
+                    if(!String.IsNullOrWhiteSpace(acronym.Value))
+                        ignoredWords.Add(acronym.Value);
         }
         #endregion
     }

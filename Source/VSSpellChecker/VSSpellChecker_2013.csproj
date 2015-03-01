@@ -51,13 +51,18 @@
     <Compile Include="..\VSSpellCheckerDefinitions\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="Configuration\CodeAnalysisDictionaryOptions.cs" />
     <Compile Include="Configuration\ConfigurationType.cs" />
     <Compile Include="Configuration\CSharpOptions.cs" />
+    <Compile Include="Configuration\RecognizedWordHandling.cs" />
     <Compile Include="Configuration\SpellCheckerDictionary.cs" />
     <Compile Include="Configuration\PropertyNames.cs" />
     <Compile Include="Configuration\SpellingConfigurationFile.cs" />
     <Compile Include="Editors\CommandTargetArguments.cs" />
     <Compile Include="Editors\ICommonCommandSupport.cs" />
+    <Compile Include="Editors\Pages\CodeAnalysisUserControl.xaml.cs">
+      <DependentUpon>CodeAnalysisUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\Pages\ExcludedExtensionsUserControl.xaml.cs">
       <DependentUpon>ExcludedExtensionsUserControl.xaml</DependentUpon>
     </Compile>
@@ -84,6 +89,7 @@
     <Compile Include="SmartTags\DoubledWordSmartTagAction.cs" />
     <Compile Include="SpellingEventArgs.cs" />
     <Compile Include="SpellingServiceProxy.cs" />
+    <Compile Include="Tagging\MisspellingType.cs" />
     <Compile Include="ToolWindows\InteractiveSpellCheckControl.xaml.cs">
       <DependentUpon>InteractiveSpellCheckControl.xaml</DependentUpon>
     </Compile>
@@ -196,6 +202,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.CoreUtility, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.Editor, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
@@ -289,6 +296,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Editors\Pages\CodeAnalysisUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Editors\Pages\ExcludedExtensionsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

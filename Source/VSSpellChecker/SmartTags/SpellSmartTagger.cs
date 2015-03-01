@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/01/2015
+// Updated : 02/28/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -22,6 +22,7 @@
 // 05/31/2013  EFW  Added support for Ignore Once
 // 06/06/2014  EFW  Added support for doubled word smart tags
 // 06/20/2014  EFW  Added support for use in VS 2013 Peek Definition windows
+// 02/28/2015  EFW  Added support for code analysis dictionary options
 //===============================================================================================================
 
 using System;
@@ -154,10 +155,11 @@ namespace VisualStudio.SpellChecker.SmartTags
 
                 SnapshotSpan errorSpan = misspellingSpans[0];
 
-                if(misspelling.Tag.IsMisspelling)
+                if(misspelling.Tag.MisspellingType != MisspellingType.DoubledWord)
                 {
-                    yield return new TagSpan<SpellSmartTag>(errorSpan,
-                        new SpellSmartTag(GetMisspellingSmartTagActions(errorSpan, misspelling.Tag.Suggestions)));
+                    yield return new TagSpan<SpellSmartTag>(errorSpan, new SpellSmartTag(
+                        GetMisspellingSmartTagActions(errorSpan, misspelling.Tag.MisspellingType,
+                            misspelling.Tag.Suggestions)));
                 }
                 else
                 {
@@ -206,10 +208,11 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// Get the smart tag actions for misspelled words
         /// </summary>
         /// <param name="errorSpan">The error span for the misspelled word</param>
+        /// <param name="misspellingType">The misspelling type</param>
         /// <param name="suggestions">The suggestions to use as the replacement</param>
         /// <returns>A read-only collection of smart tag action sets</returns>
         private ReadOnlyCollection<SmartTagActionSet> GetMisspellingSmartTagActions(SnapshotSpan errorSpan,
-          IEnumerable<string> suggestions)
+          MisspellingType misspellingType, IEnumerable<string> suggestions)
         {
             List<SmartTagActionSet> smartTagSets = new List<SmartTagActionSet>();
 
@@ -233,12 +236,16 @@ namespace VisualStudio.SpellChecker.SmartTags
 
             // Add Dictionary operations (ignore all)
             List<ISmartTagAction> dictionaryActions = new List<ISmartTagAction>();
+
             dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore Once",
                 DictionaryAction.IgnoreOnce));
             dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore All",
                 DictionaryAction.IgnoreAll));
-            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Add to Dictionary",
-                DictionaryAction.AddWord));
+
+            if(misspellingType == MisspellingType.MisspelledWord)
+                dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Add to Dictionary",
+                    DictionaryAction.AddWord));
+
             smartTagSets.Add(new SmartTagActionSet(dictionaryActions.AsReadOnly()));
 
             return smartTagSets.AsReadOnly();

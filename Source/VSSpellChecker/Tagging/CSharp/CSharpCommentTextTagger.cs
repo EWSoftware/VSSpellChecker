@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 01/30/2015
+// Updated : 03/01/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -360,6 +360,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     // If found, treat it like a single line comment
                     if(p.NextSegment(6) == "region")
                     {
+                        p.Advance(6);
                         p.StartNaturalText();
                         p.AdvanceToEndOfLine();
                         p.EndNaturalText();

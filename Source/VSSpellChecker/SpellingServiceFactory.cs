@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceFactory.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/18/2015
+// Updated : 02/27/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -111,7 +111,7 @@ namespace VisualStudio.SpellChecker
                 {
                     // Create or get the existing global dictionary for the default language
                     var globalDictionary = GlobalDictionary.CreateGlobalDictionary(config.DefaultLanguage,
-                        globalServiceProvider, config.AdditionalDictionaryFolders);
+                        globalServiceProvider, config.AdditionalDictionaryFolders, config.RecognizedWords);
 
                     if(globalDictionary != null)
                     {
@@ -138,7 +138,7 @@ namespace VisualStudio.SpellChecker
         private SpellCheckerConfiguration GenerateConfiguration(ITextBuffer buffer)
         {
             ProjectItem projectItem, fileItem;
-            string bufferFilename, filename, projectPath;
+            string bufferFilename, filename, projectPath, projectFilename = null;
 
             // Start with the global configuration
             var config = new SpellCheckerConfiguration();
@@ -181,7 +181,8 @@ namespace VisualStudio.SpellChecker
                         if(projectItem.ContainingProject != null &&
                           !String.IsNullOrWhiteSpace(projectItem.ContainingProject.FullName))
                         {
-                            filename = projectItem.ContainingProject.FullName + ".vsspell";
+                            projectFilename = projectItem.ContainingProject.FullName;
+                            filename = projectFilename + ".vsspell";
                             projectItem = solution.FindProjectItem(filename);
 
                             if(projectItem != null)
@@ -231,6 +232,29 @@ namespace VisualStudio.SpellChecker
 
                             if(projectItem != null)
                                 config.Load(filename);
+                        }
+                    }
+
+                    // Load code analysis dictionaries if wanted
+                    if(projectFilename != null && config.CadOptions.ImportCodeAnalysisDictionaries)
+                    {
+                        // I'm not sure if there's a better way to do this but it does seem to work.  We need to
+                        // find one or more arbitrary files with an item type of "CodeAnalysisDictionary".  We
+                        // do so by getting the MSBuild project from the global project collection and using its
+                        // GetItems() method to find them.
+                        var loadedProject = Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.GetLoadedProjects(
+                            projectFilename).FirstOrDefault();
+
+                        if(loadedProject != null)
+                        {
+                            // Typically there is only one but multiple files are supported
+                            foreach(var cad in loadedProject.GetItems("CodeAnalysisDictionary"))
+                            {
+                                filename = Path.Combine(Path.GetDirectoryName(projectFilename), cad.EvaluatedInclude);
+
+                                if(File.Exists(filename))
+                                    config.ImportCodeAnalysisDictionary(filename);
+                            }
                         }
                     }
 

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/10/2015
+// Updated : 02/28/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -38,7 +38,7 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         private Dictionary<string, PropertyInfo> propertyCache;
-        private PropertyDescriptorCollection configCache, csoCache;
+        private PropertyDescriptorCollection configCache, csoCache, cadCache;
         private SpellCheckerConfiguration defaultConfig;
 
         private XDocument document;
@@ -143,12 +143,17 @@ namespace VisualStudio.SpellChecker.Configuration
                 propertyCache = new Dictionary<string, PropertyInfo>();
                 configCache = TypeDescriptor.GetProperties(typeof(SpellCheckerConfiguration));
                 csoCache = TypeDescriptor.GetProperties(typeof(CSharpOptions));
+                cadCache = TypeDescriptor.GetProperties(typeof(CodeAnalysisDictionaryOptions));
 
                 foreach(PropertyInfo property in typeof(SpellCheckerConfiguration).GetProperties(
                   BindingFlags.Public | BindingFlags.Instance))
                     propertyCache.Add(property.Name, property);
 
                 foreach(PropertyInfo property in typeof(CSharpOptions).GetProperties(
+                  BindingFlags.Public | BindingFlags.Instance))
+                    propertyCache.Add(property.Name, property);
+
+                foreach(PropertyInfo property in typeof(CodeAnalysisDictionaryOptions).GetProperties(
                   BindingFlags.Public | BindingFlags.Instance))
                     propertyCache.Add(property.Name, property);
             }
@@ -310,7 +315,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// attribute is defined.</returns>
         private object DefaultValueFor(string propertyName)
         {
-            if(configCache != null && csoCache != null && propertyCache != null)
+            if(configCache != null && csoCache != null && cadCache != null && propertyCache != null)
                 try
                 {
                     string[] parts = propertyName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
@@ -341,7 +346,12 @@ namespace VisualStudio.SpellChecker.Configuration
                         prop = csoCache[parts[parts.Length - 1]];
 
                         if(prop == null)
-                            return null;
+                        {
+                            prop = cadCache[parts[parts.Length - 1]];
+
+                            if(prop == null)
+                                return null;
+                        }
                     }
 
                     var defValue = prop.Attributes[typeof(DefaultValueAttribute)] as DefaultValueAttribute;

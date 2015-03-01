@@ -47,7 +47,7 @@ you close and re-open the spell checked file in which you want the changes to ap
 <Bold>Tools | Options | Environment | Fonts and Colors</Bold> and select the <Bold>Spelling Error</Bold>
 display item.</TextBlock>
 		<FlowDocumentScrollViewer Name="fdvAddConfigs" VerticalScrollBarVisibility="Hidden" IsEnabled="False">
-			<FlowDocument FontFamily="Verdana" FontSize="11" PagePadding="10" TextAlignment="Left">
+			<FlowDocument FontFamily="Verdana" FontSize="12" PagePadding="10" TextAlignment="Left">
 				<Section Name="secAddFileSpecific">
 					<Paragraph>To add folder or file-specific settings, use one of the following methods when a solution
 file is loaded:</Paragraph>

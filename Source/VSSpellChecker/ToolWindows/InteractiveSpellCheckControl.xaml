@@ -16,7 +16,7 @@
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition />
 			</Grid.ColumnDefinitions>
-			<TextBlock Grid.Column="0" Margin="3, 5" Name="lblIssue" Text="Misspelled Word:" />
+			<TextBlock Grid.Column="0" Margin="3, 5" Name="lblIssue" Text="Misspelled Word" />
 			<Border Grid.Column="1" BorderBrush="DarkGray" Margin="3" BorderThickness="0.5">
 				<TextBlock Name="lblMisspelledWord" TextTrimming="CharacterEllipsis" Margin="2" />
 			</Border>
@@ -31,8 +31,9 @@
 				Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
 				Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}">No text editor is selected, the
 spell checker is currently disabled, or the file is excluded by filename extension.
-<LineBreak /><LineBreak />Select a text editor or use the <Bold>Tools | Spell Checker | Edit Configuration</Bold>
-option to enable spell checking or remove the excluded filename extension.</TextBlock>
+<LineBreak /><LineBreak />Select a text editor or edit the global configuration or the appropriate
+solution, project, folder, or file-specific configuration to enable spell checking or remove the excluded
+filename extension.</TextBlock>
 			<Label Grid.Row="1" Target="{Binding ElementName=lbSuggestions}">_Suggestions</Label>
 			<Grid Grid.Row="2">
 				<Grid.ColumnDefinitions>

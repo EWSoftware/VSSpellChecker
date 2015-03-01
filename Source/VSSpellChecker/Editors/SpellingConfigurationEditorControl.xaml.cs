@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/21/2015
+// Updated : 02/28/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -110,7 +110,8 @@ namespace VisualStudio.SpellChecker.Editors
                 typeof(CSharpOptionsUserControl),
                 typeof(IgnoredWordsUserControl),
                 typeof(ExcludedExtensionsUserControl),
-                typeof(XmlFilesUserControl)
+                typeof(XmlFilesUserControl),
+                typeof(CodeAnalysisUserControl)
             };
 
             try

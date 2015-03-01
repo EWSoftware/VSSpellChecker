@@ -1,0 +1,49 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.Editors.Pages.CodeAnalysisUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"
+						 d:DesignHeight="300" d:DesignWidth="500">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<GroupBox Grid.Row="0">
+			<StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboImportCADictionaries" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="_Import project code analysis dictionaries if present" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboUnrecognizedWords" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Treat unrecognized words as misspelled words" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboDeprecatedTerms" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Treat deprecated terms as misspelled words" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboCompoundTerms" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Treat compound terms as misspelled words" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboCasingExceptions" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Treat casing exceptions as ignored words" />
+				</StackPanel>
+			</StackPanel>
+		</GroupBox>
+		<GroupBox Header="_Recognized Word Handling" Grid.Row="1">
+			<StackPanel Grid.Row="1" Margin="20, 3, 3, 3">
+				<RadioButton Content="Inherit recognized word handling setting" Name="rbInheritRecWordHandling"
+					Checked="Property_Changed" />
+				<RadioButton Content="None" Name="rbNone" Checked="Property_Changed" />
+				<RadioButton Content="Treat all as ignored words" Name="rbIgnoreAll" Checked="Property_Changed" />
+				<RadioButton Content="Add all to dictionary" Name="rbAddToDictionary" Checked="Property_Changed" />
+				<RadioButton Content="Spelling attribute determines usage" Name="rbAttributeDetermines"
+					Checked="Property_Changed" />
+			</StackPanel>
+		</GroupBox>
+	</Grid>
+</UserControl>
