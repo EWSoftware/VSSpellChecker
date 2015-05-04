@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/08/2015
+// Updated : 04/21/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -62,7 +62,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public string HelpUrl
         {
-            get { return this.Title.Replace(" ", "-"); }
+            get { return "b4a8726f-5bee-48a4-81a9-00b1be332607"; }
         }
 
         /// <inheritdoc />

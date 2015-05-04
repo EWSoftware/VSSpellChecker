@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="70a7fa5b-1a9e-494f-9d2c-5eb3321b2596" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category lets you define sets of files to exclude from being spell checked by filename
+extension.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<para>To add new extensions, enter a space or comma-separated list of filename extensions in which to
+disable spell checking (i.e. <codeInline>.bat .ps1 .xyz</codeInline>) and click the <ui>Add</ui> button.  A
+period by itself with no trailing text will disable spell checking in files without an extension.</para>
+
+				<para>To remove an extension, select it in the list and click the <ui>Remove</ui> button.  To clear the
+list of all excluded extensions, click the <ui>Clear</ui> button.</para>
+
+				<para>For non-global settings, an option is available to inherit the excluded filename extensions from
+configurations above the current one.  If enabled, any additional excluded extensions in the current
+configuration are added to those.  If disabled, the settings in the current configuration will replace the
+inherited list of excluded extensions.  If not inherited and the list is left empty, it effectively clears the
+list of excluded extensions.</para>
+				
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

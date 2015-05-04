@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Configuration files are used to store the spell checker settings.  There is one global configuration
+that contains the default settings.  Spell checker configuration files can also be created within solutions at
+the solution, project, folder, and file level.  This allows you to define different settings at each level while
+inheriting the options that are not changed from higher level configurations.</para>
+
+			<autoOutline excludeRelatedTopics="true" lead="none" />
+		</introduction>
+
+		<section address="Overview">
+			<title>Overview</title>
+			<content>
+				<para>All configuration files have a <localUri>.vsspell</localUri> extension.  A file editor in Visual
+Studio allows you to modify the settings at any level by opening the settings file in the project.  Global
+settings are modified by selecting the <ui>Tools | Spell Checker | Edit Global Configuration</ui> option.</para>
+
+				<list class="bullet">
+					<listItem>
+						<para>The global settings file is stored in the local application data folder
+(<localUri>%LOCALAPPDATA%\EWSoftware\Visual Studio Spell Checker</localUri>).  These are the base settings used
+in the absence of, and inherited by, solution, project, folder, and file-specific configuration files.</para>
+					</listItem>
+
+					<listItem>
+						<para>Solution settings are stored in the solution's <localUri>Solution Items</localUri> folder and
+are named after the solution.  Options that are set in this configuration will override the global settings and
+will be inherited by projects, folders, and files.</para>
+					</listItem>
+
+					<listItem>
+						<para>Project settings are stored within the project in the root folder and are named after the
+project.  Options that are set in this configuration will override the global settings and solution settings and
+will be inherited by the project's folders and files.</para>
+					</listItem>
+
+					<listItem>
+						<para>Folder settings are stored within the folder they apply to and are named after the folder.  The
+settings are used for the specified folder and its sub-folders recursively.  Options that are set in this
+configuration will override the global settings, solution settings, and project settings and will be inherited by
+all files within the folder and its sub-folders.  Sub-folders may themselves contain configuration files that
+make further changes to the configuration settings.</para>
+					</listItem>
+
+					<listItem>
+						<para>File-specific settings are named after the file to which they relate and are added as dependent
+items if the project system supports it.  As such, a settings file added for *MainForm.cs* is also used for the
+dependent items <localUri>MainForm.Designer.cs</localUri> and <localUri>MainForm.resx</localUri> as well.
+Options that are set in this configuration will override the global settings, solution settings, project
+settings, and folder settings.</para>
+					</listItem>
+
+				</list>
+
+				<para>When a project file that can be spell checked is opened, the global settings are merged with any
+defined solution, project, folder, and file settings.  In all settings other than global, properties default to
+being inherited rather than a being set to a specific default value.  If set to a specific value in a settings
+file, they override any settings loaded earlier in the chain.  Additional dictionary folders, excluded
+extensions, ignored words, ignored XML elements, and spell checked XML attributes get special treatment.  Each
+can be inherited and added to or, if marked as not to be inherited, can replace the lists from previous settings
+files earlier in the chain.  This provides for very flexible settings that should cover a wide variety of
+situations.</para>
+
+			</content>
+		</section>
+
+		<section address="AddingFiles">
+			<title>Adding Configuration Files</title>
+			<content>
+				<para>To add folder or file-specific settings, use one of the following methods when a solution file is
+loaded:</para>
+
+				<list class="bullet">
+					<listItem>
+						<para>Select the solution, a project, a folder, or a file in the <ui>Solution Explorer</ui> window
+and use the <ui>File | New | Spell Checker Configuration File for Selected Item</ui> option to add a
+configuration for the selected item.</para>
+					</listItem>
+
+					<listItem>
+						<para>Right click on the solution, a project, or a folder in the <ui>Solution Explorer</ui> window
+and use the <ui>Add | Spell Checker Configuration File</ui> context menu option to add a configuration file for
+the selected item.</para>
+					</listItem>
+
+					<listItem>
+						<para>Right click on a file that can be spell checked (source code, text, HTML, XML, etc.) in the
+<ui>Solution Explorer</ui> window and use the <ui>Add Spell Checker Configuration File</ui> context menu option
+to add a configuration file for the selected item.  Note that for project systems that support it, the
+configuration file will be added as a dependent item for the file selected like a designer or resource file for a
+form.  Expand the file node in the Solution Explorer to see it.</para>
+					</listItem>
+
+				</list>
+
+				<para>In the configuration file editor window, select a category in the list that appears on the left
+side of the window to edit the settings.   Save the file to store the changes.  Changes made to any configuration
+file will typically not take effect until you close and re-open the spell checked file in which you want the
+changes to apply.</para>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+			<link xlink:href="e339cac1-9783-4c2a-919f-88436c78fef8" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

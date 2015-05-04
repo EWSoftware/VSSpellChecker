@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/26/2015
+// Updated : 04/21/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -107,6 +107,11 @@ namespace VisualStudio.SpellChecker.Configuration
         /// C# - Ignore verbatim strings
         /// </summary>
         public const string CSharpOptionsIgnoreVerbatimStrings = "CSharpOptions.IgnoreVerbatimStrings";
+
+        /// <summary>
+        /// C# - Ignore interpolated strings
+        /// </summary>
+        public const string CSharpOptionsIgnoreInterpolatedStrings = "CSharpOptions.IgnoreInterpolatedStrings";
 
         /// <summary>
         /// Inherit excluded extensions

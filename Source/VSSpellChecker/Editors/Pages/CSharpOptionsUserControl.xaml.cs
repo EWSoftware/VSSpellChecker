@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpOptionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/08/2015
+// Updated : 04/21/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -61,7 +61,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public string HelpUrl
         {
-            get { return this.Title.Replace(" ", "-"); }
+            get { return "09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d"; }
         }
 
         /// <inheritdoc />
@@ -76,7 +76,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             cboIgnoreXmlDocComments.ItemsSource = cboIgnoreDelimitedComments.ItemsSource =
                 cboIgnoreStandardSingleLineComments.ItemsSource = cboIgnoreQuadrupleSlashComments.ItemsSource =
-                cboIgnoreNormalStrings.ItemsSource = cboIgnoreVerbatimStrings.ItemsSource = dataSource;
+                cboIgnoreNormalStrings.ItemsSource = cboIgnoreVerbatimStrings.ItemsSource =
+                cboIgnoreInterpolatedStrings.ItemsSource = dataSource;
 
             cboIgnoreXmlDocComments.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreXmlDocComments);
@@ -95,6 +96,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             cboIgnoreVerbatimStrings.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreVerbatimStrings);
+
+            cboIgnoreInterpolatedStrings.SelectedValue = configuration.ToPropertyState(
+                PropertyNames.CSharpOptionsIgnoreInterpolatedStrings);
         }
 
         /// <inheritdoc />
@@ -112,6 +116,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 ((PropertyState)cboIgnoreNormalStrings.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.CSharpOptionsIgnoreVerbatimStrings,
                 ((PropertyState)cboIgnoreVerbatimStrings.SelectedValue).ToPropertyValue());
+            configuration.StoreProperty(PropertyNames.CSharpOptionsIgnoreInterpolatedStrings,
+                ((PropertyState)cboIgnoreInterpolatedStrings.SelectedValue).ToPropertyValue());
         }
 
         /// <inheritdoc />

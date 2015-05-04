@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="15873823-4d56-486e-9069-836d44e96c75" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed the tool window so that it does not throw a "key not found" exception when the "Spell
+check as you type" option is disabled.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed a bug in the C# tagger related to multi-line comments and strings which should prevent it
+from leaving spelling tags in code when uncommented or not spell checking added lines under certain conditions.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the handling of user dictionary words so that they will show up as suggestions for
+misspelled words rather than being treated solely as words to ignore.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added a new configuration category for <link xlink:href="c592c4d8-7387-47fe-9b79-28bf0168f447" />.
+These are words such as Doxygen tags that start with what looks like an escape sequence or general words such as
+programming terms or keywords.  For escaped words, it will ignore the escape sequence and the word rather than
+just the escape sequence preventing the remainder of the word from showing up as a misspelling.  Ignored words
+will not show up as spelling errors nor will they appear as suggestions for other misspelled words unless they
+are in the selected language's dictionary.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added word breaking code to ignore .NET and C-style format string specifiers if so indicated by
+the associated configuration option.  Note that it is enabled by default on new installations to ignore them but
+if you have modified the configuration you will need to enable it manually in updated installations.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for doubled word detection and removal.  However, due to the way Visual Studio
+breaks up spans of text for interactive spell checking, it will only be able to detect doubled words if they
+appear on the same line.  Doubled words that span line breaks cannot be detected.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for disabling spell checking for files by filename extension.  Added a
+<link xlink:href="b4a8726f-5bee-48a4-81a9-00b1be332607">new configuration option</link> to the configuration
+dialog to allow setting the list of excluded extensions.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added a <link xlink:href="b4a8726f-5bee-48a4-81a9-00b1be332607">new configuration option</link>
+to ignore words containing certain character classes (non-Latin or non-ASCII).  This provides a simplistic way of
+ignoring some words in mixed language files.  It works best for spell checking English text in files that also
+contain Cyrillic or Asian text.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added a <link xlink:href="09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d">C# Options</link> configuration
+category used to disable spell checking of various C# source code elements.</para>
+					</listItem>
+
+					<listItem>
+						<para>Merged changes from David Ruhmann to ignore Doxygen tags (escaped words) and enhance the word
+breaking code.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the package icon and images with new ones supplied by David Ruhmann.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

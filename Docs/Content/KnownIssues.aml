@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="a9ff4ce1-0d6b-4376-8d32-02dae64e2075" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>The following are some known issues and workarounds.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>The spell checker tool window relies on the <ui>Spell check as you type</ui> configuration
+option being enabled.  If disabled, spell checking will be unavailable until it is turned back on.  Any open
+editors will need to be closed and reopened for the new setting to take effect.</para>
+					</listItem>
+
+					<listItem>
+						<para>In Visual Studio 2010, if a misspelled word is within a collapsed section, when the section is
+expanded the word will be flagged with a squiggly line but no smart tag will appear for it when you move the
+mouse or keyboard cursor over it.  This is caused by a bug in Visual Studio.  The only workarounds are to leave
+the section expanded, close the file, and then reopen it or to invoke the spell checker tool window which will
+let you take action on the word.</para>
+					</listItem>
+
+					<listItem>
+						<para>The spell checking code attempts to ignore escape sequences within text so that it does not
+flag text as misspelled when preceded by an escape sequence such as <codeInline>\r</codeInline>,
+<codeInline>\n</codeInline>, or <codeInline>\t</codeInline>.  This can occasionally result in a false report in
+certain situations such as words in a file path that start with what looks like an escape sequence character
+(i.e. <codeInline>C:\transform\file.txt</codeInline>).  In such cases, just select the option to ignore the
+misspelled instance once or always.  If a certain escaped word is a common enough occurrence, you can add it as
+an ignored word in the configuration options.  For C# source code, you can also enable the option to ignore
+verbatim strings which typically contain such occurrences.</para>
+					</listItem>
+
+					<listItem>
+						<para>Due to the way Visual Studio breaks up spans of text for interactive spell checking, it will
+only be able to detect doubled words if they appear on the same line.  Doubled words that span line breaks cannot
+be detected.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

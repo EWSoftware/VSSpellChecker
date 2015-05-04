@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="508e7e8f-e00f-43f1-ad4c-5439ddec84b8" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>The package uses NHunspell to perform spell checking and comes with an English (en-US) dictionary by
+default.  Since NHunspell makes use of Open Office dictionaries, you can download additional dictionaries for
+other languages.  To make them available to the spell checker, do the following:
+			</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Go to the Open Office Extensions <externalLink>
+	<linkText>dictionary page</linkText>
+	<linkAlternateText>dictionary page</linkAlternateText>
+	<linkUri>http://extensions.services.openoffice.org/dictionary</linkUri>
+	<linkTarget>_blank</linkTarget>
+</externalLink> and download the dictionaries for the languages you need.  Dictionaries for OpenOffice versions
+2, 3, and 4 are supported.</para>
+					</listItem>
+
+					<listItem>
+						<para>If the downloaded file has a <localUri>.oxt</localUri> extension, rename it to have a
+<localUri>.zip</localUri> extension.</para>
+					</listItem>
+
+					<listItem>
+						<para>Extract the content of the file and locate the <localUri>.aff</localUri> and
+<localUri>.dic</localUri> dictionary files.</para>
+					</listItem>
+
+					<listItem>
+						<para>To make the dictionaries available to all solutions and projects, the <localUri>.aff</localUri>
+and <localUri>.dic</localUri> file pairs will need to be copied into the local application data folder which
+equates to one of the following folders based on your operating system:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para>Windows Vista or later: <localUri>%LOCALAPPDATA%\EWSoftware\Visual Studio Spell
+Checker</localUri></para>
+							</listItem>
+
+							<listItem>
+								<para>Windows XP: <localUri>%USERPROFILE%\Local Settings\Application Data\EWSoftware\Visual
+Studio Spell Checker</localUri></para>
+							</listItem>
+
+						</list>
+					</listItem>
+
+					<listItem>
+						<para>Dictionaries can be stored in another location of your choosing.  If you do this, you will need
+to edit the global configuration and add the folder to the <ui>Additional Dictionary Folders</ui> list in the
+<ui>Dictionary Settings</ui> category.</para>
+					</listItem>
+
+					<listItem>
+						<para>Dictionaries can be added to solutions and projects and checked into source control so that
+they are local to each project.  To do this:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para>Add the <localUri>.aff</localUri> and <localUri>.dic</localUri> files to the solution or
+project to which they will apply.</para>
+							</listItem>
+
+							<listItem>
+								<para>Add a solution, project, folder, or file-specific
+<link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab">spell checker configuration file</link> based on how you
+want the dictionaries to be made available and used.</para>
+							</listItem>
+
+							<listItem>
+								<para>In the configuration file, add the folder location to the <ui>Additional Dictionary Folders</ui>
+list in the <ui>Dictionary Settings</ui> category.  When prompted, make the path relative to the configuration
+file so that the dictionary files can be found if the project is moved.</para>
+							</listItem>
+
+						</list>
+					</listItem>
+
+					<listItem>
+						<para>Note that the <localUri>.aff</localUri> and <localUri>.dic</localUri> files must be named after
+the language they represent with no other text in the filename and the language parts must be separated with an
+underscore or a dash.  If necessary, rename the files to match the required format.  For example:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para><localUri>de_DE.aff</localUri> and <localUri>de_DE.dic</localUri> or <localUri>de-DE.aff</localUri>
+and <localUri>de-DE.dic</localUri> for German.</para>
+							</listItem>
+
+							<listItem>
+								<para><localUri>sr_Latn.aff</localUri> and <localUri>sr_Latn.dic</localUri> or
+<localUri>sr-Latn.aff</localUri> and <localUri>sr-Latn.dic</localUri> for Serbian (Latin).</para>
+							</listItem>
+
+						</list>
+					</listItem>
+
+					<listItem>
+						<para>Adding English dictionary files (<localUri>en_US.aff</localUri> and <localUri>en_US.dic</localUri>)
+to the local application data folder or a solution, project, folder, or file configuration will effectively
+replace the default English dictionary supplied with the package.</para>
+					</listItem>
+
+					<listItem>
+						<para>Once the files are in the chosen location and are named correctly, you will be able to select
+the related language in the <ui>Dictionary Settings</ui> category of the
+<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5">configuration editor</link>.</para>
+					</listItem>
+
+				</list>
+
+				<alert class="note">
+					<para>After installing the custom dictionary files and adding their location to the additional folders
+list when necessary, if the language does not appear in the configuration editor, the files may not be named
+correctly.  If the language is selected but spelling is still occurring in English, there may be a problem with
+one or both of the dictionary files.  Search the <externalLink>
+	<linkText>issues page</linkText>
+	<linkAlternateText>issues page</linkAlternateText>
+	<linkUri>https://GitHub.com/EWSoftware/VSSpellChecker/issues</linkUri>
+	<linkTarget>_blank</linkTarget>
+</externalLink> to see if the problem has been reported and solved already.  If you are not able to resolve the
+problem, open a new issue asking for help.</para>
+				</alert>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" />
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

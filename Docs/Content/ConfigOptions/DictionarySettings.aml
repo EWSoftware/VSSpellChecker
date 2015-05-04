@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="af34b863-6a1c-41ed-bcf2-48a714686519" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<autoOutline excludeRelatedTopics="true" lead="This category lets you configure the dictionary settings." />
+		</introduction>
+
+		<section address="AdditonalDictionaries">
+			<title>Additional Dictionary Folders</title>
+			<content>
+				<para>This option lets you define a set of additional folders to search for dictionary files.  Enter the
+name of a folder or click the "<ui>...</ui>" button to select a folder.  Relative paths are
+considered to be relative to the configuration file's location.  For the global configuration, the paths should
+always be fully qualified.  For solution, project, folder, and file-specific settings files, the folders should
+typically be relative so that if the solution or project moves, the dictionary files can still be found.  You are
+prompted when adding a folder if you would like to make it relative to the current configuration file.</para>
+
+				<para>Once a folder has been added, the <ui>Default Language</ui> combo box will be updated to contain
+any additional languages for dictionaries found in the new folder.</para>
+
+				<para>To remove a folder, select it in the list and click the <ui>Remove</ui> button.  To clear the list
+of all additional folders, click the <ui>Clear</ui> button.</para>
+
+				<para>For non-global settings, an option is available to inherit the additional dictionary folders from
+configurations above the current one.  If enabled, any additional folders in the current configuration are added
+to those.  If disabled, the settings in the current configuration will replace the inherited list of folders.  If
+not inherited and the list is left empty, it effectively clears the list of additional dictionary folders.</para>
+			</content>
+		</section>
+
+		<section address="DefaultLanguage">
+			<title>Default Language</title>
+			<content>
+				<para>This option defines the default language to use for spell checking.  The package comes with an
+English (en-US) dictionary.  <link xlink:href="508e7e8f-e00f-43f1-ad4c-5439ddec84b8">Custom dictionaries</link>
+can also be added and will be selectable here once installed.</para>
+			</content>
+		</section>
+
+		<section address="ResFileLang">
+			<title>Determine Localized Resource File Language from the Filename</title>
+			<content>
+				<para>This option allows you to specify whether or not to determine the dictionary language for localized
+resource files based on their filename.  For example, if the file <localUri>LocalizedForm.de-DE.resx</localUri>
+is opened in the XML file editor, the German language dictionary will be selected and used automatically if
+available regardless of the default language that has been selected.</para>
+			</content>
+		</section>
+
+		<section address="UserDictionary">
+			<title>User Dictionary</title>
+			<content>
+				<para>This option lets you see the content of the current user dictionary and remove unwanted items.
+User dictionaries are language-specific and are associated with the currently selected default language.  As
+such, the content of the list box will be updated when a different language is chosen.  To remove an entry,
+select it in the list and click the <ui>Remove</ui> button.  The user dictionary files are stored in the same
+folder as the dictionaries with which they are associated.  Typically this will be the local application data
+folder for global dictionaries.  They are named after the associated language with an <localUri>_User</localUri>
+suffix and a <localUri>.dic</localUri> extension (i.e. <localUri>en-US_User.dic</localUri>).</para>
+
+				<para>The <ui>Import</ui> button can be used to import a custom dictionary file.  The <ui>Export</ui>
+button can be used to export the custom dictionary to a file for sharing.</para>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

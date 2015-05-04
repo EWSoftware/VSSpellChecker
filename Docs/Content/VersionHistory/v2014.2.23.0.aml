@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="e1ba871e-548d-41e6-b9e2-b3f61d5a9212" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed escape sequence checking to ignore <codeInline>\x</codeInline>, <codeInline>\u</codeInline>,
+and <codeInline>\U</codeInline> if not followed by valid hex digits.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added code to check for correct spellings when a word is followed by a period as some
+dictionaries do include them on words such as "etc.".</para>
+					</listItem>
+
+					<listItem>
+						<para>Added handling of the "text" content type as a general catch-all for unknown derived content
+types implemented by third-party VSPackages.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added the "htmlx" content type to the HTML tagger so that files such as <localUri>.cshtml</localUri>
+files in Visual Studio 2013 Razor projects are spell checked correctly.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added the option to import and export the user dictionary from the configuration dialog.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for Latin and Cyrillic dictionaries such as sr-Latn and sr-Cyrl.</para>
+					</listItem>
+
+					<listItem>
+						<para>Dictionary filenames can now use language IDs with dashes or underscores separating the parts.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

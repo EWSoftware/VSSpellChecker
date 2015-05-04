@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/10/2015
+// Updated : 04/21/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -64,7 +64,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public string HelpUrl
         {
-            get { return this.Title.Replace(" ", "-"); }
+            get { return "c592c4d8-7387-47fe-9b79-28bf0168f447"; }
         }
 
         /// <inheritdoc />

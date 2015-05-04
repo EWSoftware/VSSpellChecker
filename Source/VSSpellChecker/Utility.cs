@@ -2,7 +2,7 @@
 // System  : Sandcastle Help File Builder Visual Studio Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/27/2015
+// Updated : 04/08/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -28,6 +28,7 @@ using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.TextManager.Interop;
 
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Editors;
@@ -109,10 +110,36 @@ namespace VisualStudio.SpellChecker
         public static string GetFilename(this ITextBuffer buffer)
         {
             ITextDocument textDoc;
+            IVsTextBuffer vsTextBuffer;
 
-            if(buffer != null && buffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc))
-                if(textDoc != null && !String.IsNullOrEmpty(textDoc.FilePath))
-                    return textDoc.FilePath;
+            if(buffer != null)
+            {
+                // Most files have an ITextDocument property
+                if(buffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc))
+                {
+                    if(textDoc != null && !String.IsNullOrEmpty(textDoc.FilePath))
+                        return textDoc.FilePath;
+                }
+
+                if(buffer.Properties.TryGetProperty(typeof(IVsTextBuffer), out vsTextBuffer))
+                {
+                    // Some, like HTML files, don't so we go through the IVsTextBuffer to get it
+                    if(vsTextBuffer != null)
+                    {
+                        var persistFileFormat = vsTextBuffer as IPersistFileFormat;
+                        string ppzsFilename;
+                        uint pnFormatIndex;
+
+                        if(persistFileFormat != null)
+                        {
+                            persistFileFormat.GetCurFile(out ppzsFilename, out pnFormatIndex);
+
+                            if(!String.IsNullOrEmpty(ppzsFilename))
+                                return ppzsFilename;
+                        }
+                    }
+                }
+            }
 
             return null;
         }
@@ -124,14 +151,9 @@ namespace VisualStudio.SpellChecker
         /// <returns>The filename extension or null if it could not be obtained</returns>
         public static string GetFilenameExtension(this ITextBuffer buffer)
         {
-            ITextDocument textDoc;
-            string extension = null;
+            string path = GetFilename(buffer);
 
-            if(buffer != null && buffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc))
-                if(textDoc != null && !String.IsNullOrEmpty(textDoc.FilePath))
-                    extension = Path.GetExtension(textDoc.FilePath);
-
-            return extension;
+            return String.IsNullOrEmpty(path) ? null : Path.GetExtension(path);
         }
 
         /// <summary>

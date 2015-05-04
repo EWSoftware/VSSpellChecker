@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>To set the spelling tag underline color, select <ui>Tools | Options | Environment | Fonts and Colors</ui>
+and select the <ui>Spelling Error</ui> display item.  The default color is magenta.  All other spell checker
+options are found in the configuration editor that appears when you select <ui>Tools | Spell Checker | Edit
+Global Configuration</ui> or open a <localUri>.vsspell</localUri> configuration file within a solution or
+project.  They are divided into several categories described below.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para><link xlink:href="af34b863-6a1c-41ed-bcf2-48a714686519" /></para>
+					</listItem>
+
+					<listItem>
+						<para><link xlink:href="b4a8726f-5bee-48a4-81a9-00b1be332607" /></para>
+					</listItem>
+
+					<listItem>
+						<para><link xlink:href="09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d" /></para>
+					</listItem>
+
+					<listItem>
+						<para><link xlink:href="c592c4d8-7387-47fe-9b79-28bf0168f447" /></para>
+					</listItem>
+
+					<listItem>
+						<para><link xlink:href="70a7fa5b-1a9e-494f-9d2c-5eb3321b2596" /></para>
+					</listItem>
+
+					<listItem>
+						<para><link xlink:href="db9ee77f-6932-4df7-bd06-e94f20fc7450" /></para>
+					</listItem>
+
+					<listItem>
+						<para><link xlink:href="e01bd3d9-c525-4407-8c65-fcdb64539299" /></para>
+					</listItem>
+
+				</list>
+
+				<para>Once you have finished making changes to the configuration options, save the file.  Global
+configuration options are saved to a file in the local application data folder where the custom dictionaries are
+kept and will be used by all versions of Visual Studio in which the spell checker package is installed.
+Solution, project, folder, and file-specific settings files are stored within the solution or project to which
+they apply.</para>
+
+				<alert class="note">
+					<para>In general, you must close and reopen a spell checked file for any modified settings to take
+effect.  The exception is removing words from the user dictionary.  Changes to it are immediate.</para>
+				</alert>
+
+				<para>To reset the configuration to its default state, click the <ui>Reset</ui> button.  All options with
+the exception of the user dictionary are reset to their default value.  Use the <ui>Dictionary Settings</ui>
+category to remove words from the user dictionary.</para>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" />
+			<link xlink:href="e339cac1-9783-4c2a-919f-88436c78fef8" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

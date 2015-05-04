@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="e01bd3d9-c525-4407-8c65-fcdb64539299" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category lets you indicate whether or not to import code analysis dictionaries in the project
+for use in spelling checking.  The imported options are only applied to the spell checked elements (comments,
+strings, XML content, attribute values, etc.).  To be imported, the code analysis XML file must appear in the
+project of the file being spell checked and must have its <ui>Build Action</ui> property set to
+<codeInline>CodeAnalysisDictionary</codeInline>.</para>
+
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para><ui>Import project code analysis dictionaries if present</ui> - This option is enabled by
+default and controls whether or not the code analysis dictionaries are imported.  If disabled, all of the
+following options are ignored.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Treat unrecognized words as misspelled words</ui> - This option is enabled by default and
+will cause unrecognized words in the dictionary to be treated as misspelled words.  Adding a
+<codeInline>SpellingAlternates</codeInline> attribute to the <codeInline>Word</codeInline> element allows you to
+specify a list of one or more comma-separated words to offer as suggested replacements.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Treat deprecated terms as misspelled words</ui> - This option is enabled by default and
+will cause deprecated terms in the dictionary to be treated as misspelled words.  The preferred alternate is
+offered as the suggested replacement.  If the preferred alternate is camel cased, spaces are inserted before each
+capital letter.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Treat compound terms as misspelled words</ui> - This option is enabled by default and will
+cause compound terms in the dictionary to be treated as misspelled words.  The compound alternate is offered as
+the suggested replacement.  If the compound alternate is camel cased, spaces are inserted before each capital
+letter.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Treat casing exceptions as ignored words</ui> - This option is disabled by default.  If
+enabled, casing exceptions in the dictionary will be treated as ignored words.  Typically, casing exceptions are
+in all uppercase or camel case.  Camel cased words are always ignored.  All uppercase words are ignored if the
+<ui>Ignore words in all uppercase</ui> option in the <ui>General Settings</ui> category is enabled.  This option
+may be of use if that option is disabled so that acronyms in all uppercase within this category are not spell
+checked.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Recognized Word Handling</ui> - This option controls how recognized words in the dictionary
+are treated.  The available options are:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para><ui>None</ui> - Recognized words are not imported and are spell checked in the normal
+manner.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Treat all as ignored words</ui> - Recognized words are treated as ignored words and
+will not be offered as suggested replacements for misspelled words.  This is the default setting.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Add all to dictionary</ui> - Recognized words are added to the dictionary and will be
+offered as suggested replacements for misspelled words.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Spelling attribute determines usage</ui> - An optional <codeInline>Spelling</codeInline>
+attribute on each <codeInline>Word</codeInline> element determines how each recognized word is handled.  If set
+to <codeInline>Add</codeInline>, the word is added to the dictionary.  If set to <codeInline>Ignore</codeInline>,
+the word is treated as an ignored word.  If set to <codeInline>None</codeInline>, any other value, or is omitted,
+the word is not imported and will be spell checked in the normal manner.</para>
+							</listItem>
+
+						</list>
+					</listItem>
+
+				</list>
+
+				<para>Below is an example of a code analysis dictionary file with the extra attributes used by the spell
+checker.</para>
+
+				<alert class="tip">
+					<para>Once you have configured and saved the settings, you can open the code analysis dictionary file
+itself to see how the words within it are treated.</para>
+				</alert>
+
+<code language="XML" title=" ">
+&lt;Dictionary&gt;
+  &lt;!-- This is a code analysis dictionary used for Visual Studio code analysis.
+       See http://msdn.microsoft.com/en-us/library/bb514188.aspx --&gt;
+  &lt;Words&gt;
+    &lt;Unrecognized&gt;
+      &lt;!-- SpellingAlternates is a comma-separated list of alternate spellings
+           to offer as suggestions --&gt;
+      &lt;Word SpellingAlternates="literally, precisely"&gt;verbatim&lt;/Word&gt;
+    &lt;/Unrecognized&gt;
+    &lt;Recognized&gt;
+      &lt;!-- The Spelling attribute tells the spell checker how to treat the word:
+           Add = Add to dictionary
+           Ignore = Ignore word
+           None/other value/attribute omitted = Not handled, pass through as a
+           normal word --&gt;
+      &lt;Word Spelling="Add"&gt;yadda&lt;/Word&gt;
+      &lt;Word Spelling="Ignore"&gt;Epg&lt;/Word&gt;
+      &lt;Word Spelling="Ignore"&gt;Mvp&lt;/Word&gt;
+      &lt;Word&gt;Gui&lt;/Word&gt;
+      &lt;Word Spelling="Ignore"&gt;Mru&lt;/Word&gt;
+      &lt;Word Spelling="Ignore"&gt;Kpi&lt;/Word&gt;
+      &lt;Word Spelling="Ignore"&gt;Hsl&lt;/Word&gt;
+      &lt;Word Spelling="Ignore"&gt;Rgb&lt;/Word&gt;
+      &lt;Word Spelling="Ignore"&gt;Bim&lt;/Word&gt;
+      &lt;Word&gt;Appender&lt;/Word&gt;
+    &lt;/Recognized&gt;
+    &lt;Deprecated&gt;
+      &lt;!-- The preferred alternate is offered as the suggested replacement --&gt;
+      &lt;Term PreferredAlternate="yadda"&gt;blah&lt;/Term&gt;
+      &lt;Term PreferredAlternate="Elements"&gt;NuoGui&lt;/Term&gt;
+    &lt;/Deprecated&gt;
+    &lt;Compound&gt;
+      &lt;!-- The compound alternate is offered as the suggested replacement with
+           spaces inserted after each capital letter. --&gt;
+      &lt;Term CompoundAlternate="BigBox"&gt;bigbox&lt;/Term&gt;
+    &lt;/Compound&gt;
+  &lt;/Words&gt;
+  &lt;Acronyms&gt;
+    &lt;!-- These are treated as ignored words if the option is enabled --&gt;
+    &lt;CasingExceptions&gt;
+      &lt;Acronym&gt;LCID&lt;/Acronym&gt;
+      &lt;Acronym&gt;UI&lt;/Acronym&gt;
+      &lt;Acronym&gt;SQLite&lt;/Acronym&gt;
+    &lt;/CasingExceptions&gt;
+  &lt;/Acronyms&gt;
+&lt;/Dictionary&gt;
+</code>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

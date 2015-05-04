@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/01/2015
+// Updated : 04/21/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -19,6 +19,7 @@
 // 04/14/2013  EFW  Imported the code into the project.
 // 04/14/2013  EFW  Added a check for #region directives so that the region title is spell checked too
 // 06/12/2014  EFW  Added support for ignoring certain items (verbatim string, quad-slash comments, etc.
+// 04/21/2015  EFW  Added support for ignoring interpolated strings
 //===============================================================================================================
 
 using System;
@@ -89,6 +90,13 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// </summary>
         /// <value>The default is false to include verbatim strings</value>
         public bool IgnoreVerbatimStrings { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore interpolated strings (<c>$"{PropertyName}..."</c>)
+        /// </summary>
+        /// <value>The default is false to include interpolated strings</value>
+        public bool IgnoreInterpolatedStrings { get; set; }
+
         #endregion
 
         #region Constructor
@@ -258,7 +266,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     case State.MultiLineComment:
                         ScanMultiLineComment(p);
                         break;
-                    
+
                     case State.MultiLineDocComment:
                         ScanMultiLineDocComment(p);
                         break;
@@ -345,7 +353,13 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 {
                     p.Advance(1);
                     p.State = State.String;
-                    ScanString(p);
+                    ScanString(p, false);
+                }
+                else if(p.Char() == '$' && p.NextChar() == '"') // Interpolated string
+                {
+                    // Keep the leading text so that we can handle the format specifiers properly
+                    p.State = State.String;
+                    ScanString(p, true);
                 }
                 else if(p.Char() == '\'') // Character literal
                 {
@@ -552,12 +566,18 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             Debug.Assert(p.State == State.MultiLineString);
         }
 
-        private void ScanString(LineProgress p)
+        private void ScanString(LineProgress p, bool isInterpolatedString)
         {
-            bool markText = !this.IgnoreNormalStrings;
+            bool markText = ((!isInterpolatedString && !this.IgnoreNormalStrings) ||
+                (isInterpolatedString && !this.IgnoreInterpolatedStrings));
 
             if(markText)
                 p.StartNaturalText();
+
+            // For interpolated strings, skip the leading format identifier.  We keep it so that we can skip the
+            // properties in it.
+            if(isInterpolatedString)
+                p.Advance(2);
 
             while(!p.EndOfLine)
             {

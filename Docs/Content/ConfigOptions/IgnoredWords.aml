@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="c592c4d8-7387-47fe-9b79-28bf0168f447" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category lets you define ignored words that are never presented as misspelled words nor will
+they appear as suggestions for other misspelled words.  This is useful for excluding things such as
+abbreviations, programming terms, etc.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<para>Escaped words are a special class of ignored words.  These are words that start with what looks
+like a valid escape sequence (<codeInline>\a</codeInline>, <codeInline>\t</codeInline>, etc.) but the remainder
+of the word should not appear as a misspelled word.  The default set includes common Doxygen tags that fit this
+category.</para>
+
+				<para>To add new words, enter one or more words in the text box and click the <ui>Add</ui> button.
+Escaped words can only start with one of the following sequences: <codeInline>\a \b \f \n \r \t \v \x \u \U</codeInline>.
+A backslash before any other letter will be removed and the word will be added without it.</para>
+
+				<para>To remove a word, select it in the list and click the <ui>Remove</ui> button.  To reset the list to
+the default set of ignored words, click the <ui>Default</ui> button.</para>
+
+				<para>For non-global settings, an option is available to inherit the ignored words lists from
+configurations above the current one.  If enabled, any additional ignored words in the current configuration are
+added to those.  If disabled, the settings in the current configuration will replace the inherited list of
+ignored words.  If not inherited and the list is left empty, it effectively clears the list of ignored words.</para>
+
+				<para>When the inherited option is enabled, the <ui>Default</ui> button clears the list of ignored words.
+If not inherited, it will set the list to the same one used in the global configuration.</para>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

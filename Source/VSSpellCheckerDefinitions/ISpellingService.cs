@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Definitions
 // File    : ISpellingService.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/19/2015
+// Updated : 04/07/2015
 // Note    : Copyright 2015, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -27,9 +27,9 @@ namespace VisualStudio.SpellChecker.Definitions
     /// </summary>
     /// <preliminary>This interface is under development and may be expanded in the future to provide more access
     /// to necessary spell checker features.</preliminary>
-    /// <exampe>
+    /// <example>
     /// This is a MEF component, and should be imported with the following code:
-    /// <code language="cs>
+    /// <code language="cs">
     /// [Import]
     /// private ISpellingService spellingService = null;
     /// </code>

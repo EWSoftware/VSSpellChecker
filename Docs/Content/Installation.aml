@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="e339cac1-9783-4c2a-919f-88436c78fef8" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<autoOutline excludeRelatedTopics="true" lead="none" />
+		</introduction>
+
+		<section address="Installation">
+			<title>Installation</title>
+			<content>
+				<para>If you have currently got a spell checker extension installed, uninstall or disable it before
+installing this package.  To install this package:</para>
+
+				<list class="bullet">
+					<listItem>
+						<para>Download the latest release of the VSIX installer from the <externalLink>
+<linkText>Releases</linkText>
+<linkAlternateText>Releases</linkAlternateText>
+<linkUri>https://GitHub.com/EWSoftware/VSSpellChecker/releases</linkUri>
+<linkTarget>_blank</linkTarget>
+</externalLink> page of this project site.</para>
+					</listItem>
+
+					<listItem>
+						<para>Close all open instances of Visual Studio before installing the package.</para>
+					</listItem>
+
+					<listItem>
+						<para>Run the downloaded package and follow the prompts to install it.  It can be installed in any
+version of Visual Studio from 2010 to 2015.  The Community Edition is also supported but the older Express
+editions are not as they do not allow installation of extensions.  Consider switching to the newer Community
+Edition which does support them.</para>
+					</listItem>
+
+				</list>
+
+				<para>This package can also be installed from within Visual Studio from the <externalLink>
+<linkText>Visual Studio Online Gallery</linkText>
+<linkAlternateText>Visual Studio Online Gallery</linkAlternateText>
+<linkUri>http://visualstudiogallery.msdn.microsoft.com/a23de100-31a1-405c-b4b7-d6be40c3dfff</linkUri>
+<linkTarget>_blank</linkTarget>
+</externalLink> using the <ui>Tools | Extension Manager</ui> option.  Select the online gallery and search for
+"Visual Studio Spell Checker".  Include the quote marks for an exact match and find the one created by
+<legacyItalic>EWSoftware</legacyItalic>.  Once found, you can click the <ui>Download</ui> button to download and
+install it.</para>
+
+				<para>Once installed, you will find a new <ui>Spell Checker</ui> option on the <ui>Tools</ui> menu.
+Unless other packages have been installed that alter its position, it will be the fourth option from the bottom
+between the <ui>External Tools</ui> and the <ui>Import and Export Settings</ui> options.  The submenu contains
+two options:</para>
+
+				<list class="bullet">
+					<listItem>
+						<para><ui>Spell Check Current Document</ui> - This opens the interactive spell checker tool window
+described below.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Edit Global Configuration</ui> - This opens the
+<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5">configuration editor</link> which lets you adjust the
+global spell checker settings.</para>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+
+		<section address="SpellAsYouType">
+			<title>Spell Check As You Type</title>
+			<content>
+				<para>In text editor windows, misspellings are highlighted by underlining them with a squiggly line.
+Place the mouse over the word and click the down arrow on the smart tag to see the available options.
+Alternately, you can place the cursor anywhere in the word and press <ui>Ctrl+.</ui> to show the smart tag
+options.</para>
+
+				<list class="bullet">
+					<listItem>
+						<para>A list of suggestions is shown at the top.  Selecting a word will replace the misspelling with
+that word.  If you hold down the <ui>Ctrl</ui> key while clicking a suggestion or select one with the keyboard
+and press <ui>Ctrl+Enter</ui>, all occurrences of the misspelled word will be replaced with the selected
+suggestion.</para>
+					</listItem>
+
+					<listItem>
+						<para><legacyBold>Ignore Once</legacyBold> - This option allows you to ignore the given instance of
+the misspelled word in the current file at the current location.  All other misspellings of the same word will
+still be flagged.  The given instance will be ignored as long as the file remains open.  If closed and reopened,
+it will be flagged again.</para>
+					</listItem>
+
+					<listItem>
+						<para><legacyBold>Ignore All</legacyBold> - Ignore all instances of the given misspelled word for the
+remainder of the Visual Studio session.  When Visual Studio is closed and reopened the ignored word will be
+flagged again.</para>
+					</listItem>
+
+					<listItem>
+						<para><legacyBold>Add To Dictionary</legacyBold> - This will add the word to the user dictionary so
+that it is no longer flagged as a misspelled word.  In addition, the word will be presented as a suggestion for
+other misspelled words when appropriate.  Use the **Edit Configuration** option to remove words from the user
+dictionary.</para>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+
+		<section address="CheckCurrentDoc">
+			<title>Spell Check Current Document</title>
+			<content>
+				<para>Selecting <ui>Tools | Spell Checker | Spell Check Current Document</ui> opens the interactive spell
+checker tool window.  This tool window will only be usable when a code or text editor window is selected as the
+active document window.  If a non-editor window is selected or if there are no misspellings, the buttons in the
+tool window will be disabled.  Open or click on an existing editor window containing editable text to activate
+the tool window options.  When there are misspellings in the active editor, it will be repositioned to the proper
+location and the misspelling will be highlighted.</para>
+
+				<alert class="note">
+					<para>If the misspelling is within a collapsed section, an attempt is made to expand the section and
+show the word.  If this does not occur, to make it visible, click on the editor window's tab to select it and
+then expand the section containing the cursor.  When you click on the spell checker tool window, it will
+reposition to the word and highlight it as usual.</para>
+				</alert>
+
+				<para>The misspelled word is shown at the top of the tool window and any suggested replacements are shown
+in the list box on the left side.  The following options are available:</para>
+
+				<list class="bullet">
+					<listItem>
+						<para><ui>Replace</ui> - Replace the current misspelled word with the selected suggestion.  Double
+clicking a suggestion in the list will also cause the misspelled word to be replaced with the double clicked
+word.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Replace All</ui> - Replace all occurrences of the misspelled word with the selected
+suggestion.  Holding down the <ui>Ctrl</ui> key when double clicking a suggestion in the list will also cause all
+occurrences of the misspelled word to be replaced with the double clicked word.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore Once</ui> - This option allows you to ignore the given instance of the misspelled
+word in the current file at the current location.  All other misspellings of the same word will still be flagged.
+The given instance will be ignored as long as the file remains open.  If closed and reopened, it will be flagged
+again.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore All</ui> - Ignore all instances of the given misspelled word for the remainder of
+the Visual Studio session.  When Visual Studio is closed and reopened the ignored word will be flagged again.</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<ui>Add Word</ui> - This will add the word to the user dictionary so that it is no longer flagged
+as a misspelled word and will present it as a suggestion for other misspelled words when appropriate.  Use the
+<ui>Edit Configuration</ui> option to remove words from the user dictionary.  Note that this button will be
+disabled for code analysis related misspellings (unrecognized word, deprecated term, and compound term) since the
+suggested replacements are what should replace the word and the term should not be added to the dictionary.</para>
+					</listItem>
+
+				</list>
+
+				<para>Once you have taken action on a misspelled word, the tool window will be updated and will move on
+to the next issue.  If there are no more, a "(No more issues)" message is displayed in the misspelled word box.</para>
+
+			</content>
+		</section>
+
+		<section address="DoubledWords">
+			<title>Doubled Word Detection</title>
+			<content>
+				<para>The spell checker will also detect doubled words and highlight them.  In such cases, the smart tag
+will contain an option to delete the doubled word and another to ignore it once.  In the spell checker tool
+window, when a doubled word is reached the list box will contain a single "(Delete word)" entry and only the
+<ui>Replace</ui> and <ui>Ignore Once</ui> buttons will be available for use.</para>
+
+				<alert class="note">
+					<para>Due to the way Visual Studio breaks up spans of text for interactive spell checking, it will only
+be able to detect doubled words if they appear on the same line.  Doubled words that span line breaks cannot be
+detected.</para>
+				</alert>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

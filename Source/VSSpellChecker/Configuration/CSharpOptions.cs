@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpOptions.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/01/2015
+// Updated : 04/21/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -73,5 +73,13 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <value>The default is false to include verbatim strings</value>
         [DefaultValue(false)]
         public bool IgnoreVerbatimStrings { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore interpolated strings in C# files
+        /// (<c>$"{PropertyName} ..."</c>)
+        /// </summary>
+        /// <value>The default is false to include interpolated strings</value>
+        [DefaultValue(false)]
+        public bool IgnoreInterpolatedStrings { get; set; }
     }
 }

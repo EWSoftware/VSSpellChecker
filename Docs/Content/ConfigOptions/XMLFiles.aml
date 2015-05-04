@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="db9ee77f-6932-4df7-bd06-e94f20fc7450" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>XML files are given special handling to ignore the content of certain elements entirely and to
+include the values of certain attributes when spell checking is performed.  This can greatly reduce the number of
+false reports when working with XML files.  The options are divided into two sections in this category.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para><ui>Ignored XML Elements</ui> - This section lets you manage the list of ignored XML elements.
+If an element name appears in this list, its inner text will be ignored when spell checking is performed.  All
+other elements not in the list will have their inner text spell checked.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Spell Checked Attributes</ui> - This section lets you manage the list of attribute names
+that will have their values spell checked.  The values for all other attributes not in the list will be
+ignored.</para>
+					</listItem>
+
+				</list>
+
+				<para>Each section contains a text box in which you can enter one or more element or attribute names.
+Click the <ui>Add</ui> button to add the name(s) to the list.  XML is case sensitive so enter the names exactly
+as they appear in the files.  The list box shows the current entries in each section.  Select an entry and click
+the <ui>Remove</ui> button to remove it.  Clicking the <ui>Default</ui> button will reset the associated list to
+the default set of elements or attributes.</para>
+
+				<para>For non-global settings, an option is available to inherit the ignored XML elements and spell
+checked attributes from configurations above the current one.  If enabled, any elements and attributes in the
+current configuration are added to those.  If disabled, the settings in the current configuration will replace
+the inherited lists of elements and attributes.  If not inherited and a list is left empty, it effectively clears
+the list of elements or attributes.</para>
+
+				<para>When the inherited option is enabled, the <ui>Default</ui> buttons clear the list of elements or
+attributes.  If not inherited, they will set the list to the same one used in the global configuration.</para>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

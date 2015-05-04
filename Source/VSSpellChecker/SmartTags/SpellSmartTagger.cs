@@ -50,10 +50,10 @@ namespace VisualStudio.SpellChecker.SmartTags
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer _buffer;
-        private SpellingDictionary _dictionary;
-        private ITagAggregator<MisspellingTag> _misspellingAggregator;
-        private bool disposed = false;
+        private ITextBuffer buffer;
+        private SpellingDictionary dictionary;
+        private ITagAggregator<MisspellingTag> misspellingAggregator;
+        private bool disposed;
 
         internal const string SpellingErrorType = "Spelling Error Smart Tag";
 
@@ -119,14 +119,15 @@ namespace VisualStudio.SpellChecker.SmartTags
         public SpellSmartTagger(ITextBuffer buffer, SpellingDictionary dictionary,
           ITagAggregator<MisspellingTag> misspellingAggregator)
         {
-            _buffer = buffer;
-            _dictionary = dictionary;
-            _misspellingAggregator = misspellingAggregator;
+            this.buffer = buffer;
+            this.dictionary = dictionary;
+            this.misspellingAggregator = misspellingAggregator;
 
-            _misspellingAggregator.TagsChanged += (sender, args) =>
+            this.misspellingAggregator.TagsChanged += (sender, args) =>
             {
-                foreach(var span in args.Span.GetSpans(_buffer))
-                    RaiseTagsChangedEvent(span);
+                if(!this.disposed)
+                    foreach(var span in args.Span.GetSpans(this.buffer))
+                        RaiseTagsChangedEvent(span);
             };
         }
         #endregion
@@ -141,12 +142,12 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <returns>Squiggle tags in the provided spans</returns>
         public IEnumerable<ITagSpan<SpellSmartTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            if(spans.Count == 0)
+            if(spans.Count == 0 || disposed)
                 yield break;
 
             ITextSnapshot snapshot = spans[0].Snapshot;
 
-            foreach(var misspelling in _misspellingAggregator.GetTags(spans))
+            foreach(var misspelling in misspellingAggregator.GetTags(spans))
             {
                 var misspellingSpans = misspelling.Span.GetSpans(snapshot);
 
@@ -179,6 +180,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         #region IDisposable
         //=====================================================================
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
@@ -187,12 +189,12 @@ namespace VisualStudio.SpellChecker.SmartTags
 
         private void Dispose(bool disposing)
         {
-            if(!this.disposed)
+            if(!disposed)
             {
                 if(disposing)
                 {
-                    _misspellingAggregator.Dispose();
-                    _misspellingAggregator = null;
+                    misspellingAggregator.Dispose();
+                    misspellingAggregator = null;
                 }
 
                 disposed = true;
@@ -223,7 +225,7 @@ namespace VisualStudio.SpellChecker.SmartTags
             List<ISmartTagAction> actions = new List<ISmartTagAction>();
 
             foreach(var suggestion in suggestions)
-                actions.Add(new SpellSmartTagAction(trackingSpan, suggestion, _dictionary));
+                actions.Add(new SpellSmartTagAction(trackingSpan, suggestion, dictionary));
 
             if(actions.Count > 0)
             {
@@ -237,13 +239,13 @@ namespace VisualStudio.SpellChecker.SmartTags
             // Add Dictionary operations (ignore all)
             List<ISmartTagAction> dictionaryActions = new List<ISmartTagAction>();
 
-            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore Once",
+            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore Once",
                 DictionaryAction.IgnoreOnce));
-            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore All",
+            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore All",
                 DictionaryAction.IgnoreAll));
 
             if(misspellingType == MisspellingType.MisspelledWord)
-                dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Add to Dictionary",
+                dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Add to Dictionary",
                     DictionaryAction.AddWord));
 
             smartTagSets.Add(new SmartTagActionSet(dictionaryActions.AsReadOnly()));
@@ -270,7 +272,7 @@ namespace VisualStudio.SpellChecker.SmartTags
 
             doubledWordActions.Add(new DoubledWordSmartTagAction(deleteWordSpan));
 
-            doubledWordActions.Add(new SpellDictionarySmartTagAction(trackingSpan, _dictionary, "Ignore Once",
+            doubledWordActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore Once",
                 DictionaryAction.IgnoreOnce));
             smartTagSets.Add(new SmartTagActionSet(doubledWordActions.AsReadOnly()));
 

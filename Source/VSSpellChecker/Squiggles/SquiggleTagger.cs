@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SquiggleTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 01/30/2015
+// Updated : 04/16/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -41,13 +41,17 @@ namespace VisualStudio.SpellChecker.Squiggles
     internal class SquiggleTagger : ITagger<IErrorTag>, IDisposable
     {
         #region Private Fields
-        private ITextBuffer _buffer;
-        private ITagAggregator<MisspellingTag> _misspellingAggregator;
-        private bool disposed = false;
+        //=====================================================================
+
+        private ITextBuffer buffer;
+        private ITagAggregator<MisspellingTag> misspellingAggregator;
+        private bool disposed;
+
         internal const string SpellingErrorType = "Spelling Error";
         #endregion
 
         #region MEF Imports / Exports
+        //=====================================================================
 
         /// <summary>
         /// Defines colors for the spelling squiggles.
@@ -105,21 +109,31 @@ namespace VisualStudio.SpellChecker.Squiggles
         }
         #endregion
 
-        #region Constructors
+        #region Constructor
+        //=====================================================================
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="buffer">The buffer to use</param>
+        /// <param name="misspellingAggregator">The misspelling aggregator to use</param>
         public SquiggleTagger(ITextBuffer buffer, ITagAggregator<MisspellingTag> misspellingAggregator)
         {
-            _buffer = buffer;
-            _misspellingAggregator = misspellingAggregator;
-            _misspellingAggregator.TagsChanged += (sender, args) =>
+            this.buffer = buffer;
+            this.misspellingAggregator = misspellingAggregator;
+
+            this.misspellingAggregator.TagsChanged += (sender, args) =>
             {
-                foreach(var span in args.Span.GetSpans(_buffer))
-                    RaiseTagsChangedEvent(span);
+                if(!this.disposed)
+                    foreach(var span in args.Span.GetSpans(this.buffer))
+                        RaiseTagsChangedEvent(span);
             };
         }
-
         #endregion
 
         #region ITagger<SpellSquiggleTag> Members
+        //=====================================================================
+
         /// <summary>
         /// Returns tags on demand.
         /// </summary>
@@ -127,29 +141,33 @@ namespace VisualStudio.SpellChecker.Squiggles
         /// <returns>Squiggle tags in provided spans.</returns>
         public IEnumerable<ITagSpan<IErrorTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            if(spans.Count == 0)
+            if(spans.Count == 0 || disposed)
                 yield break;
 
             ITextSnapshot snapshot = spans[0].Snapshot;
 
-            foreach(var misspelling in _misspellingAggregator.GetTags(spans))
+            foreach(var misspelling in misspellingAggregator.GetTags(spans))
             {
                 var misspellingSpans = misspelling.Span.GetSpans(snapshot);
+
                 if(misspellingSpans.Count != 1)
                     continue;
 
                 SnapshotSpan errorSpan = misspellingSpans[0];
 
-                yield return new TagSpan<IErrorTag>(
-                                errorSpan,
-                                new SpellSquiggleTag(SquiggleTagger.SpellingErrorType));
+                yield return new TagSpan<IErrorTag>(errorSpan, new SpellSquiggleTag(SquiggleTagger.SpellingErrorType));
             }
         }
 
+        /// <inheritdoc />
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+
         #endregion
 
         #region IDisposable
+        //=====================================================================
+
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
@@ -158,11 +176,12 @@ namespace VisualStudio.SpellChecker.Squiggles
 
         private void Dispose(bool disposing)
         {
-            if(!this.disposed)
+            if(!disposed)
             {
                 if(disposing)
                 {
-                    _misspellingAggregator.Dispose();
+                    misspellingAggregator.Dispose();
+                    misspellingAggregator = null;
                 }
 
                 disposed = true;
@@ -171,15 +190,19 @@ namespace VisualStudio.SpellChecker.Squiggles
         #endregion
 
         #region Helpers
+        //=====================================================================
+
+        /// <summary>
+        /// Raise the <see cref="TagsChanged"/> event
+        /// </summary>
+        /// <param name="subjectSpan">The snapshot span to use for the event arguments</param>
         private void RaiseTagsChangedEvent(SnapshotSpan subjectSpan)
         {
             EventHandler<SnapshotSpanEventArgs> handler = this.TagsChanged;
-            if(handler != null)
-            {
-                handler(this, new SnapshotSpanEventArgs(subjectSpan));
-            }
-        }
 
+            if(handler != null)
+                handler(this, new SnapshotSpanEventArgs(subjectSpan));
+        }
         #endregion
     }
 }

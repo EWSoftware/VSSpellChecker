@@ -3,20 +3,15 @@ CLS
 
 CD Source
 
-REM Build the package using the lowest Visual Studio version available
-IF NOT EXIST "%VS100COMNTOOLS%..\IDE\devenv.exe" GOTO VS2012
+REM Enforce use of VS 2010 SDK if present.  If not it tries to use the VS 2011 SDK even if its not there.
+IF EXIST "%ProgramFiles(x86)%\MSBuild\Microsoft\VisualStudio\v10.0\VSSDK\Microsoft.VsSDK.targets" SET VisualStudioVersion=10.0
 
-"%WINDIR%\Microsoft.Net\Framework\v4.0.30319\msbuild.exe" "VSSpellChecker_2010.sln" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
-GOTO End
+..\Source\.nuget\NuGet restore "VSSpellChecker.sln"
 
-:VS2012
-IF NOT EXIST "%VS110COMNTOOLS%..\IDE\devenv.exe" GOTO VS2013
+"%WINDIR%\Microsoft.Net\Framework\v4.0.30319\msbuild.exe" "VSSpellChecker.sln" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
 
-"%WINDIR%\Microsoft.Net\Framework\v4.0.30319\msbuild.exe" "VSSpellChecker_2012.sln" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
-GOTO End
+CD ..\NuGet
 
-:VS2013
-"%WINDIR%\Microsoft.Net\Framework\v4.0.30319\msbuild.exe" "VSSpellChecker_2013.sln" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+..\Source\.nuget\NuGet Pack VSSpellChecker.nuspec -NoDefaultExcludes -NoPackageAnalysis -OutputDirectory ..\Deployment
 
-:End
 CD ..\

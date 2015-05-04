@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="74c10bfa-832e-4f2a-bd70-1463c98c6f65" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed some theme and font size issues.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the C# tagger so that it does not include the <codeInline>region</codeInline> keyword
+when spell checking the subsequent region description.</para>
+					</listItem>
+
+					<listItem>
+						<para>When using the tool window, if a misspelling occurs within a collapsed region, the collapsed
+region is now expanded to show the misspelling.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for importing code analysis dictionary settings for use in spell checking.  The
+new <link xlink:href="e01bd3d9-c525-4407-8c65-fcdb64539299" /> category options control how they are used.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

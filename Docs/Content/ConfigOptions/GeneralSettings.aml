@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="b4a8726f-5bee-48a4-81a9-00b1be332607" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<autoOutline excludeRelatedTopics="true" lead="This category contains general settings." />
+		</introduction>
+
+		<section address="General">
+			<title>General</title>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para><ui>Spell check as you type</ui> - This enables and disables the spell checker.  Naturally, it
+is enabled by default. The spell checker tool window relies on this being enabled.  If disabled, spell checking
+will be unavailable until it is turned back on.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore words with digits</ui> - This will cause the spell checker to ignore any words
+containing digits.  The default is enabled.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore words in all uppercase</ui> - This will cause the spell checker to ignore any words
+consisting of all uppercase letters.  The default is enabled.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore .NET and C-style format string specifiers</ui> - This will cause the spell checker
+to skip text in .NET and C-style format specifiers (i.e. <codeInline>{0:MM/dd/yyyy}</codeInline> and
+<codeInline>%ld</codeInline>).  This prevents the text within them from showing up as misspelled words.  The
+default is enabled.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore words that look like filenames and e-mail addresses</ui> - This will cause the spell
+checker to ignore words that contain periods and at signs with no intervening whitespace (i.e.
+<localUri>Userinfo.config</localUri> or <localUri>auser@mydomain.com</localUri>).  This option can occasionally
+cause a misspelled word to be missed such as when a space is missing following the period in a sentence.
+However, it excludes far more false reports and is enabled by default.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore words that look like XML elements in spell checked text</ui> - This will cause the
+spell checker to ignore words within angle brackets in spell checked text (i.e. "The <codeInline>&lt;para&gt;</codeInline>
+element creates a paragraph").  This option can occasionally cause a misspelled word to be missed such as when a
+space is missing following the opening angle bracket.  However, it excludes far more false reports and is enabled
+by default.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Treat underscores as separators</ui> - This option is disabled by default and all words
+containing underscores will be ignored.  Enabling this option will treat the underscore as a word separator and
+each word separated by the underscores will be spell checked along with all the other text.</para>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+
+		<section address="IgnoredCharClass">
+			<title>Ignored Character Class</title>
+			<content>
+				<para>This option provides a simplistic way of ignoring non-English words containing specific classes of
+characters.  It works best when spell checking English text in files containing Cyrillic or Asian text.  The
+default is <ui>Include all words</ui> so that all words are included regardless of the characters they contain.
+It can be set to <ui>Ignore words containing non-Latin characters</ui> to ignore words containing characters
+above 0xFF or it can be set to <ui>Ignore words containing non-ASCII characters</ui> to ignore words containing
+characters above 0x7F.</para>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

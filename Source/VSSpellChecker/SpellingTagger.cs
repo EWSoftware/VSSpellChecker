@@ -955,8 +955,21 @@ namespace VisualStudio.SpellChecker
                 {
                     end = i + 1;
 
-                    while(end < text.Length && Char.IsDigit(text[end]))
-                        end++;
+                    if(i > 0 && text.Length > 2 && text[0] == '$' && text[1] == '"')
+                    {
+                        // C# 6 string format: $"{Property}".  Find the end accounting for escaped braces
+                        while(++end < text.Length)
+                            if(text[end] == '}')
+                            {
+                                if(end + 1 == text.Length || text[end + 1] != '}')
+                                    break;
+
+                                end++;
+                            }
+                    }
+                    else
+                        while(end < text.Length && Char.IsDigit(text[end]))
+                            end++;
 
                     if(end < text.Length && text[end] == ':')
                     {

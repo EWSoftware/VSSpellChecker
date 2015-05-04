@@ -21,7 +21,7 @@ bld/
 [Oo]bj/
 
 # Roslyn cache directories
-*.ide/
+*.vs/
 
 # Visual Studio profiler
 *.psess
@@ -29,7 +29,7 @@ bld/
 *.vspx
 
 # Sandcastle Help File Builder is a documentation generator add-in
-Doc/Help/
+Docs/Help/
 *.shfbproj_*
 
 # Publish Web Output

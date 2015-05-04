@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This topic describes the various changes made to the Visual Studio Spell Checker over the life of the
+project.  Select a version below to see a description of its changes.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>
+							<link xlink:href="d5b0b38e-0abb-45b2-943f-5628da441785" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="74c10bfa-832e-4f2a-bd70-1463c98c6f65" />
+						</para>
+					</listItem>
+					
+					<listItem>
+						<para>
+							<link xlink:href="fae83dba-8263-4ac9-a607-8dfa77ffce2c" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="e9510e5d-6d29-4561-b127-36fe3b3c61ce" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="15873823-4d56-486e-9069-836d44e96c75" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="e1ba871e-548d-41e6-b9e2-b3f61d5a9212" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="bdd744a5-4748-4c72-9ba1-dea6374bf5fe" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="1c0d6f51-f08f-4a6f-9f5b-3ff231533b91" />
+						</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

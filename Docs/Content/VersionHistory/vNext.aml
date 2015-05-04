@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="d5b0b38e-0abb-45b2-943f-5628da441785" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed a problem retrieving the filename from the text buffer which prevented extension
+exclusions from working for certain file types.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the taggers so that the aggregators cannot be used after being disposed.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for skipping format specifiers in interpolated strings
+(<codeInline>$"{Property}"</codeInline>) and added a configuration option to skip them entirely.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>
