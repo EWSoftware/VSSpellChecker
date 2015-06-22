@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/01/2015
+// Updated : 06/22/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -96,8 +96,9 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        // Word break characters (\u2026 = Ellipsis character).  Specifically excludes: _ . ' @
-        private const string wordBreakChars = " \t!\"#$%&()*+,-/:;<=>?[\\]^`{|}~\u2026";
+        // Word break characters (\u201C/\u201D = Unicode quotes, \u2026 = Ellipsis character).
+        // Specifically excludes: _ . ' @
+        private const string wordBreakChars = " \t!\"#$%&()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u2026";
 
         private ITextBuffer _buffer;
         private ITagAggregator<INaturalTextTag> _naturalTextAggregator;
@@ -221,7 +222,6 @@ namespace VisualStudio.SpellChecker
                 _dictionary.DictionaryUpdated -= DictionaryUpdated;
                 _dictionary.ReplaceAll -= ReplaceAll;
                 _dictionary.IgnoreOnce -= IgnoreOnce;
-                _dictionary = null;
             }
         }
 
@@ -575,6 +575,9 @@ namespace VisualStudio.SpellChecker
 
             foreach(var dirtySpan in dirtySpans)
             {
+                if(_isClosed)
+                    return;
+
                 var dirty = dirtySpan.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive);
 
                 // We have to go back to the UI thread to get natural text spans
@@ -607,6 +610,7 @@ namespace VisualStudio.SpellChecker
                         _misspellings = currentMisspellings;
 
                         var temp = TagsChanged;
+
                         if(temp != null)
                             temp(this, new SnapshotSpanEventArgs(dirty));
                     }));
@@ -615,10 +619,7 @@ namespace VisualStudio.SpellChecker
 
             lock(_dirtySpanLock)
             {
-                if(_isClosed)
-                    return;
-
-                if(_dirtySpans.Count != 0)
+                if(!_isClosed && _dirtySpans.Count != 0)
                     _dispatcher.BeginInvoke(new Action(() => ScheduleUpdate()));
             }
         }
@@ -649,6 +650,9 @@ namespace VisualStudio.SpellChecker
 
                 foreach(var word in GetWordsInText(text))
                 {
+                    if(_isClosed)
+                        yield break;
+
                     textToParse = text.Substring(word.Start, word.Length);
 
                     // Spell check the word if it looks like one and is not ignored

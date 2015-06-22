@@ -132,10 +132,20 @@ namespace VisualStudio.SpellChecker
 
                         if(persistFileFormat != null)
                         {
-                            persistFileFormat.GetCurFile(out ppzsFilename, out pnFormatIndex);
+                            try
+                            {
+                                persistFileFormat.GetCurFile(out ppzsFilename, out pnFormatIndex);
 
-                            if(!String.IsNullOrEmpty(ppzsFilename))
-                                return ppzsFilename;
+                                if(!String.IsNullOrEmpty(ppzsFilename))
+                                    return ppzsFilename;
+                            }
+                            catch(NotImplementedException )
+                            {
+                                // Secondary buffers throw an exception rather than returning E_NOTIMPL so we'll
+                                // ignore these.  They are typically used for inline CSS, script, etc. and can be
+                                // safely ignored as they're part of a primary buffer that does have a filename.
+                                System.Diagnostics.Debug.WriteLine("Unable to obtain filename, probably a secondary buffer");
+                            }
                         }
                     }
                 }
