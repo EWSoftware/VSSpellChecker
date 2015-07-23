@@ -9,8 +9,8 @@
 			<content>
 				<list class="bullet">
 					<listItem>
-						<para>Fixed a problem retrieving the filename from the text buffer which prevented extension
-exclusions from working for certain file types.</para>
+						<para>Fixed a couple of problems retrieving the filename from the text buffer which prevented
+extension exclusions from working for certain file types or could cause an exception.</para>
 					</listItem>
 
 					<listItem>
@@ -18,10 +18,22 @@ exclusions from working for certain file types.</para>
 					</listItem>
 
 					<listItem>
+						<para>Fixed a problem with the dictionary being accessed after the view is closed in certain
+situations.</para>
+					</listItem>
+
+					<listItem>
 						<para>Added support for skipping format specifiers in interpolated strings
 (<codeInline>$"{Property}"</codeInline>) and added a configuration option to skip them entirely.</para>
 					</listItem>
 
+					<listItem>
+						<para>Added Unicode quote marks as word break characters.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added the ability to add file-specific settings for solution items.</para>
+					</listItem>
 				</list>
 
 			</content>

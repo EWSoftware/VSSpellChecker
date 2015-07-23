@@ -128,9 +128,7 @@ clicking on the PayPal donation button below. If you would prefer to donate via 
 please send me an e-mail at Eric@EWoodruff.us and I will reply with my mailing address.</para>
 
 				<markup>
-
-[![Make donations with PayPal - It's fast, free and secure!](media/PayPal.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=29KUXTJR48CRE)
-
+[![Make donations with PayPal - It's fast, free and secure!](https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/Docs/media/PayPal.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=29KUXTJR48CRE)
 				</markup>
 
 				<para>The above method of donating is secure. PayPal guarantees your privacy and security. I never

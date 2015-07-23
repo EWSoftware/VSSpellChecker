@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceFactory.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/27/2015
+// Updated : 07/22/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -21,18 +21,16 @@
 //===============================================================================================================
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 
 using EnvDTE;
 using EnvDTE80;
-using Microsoft.VisualStudio;
+
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.TextManager.Interop;
 
 using VisualStudio.SpellChecker.Configuration;
 
@@ -233,6 +231,17 @@ namespace VisualStudio.SpellChecker
                             if(projectItem != null)
                                 config.Load(filename);
                         }
+                        else
+                            if(projectItem.Kind == EnvDTE.Constants.vsProjectItemKindSolutionItems)
+                            {
+                                // Looks like a solution item, see if a related setting file exists
+                                filename = bufferFilename + ".vsspell";
+
+                                projectItem = solution.FindProjectItem(filename);
+
+                                if(projectItem != null)
+                                    config.Load(filename);
+                            }
                     }
 
                     // Load code analysis dictionaries if wanted

@@ -6,16 +6,6 @@
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="500">
 	<StackPanel>
-		<Border BorderThickness="1" BorderBrush="Black" Margin="3">
-			<TextBlock Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
-				Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}" TextWrapping="Wrap" Padding="5">
-				<Bold>Request for Feedback:</Bold>  File-specific settings and property inheritance are new to this
-release and represent a significant change in how the spell checker settings are handled.<LineBreak/><LineBreak/>
-Since I cannot possibly test every conceivable combination of settings files, there may be issues that I am not
-aware of.  If you think something is not working right, please open an issue at the project site using the link
-found at the bottom of this editor window.  Thank you!
-			</TextBlock>
-		</Border>
 		<TextBlock Name="tbGlobal" TextWrapping="Wrap" Margin="10, 10, 10, 0">
 			This file is used to configure the global spell checker settings.  These are the base settings used in the
 absence of, and inherited by, solution, project, folder, and file-specific configuration files.

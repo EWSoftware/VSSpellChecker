@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/10/2015
+// Updated : 07/22/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -28,6 +28,7 @@ using System.Runtime.InteropServices;
 
 using EnvDTE;
 using EnvDTE80;
+
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -401,7 +402,13 @@ namespace VisualStudio.SpellChecker
                             }
                         }
                     }
-
+                    else
+                        if(item.ProjectItem.Kind == EnvDTE.Constants.vsProjectItemKindSolutionItems)
+                        {
+                            // Looks like a solution item
+                            settingsFilename = item.ProjectItem.get_FileNames(1);
+                        }
+            
             if(settingsFilename != null)
             {
                 if(settingsFilename.EndsWith(".vsspell", StringComparison.OrdinalIgnoreCase) ||
