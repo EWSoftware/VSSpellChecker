@@ -31,8 +31,8 @@ not inherited and the list is left empty, it effectively clears the list of addi
 		<section address="DefaultLanguage">
 			<title>Default Language</title>
 			<content>
-				<para>This option defines the default language to use for spell checking.  The package comes with an
-English (en-US) dictionary.  <link xlink:href="508e7e8f-e00f-43f1-ad4c-5439ddec84b8">Custom dictionaries</link>
+				<para>This option defines the default language to use for spell checking.  The package comes with several
+dictionaries for various languages.  <link xlink:href="508e7e8f-e00f-43f1-ad4c-5439ddec84b8">Custom dictionaries</link>
 can also be added and will be selectable here once installed.</para>
 			</content>
 		</section>

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/28/2015
+// Updated : 08/02/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -23,12 +23,16 @@
 // 06/06/2014  EFW  Added support for doubled word smart tags
 // 06/20/2014  EFW  Added support for use in VS 2013 Peek Definition windows
 // 02/28/2015  EFW  Added support for code analysis dictionary options
+// 07/28/2015  EFW  Added support for culture information in the spelling suggestions
+// 08/01/2015  EFW  Added support for multiple dictionary languages
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.Globalization;
+using System.Linq;
 
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -36,8 +40,6 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-using VisualStudio.SpellChecker;
-using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.SmartTags
@@ -214,41 +216,64 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <param name="suggestions">The suggestions to use as the replacement</param>
         /// <returns>A read-only collection of smart tag action sets</returns>
         private ReadOnlyCollection<SmartTagActionSet> GetMisspellingSmartTagActions(SnapshotSpan errorSpan,
-          MisspellingType misspellingType, IEnumerable<string> suggestions)
+          MisspellingType misspellingType, IEnumerable<SpellingSuggestion> suggestions)
         {
             List<SmartTagActionSet> smartTagSets = new List<SmartTagActionSet>();
-
+            List<ISmartTagAction> actions = new List<ISmartTagAction>();
             ITrackingSpan trackingSpan = errorSpan.Snapshot.CreateTrackingSpan(errorSpan,
                 SpanTrackingMode.EdgeExclusive);
 
-            // Add spelling suggestions (if there are any)
-            List<ISmartTagAction> actions = new List<ISmartTagAction>();
+            // Add spelling suggestions grouped by language when appropriate
+            foreach(var word in suggestions)
+            {
+                if(!word.IsGroupHeader)
+                    actions.Add(new SpellSmartTagAction(trackingSpan, word, dictionary));
+                else
+                {
+                    if(actions.Count != 0)
+                    {
+                        smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
+                        actions = new List<ISmartTagAction>();
+                    }
 
-            foreach(var suggestion in suggestions)
-                actions.Add(new SpellSmartTagAction(trackingSpan, suggestion, dictionary));
+                    actions.Add(new LabelSmartTagAction(String.Format(CultureInfo.InvariantCulture, "{0} ({1})",
+                        word.Culture.EnglishName, word.Culture.Name)));
+                }
+            }
 
-            if(actions.Count > 0)
+            if(actions.Count != 0)
+                smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
+
+            if(smartTagSets.Count != 0)
             {
                 // This acts as a place holder to tell the user to hold the Ctrl key down to replace all
                 // occurrences of the selected word.
-                actions.Insert(0, new SpellSmartTagAction(null, "Hold Ctrl to replace all", null));
+                actions = new List<ISmartTagAction>();
+                actions.Add(new LabelSmartTagAction("Hold Ctrl to replace all"));
+
+                smartTagSets.Insert(0, new SmartTagActionSet(actions.AsReadOnly()));
+            }
+
+            // Add Dictionary operations
+            actions = new List<ISmartTagAction>();
+
+            actions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore Once",
+                DictionaryAction.IgnoreOnce, null));
+            actions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore All",
+                DictionaryAction.IgnoreAll, null));
+
+            smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
+
+            if(misspellingType == MisspellingType.MisspelledWord)
+            {
+                actions = new List<ISmartTagAction>();
+
+                foreach(var d in dictionary.Dictionaries)
+                    actions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary,
+                        "Add to Dictionary", DictionaryAction.AddWord, d.Culture));
 
                 smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
             }
-
-            // Add Dictionary operations (ignore all)
-            List<ISmartTagAction> dictionaryActions = new List<ISmartTagAction>();
-
-            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore Once",
-                DictionaryAction.IgnoreOnce));
-            dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore All",
-                DictionaryAction.IgnoreAll));
-
-            if(misspellingType == MisspellingType.MisspelledWord)
-                dictionaryActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Add to Dictionary",
-                    DictionaryAction.AddWord));
-
-            smartTagSets.Add(new SmartTagActionSet(dictionaryActions.AsReadOnly()));
 
             return smartTagSets.AsReadOnly();
         }
@@ -273,7 +298,7 @@ namespace VisualStudio.SpellChecker.SmartTags
             doubledWordActions.Add(new DoubledWordSmartTagAction(deleteWordSpan));
 
             doubledWordActions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary, "Ignore Once",
-                DictionaryAction.IgnoreOnce));
+                DictionaryAction.IgnoreOnce, null));
             smartTagSets.Add(new SmartTagActionSet(doubledWordActions.AsReadOnly()));
 
             return smartTagSets.AsReadOnly();

@@ -3,6 +3,12 @@
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
 			<para>Changes in this release</para>
+
+			<alert class="important">
+				<para>Effective with this release, Visual Studio 2010 and Visual Studio 2012 are no longer supported.
+With the release of Visual Studio 2015, I needed to reduce the number of versions for which I can realistically
+provide support. Four versions was starting to be too many.</para>
+			</alert>
 		</introduction>
 
 		<section>

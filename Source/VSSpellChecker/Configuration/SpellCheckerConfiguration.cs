@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 08/02/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 //===============================================================================================================
 // 02/01/2015  EFW  Refactored the configuration settings to allow for solution and project specific settings
+// 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
 
 using System;
@@ -44,6 +45,7 @@ namespace VisualStudio.SpellChecker.Configuration
 
         private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, excludedExtensions,
             recognizedWords;
+        private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
         private Dictionary<string, string> deprecatedTerms, compoundTerms;
         private Dictionary<string, IList<string>> unrecognizedWords;
@@ -53,11 +55,19 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         /// <summary>
-        /// This is used to get or set the default language for the spell checker
+        /// This read-only property returns a list of dictionary languages to be used when spell checking
         /// </summary>
-        /// <remarks>The default is to use the English US dictionary (en-US)</remarks>
-        [DefaultValue(typeof(CultureInfo), "en-US")]
-        public CultureInfo DefaultLanguage { get; set; }
+        public IList<CultureInfo> DictionaryLanguages
+        {
+            get
+            {
+                // Always ensure we have at least the default language if no configuration was loaded
+                if(dictionaryLanguages.Count == 0)
+                    dictionaryLanguages.Add(new CultureInfo("en-US"));
+
+                return dictionaryLanguages;
+            }
+        }
 
         /// <summary>
         /// This is used to get or set whether or not to spell checking as you type is enabled
@@ -314,7 +324,7 @@ namespace VisualStudio.SpellChecker.Configuration
             csharpOptions = new CSharpOptions();
             cadOptions = new CodeAnalysisDictionaryOptions();
 
-            this.DefaultLanguage = new CultureInfo("en-US");
+            dictionaryLanguages = new List<CultureInfo>();
 
             this.SpellCheckAsYouType = this.IgnoreWordsWithDigits = this.IgnoreWordsInAllUppercase =
                 this.IgnoreFormatSpecifiers = this.IgnoreFilenamesAndEMailAddresses =
@@ -393,7 +403,6 @@ namespace VisualStudio.SpellChecker.Configuration
 
                 var configuration = new SpellingConfigurationFile(filename, this);
 
-                this.DefaultLanguage = configuration.ToCultureInfo(PropertyNames.DefaultLanguage);
                 this.SpellCheckAsYouType = configuration.ToBoolean(PropertyNames.SpellCheckAsYouType);
                 this.IgnoreWordsWithDigits = configuration.ToBoolean(PropertyNames.IgnoreWordsWithDigits);
                 this.IgnoreWordsInAllUppercase = configuration.ToBoolean(PropertyNames.IgnoreWordsInAllUppercase);
@@ -463,7 +472,7 @@ namespace VisualStudio.SpellChecker.Configuration
                       PropertyNames.AdditionalDictionaryFoldersItem))
                     {
                         // Fully qualify relative paths with the configuration file path
-                        if(Path.IsPathRooted(folder))
+                        if(folder.IndexOf('%') != -1 || Path.IsPathRooted(folder))
                             tempHashSet.Add(folder);
                         else
                             tempHashSet.Add(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(filename), folder)));
@@ -527,11 +536,47 @@ namespace VisualStudio.SpellChecker.Configuration
                     else
                         spellCheckedXmlAttributes = tempHashSet;
                 }
+
+                // Load the dictionary languages and, if merging settings, handle inheritance
+                if(configuration.HasProperty(PropertyNames.SelectedLanguages))
+                {
+                    var languages = configuration.ToValues(PropertyNames.SelectedLanguages,
+                      PropertyNames.SelectedLanguagesItem, true).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+                    // Is there a blank entry that marks the inherited languages placeholder?
+                    int idx = languages.IndexOf(String.Empty);
+
+                    if(idx != -1)
+                    {
+                        languages.RemoveAt(idx);
+
+                        // If there are other languages, insert the inherited languages at the desired location.
+                        // If an inherited language matches a language in the configuration file, it is left at
+                        // its new location this overriding the inherited language location.
+                        if(languages.Count != 0)
+                            foreach(var lang in dictionaryLanguages)
+                                if(!languages.Contains(lang.Name))
+                                {
+                                    languages.Insert(idx, lang.Name);
+                                    idx++;
+                                }
+                    }
+
+                    if(languages.Count != 0)
+                        dictionaryLanguages = languages.Select(l => new CultureInfo(l)).ToList();
+                }
             }
             catch(Exception ex)
             {
                 // Ignore errors and just use the defaults
                 System.Diagnostics.Debug.WriteLine(ex);
+            }
+            finally
+            {
+                // Always ensure we have at least the default language if none are specified in the global
+                // configuration file.
+                if(dictionaryLanguages.Count == 0)
+                    dictionaryLanguages.Add(new CultureInfo("en-US"));
             }
         }
 

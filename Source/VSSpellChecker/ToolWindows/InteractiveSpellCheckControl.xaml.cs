@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/28/2015
+// Updated : 08/02/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -17,19 +17,23 @@
 // ==============================================================================================================
 // 05/28/2013  EFW  Created the code
 // 02/28/2015  EFW  Added support for code analysis dictionary options
+// 07/28/2015  EFW  Added support for culture information and multiple dictionaries
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Outlining;
+
 using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.ToolWindows
@@ -73,6 +77,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     else
                         currentTagger = null;
 
+                    ctxAddWord.Items.Clear();
+
                     if(currentTagger != null)
                     {
                         currentTextView = value;
@@ -89,6 +95,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         } 
 
                         tagger_TagsChanged(this, null);
+
+                        if(currentTagger.Dictionary.DictionaryCount != 1)
+                            foreach(var d in currentTagger.Dictionary.Dictionaries)
+                                ctxAddWord.Items.Add(new MenuItem()
+                                {
+                                    Header = String.Format(CultureInfo.InvariantCulture, "{0} ({1})",
+                                        d.Culture.EnglishName, d.Culture.Name),
+                                    Tag = d.Culture
+                                });
                     }
                     else
                     {
@@ -205,13 +220,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             break;
                     }
 
-                    if(issue.Suggestions.Count() != 0)
+                    if(issue.Suggestions.Any())
                     {
                         btnReplace.IsEnabled = btnReplaceAll.IsEnabled = true;
                         btnAddWord.IsEnabled = (issue.MisspellingType == MisspellingType.MisspelledWord);
 
-                        foreach(string s in issue.Suggestions)
+                        foreach(var s in issue.Suggestions)
                             lbSuggestions.Items.Add(s);
+
+                        lbSuggestions.SelectedIndex = issue.Suggestions.First().IsGroupHeader ? 1 : 0;
                     }
                     else
                         lbSuggestions.Items.Add("(No suggestions)");
@@ -219,7 +236,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 lblMisspelledWord.Text = issue.Word;
                 lblMisspelledWord.ToolTip = issue.Word;
-                lbSuggestions.SelectedIndex = 0;
 
                 if(parentFocused)
                 {
@@ -306,7 +322,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
             if(misspellings[0].MisspellingType != MisspellingType.DoubledWord)
             {
                 span = misspellings[0].Span;
-                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), (string)lbSuggestions.SelectedItem);
+                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot),
+                    ((SpellingSuggestion)lbSuggestions.SelectedItem).Suggestion);
             }
             else
             {
@@ -332,7 +349,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 return;
             }
 
-            currentTagger.Dictionary.ReplaceAllOccurrences(misspellings[0].Word, (string)lbSuggestions.SelectedItem);
+            currentTagger.Dictionary.ReplaceAllOccurrences(misspellings[0].Word,
+                (SpellingSuggestion)lbSuggestions.SelectedItem);
         }
 
         /// <summary>
@@ -362,7 +380,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         }
 
         /// <summary>
-        /// Add the word to the global dictionary
+        /// Add the word to the dictionary if there is only one dictionary or show the context menu if there are
+        /// multiple dictionaries.
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
@@ -370,8 +389,46 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void btnAddWord_Click(object sender, RoutedEventArgs e)
         {
-            if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
-                currentTagger.Dictionary.AddWordToDictionary(misspellings[0].Word);
+            if(ctxAddWord.Items.Count == 0)
+            {
+                if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
+                    currentTagger.Dictionary.AddWordToDictionary(misspellings[0].Word, null);
+            }
+            else
+            {
+                btnAddWord_ContextMenuOpening(sender, null);
+                ctxAddWord.IsOpen = true;
+            }
+        }
+
+        /// <summary>
+        /// Set the properties on the context menu when it opens
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnAddWord_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if(ctxAddWord.Items.Count == 0)
+                e.Handled = true;
+            else
+            {
+                ctxAddWord.PlacementTarget = btnAddWord;
+                ctxAddWord.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                ContextMenuService.SetPlacement(btnAddWord, System.Windows.Controls.Primitives.PlacementMode.Bottom);
+            }
+        }
+
+        /// <summary>
+        /// Handle Add Word context menu item clicks
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void ctxAddWordMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var item = e.Source as MenuItem;
+
+            if(item != null && misspellings.Count != 0 && misspellings[0].Word.Length != 0)
+                currentTagger.Dictionary.AddWordToDictionary(misspellings[0].Word, (CultureInfo)item.Tag);
         }
         #endregion
     }

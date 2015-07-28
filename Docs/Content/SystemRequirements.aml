@@ -86,6 +86,12 @@ experimental instance settings.</para>
 
 		<relatedTopics>
 			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
+			<externalLink>
+				<linkText>License Agreement</linkText>
+				<linkAlternateText>License Agreement</linkAlternateText>
+				<linkUri>https://github.com/EWSoftware/VSSpellChecker/blob/master/LICENSE</linkUri>
+				<linkTarget>_blank</linkTarget>
+			</externalLink>
 		</relatedTopics>
 	</developerConceptualDocument>
 </topic>

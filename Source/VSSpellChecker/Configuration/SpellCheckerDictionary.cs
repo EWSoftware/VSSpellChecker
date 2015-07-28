@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/13/2015
+// Updated : 08/02/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -22,6 +22,7 @@ using System;
 using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace VisualStudio.SpellChecker.Configuration
@@ -54,6 +55,12 @@ namespace VisualStudio.SpellChecker.Configuration
         /// </summary>
         public string UserDictionaryFilePath { get; private set; }
 
+        /// <summary>
+        /// This read-only property returns true if this is a user dictionary or false if it is a standard
+        /// dictionary supplied with the package.
+        /// </summary>
+        public bool IsUserDictionary { get; private set; }
+
         #endregion
 
         #region Constructor
@@ -66,13 +73,15 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <param name="affixPath">The affix file path</param>
         /// <param name="dictionaryPath">The dictionary file path</param>
         /// <param name="userDictionaryPath">The user dictionary file path</param>
+        /// <param name="isUserDictionary">True if this is a user dictionary, false if not</param>
         public SpellCheckerDictionary(CultureInfo culture, string affixPath, string dictionaryPath,
-          string userDictionaryPath)
+          string userDictionaryPath, bool isUserDictionary)
         {
             this.Culture = culture;
             this.AffixFilePath = affixPath;
             this.DictionaryFilePath = dictionaryPath;
             this.UserDictionaryFilePath = userDictionaryPath;
+            this.IsUserDictionary = isUserDictionary;
         }
         #endregion
 
@@ -133,6 +142,9 @@ namespace VisualStudio.SpellChecker.Configuration
             if(!String.IsNullOrEmpty(this.Culture.Name))
                 description += " (" + this.Culture.Name + ")";
 
+            if(this.IsUserDictionary)
+                description += " *User supplied";
+
             return description;
         }
         #endregion
@@ -152,15 +164,15 @@ namespace VisualStudio.SpellChecker.Configuration
             Dictionary<string, SpellCheckerDictionary> availableDictionaries = new Dictionary<string,
                 SpellCheckerDictionary>(StringComparer.OrdinalIgnoreCase);
             CultureInfo info;
-            string dllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            // This is supplied with the application and is always available.  It may be replaced by a
-            // user-supplied dictionary below.
-            availableDictionaries["en-US"] = new SpellCheckerDictionary(new CultureInfo("en-US"),
-                Path.Combine(dllPath, "en_US.aff"), Path.Combine(dllPath, "en_US.dic"),
-                Path.Combine(SpellingConfigurationFile.GlobalConfigurationFilePath, "en-US_User.dic"));
+            string dllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), userDictPath, location;
+            bool isUserDictionary;
 
             var searchFolders = new List<string>();
+
+            // The package comes with a variety of common dictionaries.  We'll search that path first.  These may
+            // be replaced by user-supplied dictionaries in any of the other folders that are searched.
+            searchFolders.Add(Path.Combine(dllPath, "NHunspell"));
+
             searchFolders.Add(SpellingConfigurationFile.GlobalConfigurationFilePath);
 
             if(additionalSearchFolders != null)
@@ -170,11 +182,21 @@ namespace VisualStudio.SpellChecker.Configuration
             {
                 try
                 {
+                    location = folder;
+
+                    if(location.IndexOf('%') != -1)
+                    {
+                        location = Environment.ExpandEnvironmentVariables(location);
+
+                        if(location.IndexOf('%') != -1)
+                            continue;
+                    }
+
                     // Culture names can vary in format (en-US, arn, az-Cyrl, az-Cyrl-AZ, az-Latn, az-Latn-AZ,
                     // etc.) so look for any affix files with a related dictionary file and see if they are valid
                     // cultures.  If so, we'll take them.
-                    if(Directory.Exists(folder))
-                        foreach(string affixFile in Directory.EnumerateFiles(folder, "*.aff"))
+                    if(Directory.Exists(location))
+                        foreach(string affixFile in Directory.EnumerateFiles(location, "*.aff"))
                             if(File.Exists(Path.ChangeExtension(affixFile, ".dic")))
                             {
                                 try
@@ -188,9 +210,21 @@ namespace VisualStudio.SpellChecker.Configuration
                                 }
 
                                 if(info != null)
+                                {
+                                    isUserDictionary = !affixFile.StartsWith(dllPath, StringComparison.OrdinalIgnoreCase);
+
+                                    if(isUserDictionary)
+                                    {
+                                        userDictPath = Path.Combine(Path.GetDirectoryName(affixFile),
+                                            info.Name + "_User.dic");
+                                    }
+                                    else
+                                        userDictPath = Path.Combine(SpellingConfigurationFile.GlobalConfigurationFilePath,
+                                            info.Name + "_User.dic");
+
                                     availableDictionaries[info.Name] = new SpellCheckerDictionary(info, affixFile,
-                                        Path.ChangeExtension(affixFile, ".dic"),
-                                        Path.Combine(Path.GetDirectoryName(affixFile), info.Name + "_User.dic"));
+                                        Path.ChangeExtension(affixFile, ".dic"), userDictPath, isUserDictionary);
+                                }
                             }
                 }
                 catch(Exception ex)
@@ -199,6 +233,46 @@ namespace VisualStudio.SpellChecker.Configuration
                     System.Diagnostics.Debug.WriteLine(ex);
                 }
             }
+
+            // Make a final pass over the additional folders to see if there are any standalone user dictionary
+            // files that can be used in place of the default user dictionary file.  This allows user
+            // dictionaries in projects to override the global user dictionaries while still using the standard
+            // global dictionary.
+            if(additionalSearchFolders != null)
+                foreach(string folder in additionalSearchFolders)
+                {
+                    try
+                    {
+                        location = folder;
+
+                        if(location.IndexOf('%') != -1)
+                        {
+                            location = Environment.ExpandEnvironmentVariables(location);
+
+                            if(location.IndexOf('%') != -1)
+                                continue;
+                        }
+
+                        if(Directory.Exists(location))
+                            foreach(string file in Directory.EnumerateFiles(location, "*_User.dic"))
+                            {
+                                // Match by filename but with a different path
+                                var match = availableDictionaries.Values.FirstOrDefault(d =>
+                                    !d.UserDictionaryFilePath.Equals(file, StringComparison.OrdinalIgnoreCase) &&
+                                    Path.GetFileName(d.UserDictionaryFilePath).Equals(Path.GetFileName(file),
+                                        StringComparison.OrdinalIgnoreCase));
+
+                                if(match != null)
+                                    match.UserDictionaryFilePath = file;
+                            }
+                    }
+                    catch(Exception ex)
+                    {
+                        // Ignore exceptions due to inaccessible folders
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+                }
+
 
             return availableDictionaries;
         }

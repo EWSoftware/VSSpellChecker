@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagAction.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/06/2014
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 07/28/2014
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a smart tag action for inserting spelling suggestions
@@ -18,6 +18,7 @@
 // ==============================================================================================================
 // 04/14/2013  EFW  Imported the code into the project
 // 05/02/2013  EFW  Added support for Replace All
+// 07/28/2015  EFW  Added support for culture information in the spelling suggestions
 //===============================================================================================================
 
 using System.Collections.ObjectModel;
@@ -37,7 +38,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         //=====================================================================
 
         private ITrackingSpan span;
-        private string replaceWith;
+        private SpellingSuggestion replaceWith;
         private SpellingDictionary dictionary;
         #endregion
 
@@ -48,9 +49,9 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// Constructor for spelling suggestions smart tag actions
         /// </summary>
         /// <param name="span">The word span to replace</param>
-        /// <param name="replaceWith">Text to replace misspelled word with</param>
+        /// <param name="replaceWith">The suggestion to replace misspelled word with</param>
         /// <param name="dictionary">The dictionary used to perform the Replace All action</param>
-        public SpellSmartTagAction(ITrackingSpan span, string replaceWith, SpellingDictionary dictionary)
+        public SpellSmartTagAction(ITrackingSpan span, SpellingSuggestion replaceWith, SpellingDictionary dictionary)
         {
             this.span = span;
             this.replaceWith = replaceWith;
@@ -66,7 +67,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// </summary>
         public string DisplayText
         {
-            get { return replaceWith; }
+            get { return replaceWith.Suggestion; }
         }
 
         /// <summary>
@@ -85,7 +86,7 @@ namespace VisualStudio.SpellChecker.SmartTags
             if(dictionary != null && Keyboard.Modifiers == ModifierKeys.Control)
                 dictionary.ReplaceAllOccurrences(span.GetText(span.TextBuffer.CurrentSnapshot), replaceWith);
             else
-                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), replaceWith);
+                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), replaceWith.Suggestion);
         }
 
         /// <summary>

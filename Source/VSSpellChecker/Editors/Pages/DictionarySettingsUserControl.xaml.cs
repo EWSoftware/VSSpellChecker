@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 08/02/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 06/10/2014  EFW  Moved the language and user dictionary settings to a user control
+// 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
 
 using System;
@@ -46,7 +47,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
         private string configFilePath;
         private bool isGlobal;
-        private CultureInfo defaultLang;
+        private List<string> selectedLanguages;
 
         #endregion
 
@@ -56,6 +57,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public DictionarySettingsUserControl()
         {
             InitializeComponent();
+
+            selectedLanguages = new List<string>();
         }
         #endregion
 
@@ -84,7 +87,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public void LoadConfiguration(SpellingConfigurationFile configuration)
         {
             IEnumerable<string> folders;
+
+            cboAvailableLanguages.ItemsSource = null;
             lbAdditionalFolders.Items.Clear();
+            lbSelectedLanguages.Items.Clear();
 
             var dataSource = new List<PropertyState>();
 
@@ -125,8 +131,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             lbAdditionalFolders.Items.SortDescriptions.Add(sd);
 
-            if(configuration.HasProperty(PropertyNames.DefaultLanguage) || isGlobal)
-                defaultLang = configuration.ToCultureInfo(PropertyNames.DefaultLanguage);
+            selectedLanguages.Clear();
+            selectedLanguages.AddRange(configuration.ToValues(PropertyNames.SelectedLanguages,
+              PropertyNames.SelectedLanguagesItem, true).Distinct(StringComparer.OrdinalIgnoreCase));
 
             this.LoadAvailableLanguages();
         }
@@ -153,11 +160,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             configuration.StoreValues(PropertyNames.AdditionalDictionaryFolders,
                 PropertyNames.AdditionalDictionaryFoldersItem, newList);
 
-            if(cboDefaultLanguage.SelectedIndex == 0 && !isGlobal)
-                configuration.StoreProperty(PropertyNames.DefaultLanguage, null);
-            else
-                configuration.StoreProperty(PropertyNames.DefaultLanguage,
-                    ((SpellCheckerDictionary)cboDefaultLanguage.SelectedItem).Culture.Name);
+            configuration.StoreValues(PropertyNames.SelectedLanguages, PropertyNames.SelectedLanguagesItem,
+                lbSelectedLanguages.Items.OfType<SpellCheckerDictionary>().Select(d => d.Culture.Name));
         }
 
         /// <inheritdoc />
@@ -175,22 +179,35 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// folders specified in this configuration file.</remarks>
         private void LoadAvailableLanguages()
         {
+            SpellCheckerDictionary match = null;
             List<SpellCheckerDictionary> availableDictionaries = new List<SpellCheckerDictionary>();
+            CultureInfo defaultLang = null;
 
-            if(cboDefaultLanguage.Items.Count != 0)
-                defaultLang = ((SpellCheckerDictionary)cboDefaultLanguage.SelectedItem).Culture;
+            if(cboAvailableLanguages.Items.Count != 0)
+            {
+                defaultLang = ((SpellCheckerDictionary)cboAvailableLanguages.SelectedItem).Culture;
+
+                selectedLanguages.Clear();
+                selectedLanguages.AddRange(lbSelectedLanguages.Items.OfType<SpellCheckerDictionary>().Select(
+                    d => d.Culture.Name));
+            }
+
+            cboAvailableLanguages.ItemsSource = null;
 
             if(!isGlobal)
-                availableDictionaries.Add(new SpellCheckerDictionary(CultureInfo.InvariantCulture, null, null, null));
+                availableDictionaries.Add(new SpellCheckerDictionary(CultureInfo.InvariantCulture, null, null,
+                    null, false));
 
             List<string> additionalFolders = new List<string>();
 
             // Fully qualify relative paths with the configuration file path
             foreach(string folder in lbAdditionalFolders.Items.OfType<string>())
-                if(Path.IsPathRooted(folder))
+            {
+                if(folder.IndexOf('%') != -1 || Path.IsPathRooted(folder))
                     additionalFolders.Add(folder);
                 else
                     additionalFolders.Add(Path.GetFullPath(Path.Combine(configFilePath, folder)));
+            }
 
             foreach(var lang in SpellCheckerDictionary.AvailableDictionaries(additionalFolders).Values.OrderBy(
               d => d.ToString()))
@@ -198,20 +215,53 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 availableDictionaries.Add(lang);
             }
 
-            cboDefaultLanguage.ItemsSource = availableDictionaries;
+            cboAvailableLanguages.ItemsSource = availableDictionaries;
 
+            // Add selected languages first
+            if(selectedLanguages.Count != 0)
+            {
+                lbSelectedLanguages.Items.Clear();
+
+                foreach(string language in selectedLanguages)
+                {
+                    match = availableDictionaries.FirstOrDefault(d => d.Culture.Name.Equals(language,
+                        StringComparison.OrdinalIgnoreCase));
+
+                    if(match != null)
+                        lbSelectedLanguages.Items.Add(match);
+                }
+            }
+
+            // Then set the default language selection for the user dictionary
             if(defaultLang != null)
             {
-                var match = cboDefaultLanguage.Items.OfType<SpellCheckerDictionary>().FirstOrDefault(
-                    d => d.Culture.Name == defaultLang.Name);
+                match = availableDictionaries.FirstOrDefault(d => d.Culture.Name == defaultLang.Name);
 
                 if(match != null)
-                    cboDefaultLanguage.SelectedItem = match;
+                    cboAvailableLanguages.SelectedItem = match;
                 else
-                    cboDefaultLanguage.SelectedIndex = 0;
+                    cboAvailableLanguages.SelectedIndex = 0;
             }
             else
-                cboDefaultLanguage.SelectedIndex = 0;
+            {
+                if(lbSelectedLanguages.Items.Count != 0)
+                {
+                    var primary = (SpellCheckerDictionary)lbSelectedLanguages.Items[0];
+
+                    match = availableDictionaries.FirstOrDefault(d => d.Culture.Name == primary.Culture.Name);
+                }
+                else
+                    if(isGlobal)
+                        match = availableDictionaries.FirstOrDefault(d => d.Culture.Name == "en-US");
+
+                if(match != null)
+                    cboAvailableLanguages.SelectedItem = match;
+                else
+                    if(cboAvailableLanguages.Items.Count != 0)
+                        cboAvailableLanguages.SelectedIndex = 0;
+            }
+
+            lbSelectedLanguages_SelectionChanged(this, null);
         }
         #endregion
 
@@ -262,8 +312,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                 string folder = txtAdditionalFolder.Text;
 
-                if(!Path.IsPathRooted(folder))
-                    folder = Path.Combine(configFilePath, folder);
+                if(folder.IndexOf('%') != -1)
+                    folder = Environment.ExpandEnvironmentVariables(folder);
+                else
+                    if(!Path.IsPathRooted(folder))
+                        folder = Path.Combine(configFilePath, folder);
 
                 if(Directory.Exists(folder))
                 {
@@ -329,18 +382,20 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void cboDefaultLanguage_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void cboAvailableLanguages_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             lbUserDictionary.Items.Clear();
             grpUserDictionary.IsEnabled = false;
 
-            if(cboDefaultLanguage.Items.Count != 0 && cboDefaultLanguage.SelectedItem != null)
+            if(cboAvailableLanguages.Items.Count != 0 && cboAvailableLanguages.SelectedItem != null)
             {
-                if(cboDefaultLanguage.SelectedItem.ToString() != "Inherited")
+                if(cboAvailableLanguages.SelectedItem.ToString() != "Inherited")
                 {
-                    string filename = ((SpellCheckerDictionary)cboDefaultLanguage.SelectedItem).UserDictionaryFilePath;
+                    var dictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
+                    string filename = dictionary.UserDictionaryFilePath;
 
                     grpUserDictionary.IsEnabled = true;
+                    grpUserDictionary.Header = "_User Dictionary (" + dictionary.Culture.Name + ")";
 
                     if(File.Exists(filename))
                         try
@@ -359,8 +414,108 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                             lbUserDictionary.Items.SortDescriptions.Add(sd);
                         }
                 }
+                else
+                    grpUserDictionary.Header = "_User Dictionary";
+            }
+        }
+
+        /// <summary>
+        /// Update the button states when the selected index changes
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void lbSelectedLanguages_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            btnAddLanguage.IsEnabled = (cboAvailableLanguages.Items.Count != 0);
+            btnRemoveLanguage.IsEnabled = (lbSelectedLanguages.Items.Count != 0);
+            btnMoveLanguageUp.IsEnabled = (lbSelectedLanguages.SelectedIndex > 0);
+            btnMoveLanguageDown.IsEnabled = (lbSelectedLanguages.SelectedIndex != lbSelectedLanguages.Items.Count - 1);
+
+            if(lbSelectedLanguages.SelectedItem != null)
+                cboAvailableLanguages.SelectedItem = lbSelectedLanguages.SelectedItem;
+        }
+
+        /// <summary>
+        /// Add the selected language to the list
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnAddLanguage_Click(object sender, RoutedEventArgs e)
+        {
+            if(cboAvailableLanguages.Items.Count != 0 && cboAvailableLanguages.SelectedItem != null &&
+              !lbSelectedLanguages.Items.Contains(cboAvailableLanguages.SelectedItem))
+            {
+                lbSelectedLanguages.SelectedIndex = lbSelectedLanguages.Items.Add(cboAvailableLanguages.SelectedItem);
+                lbSelectedLanguages.ScrollIntoView(lbSelectedLanguages.SelectedItem);
+                Property_Changed(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Remove the selected language from the list
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnRemoveLanguage_Click(object sender, RoutedEventArgs e)
+        {
+            if(lbSelectedLanguages.SelectedItem != null)
+            {
+                int idx = lbSelectedLanguages.SelectedIndex;
+
+                lbSelectedLanguages.Items.Remove(lbSelectedLanguages.SelectedItem);
+
+                if(idx >= lbSelectedLanguages.Items.Count)
+                    idx = lbSelectedLanguages.Items.Count - 1;
+
+                lbSelectedLanguages.SelectedIndex = idx;
 
                 Property_Changed(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Move the selected language up in the list
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnMoveLanguageUp_Click(object sender, RoutedEventArgs e)
+        {
+            if(lbSelectedLanguages.SelectedItem != null)
+            {
+                object item = lbSelectedLanguages.SelectedItem;
+                int idx = lbSelectedLanguages.SelectedIndex;
+
+                if(idx - 1 >= 0)
+                {
+                    lbSelectedLanguages.Items.Remove(item);
+                    lbSelectedLanguages.Items.Insert(idx - 1, item);
+                    lbSelectedLanguages.SelectedIndex = idx - 1;
+
+                    Property_Changed(sender, e);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Move the selected language down in the list
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnMoveLanguageDown_Click(object sender, RoutedEventArgs e)
+        {
+            if(lbSelectedLanguages.SelectedItem != null)
+            {
+                object item = lbSelectedLanguages.SelectedItem;
+                int idx = lbSelectedLanguages.SelectedIndex;
+
+                if(idx < lbSelectedLanguages.Items.Count - 1)
+                {
+                    lbSelectedLanguages.Items.Remove(item);
+                    lbSelectedLanguages.Items.Insert(idx + 1, item);
+                    lbSelectedLanguages.SelectedIndex = idx + 1;
+
+                    Property_Changed(sender, e);
+                }
             }
         }
 
@@ -393,7 +548,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             try
             {
-                var selectedDictionary = (SpellCheckerDictionary)cboDefaultLanguage.SelectedItem;
+                var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
                 if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
                   selectedDictionary.DictionaryFilePath, VSSpellCheckerPackage.Instance))
@@ -428,7 +583,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (.txt)|*.txt|All Files (*.*)|*.*";
+            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (*.txt)|*.txt|All Files (*.*)|*.*";
             dlg.CheckPathExists = dlg.CheckFileExists = true;
 
             if((dlg.ShowDialog() ?? false))
@@ -449,7 +604,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     try
                     {
-                        var selectedDictionary = (SpellCheckerDictionary)cboDefaultLanguage.SelectedItem;
+                        var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
                         if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
                           selectedDictionary.DictionaryFilePath, VSSpellCheckerPackage.Instance))
@@ -458,7 +613,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                             GlobalDictionary.LoadUserDictionaryFile(selectedDictionary.Culture);
 
-                            cboDefaultLanguage_SelectionChanged(sender, new SelectionChangedEventArgs(
+                            cboAvailableLanguages_SelectionChanged(sender, new SelectionChangedEventArgs(
                                 e.RoutedEvent, new object[] { }, new object[] { }));
                         }
                         else
@@ -493,7 +648,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             dlg.FileName = "UserDictionary.dic";
             dlg.DefaultExt = ".dic";
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (.txt)|*.txt|All Files (*.*)|*.*";
+            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (*.txt)|*.txt|All Files (*.*)|*.*";
 
             if((dlg.ShowDialog() ?? false))
             {

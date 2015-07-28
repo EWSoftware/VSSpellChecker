@@ -2,8 +2,8 @@
 <topic id="508e7e8f-e00f-43f1-ad4c-5439ddec84b8" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>The package uses NHunspell to perform spell checking and comes with an English (en-US) dictionary by
-default.  Since NHunspell makes use of Open Office dictionaries, you can download additional dictionaries for
+			<para>The package uses NHunspell to perform spell checking and comes with several dictionaries for various
+languages.  Since NHunspell makes use of Open Office dictionaries, you can download additional dictionaries for
 other languages.  To make them available to the spell checker, do the following:
 			</para>
 		</introduction>
@@ -101,15 +101,16 @@ and <localUri>de-DE.dic</localUri> for German.</para>
 					</listItem>
 
 					<listItem>
-						<para>Adding English dictionary files (<localUri>en_US.aff</localUri> and <localUri>en_US.dic</localUri>)
-to the local application data folder or a solution, project, folder, or file configuration will effectively
-replace the default English dictionary supplied with the package.</para>
+						<para>Adding dictionary files to the local application data folder or a solution, project, folder, or
+file configuration for a language that matches one of the default languages supplied with the package will
+effectively replace the default dictionary files supplied with the package for that language.</para>
 					</listItem>
 
 					<listItem>
 						<para>Once the files are in the chosen location and are named correctly, you will be able to select
 the related language in the <ui>Dictionary Settings</ui> category of the
-<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5">configuration editor</link>.</para>
+<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5">configuration editor</link>.  User dictionaries are
+noted with a "*User supplied" suffix after the language name.</para>
 					</listItem>
 
 				</list>
