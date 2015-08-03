@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 07/24/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 //===============================================================================================================
 // 02/01/2015  EFW  Refactored configuration settings
+// 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
 
 using System;
@@ -199,7 +200,37 @@ namespace VisualStudio.SpellChecker.Configuration
                 PropertyNames.IgnoreFormatSpecifiers, PropertyNames.IgnoreFilenamesAndEMailAddresses,
                 PropertyNames.IgnoreXmlElementsInText, PropertyNames.TreatUnderscoreAsSeparator };
 
-            // So far, there's only one old format
+            var format = root.Attribute("Format");
+
+            if(format != null)
+            {
+                Version fileFormat = new Version(format.Value),
+                    currentVersion = new Version(AssemblyInfo.ConfigSchemaVersion);
+
+                // If they've downgraded, there's nothing to convert
+                if(fileFormat < currentVersion)
+                {
+                    // There's only one prior schema version so far (2015.2.1.0)
+
+                    // DefaultLanguage got replaced by SelectedLanguages in schema version 2015.7.24.0
+                    var defaultLanguage = root.Element("DefaultLanguage");
+
+                    if(defaultLanguage != null)
+                    {
+                        if(!String.IsNullOrWhiteSpace(defaultLanguage.Value))
+                            root.Add(new XElement(PropertyNames.SelectedLanguages,
+                                new XElement(PropertyNames.SelectedLanguagesItem, defaultLanguage.Value)));
+
+                        defaultLanguage.Remove();
+                    }
+                }
+
+                format.Value = AssemblyInfo.ConfigSchemaVersion;
+
+                return;
+            }
+
+            // Convert from the first version to the new configuration format
             document.AddFirst(new XComment(" Visual Studio Spell Checker configuration file - " +
                 "[https://github.com/EWSoftware/VSSpellChecker]\r\n     Do not edit the XML.  Use the " +
                 "configuration file editor in Visual Studio to modify the settings. "));
@@ -512,14 +543,15 @@ namespace VisualStudio.SpellChecker.Configuration
         /// </summary>
         /// <param name="propertyName">The property name to retrieve</param>
         /// <param name="valueName">The value element name of the sub-elements within the parent property</param>
-        /// <returns></returns>
-        public IEnumerable<string> ToValues(string propertyName, string valueName)
+        /// <param name="allowBlankValues">False (the default) to exclude blank values or true to allow them</param>
+        /// <returns>An enumerable list of the values</returns>
+        public IEnumerable<string> ToValues(string propertyName, string valueName, bool allowBlankValues = false)
         {
             var property = this.GetPropertyElement(propertyName);
 
             if(property != null && property.HasElements)
                 foreach(var value in property.Descendants(valueName))
-                    if(!String.IsNullOrWhiteSpace(value.Value))
+                    if(allowBlankValues || !String.IsNullOrWhiteSpace(value.Value))
                         yield return value.Value;
         }
 

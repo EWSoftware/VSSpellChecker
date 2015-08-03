@@ -2,8 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingEventArgs.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 05/31/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Updated : 07/28/2015
+// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to contain arguments for spelling events
@@ -18,9 +19,12 @@
 // 04/14/2013  EFW  Imported the code into the project
 // 05/02/2013  EFW  Add support for defining a replacement word
 // 05/31/2013  EFW  Added support for defining the word's position in the editor's buffer
+// 07/28/2015  EFW  Added support for culture information in the spelling suggestions
 //===============================================================================================================
 
 using System;
+using System.Globalization;
+
 using Microsoft.VisualStudio.Text;
 
 namespace VisualStudio.SpellChecker
@@ -39,6 +43,12 @@ namespace VisualStudio.SpellChecker
         /// <remarks>If <c>null</c>, it means that the entire dictionary has changed and words that may have
         /// been ignored before may now no longer be in the dictionary.</remarks>
         public string Word { get; private set; }
+
+        /// <summary>
+        /// This read-only property returns the culture related to the replacement word
+        /// </summary>
+        /// <value>This will be null if not applicable</value>
+        public CultureInfo Culture { get; private set; }
 
         /// <summary>
         /// This read-only property returns the word that should replace <see cref="Word"/> if applicable to
@@ -70,14 +80,22 @@ namespace VisualStudio.SpellChecker
         /// Constructor
         /// </summary>
         /// <param name="word">The word related to the event</param>
-        /// <param name="replacement">The replacement word.  If null, an empty string is used.</param>
-        public SpellingEventArgs(string word, string replacement)
+        /// <param name="replacement">The replacement to use.  If null, an empty string is used.</param>
+        public SpellingEventArgs(string word, SpellingSuggestion replacement)
         {
             if(String.IsNullOrWhiteSpace(word))
                 throw new ArgumentException("The word cannot be null or empty", "word");
 
             this.Word = word;
-            this.ReplacementWord = (replacement ?? String.Empty);
+
+            if(replacement == null)
+                this.ReplacementWord = String.Empty;
+            else
+            {
+                this.Culture = replacement.Culture;
+                this.ReplacementWord = String.IsNullOrWhiteSpace(replacement.Suggestion) ? String.Empty :
+                    replacement.Suggestion;
+            }
         }
 
         /// <summary>

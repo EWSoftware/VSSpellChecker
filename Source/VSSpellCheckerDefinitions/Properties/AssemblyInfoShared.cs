@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker
 // File    : AssemblyInfoShared.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/01/2015
+// Updated : 07/24/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -70,7 +70,7 @@ internal static partial class AssemblyInfo
     // This is used to set the version in the spell checker configuration files.  This should remain unchanged to
     // maintain compatibility with prior releases.  It should only be changed if a breaking change is made that
     // requires the configuration file to be upgraded to a newer format.
-    public const string ConfigSchemaVersion = "2015.2.1.0";
+    public const string ConfigSchemaVersion = "2015.7.24.0";
 
     // Common assembly strong name version - DO NOT CHANGE UNLESS NECESSARY.
     //

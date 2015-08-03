@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 07/24/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 //===============================================================================================================
 // 02/01/2015  EFW  Refactored configuration settings
+// 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
 
 namespace VisualStudio.SpellChecker.Configuration
@@ -29,9 +30,14 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         /// <summary>
-        /// Default language
+        /// Selected languages list
         /// </summary>
-        public const string DefaultLanguage = "DefaultLanguage";
+        public const string SelectedLanguages = "SelectedLanguages";
+
+        /// <summary>
+        /// Selected languages list item
+        /// </summary>
+        public const string SelectedLanguagesItem = "LanguageName";
 
         /// <summary>
         /// Spell check as you type

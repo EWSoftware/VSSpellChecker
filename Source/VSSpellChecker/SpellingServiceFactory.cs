@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceFactory.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/22/2015
+// Updated : 07/24/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -18,6 +18,7 @@
 // ==============================================================================================================
 // 04/14/2013  EFW  Imported the code into the project
 // 04/30/2013  EFW  Moved the global dictionary creation into the GlobalDictionary class
+// 07/24/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
 
 using System;
@@ -107,13 +108,16 @@ namespace VisualStudio.SpellChecker
 
                 if(config != null)
                 {
-                    // Create or get the existing global dictionary for the default language
-                    var globalDictionary = GlobalDictionary.CreateGlobalDictionary(config.DefaultLanguage,
-                        globalServiceProvider, config.AdditionalDictionaryFolders, config.RecognizedWords);
+                    // Create a dictionary for each configuration dictionary language ignoring any that are
+                    // invalid and duplicates caused by missing languages which return the en-US dictionary.
+                    var globalDictionaries = config.DictionaryLanguages.Select(l =>
+                        GlobalDictionary.CreateGlobalDictionary(l, globalServiceProvider,
+                        config.AdditionalDictionaryFolders, config.RecognizedWords)).Where(
+                        d => d != null).Distinct().ToList();
 
-                    if(globalDictionary != null)
+                    if(globalDictionaries.Any())
                     {
-                        service = new SpellingDictionary(globalDictionary, config.IgnoredWords);
+                        service = new SpellingDictionary(globalDictionaries, config.IgnoredWords);
                         buffer.Properties[typeof(SpellingDictionary)] = service;
                     }
                 }
@@ -282,7 +286,12 @@ namespace VisualStudio.SpellChecker
 
                             if(SpellCheckerDictionary.AvailableDictionaries(
                               config.AdditionalDictionaryFolders).TryGetValue(bufferFilename, out match))
-                                config.DefaultLanguage = match.Culture;
+                            {
+                                // Clear any existing dictionary languages and use just the one that matches the
+                                // file's language.
+                                config.DictionaryLanguages.Clear();
+                                config.DictionaryLanguages.Add(match.Culture);
+                            }
                         }
                     }
                 }

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MisspellingTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/28/2015
+// Updated : 07/28/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -19,6 +19,7 @@
 // 04/14/2013  EFW  Imported the code into the project
 // 05/30/2013  EFW  Added a Word property to return the misspelled word
 // 02/28/2015  EFW  Added support for code analysis dictionary options
+// 07/28/2015  EFW  Added support for culture information in the spelling suggestions
 //===============================================================================================================
 
 using System;
@@ -54,9 +55,9 @@ namespace VisualStudio.SpellChecker.Tagging
         public ITrackingSpan DeleteWordSpan { get; private set; }
 
         /// <summary>
-        /// This read-only property returns the suggestions that can be used to replace the misspelled word
+        /// This is used to get or set the suggestions that can be used to replace the misspelled word
         /// </summary>
-        public IEnumerable<string> Suggestions { get; private set; }
+        public IEnumerable<SpellingSuggestion> Suggestions { get; set; }
 
         /// <summary>
         /// This read-only property returns the misspelled or doubled word
@@ -76,25 +77,25 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="misspellingType">The misspelling type</param>
         /// <param name="span">The span containing the misspelled word</param>
         /// <param name="suggestions">The suggestions that can be used to replace the misspelled word</param>
-        /// <overloads>There are two overloads for the constructor</overloads>
-        public MisspellingTag(MisspellingType misspellingType, SnapshotSpan span, IEnumerable<string> suggestions)
+        /// <overloads>There are three overloads for the constructor</overloads>
+        public MisspellingTag(MisspellingType misspellingType, SnapshotSpan span, IEnumerable<SpellingSuggestion> suggestions)
         {
             if(misspellingType == MisspellingType.DoubledWord)
                 throw new ArgumentException("Misspelling type cannot be doubled word");
 
             this.MisspellingType = misspellingType;
             this.Span = this.DeleteWordSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
-            this.Suggestions = suggestions;
+            this.Suggestions = suggestions ?? new SpellingSuggestion[0];
         }
 
         /// <summary>
-        /// This constructor is used for misspelled words
+        /// This constructor is used for general misspelled words
         /// </summary>
         /// <param name="span">The span containing the misspelled word</param>
-        /// <param name="suggestions">The suggestions that can be used to replace the misspelled word</param>
-        /// <overloads>There are two overloads for the constructor</overloads>
-        public MisspellingTag(SnapshotSpan span, IEnumerable<string> suggestions) :
-          this(MisspellingType.MisspelledWord, span, suggestions)
+        /// <remarks>For this constructor, no suggestions are given.  They are set once the spell checking has
+        /// been completed for the entire range so that common misspellings can share a common set of
+        /// suggestions.</remarks>
+        public MisspellingTag(SnapshotSpan span) : this(MisspellingType.MisspelledWord, span, null)
         {
         }
 
@@ -108,7 +109,7 @@ namespace VisualStudio.SpellChecker.Tagging
             this.MisspellingType = MisspellingType.DoubledWord;
             this.Span = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
             this.DeleteWordSpan = deleteWordSpan.Snapshot.CreateTrackingSpan(deleteWordSpan, SpanTrackingMode.EdgeExclusive);
-            this.Suggestions = new string[0];
+            this.Suggestions = new SpellingSuggestion[0];
         }
         #endregion
 

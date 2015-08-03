@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="600">
+             d:DesignHeight="400" d:DesignWidth="650">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition />
@@ -58,18 +58,32 @@ the configuration file.</TextBlock>
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
 						<RowDefinition />
 					</Grid.RowDefinitions>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="Auto" />
 						<ColumnDefinition />
 					</Grid.ColumnDefinitions>
-					<Label Content="Lan_guage" Grid.Row="0" Grid.Column="0" Margin="3" />
-					<ComboBox Name="cboDefaultLanguage" Grid.Row="0" Grid.Column="1" Margin="3"
-						SelectionChanged="cboDefaultLanguage_SelectionChanged" />
-					<ComboBox Name="cboDetermineResxLang" Width="75" Margin="3" Grid.Row="1" Grid.Column="0"
+					<Label Content="Lan_guage(s)" Grid.Row="0" Grid.Column="0" Margin="3" />
+					<ComboBox Name="cboAvailableLanguages" Grid.Row="0" Grid.Column="1" Margin="3"
+						SelectionChanged="cboAvailableLanguages_SelectionChanged" MaxDropDownHeight="350" />
+					<ListBox Name="lbSelectedLanguages" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="40"
+						MaxHeight="100" Margin="3" SelectionChanged="lbSelectedLanguages_SelectionChanged" />
+					<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+						<Button Name="btnAddLanguage" Content="Add" Margin="3" Padding="10,3"
+							ToolTip="Add the selected language" Click="btnAddLanguage_Click" />
+						<Button Name="btnRemoveLanguage" Content="Remove" Margin="3" Padding="10,3"
+							ToolTip="Remove the selected language" Click="btnRemoveLanguage_Click" />
+						<Button Name="btnMoveLanguageUp" Content="Move Up" Margin="3" Padding="10,3"
+							ToolTip="Move the selected language up" Click="btnMoveLanguageUp_Click"/>
+						<Button Name="btnMoveLanguageDown" Content="Move Down" Margin="3" Padding="10,3"
+							ToolTip="Move the selected language down" Click="btnMoveLanguageDown_Click" />
+					</StackPanel>
+					<ComboBox Name="cboDetermineResxLang" Width="75" Margin="3" Grid.Row="3" Grid.Column="0"
 						SelectionChanged="Property_Changed" />
-					<TextBlock Margin="3" Grid.Row="1" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
+					<TextBlock Margin="3" Grid.Row="3" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
 						Text="Determine localized resource file language from the filename" />
 				</Grid>
 			</GroupBox>

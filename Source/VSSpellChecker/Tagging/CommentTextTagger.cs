@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 04/21/2015
+// Updated : 07/25/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -142,7 +142,8 @@ namespace VisualStudio.SpellChecker.Tagging
         public IEnumerable<ITagSpan<NaturalTextTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             bool preprocessorKeywordSeen = false, delimiterSeen = false;
-            string elementName = null, attributeName = null;
+            string elementName = null, attributeName = null, text;
+            int pos;
 
             if(classifier == null || spans == null || spans.Count == 0)
                 yield break;
@@ -157,25 +158,84 @@ namespace VisualStudio.SpellChecker.Tagging
                 {
                     string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant();
 
+                    // Do some conversion to make things simpler below
+                    switch(name)
+                    {
+                        case "vb xml doc attribute":
+                            name = "attribute value";
+                            break;
+
+                        // VS2015 is much more specific in classifying XML doc comment parts
+                        case "xml doc comment - delimiter":
+                            name = "xml delimiter";
+                            break;
+
+                        case "xml doc comment - name":
+                            name = "xml name";
+                            break;
+
+                        case "xml doc comment - attribute name":
+                            name = "xml attribute";
+                            break;
+
+                        case "xml doc comment - attribute value":
+                            name = "attribute value";
+                            break;
+
+                        case "xml doc comment - text":
+                            break;
+
+                        default:
+                            if(name == "identifier" || name.StartsWith("xml doc comment - ", StringComparison.Ordinal))
+                                continue;
+
+                            break;
+                    }
+
                     // As long as the opening and closing XML tags appear on the same line as the content, we
                     // can skip spell checking of unwanted elements.
-                    if(name == "xml delimiter" || name == "xaml delimiter" || name.StartsWith("vb xml delimiter",
-                      StringComparison.Ordinal))
+                    if(name == "xml delimiter" || name == "xaml delimiter" || name == "vb xml doc tag" ||
+                      name.StartsWith("vb xml delimiter", StringComparison.Ordinal))
                     {
-                        if(classificationSpan.Span.GetText().IndexOf('/') != -1)
+                        text = classificationSpan.Span.GetText();
+
+                        if(text.IndexOf('/') != -1)
                         {
                             elementName = null;
                             delimiterSeen = false;
                         }
                         else
-                            if(classificationSpan.Span.GetText().IndexOf('<') != -1)
+                            if(text.IndexOf('<') != -1)
                                 delimiterSeen = true;
+
+                        if(name == "vb xml doc tag" && delimiterSeen)
+                        {
+                            if(text.Length > 1 && text[0] == '<')
+                            {
+                                pos = text.IndexOf(' ');
+
+                                if(pos != -1)
+                                    elementName = text.Substring(1, pos - 1);
+                                else
+                                    elementName = text.Substring(1, text.Length - 2);
+                            }
+
+                            if(text.Length > 1 && text[text.Length - 1] == '=')
+                            {
+                                pos = text.IndexOf(' ');
+
+                                if(pos != -1)
+                                    attributeName = text.Substring(pos + 1, text.Length - pos - 2);
+                                else
+                                    attributeName = text.Substring(0, text.Length - 1);
+                            }
+                        }
                     }
 
                     if(delimiterSeen && (name == "xml name" || name == "xaml name" ||
                       name.StartsWith("vb xml name", StringComparison.Ordinal)))
                     {
-                        elementName = classificationSpan.Span.GetText();
+                        elementName = classificationSpan.Span.GetText().Trim();
 
                         // Ignore any namespace prefix
                         if(elementName.IndexOf(':') != -1)

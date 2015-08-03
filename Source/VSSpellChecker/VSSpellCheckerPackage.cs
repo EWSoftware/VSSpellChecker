@@ -446,6 +446,8 @@ namespace VisualStudio.SpellChecker
                             System.Diagnostics.Debug.WriteLine(ex);
                         }
                     }
+                    else
+                        settingsFilename += ".vsspell";
             }
 
             return (settingsFilename != null);

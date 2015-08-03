@@ -2,7 +2,7 @@
 // System  : Sandcastle Help File Builder Visual Studio Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/08/2015
+// Updated : 08/02/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -187,6 +187,15 @@ namespace VisualStudio.SpellChecker
             if(absolutePath == null)
                 absolutePath = String.Empty;
 
+            // Expand environment variables if necessary
+            if(absolutePath.IndexOf('%') != -1)
+            {
+                absolutePath = Environment.ExpandEnvironmentVariables(absolutePath);
+
+                if(absolutePath.IndexOf('%') != -1)
+                    return absolutePath;
+            }
+
             // Just in case, make sure the path is absolute
             if(!Path.IsPathRooted(absolutePath))
                 if(!absolutePath.Contains("*") && !absolutePath.Contains("?"))
@@ -323,7 +332,7 @@ namespace VisualStudio.SpellChecker
 
             // If the dictionary is part of a project but the user file isn't, add it to the dictionary file's
             // containing project.
-            if(dictItem.ContainingProject != null && userItem == null)
+            if(dictItem != null && dictItem.ContainingProject != null && userItem == null)
             {
                 userItem = dictItem.ContainingProject.ProjectItems.AddFromFile(dictionaryWordsFile);
 

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/27/2015
+// Updated : 08/01/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -50,6 +50,18 @@ namespace VisualStudio.SpellChecker
         private SpellFactory spellFactory;
         private string dictionaryFile, dictionaryWordsFile;
 
+        #endregion
+
+        #region Properties
+        //=====================================================================
+
+        /// <summary>
+        /// This read-only property returns the dictionary's culture
+        /// </summary>
+        public CultureInfo Culture
+        {
+            get { return culture; }
+        }
         #endregion
 
         #region Constructor
@@ -136,14 +148,12 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="word">The misspelled word for which to get suggestions</param>
         /// <returns>An enumerable list of zero or more suggested correct spellings</returns>
-        public IEnumerable<string> SuggestCorrections(string word)
+        public IEnumerable<SpellingSuggestion> SuggestCorrections(string word)
         {
-            List<string> suggestions = null;
-
             try
             {
                 if(spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
-                    suggestions = spellFactory.Suggest(word);
+                    return spellFactory.Suggest(word).Select(w => new SpellingSuggestion(culture, w));
             }
             catch(Exception ex)
             {
@@ -151,7 +161,7 @@ namespace VisualStudio.SpellChecker
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            return (suggestions ?? new List<string>());
+            return Enumerable.Empty<SpellingSuggestion>();
         }
 
         /// <summary>
@@ -171,14 +181,14 @@ namespace VisualStudio.SpellChecker
             if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile, serviceProvider))
                 return false;
 
-            using(StreamWriter writer = new StreamWriter(dictionaryWordsFile, true))
-            {
-                writer.WriteLine(word);
-            }
-
             lock(dictionaryWords)
             {
                 dictionaryWords.Add(word);
+
+                // Sort and write all the words to the file.  If under source control, this should minimize the
+                // number of merge conflicts that could result if multiple people added words and they were all
+                // written to the end of the file.
+                File.WriteAllLines(dictionaryWordsFile, dictionaryWords.OrderBy(w => w));
             }
 
             this.AddSuggestion(word);
@@ -277,9 +287,9 @@ namespace VisualStudio.SpellChecker
                     else
                         affixFile = dictionaryFile = userWordsFile = null;
 
-                    // If not found, default to the English dictionary supplied with the package.  This can at
+                    // If not found, default to the US English dictionary supplied with the package.  This can at
                     // least clue us in that it didn't find the language-specific dictionary when the suggestions
-                    // are in English.
+                    // are in US English.
                     if(affixFile == null || dictionaryFile == null || !File.Exists(affixFile) ||
                       !File.Exists(dictionaryFile))
                     {
@@ -307,7 +317,7 @@ namespace VisualStudio.SpellChecker
             }
             catch(Exception ex)
             {
-                // Ignore exceptions.  Not much we can do, we just won't spell check anything.
+                // Ignore exceptions.  Not much we can do, we just won't spell check anything in this language.
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 

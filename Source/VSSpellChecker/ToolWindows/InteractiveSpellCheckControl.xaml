@@ -40,7 +40,18 @@ filename extension.</TextBlock>
 					<ColumnDefinition />
 					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
-				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick" />
+				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick">
+					<ListBox.ItemContainerStyle>
+						<Style TargetType="{x:Type ListBoxItem}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding IsGroupHeader}" Value="True">
+									<Setter Property="Background" Value="LightGray"/>
+									<Setter Property="IsEnabled" Value="False"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</ListBox.ItemContainerStyle>
+				</ListBox>
 				<StackPanel Grid.Column="1">
 					<Button Name="btnReplace" Content="R_eplace" Width="100" Margin="3"
 						ToolTip="Replace current misspelling with the selected word" Click="btnReplace_Click" />
@@ -51,7 +62,12 @@ filename extension.</TextBlock>
 					<Button Name="btnIgnoreAll" Content="Ig_nore All" Width="100" Margin="3, 3, 3, 12"
 						ToolTip="Ignore all occurrences of this misspelled word" Click="btnIgnoreAll_Click" />
 					<Button Name="btnAddWord" Content="Add _Word" Width="100" Margin="3"
-						ToolTip="Add the word to the user dictionary" Click="btnAddWord_Click" />
+						ToolTip="Add the word to the user dictionary" Click="btnAddWord_Click"
+						ContextMenuOpening="btnAddWord_ContextMenuOpening">
+						<Button.ContextMenu>
+							<ContextMenu Name="ctxAddWord" MenuItem.Click="ctxAddWordMenuItem_Click" />
+						</Button.ContextMenu>
+					</Button>
 				</StackPanel>
 			</Grid>
 		</Grid>

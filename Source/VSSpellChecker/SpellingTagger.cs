@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/22/2015
+// Updated : 08/02/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -29,11 +29,13 @@
 // 06/03/2014  EFW  Merged changes from David Ruhmann to ignore escaped words and enhance word breaking code.
 //                  Added code to ignore .NET and C-style format string specifiers.
 // 02/28/2015  EFW  Added support for code analysis dictionary options
+// 07/28/2015  EFW  Added support for culture information in the spelling suggestions
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -306,8 +308,7 @@ namespace VisualStudio.SpellChecker
                         string currentWord = misspelling.Span.GetText(snapshot);
                         string replacementWord = e.ReplacementWord;
 
-                        // TODO: language should be passed in event arguments to support multi-language spell checking
-                        var language = configuration.DefaultLanguage;
+                        var language = e.Culture ?? CultureInfo.CurrentUICulture;
 
                         // Match the case of the first letter if necessary
                         if(replacementWord.Length > 1 &&
@@ -600,6 +601,15 @@ namespace VisualStudio.SpellChecker
                 // If anything has been updated, we need to send out a change event
                 if(newMisspellings.Count != 0 || removed != 0)
                 {
+                    foreach(var g in newMisspellings.Where(
+                      w => w.MisspellingType == MisspellingType.MisspelledWord).GroupBy(w => w.Word))
+                    {
+                        var suggestions = _dictionary.SuggestCorrections(g.Key);
+
+                        foreach(var m in g)
+                            m.Suggestions = suggestions;
+                    }
+
                     currentMisspellings.AddRange(newMisspellings);
 
                     _dispatcher.Invoke(new Action(() =>
@@ -696,7 +706,7 @@ namespace VisualStudio.SpellChecker
                               configuration.DeprecatedTerms.TryGetValue(textToParse, out preferredTerm))
                             {
                                 yield return new MisspellingTag(MisspellingType.DeprecatedTerm, errorSpan,
-                                    new[] { preferredTerm });
+                                    new[] { new SpellingSuggestion(null, preferredTerm) });
                                 continue;
                             }
 
@@ -704,7 +714,7 @@ namespace VisualStudio.SpellChecker
                               configuration.CompoundTerms.TryGetValue(textToParse, out preferredTerm))
                             {
                                 yield return new MisspellingTag(MisspellingType.CompoundTerm, errorSpan,
-                                    new[] { preferredTerm });
+                                    new[] { new SpellingSuggestion(null, preferredTerm) });
                                 continue;
                             }
 
@@ -712,7 +722,7 @@ namespace VisualStudio.SpellChecker
                               configuration.UnrecognizedWords.TryGetValue(textToParse, out spellingAlternates))
                             {
                                 yield return new MisspellingTag(MisspellingType.UnrecognizedWord, errorSpan,
-                                    spellingAlternates);
+                                    spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
                                 continue;
                             }
 
@@ -742,7 +752,7 @@ namespace VisualStudio.SpellChecker
                                         continue;
                                 }
 
-                                yield return new MisspellingTag(errorSpan, _dictionary.SuggestCorrections(textToParse));
+                                yield return new MisspellingTag(errorSpan);
                             }
                         }
                     }

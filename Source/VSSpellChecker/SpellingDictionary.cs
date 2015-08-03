@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/05/2015
+// Updated : 08/01/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -19,15 +19,16 @@
 // 04/14/2013  EFW  Imported the code into the project
 // 04/15/2013  EFW  Added support for NHunspell and language specific dictionaries
 // 05/31/2013  EFW  Added support for Ignore Once
+// 07/28/2015  EFW  Added support for culture information in the spelling suggestions
+// 08/01/2015  EFW  Added support for multiple dictionary languages
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 using Microsoft.VisualStudio.Text;
-
-using VisualStudio.SpellChecker.Configuration;
 
 namespace VisualStudio.SpellChecker
 {
@@ -40,10 +41,25 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        private GlobalDictionary globalDictionary;
         private IEnumerable<string> ignoredWords;
 
         #endregion
+
+        #region Properties
+        //=====================================================================
+
+        /// <summary>
+        /// This read-only property returns the dictionary count
+        /// </summary>
+        public int DictionaryCount { get; private set; }
+
+        /// <summary>
+        /// This read-only property returns the list of dictionaries being used for spell checking
+        /// </summary>
+        public IEnumerable<GlobalDictionary> Dictionaries { get; private set; }
+
+        #endregion
+
 
         #region Constructor
         //=====================================================================
@@ -51,15 +67,18 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="globalDictionary">The global dictionary</param>
+        /// <param name="dictionaries">The dictionaries to use</param>
         /// <param name="ignoredWords">An optional enumerable list of ignored words</param>
-        public SpellingDictionary(GlobalDictionary globalDictionary, IEnumerable<string> ignoredWords)
+        public SpellingDictionary(IEnumerable<GlobalDictionary> dictionaries, IEnumerable<string> ignoredWords)
         {
-            this.globalDictionary = globalDictionary;
+            this.DictionaryCount = dictionaries.Count();
+            this.Dictionaries = dictionaries;
+
             this.ignoredWords = (ignoredWords ?? Enumerable.Empty<string>());
 
-            // Register to receive events when the global dictionary is updated
-            globalDictionary.RegisterSpellingDictionaryService(this);
+            // Register to receive events when any of the global dictionaries are updated
+            foreach(var d in dictionaries)
+                d.RegisterSpellingDictionaryService(this);
         }
         #endregion
 
@@ -73,31 +92,61 @@ namespace VisualStudio.SpellChecker
         /// <returns>True if spelled correctly, false if not</returns>
         public bool IsSpelledCorrectly(string word)
         {
-            return globalDictionary.IsSpelledCorrectly(word);
+            return this.Dictionaries.Any(d => d.IsSpelledCorrectly(word));
         }
 
         /// <summary>
         /// This is used to suggest corrections for a misspelled word
         /// </summary>
         /// <param name="word">The misspelled word for which to get suggestions</param>
-        /// <returns>An enumerable list of zero or more suggested correct spellings</returns>
-        public IEnumerable<string> SuggestCorrections(string word)
+        /// <returns>An enumerable list of zero or more suggested correct spellings.  If there is only one
+        /// dictionary, only the list of suggestions is returned.  If multiple dictionaries are used, each set of
+        /// suggestions is preceded by an entry for the culture.</returns>
+        public IEnumerable<SpellingSuggestion> SuggestCorrections(string word)
         {
-            return globalDictionary.SuggestCorrections(word);
+            // IMPORTANT: ALWAYS return an actual list here not an enumeration.  This list can get used a lot
+            // and deferred execution has a significant impact on performance.
+            List<SpellingSuggestion> allSuggestions = new List<SpellingSuggestion>();
+
+            if(this.DictionaryCount == 1)
+                allSuggestions.AddRange(this.Dictionaries.First().SuggestCorrections(word));
+            else
+                foreach(var d in this.Dictionaries)
+                {
+                    var dictionarySuggestions = d.SuggestCorrections(word);
+
+                    if(dictionarySuggestions.Any())
+                    {
+                        allSuggestions.Add(new SpellingSuggestion(d.Culture));
+                        allSuggestions.AddRange(dictionarySuggestions);
+                    }
+                }
+
+            return allSuggestions;
         }
 
         /// <summary>
         /// Add the given word to the dictionary so that it will no longer show up as an incorrect spelling
         /// </summary>
         /// <param name="word">The word to add to the dictionary.</param>
+        /// <param name="culture">The culture of the dictionary to which the word is added or null to add it to
+        /// the first dictionary.</param>
         /// <returns><c>true</c> if the word was successfully added to the dictionary, even if it was already in
         /// the dictionary.</returns>
-        public bool AddWordToDictionary(string word)
+        public bool AddWordToDictionary(string word, CultureInfo culture)
         {
+            GlobalDictionary dictionary = null;
+
             if(String.IsNullOrWhiteSpace(word))
                 return false;
 
-            return (this.ShouldIgnoreWord(word) || globalDictionary.AddWordToDictionary(word));
+            if(culture != null)
+                dictionary = this.Dictionaries.FirstOrDefault(d => d.Culture == culture);
+
+            if(dictionary == null)
+                dictionary = this.Dictionaries.First();
+
+            return (this.ShouldIgnoreWord(word) || dictionary.AddWordToDictionary(word));
         }
 
         /// <summary>
@@ -128,7 +177,7 @@ namespace VisualStudio.SpellChecker
             if(String.IsNullOrWhiteSpace(word))
                 return false;
 
-            return (this.ShouldIgnoreWord(word) || globalDictionary.IgnoreWord(word));
+            return (this.ShouldIgnoreWord(word) || this.Dictionaries.All(d => d.IgnoreWord(word)));
         }
 
         /// <summary>
@@ -141,7 +190,7 @@ namespace VisualStudio.SpellChecker
             if(String.IsNullOrWhiteSpace(word) || ignoredWords.Contains(word))
                 return true;
 
-            return globalDictionary.ShouldIgnoreWord(word);
+            return this.Dictionaries.Any(d => d.ShouldIgnoreWord(word));
         }
 
         /// <summary>
@@ -173,8 +222,8 @@ namespace VisualStudio.SpellChecker
         /// This is used to replace all occurrences of the specified word
         /// </summary>
         /// <param name="word">The word to be replaced</param>
-        /// <param name="replacement">The word to use as the replacement</param>
-        public void ReplaceAllOccurrences(string word, string replacement)
+        /// <param name="replacement">The suggestion to use as the replacement</param>
+        public void ReplaceAllOccurrences(string word, SpellingSuggestion replacement)
         {
             var handler = ReplaceAll;
 
