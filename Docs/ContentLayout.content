@@ -88,9 +88,9 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="d5b0b38e-0abb-45b2-943f-5628da441785" visible="True" isSelected="true" title="Version vNext">
+    <Topic id="d5b0b38e-0abb-45b2-943f-5628da441785" visible="True" isSelected="true" title="Version 2015.8.15.0">
       <HelpKeywords>
-        <HelpKeyword index="K" term="versions, vNext" />
+        <HelpKeyword index="K" term="versions, 2015.8.15.0" />
       </HelpKeywords>
     </Topic>
     <Topic id="74c10bfa-832e-4f2a-bd70-1463c98c6f65" visible="True" title="Version 2015.3.1.0">

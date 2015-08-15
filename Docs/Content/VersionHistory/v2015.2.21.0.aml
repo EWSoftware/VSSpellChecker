@@ -47,9 +47,9 @@ or file-specific.</para>
 
 					<listItem>
 						<para>Added a configuration option to specify whether or not to determine the dictionary language for
-localized resource files based on their filename.  For example, if the file _LocalizedForm.de-DE.resx_ is opened
-in the XML file editor, the German language dictionary will be selected and used automatically if available
-regardless of the default language that is specified in the configuration settings.</para>
+localized resource files based on their filename.  For example, if the file <localUri>LocalizedForm.de-DE.resx</localUri>
+is opened in the XML file editor, the German language dictionary will be selected and used automatically if
+available regardless of the default language that is specified in the configuration settings.</para>
 					</listItem>
 
 				</list>

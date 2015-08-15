@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingSuggestion.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2015
+// Updated : 08/07/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -108,7 +108,9 @@ namespace VisualStudio.SpellChecker
         {
             SpellingSuggestion s = obj as SpellingSuggestion;
 
-            return (s != null && this.Culture.Name == s.Culture.Name && this.Suggestion == s.Suggestion);
+            return (s != null && ((this.Culture == null && s.Culture == null) ||
+                (this.Culture != null && s.Culture != null && this.Culture.Name == s.Culture.Name)) &&
+                this.Suggestion == s.Suggestion);
         }
 
         /// <summary>
@@ -117,7 +119,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>Returns the hash code for the culture and suggestion XOR'ed together</returns>
         public override int GetHashCode()
         {
-            return this.Culture.GetHashCode() ^ this.Suggestion.GetHashCode();
+            return (this.Culture ?? CultureInfo.InvariantCulture).GetHashCode() ^ this.Suggestion.GetHashCode();
         }
 
         /// <summary>

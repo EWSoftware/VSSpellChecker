@@ -54,7 +54,7 @@ the configuration file.</TextBlock>
 				<RowDefinition Height="Auto" />
 				<RowDefinition />
 			</Grid.RowDefinitions>
-			<GroupBox Header="Dictionary" Grid.Row="0">
+			<GroupBox Header="Global Dictionary" Grid.Row="0">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="Auto" />
@@ -92,8 +92,14 @@ the configuration file.</TextBlock>
 					<Grid.RowDefinitions>
 						<RowDefinition />
 						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
 					</Grid.RowDefinitions>
 					<ListBox Name="lbUserDictionary" Margin="3" Grid.Row="0" />
+					<StackPanel Grid.Row="1" Orientation="Horizontal">
+						<Label Name="lblDictionaryType" Margin="3" Content="Package Dictionary" />
+						<Label Content="/" Margin="3" />
+						<Label Name="lblUserDictionaryType" Margin="3" Content="Standard user dictionary" />
+					</StackPanel>
 					<Grid Grid.Row="2">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition />

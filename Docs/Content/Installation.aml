@@ -27,9 +27,9 @@ installing this package.  To install this package:</para>
 
 					<listItem>
 						<para>Run the downloaded package and follow the prompts to install it.  It can be installed in any
-version of Visual Studio from 2010 to 2015.  The Community Edition is also supported but the older Express
-editions are not as they do not allow installation of extensions.  Consider switching to the newer Community
-Edition which does support them.</para>
+version of Visual Studio 2013 and later.  The Community Edition is also supported but the older Express editions
+are not as they do not allow installation of extensions.  Consider switching to the newer Community Edition which
+does support them.</para>
 					</listItem>
 
 				</list>
@@ -78,27 +78,28 @@ options.</para>
 						<para>A list of suggestions is shown at the top.  Selecting a word will replace the misspelling with
 that word.  If you hold down the <ui>Ctrl</ui> key while clicking a suggestion or select one with the keyboard
 and press <ui>Ctrl+Enter</ui>, all occurrences of the misspelled word will be replaced with the selected
-suggestion.</para>
+suggestion.  If you are spell checking against multiple languages, you may see more than one set of suggestions,
+each preceded by a language.  Choose the suggestion you want to use from the appropriate language set.</para>
 					</listItem>
 
 					<listItem>
-						<para><legacyBold>Ignore Once</legacyBold> - This option allows you to ignore the given instance of
-the misspelled word in the current file at the current location.  All other misspellings of the same word will
-still be flagged.  The given instance will be ignored as long as the file remains open.  If closed and reopened,
-it will be flagged again.</para>
+						<para><ui>Ignore Once</ui> - This option allows you to ignore the given instance of the misspelled
+word in the current file at the current location.  All other misspellings of the same word will still be flagged.
+The given instance will be ignored as long as the file remains open.  If closed and reopened, it will be flagged
+again.</para>
 					</listItem>
 
 					<listItem>
-						<para><legacyBold>Ignore All</legacyBold> - Ignore all instances of the given misspelled word for the
-remainder of the Visual Studio session.  When Visual Studio is closed and reopened the ignored word will be
-flagged again.</para>
+						<para><ui>Ignore All</ui> - Ignore all instances of the given misspelled word for the remainder of
+the Visual Studio session.  When Visual Studio is closed and reopened the ignored word will be flagged again.</para>
 					</listItem>
 
 					<listItem>
-						<para><legacyBold>Add To Dictionary</legacyBold> - This will add the word to the user dictionary so
-that it is no longer flagged as a misspelled word.  In addition, the word will be presented as a suggestion for
-other misspelled words when appropriate.  Use the **Edit Configuration** option to remove words from the user
-dictionary.</para>
+						<para><ui>Add To Dictionary</ui> - This will add the word to the user dictionary so that it is no
+longer flagged as a misspelled word.  In addition, the word will be presented as a suggestion for other
+misspelled words when appropriate.  Use the <ui>Edit Configuration</ui> option to remove words from the user
+dictionary.  If spell checking against multiple dictionaries, you will see one <ui>Add to Dictionary</ui> option
+for each available language.  Choosing an option will add the word to that language's user dictionary.</para>
 					</listItem>
 
 				</list>
@@ -161,8 +162,21 @@ suggested replacements are what should replace the word and the term should not 
 
 				</list>
 
+				<para>As with the spell check as you type option, the suggestions in the tool window will be grouped
+by language if spell checking against multiple languages.  Choose the suggestion you want to use from the
+appropriate language set.  The <ui>Add Word</ui> button will show a dropdown menu when spell checking against
+multiple languages.  Selecting an option will add the word to that language's user dictionary.</para>
+
+				<para>The misspelled word displayed at the top of the tool window is editable.  You may alter it to
+correct the spelling manually.  When changed, the <ui>Undo</ui>  button to the right of the text box is enabled
+and the list of suggestions is disabled.  Clicking <ui>Undo</ui> will undo any edits made to the word and enable
+the list of suggestions.  If you do modify the word, the <ui>Replace</ui> and <ui>Add Word</ui> options will use
+the modified word to perform their action.  In addition, the <ui>Add Word</ui> option will replace the original
+misspelled word with the edited word.</para>
+
 				<para>Once you have taken action on a misspelled word, the tool window will be updated and will move on
-to the next issue.  If there are no more, a "(No more issues)" message is displayed in the misspelled word box.</para>
+to the next issue.  If there are no more, a "(No more issues)" message is displayed in the misspelled word text
+box.</para>
 
 			</content>
 		</section>

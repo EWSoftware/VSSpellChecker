@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/01/2015
+// Updated : 08/05/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -168,14 +168,15 @@ namespace VisualStudio.SpellChecker
         /// Add the given word to the dictionary so that it will no longer show up as an incorrect spelling.
         /// </summary>
         /// <param name="word">The word to add to the dictionary.</param>
-        /// <returns><c>true</c> if the word was successfully added to the dictionary, even if it was already in
-        /// the dictionary.</returns>
+        /// <returns>True if the word was successfully added to the dictionary, was an ignored word, or was
+        /// already in the main or user dictionary.  False if the word to add is blank or the user dictionary
+        /// could not be updated.</returns>
         public bool AddWordToDictionary(string word)
         {
             if(String.IsNullOrWhiteSpace(word))
                 return false;
 
-            if(this.ShouldIgnoreWord(word))
+            if(this.ShouldIgnoreWord(word) || this.IsSpelledCorrectly(word))
                 return true;
 
             if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile, serviceProvider))

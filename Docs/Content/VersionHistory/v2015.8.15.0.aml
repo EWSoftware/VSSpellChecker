@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="d5b0b38e-0abb-45b2-943f-5628da441785" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<alert class="important">
+				<para>Effective with this release, Visual Studio 2010 and Visual Studio 2012 are no longer supported.
+With the release of Visual Studio 2015, I needed to reduce the number of versions for which I can realistically
+provide support. Four versions was starting to be too many.</para>
+
+				<para>If you need spell checking support for those versions, you can download the v2015.3.1.0 release and
+install it.  Most of the recent bug fixes have been related to changes in Visual Studio 2013 and Visual Studio
+2015 so the prior release is quite stable.</para>
+			</alert>
+
+			<para>Changes in this release</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed a couple of problems retrieving the filename from the text buffer which prevented
+extension exclusions from working for certain file types or could cause an exception.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the taggers so that the aggregators cannot be used after being disposed.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed a problem with the dictionary being accessed after the view is closed in certain
+situations.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed <codeInline>CommentTextTagger</codeInline> so that it works correctly with the new
+classifications in Visual Studio 2015.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed folder level configuration files not getting a <localUri>.vsspell</localUri> extension.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for skipping format specifiers in interpolated strings
+(<codeInline>$"{Property}"</codeInline>) and added a C# configuration option to skip them entirely.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added Unicode quote marks as word break characters.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added the ability to add file-specific settings for solution items.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for environment variable references in additional dictionary paths.</para>
+					</listItem>
+
+					<listItem>
+						<para>The misspelled word can now be edited and used as the replacement or added to the dictionary in
+the interactive spell checking tool window.</para>
+					</listItem>
+
+					<listItem>
+						<para>The following language dictionaries are now included by default with the package.</para>
+
+						<list class="bullet">
+							<listItem>
+								<para>English, Australia (en-AU)</para>
+							</listItem>
+
+							<listItem>
+								<para>English, Canada (en-CA)</para>
+							</listItem>
+
+							<listItem>
+								<para>English, New Zealand (en-NZ)</para>
+							</listItem>
+
+							<listItem>
+								<para>English, South Africa (en-ZA)</para>
+							</listItem>
+
+							<listItem>
+								<para>English, United Kingdom (en-GB)</para>
+							</listItem>
+
+							<listItem>
+								<para>French, France (fr-FR)</para>
+							</listItem>
+
+							<listItem>
+								<para>German, Germany (de-DE)</para>
+							</listItem>
+
+							<listItem>
+								<para>Italian, Italy (it-IT)</para>
+							</listItem>
+
+							<listItem>
+								<para>Portuguese, Brazil (pt-BR)</para>
+							</listItem>
+
+							<listItem>
+								<para>Portuguese, Portugal (pt-PT)</para>
+							</listItem>
+
+							<listItem>
+								<para>Russian, Russia (ru-RU)</para>
+							</listItem>
+
+							<listItem>
+								<para>Serbian (sr)</para>
+							</listItem>
+
+							<listItem>
+								<para>Serbian, Latin (sr-Latn)</para>
+							</listItem>
+
+							<listItem>
+								<para>Slovenian, Slovenia (sl-SI)</para>
+							</listItem>
+
+							<listItem>
+								<para>Spanish, Spain (es-ES)</para>
+							</listItem>
+
+						</list>
+
+					<para>If you have downloaded dictionaries for any of the above languages, they will override the
+package versions unless you remove your copies from the local application data folder or your solutions and
+projects.</para>
+
+					</listItem>
+
+					<listItem>
+						<para>Added the ability to select multiple languages to use for spell checking.  See the
+<legacyBold>Language(s)</legacyBold> section of the <link xlink:href="af34b863-6a1c-41ed-bcf2-48a714686519#Languages" />
+topic for details on selecting them in the configuration files.  See the <legacyBold>Spell Check As You
+Type</legacyBold> and <legacyBold>Spell Check Current Document</legacyBold> sections of the
+<link xlink:href="e339cac1-9783-4c2a-919f-88436c78fef8#SpellAsYouType">Usage Notes</link> topic for details about
+how multiple languages affect those options.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for placing user dictionaries in additional dictionary paths without a matching
+language dictionary.  In such cases, the user dictionaries will be used in conjunction with the default language
+dictionaries for the matching languages.  See the <legacyBold>User Dictionary</legacyBold> section of the
+<link xlink:href="af34b863-6a1c-41ed-bcf2-48a714686519#UserDictionary" /> topic for details.</para>
+					</listItem>
+
+					<listItem>
+						<para>A <link xlink:href="df2a45c1-1996-46f6-9d33-e73f0fa1d88a">NuGet package</link>
+(<legacyBold>EWSoftware.VSSpellChecker</legacyBold>) is now available that will enable creating taggers for
+third-party content types.</para>
+					</listItem>
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

@@ -5,7 +5,7 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 		xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
 		mc:Ignorable="d" 
-		d:DesignHeight="325" d:DesignWidth="300" Name="ucInteractiveSpellCheck">
+		d:DesignHeight="350" d:DesignWidth="300" Name="ucInteractiveSpellCheck">
 	<Grid Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -15,11 +15,13 @@
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto" />
 				<ColumnDefinition />
+				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
-			<TextBlock Grid.Column="0" Margin="3, 5" Name="lblIssue" Text="Misspelled Word" />
-			<Border Grid.Column="1" BorderBrush="DarkGray" Margin="3" BorderThickness="0.5">
-				<TextBlock Name="lblMisspelledWord" TextTrimming="CharacterEllipsis" Margin="2" />
-			</Border>
+			<Label Grid.Column="0" Margin="3" Name="lblIssue"
+				Target="{Binding ElementName=txtMisspelledWord}">_Misspelled Word</Label>
+			<TextBox Grid.Column="1" Name="txtMisspelledWord" Margin="3" TextChanged="txtMisspelledWord_TextChanged" />
+			<Button Grid.Column="2" Name="btnUndo" Content="_Undo" Margin="3" Padding="10,0"
+				ToolTip="Undo changes to the misspelled word" Click="btnUndo_Click" />
 		</Grid>
 		<Grid Grid.Row="1">
 			<Grid.RowDefinitions>
@@ -27,7 +29,7 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition />
 			</Grid.RowDefinitions>
-			<TextBlock Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow"
+			<TextBlock Grid.Row="0" Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow"
 				Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
 				Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}">No text editor is selected, the
 spell checker is currently disabled, or the file is excluded by filename extension.

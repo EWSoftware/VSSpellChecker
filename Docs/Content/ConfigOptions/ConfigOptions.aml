@@ -50,10 +50,13 @@ they apply.</para>
 
 				<alert class="note">
 					<para>In general, you must close and reopen a spell checked file for any modified settings to take
-effect.  The exception is removing words from the user dictionary.  Changes to it are immediate.</para>
+effect.  Dictionaries are global resources and are cached for reuse when subsequent files are opened within
+the same solution.  If you make changes to the dictionary locations used in a configuration, you must close and
+reopen the solution to ensure that the dictionary changes take effect.  The exception is removing words from a
+user dictionary.  Changes to user dictionaries are immediate.</para>
 				</alert>
 
-				<para>To reset the configuration to its default state, click the <ui>Reset</ui> button.  All options with
+				<para>Click the <ui>Reset</ui> button to reset the configuration to its default state.  All options with
 the exception of the user dictionary are reset to their default value.  Use the <ui>Dictionary Settings</ui>
 category to remove words from the user dictionary.</para>
 

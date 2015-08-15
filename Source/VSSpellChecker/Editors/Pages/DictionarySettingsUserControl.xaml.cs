@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2015
+// Updated : 08/12/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -28,12 +28,16 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
+using EnvDTE;
+using EnvDTE80;
+
 using Microsoft.Win32;
+using Microsoft.VisualStudio.Shell.Interop;
+
+using VisualStudio.SpellChecker.Configuration;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using FolderBrowserDlg = System.Windows.Forms.FolderBrowserDialog;
-
-using VisualStudio.SpellChecker.Configuration;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
@@ -45,7 +49,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         #region Private data members
         //=====================================================================
 
-        private string configFilePath;
+        private ConfigurationType configType;
+        private string configFilePath, relatedFilename;
         private bool isGlobal;
         private List<string> selectedLanguages;
 
@@ -104,6 +109,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             cboDetermineResxLang.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.DetermineResourceFileLanguageFromName);
 
+            configType = configuration.ConfigurationType;
+            relatedFilename = Path.GetFileNameWithoutExtension(configuration.Filename);
             configFilePath = Path.GetDirectoryName(configuration.Filename);
             isGlobal = configuration.ConfigurationType == ConfigurationType.Global;
 
@@ -146,6 +153,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             configuration.StoreProperty(PropertyNames.DetermineResourceFileLanguageFromName,
                 ((PropertyState)cboDetermineResxLang.SelectedValue).ToPropertyValue());
 
+            relatedFilename = Path.GetFileNameWithoutExtension(configuration.Filename);
             configFilePath = Path.GetDirectoryName(configuration.Filename);
             isGlobal = configuration.ConfigurationType == ConfigurationType.Global;
 
@@ -200,6 +208,15 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             List<string> additionalFolders = new List<string>();
 
+            // Include inherited additional folders from parent configurations.  This allows for consistent
+            // user dictionary content across all configuration files within a solution and/or project
+            if(chkInheritAdditionalFolders.IsChecked.Value)
+            {
+                var parentConfig = this.GenerateParentConfiguration();
+
+                additionalFolders.AddRange(parentConfig.AdditionalDictionaryFolders);
+            }
+
             // Fully qualify relative paths with the configuration file path
             foreach(string folder in lbAdditionalFolders.Items.OfType<string>())
             {
@@ -209,8 +226,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     additionalFolders.Add(Path.GetFullPath(Path.Combine(configFilePath, folder)));
             }
 
-            foreach(var lang in SpellCheckerDictionary.AvailableDictionaries(additionalFolders).Values.OrderBy(
-              d => d.ToString()))
+            foreach(var lang in SpellCheckerDictionary.AvailableDictionaries(
+              additionalFolders.Distinct()).Values.OrderBy(d => d.ToString()))
             {
                 availableDictionaries.Add(lang);
             }
@@ -262,6 +279,123 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
 
             lbSelectedLanguages_SelectionChanged(this, null);
+        }
+
+        /// <summary>
+        /// Generate the configuration for all parent items
+        /// </summary>
+        /// <returns>The generated configuration to use</returns>
+        /// <remarks>The configuration is a merger of the global settings plus any solution, project, and folder
+        /// settings related to but excluding the current configuration file.  This allows us to determine the
+        /// inherited additional dictionary folders to use.</remarks>
+        private SpellCheckerConfiguration GenerateParentConfiguration()
+        {
+            ProjectItem projectItem, fileItem;
+            string filename, projectPath;
+
+            // Start with the global configuration
+            var config = new SpellCheckerConfiguration();
+
+            if(isGlobal)
+                return config;
+
+            try
+            {
+                config.Load(SpellingConfigurationFile.GlobalConfigurationFilename);
+
+                if(configType == ConfigurationType.Solution)
+                    return config;
+
+                var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(true);
+
+                if(dte2 != null && dte2.Solution != null && !String.IsNullOrWhiteSpace(dte2.Solution.FullName))
+                {
+                    var solution = dte2.Solution;
+
+                    // See if there is a solution configuration
+                    filename = solution.FullName + ".vsspell";
+                    projectItem = solution.FindProjectItem(filename);
+
+                    if(projectItem != null)
+                        config.Load(filename);
+
+                    if(configType == ConfigurationType.Project)
+                        return config;
+
+                    // Find the project item for the file we are opening
+                    if(configType != ConfigurationType.Folder)
+                        projectItem = solution.FindProjectItem(relatedFilename);
+                    else
+                        projectItem = solution.FindProjectItem(Path.Combine(relatedFilename, relatedFilename + ".vsspell"));
+
+                    if(projectItem != null)
+                    {
+                        fileItem = projectItem;
+
+                        // If we have a project (we should), see if it has settings
+                        if(projectItem.ContainingProject != null &&
+                          !String.IsNullOrWhiteSpace(projectItem.ContainingProject.FullName))
+                        {
+                            filename = projectItem.ContainingProject.FullName + ".vsspell";
+                            projectItem = solution.FindProjectItem(filename);
+
+                            if(projectItem != null)
+                                config.Load(filename);
+
+                            // Get the full path based on the project.  The configuration filename will refer to
+                            // the actual path which may be to a linked file outside the project's folder
+                            // structure.
+                            projectPath = Path.GetDirectoryName(filename);
+                            filename = Path.GetDirectoryName((string)fileItem.Properties.Item("FullPath").Value);
+
+                            // Search for folder-specific configuration files
+                            if(filename.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Then check subfolders.  No need to check the root folder as the project
+                                // settings cover it.
+                                if(filename.Length > projectPath.Length)
+                                    foreach(string folder in filename.Substring(projectPath.Length + 1).Split('\\'))
+                                    {
+                                        projectPath = Path.Combine(projectPath, folder);
+                                        filename = Path.Combine(projectPath, folder + ".vsspell");
+
+                                        if(configType == ConfigurationType.Folder &&
+                                          Path.GetFileNameWithoutExtension(filename) == relatedFilename)
+                                            return config;
+
+                                        projectItem = solution.FindProjectItem(filename);
+
+                                        if(projectItem != null)
+                                            config.Load(filename);
+                                    }
+                            }
+
+                            // If the item looks like a dependent file item, look for a settings file related to
+                            // the parent file item.
+                            if(fileItem.Collection != null && fileItem.Collection.Parent != null)
+                            {
+                                projectItem = fileItem.Collection.Parent as ProjectItem;
+
+                                if(projectItem != null && projectItem.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile)
+                                {
+                                    filename = (string)projectItem.Properties.Item("FullPath").Value + ".vsspell";
+                                    projectItem = solution.FindProjectItem(filename);
+
+                                    if(projectItem != null)
+                                        config.Load(filename);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                // Ignore errors, we just won't load the configurations after the point of failure
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+
+            return config;
         }
         #endregion
 
@@ -397,6 +531,15 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     grpUserDictionary.IsEnabled = true;
                     grpUserDictionary.Header = "_User Dictionary (" + dictionary.Culture.Name + ")";
 
+                    lblDictionaryType.Content = dictionary.IsCustomDictionary ? "Custom dictionary" :
+                        "Package dictionary";
+                    lblDictionaryType.ToolTip = "Location: " + (dictionary.IsCustomDictionary ?
+                        Path.GetDirectoryName(dictionary.DictionaryFilePath) : "Package folder");
+
+                    lblUserDictionaryType.Content = dictionary.HasAlternateUserDictionary ?
+                        "Alternate user dictionary" : "Standard user dictionary";
+                    lblUserDictionaryType.ToolTip = "Location: " + Path.GetDirectoryName(dictionary.UserDictionaryFilePath);
+
                     if(File.Exists(filename))
                         try
                         {
@@ -415,7 +558,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         }
                 }
                 else
+                {
                     grpUserDictionary.Header = "_User Dictionary";
+                    lblDictionaryType.Content = lblUserDictionaryType.Content = lblDictionaryType.ToolTip =
+                        lblUserDictionaryType.ToolTip = String.Empty;
+                }
             }
         }
 
@@ -676,6 +823,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(handler != null)
                 handler(this, EventArgs.Empty);
+
+            if(sender == chkInheritAdditionalFolders && cboAvailableLanguages.Items.Count != 0)
+                this.LoadAvailableLanguages();
         }
         #endregion
     }

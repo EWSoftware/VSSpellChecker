@@ -3,14 +3,20 @@
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
 			<para>A NuGet package is available that will allow you to enable spell checking for third-party content
-types within Visual Studio.  This topic provides a simple example of a tagger that enables spell checking for
-such third-party content types.</para>
+types within Visual Studio (<legacyBold>EWSoftware.VSSpellChecker</legacyBold>).  This topic provides a simple
+example of a tagger that enables spell checking for such third-party content types.</para>
+
+			<alert class="note">
+				<para>The NuGet package version may not match the version of the latest release of the spell checker
+package.  This is normal.  The NuGet package assembly version only changes when it contains a breaking change
+that will require rebuilding any code that utilizes it.</para>
+			</alert>
 		</introduction>
 
 		<section>
 			<content>
-				<para>Add a new class file to the project that implements the content type and replace its content with
-the following code:</para>
+				<para>Once you have installed the NuGet package in your project, add a new class file to the project that
+implements the content type you want to support.  Replace the new class's content with the following code:</para>
 				
 <code language="cs" title="Example Tagger">
 using System;

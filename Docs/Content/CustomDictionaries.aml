@@ -109,8 +109,10 @@ effectively replace the default dictionary files supplied with the package for t
 					<listItem>
 						<para>Once the files are in the chosen location and are named correctly, you will be able to select
 the related language in the <ui>Dictionary Settings</ui> category of the
-<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5">configuration editor</link>.  User dictionaries are
-noted with a "*User supplied" suffix after the language name.</para>
+<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5">configuration editor</link>.  Custom dictionaries are
+noted with a value of "Custom dictionary" in the left-hand label below the user dictionary list box on the
+<ui>Dictionary Settings</ui> category page.  Hovering over the label will show a tool tip containing the location
+of the custom dictionary.</para>
 					</listItem>
 
 				</list>

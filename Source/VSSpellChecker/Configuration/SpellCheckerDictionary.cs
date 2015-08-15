@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2015
+// Updated : 08/12/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -56,11 +56,27 @@ namespace VisualStudio.SpellChecker.Configuration
         public string UserDictionaryFilePath { get; private set; }
 
         /// <summary>
-        /// This read-only property returns true if this is a user dictionary or false if it is a standard
+        /// This read-only property returns true if this is a custom dictionary or false if it is a standard
         /// dictionary supplied with the package.
         /// </summary>
-        public bool IsUserDictionary { get; private set; }
+        public bool IsCustomDictionary { get; private set; }
 
+        /// <summary>
+        /// This read-only property returns true if this dictionary has an alternate user dictionary, one from
+        /// a solution or project rather than one that resides in the same folder as the related dictionary.
+        /// </summary>
+        public bool HasAlternateUserDictionary
+        {
+            get
+            {
+                string dictPath = Path.GetDirectoryName(this.DictionaryFilePath),
+                    userDictPath = Path.GetDirectoryName(this.UserDictionaryFilePath);
+
+                return !userDictPath.Equals(SpellingConfigurationFile.GlobalConfigurationFilePath,
+                    StringComparison.OrdinalIgnoreCase) && !userDictPath.Equals(dictPath,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+        }
         #endregion
 
         #region Constructor
@@ -73,15 +89,15 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <param name="affixPath">The affix file path</param>
         /// <param name="dictionaryPath">The dictionary file path</param>
         /// <param name="userDictionaryPath">The user dictionary file path</param>
-        /// <param name="isUserDictionary">True if this is a user dictionary, false if not</param>
+        /// <param name="isCustomDictionary">True if this is a custom dictionary, false if not</param>
         public SpellCheckerDictionary(CultureInfo culture, string affixPath, string dictionaryPath,
-          string userDictionaryPath, bool isUserDictionary)
+          string userDictionaryPath, bool isCustomDictionary)
         {
             this.Culture = culture;
             this.AffixFilePath = affixPath;
             this.DictionaryFilePath = dictionaryPath;
             this.UserDictionaryFilePath = userDictionaryPath;
-            this.IsUserDictionary = isUserDictionary;
+            this.IsCustomDictionary = isCustomDictionary;
         }
         #endregion
 
@@ -142,9 +158,6 @@ namespace VisualStudio.SpellChecker.Configuration
             if(!String.IsNullOrEmpty(this.Culture.Name))
                 description += " (" + this.Culture.Name + ")";
 
-            if(this.IsUserDictionary)
-                description += " *User supplied";
-
             return description;
         }
         #endregion
@@ -165,7 +178,7 @@ namespace VisualStudio.SpellChecker.Configuration
                 SpellCheckerDictionary>(StringComparer.OrdinalIgnoreCase);
             CultureInfo info;
             string dllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), userDictPath, location;
-            bool isUserDictionary;
+            bool isCustomDictionary;
 
             var searchFolders = new List<string>();
 
@@ -211,9 +224,9 @@ namespace VisualStudio.SpellChecker.Configuration
 
                                 if(info != null)
                                 {
-                                    isUserDictionary = !affixFile.StartsWith(dllPath, StringComparison.OrdinalIgnoreCase);
+                                    isCustomDictionary = !affixFile.StartsWith(dllPath, StringComparison.OrdinalIgnoreCase);
 
-                                    if(isUserDictionary)
+                                    if(isCustomDictionary)
                                     {
                                         userDictPath = Path.Combine(Path.GetDirectoryName(affixFile),
                                             info.Name + "_User.dic");
@@ -223,7 +236,7 @@ namespace VisualStudio.SpellChecker.Configuration
                                             info.Name + "_User.dic");
 
                                     availableDictionaries[info.Name] = new SpellCheckerDictionary(info, affixFile,
-                                        Path.ChangeExtension(affixFile, ".dic"), userDictPath, isUserDictionary);
+                                        Path.ChangeExtension(affixFile, ".dic"), userDictPath, isCustomDictionary);
                                 }
                             }
                 }

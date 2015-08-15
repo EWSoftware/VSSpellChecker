@@ -15,14 +15,6 @@ editors will need to be closed and reopened for the new setting to take effect.<
 					</listItem>
 
 					<listItem>
-						<para>In Visual Studio 2010, if a misspelled word is within a collapsed section, when the section is
-expanded the word will be flagged with a squiggly line but no smart tag will appear for it when you move the
-mouse or keyboard cursor over it.  This is caused by a bug in Visual Studio.  The only workarounds are to leave
-the section expanded, close the file, and then reopen it or to invoke the spell checker tool window which will
-let you take action on the word.</para>
-					</listItem>
-
-					<listItem>
 						<para>The spell checking code attempts to ignore escape sequences within text so that it does not
 flag text as misspelled when preceded by an escape sequence such as <codeInline>\r</codeInline>,
 <codeInline>\n</codeInline>, or <codeInline>\t</codeInline>.  This can occasionally result in a false report in

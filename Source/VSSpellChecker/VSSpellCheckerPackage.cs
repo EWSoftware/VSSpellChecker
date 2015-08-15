@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/22/2015
+// Updated : 08/11/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -160,11 +160,34 @@ namespace VisualStudio.SpellChecker
                     AddSpellCheckerConfigQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
             }
+
+            // Register for solution events so that we can clear the global dictionary cache when necessary
+            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
+
+            if(dte != null && dte.Events != null)
+            {
+                var solutionEvents = dte.Events.SolutionEvents;
+
+                if(solutionEvents != null)
+                    solutionEvents.AfterClosing += solutionEvents_AfterClosing;
+            }
         }
         #endregion
 
         #region Command event handlers
         //=====================================================================
+
+        /// <summary>
+        /// This is used to clear the global dictionary cache whenever a solution is closed
+        /// </summary>
+        /// <remarks>The spelling service factory also contains code to clear the dictionary cache when it
+        /// detects a change in solution.  This package will not load unless a configuration is edited.  This is
+        /// needed to consistently clear the cache if editing configurations in different solutions without
+        /// opening any spell checked files.</remarks>
+        void solutionEvents_AfterClosing()
+        {
+            GlobalDictionary.ClearDictionaryCache();
+        }
 
         /// <summary>
         /// This is used to edit the global configuration file

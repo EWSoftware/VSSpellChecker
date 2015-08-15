@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2015
+// Updated : 08/05/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -34,6 +34,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Outlining;
 
+using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.ToolWindows
@@ -164,13 +165,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             try
             {
-                updatingState = true;
+                updatingState = lbSuggestions.IsEnabled = true;
 
                 btnReplace.IsEnabled = btnReplaceAll.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled =
-                    btnAddWord.IsEnabled = false;
-                lblIssue.Text = "Misspelled Word";
-                lblMisspelledWord.Text = null;
-                lblMisspelledWord.ToolTip = null;
+                    btnAddWord.IsEnabled = btnUndo.IsEnabled = txtMisspelledWord.IsEnabled = false;
+                lblIssue.Content = "_Misspelled Word";
+                txtMisspelledWord.Text = null;
                 lbSuggestions.Items.Clear();
 
                 if(currentTextView == null)
@@ -186,7 +186,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(misspellings.Count == 0)
                 {
-                    lblMisspelledWord.Text = "(No more issues)";
+                    txtMisspelledWord.Text = "(No more issues)";
                     return;
                 }
 
@@ -194,26 +194,26 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(issue.MisspellingType == MisspellingType.DoubledWord)
                 {
-                    lblIssue.Text = "Doubled Word";
+                    lblIssue.Content = "_Doubled Word";
                     btnReplace.IsEnabled = btnIgnoreOnce.IsEnabled = true;
                     lbSuggestions.Items.Add("(Delete word)");
                 }
                 else
                 {
-                    btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled = true;
+                    txtMisspelledWord.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled = true;
 
                     switch(issue.MisspellingType)
                     {
                         case MisspellingType.CompoundTerm:
-                            lblIssue.Text = "Compound Term";
+                            lblIssue.Content = "Co_mpound Term";
                             break;
 
                         case MisspellingType.DeprecatedTerm:
-                            lblIssue.Text = "Deprecated Term";
+                            lblIssue.Content = "_Deprecated Term";
                             break;
 
                         case MisspellingType.UnrecognizedWord:
-                            lblIssue.Text = "Unrecognized Word";
+                            lblIssue.Content = "Un_recognized Word";
                             break;
 
                         default:
@@ -234,8 +234,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         lbSuggestions.Items.Add("(No suggestions)");
                 }
 
-                lblMisspelledWord.Text = issue.Word;
-                lblMisspelledWord.ToolTip = issue.Word;
+                txtMisspelledWord.Text = issue.Word;
 
                 if(parentFocused)
                 {
@@ -301,6 +300,34 @@ namespace VisualStudio.SpellChecker.ToolWindows
         }
 
         /// <summary>
+        /// Update the control states when the misspelled word changes
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void txtMisspelledWord_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(!updatingState && misspellings.Count != 0)
+            {
+                bool hasChanged = !txtMisspelledWord.Text.Trim().Equals(misspellings[0].Word,
+                    StringComparison.OrdinalIgnoreCase);
+
+                btnUndo.IsEnabled = hasChanged;
+                lbSuggestions.IsEnabled = !hasChanged;
+            }
+        }
+
+        /// <summary>
+        /// Undo changes to the misspelled word
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnUndo_Click(object sender, RoutedEventArgs e)
+        {
+            if(misspellings.Count != 0)
+                txtMisspelledWord.Text = misspellings[0].Word;
+        }
+
+        /// <summary>
         /// Replace the current misspelled word with the selected word
         /// </summary>
         /// <param name="sender">The sender of the event</param>
@@ -310,26 +337,34 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void btnReplace_Click(object sender, RoutedEventArgs e)
         {
             ITrackingSpan span;
+            string word;
 
-            if(lbSuggestions.SelectedIndex < 0 || misspellings.Count == 0 || misspellings[0].Word.Length == 0)
-            {
-                if(lbSuggestions.Items.Count != 0 && lbSuggestions.SelectedIndex < 0)
-                    lbSuggestions.SelectedIndex = 0;
+            if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
+                if(misspellings[0].MisspellingType != MisspellingType.DoubledWord)
+                {
+                    if(!lbSuggestions.IsEnabled)
+                        word = txtMisspelledWord.Text.Trim();
+                    else
+                    {
+                        if(lbSuggestions.SelectedIndex < 0)
+                        {
+                            if(lbSuggestions.Items.Count != 0 && lbSuggestions.SelectedIndex < 0)
+                                lbSuggestions.SelectedIndex = 0;
 
-                return;
-            }
+                            return;
+                        }
 
-            if(misspellings[0].MisspellingType != MisspellingType.DoubledWord)
-            {
-                span = misspellings[0].Span;
-                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot),
-                    ((SpellingSuggestion)lbSuggestions.SelectedItem).Suggestion);
-            }
-            else
-            {
-                span = misspellings[0].DeleteWordSpan;
-                span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), String.Empty);
-            }
+                        word = ((SpellingSuggestion)lbSuggestions.SelectedItem).Suggestion;
+                    }
+
+                    span = misspellings[0].Span;
+                    span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), word);
+                }
+                else
+                {
+                    span = misspellings[0].DeleteWordSpan;
+                    span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), String.Empty);
+                }
         }
 
         /// <summary>
@@ -341,16 +376,27 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void btnReplaceAll_Click(object sender, RoutedEventArgs e)
         {
-            if(lbSuggestions.SelectedIndex < 0 || misspellings.Count == 0 || misspellings[0].Word.Length == 0)
+            SpellingSuggestion suggestion;
+
+            if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
             {
-                if(lbSuggestions.Items.Count != 0 && lbSuggestions.SelectedIndex < 0)
-                    lbSuggestions.SelectedIndex = 0;
+                if(!lbSuggestions.IsEnabled)
+                    suggestion = new SpellingSuggestion(null, txtMisspelledWord.Text.Trim());
+                else
+                {
+                    if(lbSuggestions.SelectedIndex < 0)
+                    {
+                        if(lbSuggestions.Items.Count != 0 && lbSuggestions.SelectedIndex < 0)
+                            lbSuggestions.SelectedIndex = 0;
 
-                return;
+                        return;
+                    }
+
+                    suggestion = (SpellingSuggestion)lbSuggestions.SelectedItem;
+                }
+
+                currentTagger.Dictionary.ReplaceAllOccurrences(misspellings[0].Word, suggestion);
             }
-
-            currentTagger.Dictionary.ReplaceAllOccurrences(misspellings[0].Word,
-                (SpellingSuggestion)lbSuggestions.SelectedItem);
         }
 
         /// <summary>
@@ -389,16 +435,33 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void btnAddWord_Click(object sender, RoutedEventArgs e)
         {
-            if(ctxAddWord.Items.Count == 0)
-            {
-                if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
-                    currentTagger.Dictionary.AddWordToDictionary(misspellings[0].Word, null);
-            }
-            else
-            {
-                btnAddWord_ContextMenuOpening(sender, null);
-                ctxAddWord.IsOpen = true;
-            }
+            string word;
+
+            if(misspellings.Count != 0)
+                if(ctxAddWord.Items.Count == 0)
+                {
+                    if(!lbSuggestions.IsEnabled)
+                        word = txtMisspelledWord.Text.Trim();
+                    else
+                        word = misspellings[0].Word;
+
+                    if(word.Length != 0)
+                    {
+                        currentTagger.Dictionary.AddWordToDictionary(word, null);
+
+                        // If adding a modified word, replace the word in the file too
+                        if(!lbSuggestions.IsEnabled)
+                            btnReplace_Click(sender, e);
+                    }
+                    else
+                        MessageBox.Show("Cannot add an empty word to the dictionary", PackageResources.PackageTitle,
+                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+                else
+                {
+                    btnAddWord_ContextMenuOpening(sender, null);
+                    ctxAddWord.IsOpen = true;
+                }
         }
 
         /// <summary>
@@ -426,9 +489,27 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void ctxAddWordMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var item = e.Source as MenuItem;
+            string word;
 
-            if(item != null && misspellings.Count != 0 && misspellings[0].Word.Length != 0)
-                currentTagger.Dictionary.AddWordToDictionary(misspellings[0].Word, (CultureInfo)item.Tag);
+            if(item != null && misspellings.Count != 0)
+            {
+                if(!lbSuggestions.IsEnabled)
+                    word = txtMisspelledWord.Text.Trim();
+                else
+                    word = misspellings[0].Word;
+
+                if(word.Length != 0)
+                {
+                    currentTagger.Dictionary.AddWordToDictionary(word, (CultureInfo)item.Tag);
+
+                    // If adding a modified word, replace the word in the file too
+                    if(!lbSuggestions.IsEnabled)
+                        btnReplace_Click(sender, e);
+                }
+                else
+                    MessageBox.Show("Cannot add an empty word to the dictionary", PackageResources.PackageTitle,
+                        MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
         }
         #endregion
     }

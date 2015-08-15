@@ -1,34 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Vsix Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-	<Identifier Id="34482677-bc69-4bd3-8b8b-1ecd347f609d">
-		<Name>Visual Studio Spell Checker</Name>
-		<Author>EWSoftware</Author>
-		<Version>2015.3.1.0</Version>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+	<Metadata>
+		<Identity Id="34482677-bc69-4bd3-8b8b-1ecd347f609d" Version="2015.8.15.0" Language="en-US" Publisher="EWSoftware" />
+		<DisplayName>Visual Studio Spell Checker</DisplayName>
 		<Description xml:space="preserve">An editor extension that checks the spelling of comments, strings, and plain text as you type or interactively with a tool window.  Extra options are available to control how elements and attributes in XML and MAML files are spell checked.</Description>
-		<Locale>1033</Locale>
-		<MoreInfoUrl>https://github.com/EWSoftware/VSSpellChecker/wiki</MoreInfoUrl>
+		<MoreInfo>https://github.com/EWSoftware/VSSpellChecker/wiki</MoreInfo>
 		<License>License.rtf</License>
 		<GettingStartedGuide>https://github.com/EWSoftware/VSSpellChecker/wiki/e339cac1-9783-4c2a-919f-88436c78fef8</GettingStartedGuide>
+		<ReleaseNotes>https://github.com/EWSoftware/VSSpellChecker/wiki/548dc6d7-6d08-4006-82b3-d5830be96f04</ReleaseNotes>
 		<Icon>VSIXPackage.png</Icon>
 		<PreviewImage>VSIXPreview.png</PreviewImage>
-		<InstalledByMsi>false</InstalledByMsi>
-		<SupportedProducts>
-			<VisualStudio Version="12.0">
-				<Edition>Pro</Edition>
-			</VisualStudio>
-			<VisualStudio Version="14.0">
-				<Edition>Pro</Edition>
-			</VisualStudio>
-		</SupportedProducts>
-		<SupportedFrameworkRuntimeEdition MinVersion="4.0" MaxVersion="4.6" />
-	</Identifier>
-	<References>
-		<Reference Id="Microsoft.VisualStudio.MPF" MinVersion="10.0">
-			<Name>Visual Studio MPF</Name>
-		</Reference>
-	</References>
-	<Content>
-		<VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
-		<MefComponent>|%CurrentProject%|</MefComponent>
-	</Content>
-</Vsix>
+		<Tags>spell checker;spell;spellcheck;spelling;spell as you type</Tags>
+	</Metadata>
+	<Installation InstalledByMsi="false">
+		<InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[12.0, 14.0]" />
+	</Installation>
+	<Dependencies>
+		<Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+		<Dependency Id="Microsoft.VisualStudio.MPF.12.0" DisplayName="Visual Studio MPF 12.0" d:Source="Installed" Version="[12.0,)" />
+	</Dependencies>
+	<Assets>
+		<Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+		<Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+	</Assets>
+</PackageManifest>

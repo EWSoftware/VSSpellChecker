@@ -44,12 +44,17 @@ file.</para>
 					</listItem>
 
 					<listItem>
-						<para>Some new spell checking options have been added and all of the spell checking options have been
-exposed and can be configured.  Configurable options include:</para>
+						<para>Several new spell checking options have been added and all of the spell checking options have
+been exposed and can be configured.  Configurable options include:</para>
 
 						<list class="bullet">
 							<listItem>
-								<para>The default language to use for spell checking.</para>
+								<para>Specify one or more dictionary languages to use for spell checking.  The package comes with
+several dictionaries for various languages.</para>
+							</listItem>
+
+							<listItem>
+								<para>Specify additional folders to search for custom dictionaries or user dictionaries.</para>
 							</listItem>
 
 							<listItem>
@@ -97,10 +102,6 @@ XML files.</para>
 							<listItem>
 								<para>Specify a list of XML attributes for which the value should be spell checked when spell
 checking XML files.</para>
-							</listItem>
-
-							<listItem>
-								<para>Specify additional folders to search for dictionaries.</para>
 							</listItem>
 
 							<listItem>

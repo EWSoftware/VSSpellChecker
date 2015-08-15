@@ -156,7 +156,9 @@ namespace VisualStudio.SpellChecker
                 {
                     var solution = dte2.Solution;
 
-                    // Clear the global dictionary cache when a change in solution is detected
+                    // Clear the global dictionary cache when a change in solution is detected.  This handles
+                    // cases where only the MEF components are loaded and not the package (i.e. a configuration
+                    // has not been edited).  See VSSpellCheckerPackage.solutionEvents_AfterClosing().
                     if(lastSolutionName == null || !lastSolutionName.Equals(solution.FullName,
                       StringComparison.OrdinalIgnoreCase))
                     {

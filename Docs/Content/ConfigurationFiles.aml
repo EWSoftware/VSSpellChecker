@@ -46,17 +46,17 @@ make further changes to the configuration settings.</para>
 
 					<listItem>
 						<para>File-specific settings are named after the file to which they relate and are added as dependent
-items if the project system supports it.  As such, a settings file added for *MainForm.cs* is also used for the
-dependent items <localUri>MainForm.Designer.cs</localUri> and <localUri>MainForm.resx</localUri> as well.
-Options that are set in this configuration will override the global settings, solution settings, project
-settings, and folder settings.</para>
+items if the project system supports it.  As such, a settings file added for <localUri>MainForm.cs</localUri> is
+also used for the dependent items <localUri>MainForm.Designer.cs</localUri> and <localUri>MainForm.resx</localUri>
+as well.  Options that are set in this configuration will override the global settings, solution settings,
+project settings, and folder settings.</para>
 					</listItem>
 
 				</list>
 
 				<para>When a project file that can be spell checked is opened, the global settings are merged with any
 defined solution, project, folder, and file settings.  In all settings other than global, properties default to
-being inherited rather than a being set to a specific default value.  If set to a specific value in a settings
+being inherited rather than being set to a specific default value.  If set to a specific value in a settings
 file, they override any settings loaded earlier in the chain.  Additional dictionary folders, excluded
 extensions, ignored words, ignored XML elements, and spell checked XML attributes get special treatment.  Each
 can be inherited and added to or, if marked as not to be inherited, can replace the lists from previous settings
@@ -99,6 +99,10 @@ form.  Expand the file node in the Solution Explorer to see it.</para>
 side of the window to edit the settings.   Save the file to store the changes.  Changes made to any configuration
 file will typically not take effect until you close and re-open the spell checked file in which you want the
 changes to apply.</para>
+
+				<para>Dictionaries are global resources and are cached for reuse when subsequent files are opened within
+the same solution.  If you make changes to the dictionary locations used in a configuration, you must close and
+reopen the solution to ensure that the dictionary changes take effect.</para>
 			</content>
 		</section>
 
