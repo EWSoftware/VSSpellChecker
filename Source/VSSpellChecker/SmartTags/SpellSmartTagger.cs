@@ -222,17 +222,40 @@ namespace VisualStudio.SpellChecker.SmartTags
             ITrackingSpan trackingSpan = errorSpan.Snapshot.CreateTrackingSpan(errorSpan,
                 SpanTrackingMode.EdgeExclusive);
 
-            // merge the same words from different dictionaries
-            var words = from word in suggestions
-                        where !word.IsGroupHeader
-                        group word by word.Suggestion into grp
-                        select new MultiLanguageSpellSmartTagAction(trackingSpan,
-                                                                    grp.First(),
-                                                                    grp.Select(w => w.Culture),
-                                                                    dictionary);
+            if (dictionary.DictionaryCount > 1)
+            {
+                // merge the same words from different dictionaries
+                var words = from word in suggestions
+                            where !word.IsGroupHeader
+                            group word by word.Suggestion into grp
+                            select new MultiLanguageSpellSmartTagAction(trackingSpan,
+                                                                        grp.First(),
+                                                                        grp.Select(w => w.Culture),
+                                                                        dictionary);
 
-            // workaround for the inability to convert implicitly from MultiLanguageSpellSmartTagAction
-            actions.AddRange(words);
+                // workaround for the inability to convert implicitly from MultiLanguageSpellSmartTagAction
+                actions.AddRange(words);
+            }
+            else
+            {
+                // Add spelling suggestions grouped by language when appropriate
+                foreach (var word in suggestions)
+                {
+                    if (!word.IsGroupHeader)
+                        actions.Add(new SpellSmartTagAction(trackingSpan, word, dictionary));
+                    else
+                    {
+                        if (actions.Count != 0)
+                        {
+                            smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
+                            actions = new List<ISmartTagAction>();
+                        }
+
+                        actions.Add(new LabelSmartTagAction(String.Format(CultureInfo.InvariantCulture, "{0} ({1})",
+                            word.Culture.EnglishName, word.Culture.Name)));
+                    }
+                }
+            }
 
             if (actions.Count != 0)
                 smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
