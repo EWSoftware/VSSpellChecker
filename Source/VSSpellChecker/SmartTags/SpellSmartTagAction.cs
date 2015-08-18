@@ -65,7 +65,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <summary>
         /// Display text
         /// </summary>
-        public string DisplayText
+        public virtual string DisplayText
         {
             get { return replaceWith.Suggestion; }
         }
@@ -83,7 +83,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// </summary>
         public void Invoke()
         {
-            if(dictionary != null && Keyboard.Modifiers == ModifierKeys.Control)
+            if (dictionary != null && Keyboard.Modifiers == ModifierKeys.Control)
                 dictionary.ReplaceAllOccurrences(span.GetText(span.TextBuffer.CurrentSnapshot), replaceWith);
             else
                 span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), replaceWith.Suggestion);
