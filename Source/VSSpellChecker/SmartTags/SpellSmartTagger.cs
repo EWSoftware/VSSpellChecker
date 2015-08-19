@@ -89,7 +89,7 @@ namespace VisualStudio.SpellChecker.SmartTags
             {
                 // If this view isn't editable, then there isn't a good reason to be showing these.  Also,
                 // make sure we are only tagging the top buffer.
-                if (textView == null || buffer == null || spellingService == null ||
+                if(textView == null || buffer == null || spellingService == null ||
                   textView.TextBuffer != buffer || !textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
                   (!textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument) &&
                   !textView.Roles.Contains(Utility.EmbeddedPeekTextView)))
@@ -100,7 +100,7 @@ namespace VisualStudio.SpellChecker.SmartTags
                 // Getting the dictionary determines if spell checking is enabled for this file
                 var dictionary = spellingService.GetDictionary(buffer);
 
-                if (dictionary == null)
+                if(dictionary == null)
                     return null;
 
                 return new SpellSmartTagger(buffer, dictionary,
@@ -125,9 +125,10 @@ namespace VisualStudio.SpellChecker.SmartTags
             this.dictionary = dictionary;
             this.misspellingAggregator = misspellingAggregator;
 
-            this.misspellingAggregator.TagsChanged += (sender, args) => {
-                if (!this.disposed)
-                    foreach (var span in args.Span.GetSpans(this.buffer))
+            this.misspellingAggregator.TagsChanged += (sender, args) =>
+            {
+                if(!this.disposed)
+                    foreach(var span in args.Span.GetSpans(this.buffer))
                         RaiseTagsChangedEvent(span);
             };
         }
@@ -143,21 +144,21 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <returns>Squiggle tags in the provided spans</returns>
         public IEnumerable<ITagSpan<SpellSmartTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            if (spans.Count == 0 || disposed)
+            if(spans.Count == 0 || disposed)
                 yield break;
 
             ITextSnapshot snapshot = spans[0].Snapshot;
 
-            foreach (var misspelling in misspellingAggregator.GetTags(spans))
+            foreach(var misspelling in misspellingAggregator.GetTags(spans))
             {
                 var misspellingSpans = misspelling.Span.GetSpans(snapshot);
 
-                if (misspellingSpans.Count != 1)
+                if(misspellingSpans.Count != 1)
                     continue;
 
                 SnapshotSpan errorSpan = misspellingSpans[0];
 
-                if (misspelling.Tag.MisspellingType != MisspellingType.DoubledWord)
+                if(misspelling.Tag.MisspellingType != MisspellingType.DoubledWord)
                 {
                     yield return new TagSpan<SpellSmartTag>(errorSpan, new SpellSmartTag(
                         GetMisspellingSmartTagActions(errorSpan, misspelling.Tag.MisspellingType,
@@ -190,9 +191,9 @@ namespace VisualStudio.SpellChecker.SmartTags
 
         private void Dispose(bool disposing)
         {
-            if (!disposed)
+            if(!disposed)
             {
-                if (disposing)
+                if(disposing)
                 {
                     misspellingAggregator.Dispose();
                     misspellingAggregator = null;
@@ -222,7 +223,7 @@ namespace VisualStudio.SpellChecker.SmartTags
             ITrackingSpan trackingSpan = errorSpan.Snapshot.CreateTrackingSpan(errorSpan,
                 SpanTrackingMode.EdgeExclusive);
 
-            if (dictionary.DictionaryCount > 1)
+            if(dictionary.DictionaryCount > 1)
             {
                 // merge the same words from different dictionaries
                 var words = from word in suggestions
@@ -239,13 +240,13 @@ namespace VisualStudio.SpellChecker.SmartTags
             else
             {
                 // Add spelling suggestions grouped by language when appropriate
-                foreach (var word in suggestions)
+                foreach(var word in suggestions)
                 {
-                    if (!word.IsGroupHeader)
+                    if(!word.IsGroupHeader)
                         actions.Add(new SpellSmartTagAction(trackingSpan, word, dictionary));
                     else
                     {
-                        if (actions.Count != 0)
+                        if(actions.Count != 0)
                         {
                             smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
                             actions = new List<ISmartTagAction>();
@@ -257,10 +258,10 @@ namespace VisualStudio.SpellChecker.SmartTags
                 }
             }
 
-            if (actions.Count != 0)
+            if(actions.Count != 0)
                 smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
 
-            if (smartTagSets.Count != 0)
+            if(smartTagSets.Count != 0)
             {
                 // This acts as a place holder to tell the user to hold the Ctrl key down to replace all
                 // occurrences of the selected word.
@@ -280,11 +281,11 @@ namespace VisualStudio.SpellChecker.SmartTags
 
             smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
 
-            if (misspellingType == MisspellingType.MisspelledWord)
+            if(misspellingType == MisspellingType.MisspelledWord)
             {
                 actions = new List<ISmartTagAction>();
 
-                foreach (var d in dictionary.Dictionaries)
+                foreach(var d in dictionary.Dictionaries)
                     actions.Add(new SpellDictionarySmartTagAction(trackingSpan, dictionary,
                         "Add to Dictionary", DictionaryAction.AddWord, d.Culture));
 
@@ -332,7 +333,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         {
             EventHandler<SnapshotSpanEventArgs> handler = this.TagsChanged;
 
-            if (handler != null)
+            if(handler != null)
                 handler(this, new SnapshotSpanEventArgs(subjectSpan));
         }
         #endregion

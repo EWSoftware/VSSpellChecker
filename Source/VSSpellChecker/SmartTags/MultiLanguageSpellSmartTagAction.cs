@@ -1,16 +1,16 @@
-﻿using Microsoft.VisualStudio.Text;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+
+using Microsoft.VisualStudio.Text;
 
 namespace VisualStudio.SpellChecker.SmartTags
 {
     /// <summary>Smart tag action for inserting multi-language spelling suggestions.</summary>
     internal class MultiLanguageSpellSmartTagAction : SpellSmartTagAction
     {
-        private CultureInfo[] _cultures;
-        private string _displayText;
+        private CultureInfo[] cultures;
+        private string displayText;
 
         /// <summary>Constructor for multi-language spelling suggestions smart tag actions.</summary>
         /// <param name="trackingSpan">The tracking span.</param>
@@ -23,8 +23,8 @@ namespace VisualStudio.SpellChecker.SmartTags
                                                 SpellingDictionary dictionary)
             : base(trackingSpan, replaceWith, dictionary)
         {
-            _cultures = cultures.ToArray();
-            _displayText = null;
+            this.cultures = cultures.ToArray();
+            this.displayText = null;
         }
 
         /// <summary>Display text</summary>
@@ -32,17 +32,17 @@ namespace VisualStudio.SpellChecker.SmartTags
         {
             get
             {
-                return (_displayText ?? FormatDisplayText());
+                return (displayText ?? FormatDisplayText());
             }
         }
 
         /// <summary>Formats the display text.</summary>
         private string FormatDisplayText()
         {
-            _displayText = string.Format("{0}\t\t({1})",
+            displayText = string.Format("{0}\t\t({1})",
                                          base.DisplayText,
-                                         string.Join(" | ", _cultures.Select(c => c.Name).ToArray()));
-            return _displayText;
+                                         string.Join(" | ", cultures.Select(c => c.Name).ToArray()));
+            return displayText;
         }
     }
 }
