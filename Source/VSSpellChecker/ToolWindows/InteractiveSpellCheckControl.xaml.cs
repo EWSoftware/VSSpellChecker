@@ -93,7 +93,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                             if(outliningManagerService != null)
                                 outliningManager = outliningManagerService.GetOutliningManager(currentTextView);
-                        } 
+                        }
 
                         tagger_TagsChanged(this, null);
 
@@ -225,7 +225,22 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         btnReplace.IsEnabled = btnReplaceAll.IsEnabled = true;
                         btnAddWord.IsEnabled = (issue.MisspellingType == MisspellingType.MisspelledWord);
 
-                        foreach(var s in issue.Suggestions)
+                        IEnumerable<SpellingSuggestion> suggestions;
+
+                        // group suggestions by suggestion (word) if there are multiple dictionaries
+                        if(currentTagger.Dictionary.DictionaryCount > 1)
+                        {
+                            suggestions = from word in issue.Suggestions
+                                          where !word.IsGroupHeader
+                                          group word by word.Suggestion into grp
+                                          select new MultiLanguageSpellingSuggestion(grp.Select(w => w.Culture), grp.Key);
+                        }
+                        else
+                        {
+                            suggestions = issue.Suggestions;
+                        }
+
+                        foreach(var s in suggestions)
                             lbSuggestions.Items.Add(s);
 
                         lbSuggestions.SelectedIndex = issue.Suggestions.First().IsGroupHeader ? 1 : 0;

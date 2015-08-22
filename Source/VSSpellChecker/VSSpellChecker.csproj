@@ -92,6 +92,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Guids.cs">
     </Compile>
+    <Compile Include="MultiLanguageSpellingSuggestion.cs" />
     <Compile Include="PkgCmdID.cs">
     </Compile>
     <Compile Include="GlobalDictionary.cs" />

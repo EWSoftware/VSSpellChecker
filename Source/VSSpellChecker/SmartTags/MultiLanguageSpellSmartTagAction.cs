@@ -39,10 +39,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <summary>Formats the display text.</summary>
         private string FormatDisplayText()
         {
-            displayText = string.Format("{0}\t\t({1})",
-                                         base.DisplayText,
-                                         string.Join(" | ", cultures.Select(c => c.Name).ToArray()));
-            return displayText;
+            return (displayText = MultiLanguageSpellingSuggestion.FormatSuggestion(base.DisplayText, cultures));
         }
     }
 }
