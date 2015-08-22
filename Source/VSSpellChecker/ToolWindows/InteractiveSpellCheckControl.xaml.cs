@@ -243,7 +243,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         foreach(var s in suggestions)
                             lbSuggestions.Items.Add(s);
 
-                        lbSuggestions.SelectedIndex = issue.Suggestions.First().IsGroupHeader ? 1 : 0;
+                        lbSuggestions.SelectedIndex = 0;
                     }
                     else
                         lbSuggestions.Items.Add("(No suggestions)");
