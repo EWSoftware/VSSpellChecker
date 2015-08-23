@@ -5,15 +5,22 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="700" FontSize="12">
-	<Grid KeyboardNavigation.TabNavigation="Local"
-		Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<Grid KeyboardNavigation.TabNavigation="Local">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition />
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" Orientation="Horizontal" Background="LightGray">
-			<TextBlock FontWeight="Bold" FontSize="15" Name="lblTitle" Margin="3" TextTrimming="CharacterEllipsis" />
+		<StackPanel Grid.Row="0" Orientation="Horizontal">
+			<TextBlock Name="lblTitle" Margin="3" TextTrimming="CharacterEllipsis" Style="{StaticResource TitleText}" />
 		</StackPanel>
 		<Grid Row="1">
 			<Grid.ColumnDefinitions>
@@ -24,9 +31,8 @@
 			<TreeView Grid.Column="0" Name="tvPages" Margin="3" SelectedItemChanged="tvPages_SelectedItemChanged"
 				KeyboardNavigation.TabIndex="0" />
 			<GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center"
-        ShowsPreview="False" Background="DarkGray" TabIndex="4" />
-			<Border Grid.Column="2" Margin="3" BorderThickness="0.5" BorderBrush="Black"
-				Background="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}">
+        ShowsPreview="False" TabIndex="4" />
+			<Border Grid.Column="2" Margin="3" BorderThickness="0.5" BorderBrush="{StaticResource LightBorderBrushKey}">
 				<DockPanel Name="pnlPages" Margin="3">
 				</DockPanel>
 			</Border>
