@@ -1,7 +1,7 @@
 //===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
-// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff, Franz Alex Gaisie-Essilfie
 // Updated : 08/02/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
@@ -14,17 +14,18 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-//    Date     Who  Comments
+//    Date     Who   Comments
 // ==============================================================================================================
-// 04/14/2013  EFW  Imported the code into the project
-// 04/26/2013  EFW  Added support for disabling spell checking as you type
-// 05/02/2013  EFW  Added support for Replace All
-// 05/31/2013  EFW  Added support for Ignore Once
-// 06/06/2014  EFW  Added support for doubled word smart tags
-// 06/20/2014  EFW  Added support for use in VS 2013 Peek Definition windows
-// 02/28/2015  EFW  Added support for code analysis dictionary options
-// 07/28/2015  EFW  Added support for culture information in the spelling suggestions
-// 08/01/2015  EFW  Added support for multiple dictionary languages
+// 04/14/2013  EFW   Imported the code into the project
+// 04/26/2013  EFW   Added support for disabling spell checking as you type
+// 05/02/2013  EFW   Added support for Replace All
+// 05/31/2013  EFW   Added support for Ignore Once
+// 06/06/2014  EFW   Added support for doubled word smart tags
+// 06/20/2014  EFW   Added support for use in VS 2013 Peek Definition windows
+// 02/28/2015  EFW   Added support for code analysis dictionary options
+// 07/28/2015  EFW   Added support for culture information in the spelling suggestions
+// 08/01/2015  EFW   Added support for multiple dictionary languages
+// 08/18/2015  FAGE  Grouping of multi-language suggestions by word
 //===============================================================================================================
 
 using System;
