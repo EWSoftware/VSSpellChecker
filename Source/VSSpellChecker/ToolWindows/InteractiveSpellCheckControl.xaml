@@ -3,10 +3,17 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-		xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
 		mc:Ignorable="d" 
-		d:DesignHeight="350" d:DesignWidth="300" Name="ucInteractiveSpellCheck">
-	<Grid Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+		d:DesignHeight="350" d:DesignWidth="300" Name="ucInteractiveSpellCheck" FontSize="12">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition/>
@@ -29,10 +36,8 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition />
 			</Grid.RowDefinitions>
-			<TextBlock Grid.Row="0" Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow"
-				Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}"
-				Foreground="{DynamicResource {x:Static SystemColors.InfoTextBrushKey}}">No text editor is selected, the
-spell checker is currently disabled, or the file is excluded by filename extension.
+			<TextBlock Grid.Row="0" Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow" Style="{StaticResource NotificationText}">
+No text editor is selected, the spell checker is currently disabled, or the file is excluded by filename extension.
 <LineBreak /><LineBreak />Select a text editor or edit the global configuration or the appropriate
 solution, project, folder, or file-specific configuration to enable spell checking or remove the excluded
 filename extension.</TextBlock>
@@ -44,10 +49,10 @@ filename extension.</TextBlock>
 				</Grid.ColumnDefinitions>
 				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick">
 					<ListBox.ItemContainerStyle>
-						<Style TargetType="{x:Type ListBoxItem}">
+						<Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
 							<Style.Triggers>
 								<DataTrigger Binding="{Binding IsGroupHeader}" Value="True">
-									<Setter Property="Background" Value="LightGray"/>
+									<Setter Property="Background" Value="{StaticResource ItemSelectedNotFocusedBrushKey}"/>
 									<Setter Property="IsEnabled" Value="False"/>
 								</DataTrigger>
 							</Style.Triggers>
