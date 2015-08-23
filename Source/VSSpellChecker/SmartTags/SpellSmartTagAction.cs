@@ -65,7 +65,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <summary>
         /// Display text
         /// </summary>
-        public string DisplayText
+        public virtual string DisplayText
         {
             get { return replaceWith.Suggestion; }
         }

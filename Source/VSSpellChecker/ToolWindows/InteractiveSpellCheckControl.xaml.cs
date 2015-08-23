@@ -1,7 +1,7 @@
 //===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
-// Author  : Eric Woodruff  (Eric@EWoodruff.us)
+// Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
 // Updated : 08/05/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -13,11 +13,12 @@
 // This notice, the author's name, and all copyright notices must remain intact in all applications,
 // documentation, and source files.
 //
-//    Date     Who  Comments
+//    Date     Who   Comments
 // ==============================================================================================================
-// 05/28/2013  EFW  Created the code
-// 02/28/2015  EFW  Added support for code analysis dictionary options
-// 07/28/2015  EFW  Added support for culture information and multiple dictionaries
+// 05/28/2013  EFW   Created the code
+// 02/28/2015  EFW   Added support for code analysis dictionary options
+// 07/28/2015  EFW   Added support for culture information and multiple dictionaries
+// 08/22/2015  FAGE  Grouping of multi-language suggestions by word
 //===============================================================================================================
 
 using System;
@@ -93,7 +94,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                             if(outliningManagerService != null)
                                 outliningManager = outliningManagerService.GetOutliningManager(currentTextView);
-                        } 
+                        }
 
                         tagger_TagsChanged(this, null);
 
@@ -225,10 +226,25 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         btnReplace.IsEnabled = btnReplaceAll.IsEnabled = true;
                         btnAddWord.IsEnabled = (issue.MisspellingType == MisspellingType.MisspelledWord);
 
-                        foreach(var s in issue.Suggestions)
+                        IEnumerable<SpellingSuggestion> suggestions;
+
+                        // group suggestions by suggestion (word) if there are multiple dictionaries
+                        if(currentTagger.Dictionary.DictionaryCount > 1)
+                        {
+                            suggestions = from word in issue.Suggestions
+                                          where !word.IsGroupHeader
+                                          group word by word.Suggestion into grp
+                                          select new MultiLanguageSpellingSuggestion(grp.Select(w => w.Culture), grp.Key);
+                        }
+                        else
+                        {
+                            suggestions = issue.Suggestions;
+                        }
+
+                        foreach(var s in suggestions)
                             lbSuggestions.Items.Add(s);
 
-                        lbSuggestions.SelectedIndex = issue.Suggestions.First().IsGroupHeader ? 1 : 0;
+                        lbSuggestions.SelectedIndex = 0;
                     }
                     else
                         lbSuggestions.Items.Add("(No suggestions)");
