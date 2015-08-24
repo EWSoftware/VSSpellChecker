@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingSuggestion.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/07/2015
+// Updated : 08/23/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -42,13 +42,6 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public string Suggestion { get; private set; }
 
-        /// <summary>
-        /// This read-only property is used by the interactive tool window for determining whether or not this
-        /// is a language group heading entry.
-        /// </summary>
-        /// <value>This will be false for all suggestions and true for a language group header title</value>
-        public bool IsGroupHeader { get; private set; }
-
         #endregion
 
         #region Constructors
@@ -59,23 +52,10 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="culture">The culture information for the suggestion</param>
         /// <param name="suggestion">The suggested replacement word</param>
-        /// <overloads>There are two overloads for the constructor</overloads>
         public SpellingSuggestion(CultureInfo culture, string suggestion)
         {
             this.Culture = culture;
             this.Suggestion = suggestion;
-        }
-
-        /// <summary>
-        /// Language group header constructor
-        /// </summary>
-        /// <param name="culture">The culture information for the header</param>
-        public SpellingSuggestion(CultureInfo culture)
-        {
-            this.IsGroupHeader = true;
-            this.Culture = culture;
-            this.Suggestion = String.Format(CultureInfo.InvariantCulture, "{0} ({1})", culture.EnglishName,
-                culture.Name);
         }
         #endregion
 

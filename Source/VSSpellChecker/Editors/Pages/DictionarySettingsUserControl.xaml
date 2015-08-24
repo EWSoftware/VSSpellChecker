@@ -5,6 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="650">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition />
@@ -69,8 +77,13 @@ the configuration file.</TextBlock>
 					<Label Content="Lan_guage(s)" Grid.Row="0" Grid.Column="0" Margin="3" />
 					<ComboBox Name="cboAvailableLanguages" Grid.Row="0" Grid.Column="1" Margin="3"
 						SelectionChanged="cboAvailableLanguages_SelectionChanged" MaxDropDownHeight="350" />
-					<ListBox Name="lbSelectedLanguages" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="40"
-						MaxHeight="100" Margin="3" SelectionChanged="lbSelectedLanguages_SelectionChanged" />
+					<StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+						<TextBlock Name="lblAddLanguage" HorizontalAlignment="Stretch"  Margin="3" Padding="3"
+							Text="Add a language here if you want to spell check using something other than English US."
+							TextWrapping="Wrap" Visibility="Collapsed" Style="{StaticResource NotificationText}" />
+						<ListBox Name="lbSelectedLanguages" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="40"
+							MaxHeight="100" Margin="3" SelectionChanged="lbSelectedLanguages_SelectionChanged" />
+					</StackPanel>
 					<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
 						<Button Name="btnAddLanguage" Content="Add" Margin="3" Padding="10,3"
 							ToolTip="Add the selected language" Click="btnAddLanguage_Click" />

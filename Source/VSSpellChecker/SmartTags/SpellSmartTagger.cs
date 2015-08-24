@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff, Franz Alex Gaisie-Essilfie
-// Updated : 08/02/2015
+// Updated : 08/23/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -226,38 +226,15 @@ namespace VisualStudio.SpellChecker.SmartTags
 
             if(dictionary.DictionaryCount > 1)
             {
-                // merge the same words from different dictionaries
-                var words = from word in suggestions
-                            where !word.IsGroupHeader
-                            group word by word.Suggestion into grp
-                            select new MultiLanguageSpellSmartTagAction(trackingSpan,
-                                                                        grp.First(),
-                                                                        grp.Select(w => w.Culture),
-                                                                        dictionary);
+                // Merge the same words from different dictionaries
+                var words = suggestions.GroupBy(w => w.Suggestion).Select(g =>
+                    new MultiLanguageSpellSmartTagAction(trackingSpan, g.First(),
+                        g.Select(w => w.Culture), dictionary));
 
-                // workaround for the inability to convert implicitly from MultiLanguageSpellSmartTagAction
                 actions.AddRange(words);
             }
             else
-            {
-                // Add spelling suggestions grouped by language when appropriate
-                foreach(var word in suggestions)
-                {
-                    if(!word.IsGroupHeader)
-                        actions.Add(new SpellSmartTagAction(trackingSpan, word, dictionary));
-                    else
-                    {
-                        if(actions.Count != 0)
-                        {
-                            smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));
-                            actions = new List<ISmartTagAction>();
-                        }
-
-                        actions.Add(new LabelSmartTagAction(String.Format(CultureInfo.InvariantCulture, "{0} ({1})",
-                            word.Culture.EnglishName, word.Culture.Name)));
-                    }
-                }
-            }
+                actions.AddRange(suggestions.Select(word => new SpellSmartTagAction(trackingSpan, word, dictionary)));
 
             if(actions.Count != 0)
                 smartTagSets.Add(new SmartTagActionSet(actions.AsReadOnly()));

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/01/2015
+// Updated : 08/23/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -112,15 +112,7 @@ namespace VisualStudio.SpellChecker
                 allSuggestions.AddRange(this.Dictionaries.First().SuggestCorrections(word));
             else
                 foreach(var d in this.Dictionaries)
-                {
-                    var dictionarySuggestions = d.SuggestCorrections(word);
-
-                    if(dictionarySuggestions.Any())
-                    {
-                        allSuggestions.Add(new SpellingSuggestion(d.Culture));
-                        allSuggestions.AddRange(dictionarySuggestions);
-                    }
-                }
+                    allSuggestions.AddRange(d.SuggestCorrections(word));
 
             return allSuggestions;
         }

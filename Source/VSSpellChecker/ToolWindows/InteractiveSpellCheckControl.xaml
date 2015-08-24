@@ -47,18 +47,7 @@ filename extension.</TextBlock>
 					<ColumnDefinition />
 					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
-				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick">
-					<ListBox.ItemContainerStyle>
-						<Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-							<Style.Triggers>
-								<DataTrigger Binding="{Binding IsGroupHeader}" Value="True">
-									<Setter Property="Background" Value="{StaticResource ItemSelectedNotFocusedBrushKey}"/>
-									<Setter Property="IsEnabled" Value="False"/>
-								</DataTrigger>
-							</Style.Triggers>
-						</Style>
-					</ListBox.ItemContainerStyle>
-				</ListBox>
+				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick" />
 				<StackPanel Grid.Column="1">
 					<Button Name="btnReplace" Content="R_eplace" Width="100" Margin="3"
 						ToolTip="Replace current misspelling with the selected word" Click="btnReplace_Click" />

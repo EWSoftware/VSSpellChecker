@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 08/05/2015
+// Updated : 08/23/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -228,18 +228,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                         IEnumerable<SpellingSuggestion> suggestions;
 
-                        // group suggestions by suggestion (word) if there are multiple dictionaries
+                        // Group suggestions by word if there are multiple dictionaries
                         if(currentTagger.Dictionary.DictionaryCount > 1)
                         {
-                            suggestions = from word in issue.Suggestions
-                                          where !word.IsGroupHeader
-                                          group word by word.Suggestion into grp
-                                          select new MultiLanguageSpellingSuggestion(grp.Select(w => w.Culture), grp.Key);
+                            suggestions = issue.Suggestions.GroupBy(w => w.Suggestion).Select(g =>
+                                new MultiLanguageSpellingSuggestion(g.Select(w => w.Culture), g.Key));
                         }
                         else
-                        {
                             suggestions = issue.Suggestions;
-                        }
 
                         foreach(var s in suggestions)
                             lbSuggestions.Items.Add(s);

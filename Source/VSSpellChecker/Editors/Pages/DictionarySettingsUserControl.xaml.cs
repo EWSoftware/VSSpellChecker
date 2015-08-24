@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/12/2015
+// Updated : 08/23/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -580,6 +580,21 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbSelectedLanguages.SelectedItem != null)
                 cboAvailableLanguages.SelectedItem = lbSelectedLanguages.SelectedItem;
+
+            if(lbSelectedLanguages.Items.Count != 0)
+            {
+                if(lblAddLanguage.Visibility == Visibility.Visible)
+                    lblAddLanguage.Visibility = Visibility.Collapsed;
+            }
+            else
+                if(lblAddLanguage.Visibility == Visibility.Collapsed)
+                {
+                    lblAddLanguage.Visibility = Visibility.Visible;
+
+                    if(!isGlobal)
+                        lblAddLanguage.Text = "Add a language here if you want to spell check using something " +
+                            "other than the inherited language(s).";
+                }
         }
 
         /// <summary>
