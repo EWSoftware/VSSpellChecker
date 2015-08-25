@@ -79,6 +79,8 @@
     <Folder Include="media" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Content\ClassifierDefinition.aml" />
+    <None Include="Content\CommonProblems.aml" />
     <None Include="Content\ConfigOptions\CodeAnalysisDictionaries.aml" />
     <None Include="Content\ConfigOptions\ConfigOptions.aml" />
     <None Include="Content\ConfigOptions\CSharpOptions.aml" />
@@ -89,9 +91,14 @@
     <None Include="Content\ConfigOptions\XMLFiles.aml" />
     <None Include="Content\ConfigurationFiles.aml" />
     <None Include="Content\Contributing.aml" />
+    <None Include="Content\CorrectingIssues.aml" />
     <None Include="Content\CustomDictionaries.aml" />
     <None Include="Content\Installation.aml" />
     <None Include="Content\KnownIssues.aml" />
+    <None Include="Content\SolutionProjectSpellCheck.aml" />
+    <None Include="Content\SpellCheckAsYouType.aml" />
+    <None Include="Content\SpellCheckCurrentDoc.aml" />
+    <None Include="Content\SpellCheckOptions.aml" />
     <None Include="Content\SystemRequirements.aml" />
     <None Include="Content\ThirdPartyContentTypes.aml" />
     <None Include="Content\VersionHistory\v1.0.0.0.aml" />
@@ -103,7 +110,9 @@
     <None Include="Content\VersionHistory\v2015.3.1.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2015.8.15.0.aml" />
+    <None Include="Content\VersionHistory\vNext.aml" />
     <None Include="Content\Welcome.aml" />
+    <None Include="VSSpellCheckerWiki.shfbproj.vsspell" />
   </ItemGroup>
   <ItemGroup>
     <ContentLayout Include="ContentLayout.content" />
@@ -113,6 +122,16 @@
       <ImageId>PayPal</ImageId>
       <AlternateText>Pay Pal</AlternateText>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="media\ActiveDocToolWindow.png">
+      <ImageId>ActiveDocToolWindow</ImageId>
+      <AlternateText>Active Document Spell Check Tool Window</AlternateText>
+    </Image>
+    <Image Include="media\SolutionProjToolWindow.png">
+      <ImageId>SolutionProjToolWindow</ImageId>
+      <AlternateText>Solution/Project Spell Check Tool Window</AlternateText>
+    </Image>
   </ItemGroup>
   <!-- Import the SHFB build targets -->
   <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" />

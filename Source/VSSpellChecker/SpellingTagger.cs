@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/02/2015
+// Updated : 09/06/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -98,10 +98,6 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        // Word break characters (\u201C/\u201D = Unicode quotes, \u2026 = Ellipsis character).
-        // Specifically excludes: _ . ' @
-        private const string wordBreakChars = " \t!\"#$%&()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u2026";
-
         private ITextBuffer _buffer;
         private ITagAggregator<INaturalTextTag> _naturalTextAggregator;
         private ITagAggregator<IUrlTag> _urlAggregator;
@@ -109,6 +105,7 @@ namespace VisualStudio.SpellChecker
 
         private SpellCheckerConfiguration configuration;
         private SpellingDictionary _dictionary;
+        private WordSplitter wordSplitter;
 
         private List<SnapshotSpan> _dirtySpans;
 
@@ -121,8 +118,6 @@ namespace VisualStudio.SpellChecker
 
         private bool _isClosed;
 
-        // Regular expressions used to find things that look like XML elements
-        private static Regex reXml = new Regex(@"<[A-Za-z/]+?.*?>");
         #endregion
 
         #region Properties
@@ -177,6 +172,8 @@ namespace VisualStudio.SpellChecker
             _dirtySpans = new List<SnapshotSpan>();
             _misspellings = new List<MisspellingTag>();
             wordsIgnoredOnce = new List<IgnoredWord>();
+
+            wordSplitter = new WordSplitter { Configuration = configuration };
 
             _buffer.Changed += BufferChanged;
             _naturalTextAggregator.TagsChanged += AggregatorTagsChanged;
@@ -645,28 +642,32 @@ namespace VisualStudio.SpellChecker
             IList<string> spellingAlternates;
             SnapshotSpan errorSpan, deleteWordSpan;
             Microsoft.VisualStudio.Text.Span lastWord;
-            string text, textToParse, preferredTerm;
+            string textToSplit, textToCheck, preferredTerm;
             var ignoredWords = wordsIgnoredOnce;
 
+            // **************************************************************************************************
+            // NOTE: If anything changes here, update the related solution/project spell checking code in
+            // ToolWindows\SolutionProjectSpellCheckControl.xaml.cs\GetMisspellingsInSpans().
+            // **************************************************************************************************
             foreach(var span in spans)
             {
-                text = span.GetText();
+                textToSplit = span.GetText();
 
                 // Note the location of all XML elements if needed
                 if(configuration.IgnoreXmlElementsInText)
-                    xmlTags = reXml.Matches(text).OfType<Match>().ToList();
+                    xmlTags = WordSplitter.XmlElement.Matches(textToSplit).OfType<Match>().ToList();
 
                 lastWord = new Microsoft.VisualStudio.Text.Span();
 
-                foreach(var word in GetWordsInText(text))
+                foreach(var word in wordSplitter.GetWordsInText(textToSplit))
                 {
                     if(_isClosed)
                         yield break;
 
-                    textToParse = text.Substring(word.Start, word.Length);
+                    textToCheck = textToSplit.Substring(word.Start, word.Length);
 
                     // Spell check the word if it looks like one and is not ignored
-                    if(IsProbablyARealWord(textToParse) && (xmlTags == null || xmlTags.Count == 0 ||
+                    if(wordSplitter.IsProbablyARealWord(textToCheck) && (xmlTags == null || xmlTags.Count == 0 ||
                       !xmlTags.Any(match => word.Start >= match.Index &&
                       word.Start <= match.Index + match.Length - 1)))
                     {
@@ -674,12 +675,13 @@ namespace VisualStudio.SpellChecker
 
                         // Check for a doubled word.  This isn't perfect as it won't detected doubled words
                         // across a line break.
-                        if(lastWord.Length != 0 && text.Substring(lastWord.Start, lastWord.Length).Equals(
-                          textToParse, StringComparison.OrdinalIgnoreCase) && String.IsNullOrWhiteSpace(
-                          text.Substring(lastWord.Start + lastWord.Length, word.Start - lastWord.Start - lastWord.Length)))
+                        if(configuration.DetectDoubledWords && lastWord.Length != 0 &&
+                          textToSplit.Substring(lastWord.Start, lastWord.Length).Equals(textToCheck,
+                          StringComparison.OrdinalIgnoreCase) && String.IsNullOrWhiteSpace(textToSplit.Substring(
+                          lastWord.Start + lastWord.Length, word.Start - lastWord.Start - lastWord.Length)))
                         {
                             // If the doubled word is not being ignored at the current location, return it
-                            if(!ignoredWords.Any(w => w.StartPoint == errorSpan.Start && w.Word.Equals(textToParse,
+                            if(!ignoredWords.Any(w => w.StartPoint == errorSpan.Start && w.Word.Equals(textToCheck,
                               StringComparison.OrdinalIgnoreCase)))
                             {
                                 // Delete the whitespace ahead of it too
@@ -696,14 +698,14 @@ namespace VisualStudio.SpellChecker
                         lastWord = word;
 
                         // If the word is not being ignored, perform the other checks
-                        if(!_dictionary.ShouldIgnoreWord(textToParse) && !ignoredWords.Any(
-                          w => w.StartPoint == errorSpan.Start && w.Word.Equals(textToParse,
+                        if(!_dictionary.ShouldIgnoreWord(textToCheck) && !ignoredWords.Any(
+                          w => w.StartPoint == errorSpan.Start && w.Word.Equals(textToCheck,
                           StringComparison.OrdinalIgnoreCase)))
                         {
                             // Handle code analysis dictionary checks first as they may be not be recognized as
                             // correctly spelled words but have alternate handling.
                             if(configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
-                              configuration.DeprecatedTerms.TryGetValue(textToParse, out preferredTerm))
+                              configuration.DeprecatedTerms.TryGetValue(textToCheck, out preferredTerm))
                             {
                                 yield return new MisspellingTag(MisspellingType.DeprecatedTerm, errorSpan,
                                     new[] { new SpellingSuggestion(null, preferredTerm) });
@@ -711,7 +713,7 @@ namespace VisualStudio.SpellChecker
                             }
 
                             if(configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
-                              configuration.CompoundTerms.TryGetValue(textToParse, out preferredTerm))
+                              configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
                             {
                                 yield return new MisspellingTag(MisspellingType.CompoundTerm, errorSpan,
                                     new[] { new SpellingSuggestion(null, preferredTerm) });
@@ -719,36 +721,36 @@ namespace VisualStudio.SpellChecker
                             }
 
                             if(configuration.CadOptions.TreatUnrecognizedWordsAsMisspelled &&
-                              configuration.UnrecognizedWords.TryGetValue(textToParse, out spellingAlternates))
+                              configuration.UnrecognizedWords.TryGetValue(textToCheck, out spellingAlternates))
                             {
                                 yield return new MisspellingTag(MisspellingType.UnrecognizedWord, errorSpan,
                                     spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
                                 continue;
                             }
 
-                            if(!_dictionary.IsSpelledCorrectly(textToParse))
+                            if(!_dictionary.IsSpelledCorrectly(textToCheck))
                             {
                                 // Sometimes it flags a word as misspelled if it ends with "'s".  Try checking the
                                 // word without the "'s".  If ignored or correct without it, don't flag it.  This
                                 // appears to be caused by the definitions in the dictionary rather than Hunspell.
-                                if(textToParse.EndsWith("'s", StringComparison.OrdinalIgnoreCase))
+                                if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    textToParse = textToParse.Substring(0, textToParse.Length - 2);
+                                    textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
-                                    if(_dictionary.ShouldIgnoreWord(textToParse) ||
-                                      _dictionary.IsSpelledCorrectly(textToParse))
+                                    if(_dictionary.ShouldIgnoreWord(textToCheck) ||
+                                      _dictionary.IsSpelledCorrectly(textToCheck))
                                         continue;
 
-                                    textToParse += "'s";
+                                    textToCheck += "'s";
                                 }
 
                                 // Some dictionaries include a trailing period on certain words such as "etc." which
                                 // we don't include.  If the word is followed by a period, try it with the period to
                                 // see if we get a match.  If so, consider it valid.
-                                if(word.Start + word.Length < text.Length && text[word.Start + word.Length] == '.')
+                                if(word.Start + word.Length < textToSplit.Length && textToSplit[word.Start + word.Length] == '.')
                                 {
-                                    if(_dictionary.ShouldIgnoreWord(textToParse + ".") ||
-                                      _dictionary.IsSpelledCorrectly(textToParse + "."))
+                                    if(_dictionary.ShouldIgnoreWord(textToCheck + ".") ||
+                                      _dictionary.IsSpelledCorrectly(textToCheck + "."))
                                         continue;
                                 }
 
@@ -758,389 +760,6 @@ namespace VisualStudio.SpellChecker
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Determine if a word is probably a real word
-        /// </summary>
-        /// <param name="word">The word to check</param>
-        /// <returns>True if it appears to be a real word or false if any of the following conditions are met:
-        /// 
-        /// <list type="bullet">
-        ///     <description>The word contains a period or an at-sign (it looks like a filename or an e-mail
-        /// address) and those words are being ignored.  We may miss a few real misspellings in this case due
-        /// to a missed space after a period, but that's acceptable.</description>
-        ///     <description>The word contains an underscore and underscores are not being treated as
-        /// separators.</description>
-        ///     <description>The word contains a digit and words with digits are being ignored.</description>
-        ///     <description>The word is composed entirely of digits when words with digits are not being
-        /// ignored.</description>
-        ///     <description>The word is in all uppercase and words in all uppercase are being ignored.</description>
-        ///     <description>The word is camel cased.</description>
-        /// </list>
-        /// </returns>
-        internal bool IsProbablyARealWord(string word)
-        {
-            if(String.IsNullOrWhiteSpace(word))
-                return false;
-
-            word = word.Trim();
-
-            // Check for a period or an at-sign in the word (things that look like filenames and e-mail addresses)
-            if(word.IndexOfAny(new[] { '.', '@' }) >= 0)
-                return false;
-
-            // Check for underscores and digits
-            if(word.Any(c => c == '_' || (Char.IsDigit(c) && configuration.IgnoreWordsWithDigits)))
-                return false;
-
-            // Ignore if all digits (this only happens if the Ignore Words With Digits option is false)
-            if(!word.Any(c => Char.IsLetter(c)))
-                return false;
-
-            // Ignore if all uppercase, accounting for apostrophes and digits
-            if(word.All(c => Char.IsUpper(c) || !Char.IsLetter(c)))
-                return !configuration.IgnoreWordsInAllUppercase;
-
-            // Ignore if camel cased
-            if(Char.IsLetter(word[0]) && word.Skip(1).Any(c => Char.IsUpper(c)))
-            {
-                // An exception is if it appears in the code analysis dictionary options.  These may be camel
-                // cased but the user wants them replaced with something else.
-                if((configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
-                  configuration.DeprecatedTerms.ContainsKey(word)) ||
-                  (configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
-                  configuration.CompoundTerms.ContainsKey(word)))
-                    return true;
-
-                return false;
-            }
-
-            // Ignore by character class.  A rather simplistic way to ignore some foreign language words in files
-            // with mixed English/non-English text.
-            if(configuration.IgnoreCharacterClass != IgnoredCharacterClass.None)
-            {
-                if(configuration.IgnoreCharacterClass == IgnoredCharacterClass.NonAscii && word.Any(c => c > '\x07F'))
-                    return false;
-
-                if(configuration.IgnoreCharacterClass == IgnoredCharacterClass.NonLatin && word.Any(c => c > '\x0FF'))
-                    return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Get all words in the specified text string
-        /// </summary>
-        /// <param name="text">The text to break into words</param>
-        /// <returns>An enumerable list of word spans</returns>
-        internal IEnumerable<Microsoft.VisualStudio.Text.Span> GetWordsInText(string text)
-        {
-            if(String.IsNullOrWhiteSpace(text))
-                yield break;
-
-            for(int i = 0, end = 0; i < text.Length; i++)
-            {
-                // Skip escape sequences.  If not, they can end up as part of the word or cause words to be
-                // missed.  For example, "This\r\nis\ta\ttest \x22missing\x22" would incorrectly yield "nis",
-                // "ta", and "ttest" and incorrectly exclude "missing".  This can cause the occasional false
-                // positive in file paths (i.e. \Folder\transform\File.txt flags "ransform" as a misspelled word
-                // because of the lowercase "t" following the backslash) but I can live with that.  If they are
-                // common enough, they can be added to the configuration's ignored word list as an escaped word.
-                if(text[i] == '\\')
-                {
-                    end = i + 1;
-
-                    if(end < text.Length)
-                    {
-                        // Skip escaped words.  Only need to check the escape sequence letters.
-                        switch(text[end])
-                        {
-                            case 'a':   // BEL
-                            case 'b':   // BS
-                            case 'f':   // FF
-                            case 'n':   // LF
-                            case 'r':   // CR
-                            case 't':   // TAB
-                            case 'v':   // VT
-                            case 'x':   // Hex value
-                            case 'u':   // Unicode value
-                            case 'U':
-                            {
-                                // Find the end of the word
-                                int wordEnd = end;
-
-                                while(++wordEnd < text.Length && !IsWordBreakCharacter(text[wordEnd]))
-                                    ;
-
-                                if(configuration.ShouldIgnoreWord(text.Substring(end - 1, --wordEnd - i + 1)))
-                                {
-                                    i = wordEnd;
-                                    continue;
-                                }
-
-                                break;
-                            }
-                        }
-
-                        // Escape sequences
-                        switch(text[end])
-                        {
-                            case '\'':
-                            case '\"':
-                            case '\\':
-                            case '?':   // Anti-Trigraph
-                            case '0':   // NUL or Octal
-                            case 'a':   // BEL
-                            case 'b':   // BS
-                            case 'f':   // FF
-                            case 'n':   // LF
-                            case 'r':   // CR
-                            case 't':   // TAB
-                            case 'v':   // VT
-                                i++;
-                                break;
-
-                            case 'x':   // xh[h[h[h]]] or xhh[hh]
-                                while(++end < text.Length && (end - i) < 6 && (Char.IsDigit(text[end]) ||
-                                  (Char.ToLower(text[end]) >= 'a' && Char.ToLower(text[end]) <= 'f')))
-                                    ;
-
-                                i = --end;
-                                break;
-
-                            case 'u':   // uhhhh
-                                while(++end < text.Length && (end - i) < 6 && (Char.IsDigit(text[end]) ||
-                                  (Char.ToLower(text[end]) >= 'a' && Char.ToLower(text[end]) <= 'f')))
-                                    ;
-
-                                if((--end - i) == 5)
-                                    i = end;
-                                break;
-
-                            case 'U':   // Uhhhhhhhh
-                                while(++end < text.Length && (end - i) < 10 && (Char.IsDigit(text[end]) ||
-                                  (Char.ToLower(text[end]) >= 'a' && Char.ToLower(text[end]) <= 'f')))
-                                    ;
-
-                                if((--end - i) == 9)
-                                    i = end;
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-
-                    continue;
-                }
-
-                // Skip XML entities
-                if(text[i] == '&')
-                {
-                    end = i + 1;
-
-                    if(end < text.Length && text[end] == '#')
-                    {
-                        // Numeric Reference &#n[n][n][n];
-                        while(++end < text.Length && (end - i) < 7 && Char.IsDigit(text[end]))
-                            ;
-
-                        // Hexadecimal Reference &#xh[h][h][h];
-                        if(end < text.Length && text[end] == 'x')
-                        {
-                            while(++end < text.Length && (end - i) < 8 && (Char.IsDigit(text[end]) ||
-                              (Char.ToLower(text[end]) >= 'a' && Char.ToLower(text[end]) <= 'f')))
-                                ;
-                        }
-
-                        // Check for entity closer
-                        if(end < text.Length && text[end] == ';')
-                            i = end;
-                    }
-
-                    continue;
-                }
-
-                // Skip .NET format string specifiers if so indicated.  This ignores stuff like date formats
-                // such as "{0:MM/dd/yyyy hh:nn tt}".
-                if(text[i] == '{' && configuration.IgnoreFormatSpecifiers)
-                {
-                    end = i + 1;
-
-                    if(i > 0 && text.Length > 2 && text[0] == '$' && text[1] == '"')
-                    {
-                        // C# 6 string format: $"{Property}".  Find the end accounting for escaped braces
-                        while(++end < text.Length)
-                            if(text[end] == '}')
-                            {
-                                if(end + 1 == text.Length || text[end + 1] != '}')
-                                    break;
-
-                                end++;
-                            }
-                    }
-                    else
-                        while(end < text.Length && Char.IsDigit(text[end]))
-                            end++;
-
-                    if(end < text.Length && text[end] == ':')
-                    {
-                        // Find the end accounting for escaped braces
-                        while(++end < text.Length)
-                            if(text[end] == '}')
-                            {
-                                if(end + 1 == text.Length || text[end + 1] != '}')
-                                    break;
-
-                                end++;
-                            }
-                    }
-
-                    if(end < text.Length && text[end] == '}')
-                        i = end;
-
-                    continue;
-                }
-
-                // Skip C-style format string specifiers if so indicated.  These can cause spelling errors in
-                // cases where there are multiple characters such as "%ld".  My C/C++ skills are very rusty but
-                // this should cover it.
-                if(text[i] == '%' && configuration.IgnoreFormatSpecifiers)
-                {
-                    end = i + 1;
-
-                    if(end < text.Length)
-                    {
-                        // Flags
-                        switch(text[end])
-                        {
-                            // NOTE: A space is also a valid flag character but we can't tell if it's part of
-                            // the format or just a percentage followed by a word without some lookahead which
-                            // probably isn't worth the effort (i.e. "% i" vs "100% stuff").  As such, the space
-                            // flag character is not included here.
-                            case '-':
-                            case '+':
-                            case '#':
-                            case '0':
-                                end++;
-                                break;
-
-                            default:
-                                break;
-                        }
-
-                        // Width and precision not accounting for validity to keep it simple
-                        while(end < text.Length && (Char.IsDigit(text[end]) || text[end] == '.' || text[end] == '*'))
-                            end++;
-
-                        if(end < text.Length)
-                        {
-                            // Length
-                            switch(text[end])
-                            {
-                                case 'h':
-                                case 'l':
-                                    end++;
-
-                                    // Check for "hh" and "ll"
-                                    if(end < text.Length && text[end] == text[end - 1])
-                                        end++;
-                                    break;
-
-                                case 'j':
-                                case 'z':
-                                case 't':
-                                case 'L':
-                                    end++;
-                                    break;
-
-                                default:
-                                    break;
-                            }
-
-                            if(end < text.Length)
-                            {
-                                // And finally, the specifier
-                                switch(text[end])
-                                {
-                                    case 'd':
-                                    case 'i':
-                                    case 'u':
-                                    case 'o':
-                                    case 'x':
-                                    case 'X':
-                                    case 'f':
-                                    case 'F':
-                                    case 'e':
-                                    case 'E':
-                                    case 'g':
-                                    case 'G':
-                                    case 'a':
-                                    case 'A':
-                                    case 'c':
-                                    case 's':
-                                    case 'p':
-                                    case 'n':
-                                        i = end;
-                                        break;
-
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                    }
-
-                    continue;
-                }
-
-                // Skip word separator
-                if(IsWordBreakCharacter(text[i]))
-                    continue;
-
-                // Find the end of the word
-                end = i;
-
-                while(++end < text.Length && !IsWordBreakCharacter(text[end]))
-                    ;
-
-                // Skip XML entity reference &[name];
-                if(end < text.Length && i > 0 && text[i - 1] == '&' && text[end] == ';')
-                {
-                    i = end;
-                    continue;
-                }
-
-                // Skip leading apostrophes
-                while(i < end && text[i] == '\'')
-                    i++;
-
-                // Skip trailing apostrophes, periods, and at-signs
-                while(--end > i && (text[end] == '\'' || text[end] == '.' || text[end] == '@'))
-                    ;
-
-                end++;    // Move back to last match
-
-                // Ignore anything less than two characters
-                if(end - i > 1)
-                    yield return Microsoft.VisualStudio.Text.Span.FromBounds(i, end);
-
-                i = --end;
-            }
-        }
-
-        /// <summary>
-        /// See if the specified character is a word break character
-        /// </summary>
-        /// <param name="c">The character to check</param>
-        /// <returns>True if the character is a word break, false if not</returns>
-        private bool IsWordBreakCharacter(char c)
-        {
-            return wordBreakChars.Contains(c) || Char.IsWhiteSpace(c) ||
-                (c == '_' && configuration.TreatUnderscoreAsSeparator) ||
-                ((c == '.' || c == '@') && !configuration.IgnoreFilenamesAndEMailAddresses);
         }
 
         /// <summary>

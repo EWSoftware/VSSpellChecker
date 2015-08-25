@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="9581715a-a5bc-4de5-9474-eaefa38cf211" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>The left side of the tool window contains the following items that control the process and display
+the results.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para><ui>Spell Check</ui> - This combo box lets you choose what is spell checked.  The first option
+is always <ui>Entire Solution</ui>.  There will be one entry for each project in the solution following it that,
+if selected, spell checks only the selected project.  The last option is always <ui>Selected Solution Explorer
+items</ui> which will only spell check the items currently selected in the Solution Explorer tool window.  This
+can be any combination of projects, folders, and/or files.  If the solution node is selected, it effectively
+checks the entire solution.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Max Issues</ui> - This option lets you specify the maximum number of spell checking issues
+that will be reported.  The default is 5,000 which should be sufficient for most projects.  If you have a very
+large number of projects in a solution, you can increase this value up to 99,999 as you see fit.  Note that the
+number entered may not be matched exactly.  Spell checking will stop after the process finishes the file in which
+the maximum is exceeded.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Start</ui> - Click this button to start the spell checking process.  Once started, the
+button is changed to a <ui>Cancel</ui> button.  Clicking it will stop the spell checking process as soon as
+possible.  A spinner will appear to the right of the button when spell checking is in progress and the current
+file being spell checked will be reported in the message area just below the option controls.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Issues</ui> - The grid in the lower half of the tool window displays all issues found once
+the spell checking process completes or has been canceled.  A counter above the first column displays the
+currently selected issue number and the total number of issues found.  The grid contains the following columns:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para><ui>Project</ui> - The project containing the file in which the issues was found.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>File</ui> - The name of the file in which the issue was found</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Line #</ui> - The line number on which the issue was found.  A column number is not
+reported as configuration options can vary the size of tab characters thus making it difficult to accurately
+report a true column number as displayed in the editor.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Issue</ui> - The issue that was found: Misspelled Word, Double Word, Compound Term,
+Deprecated Term, or Unrecognized Word.  The first two are the most common.  The last three will only be seen if
+code analysis dictionaries are enabled for use as part of the spell checking process.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Word</ui> - The word that caused the issue</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Text</ui> - The text of the line containing the word at issue.  This allows you to
+determine the location and actual context to determine whether or not the issue should be corrected or ignored.</para>
+							</listItem>
+
+						</list>
+
+						<para>Clicking on the project, file, issue, or word column header will sort the grid by the values in
+that column.  Click on the column header again to change the sort between ascending and descending order.  The
+line number and text columns are not sortable as sorting by them serves no useful purpose.</para>
+
+						<para>Right click on an issue to bring up a context menu with the following options:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para><ui>Ignore Once</ui> - Ignore the selected issue once.  This is equivalent to clicking the
+<ui>Ignore Once</ui> button in the correction options on the right side of the tool window.  The issue will be
+removed from the list.  If the spell check process is ran again, the issue will be reported again.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Ignore All</ui> - Ignore all similar issues with the same word.  This is equivalent to
+clicking the <ui>Ignore All</ui> button in the correction options on the right side of the tool window.  The
+current issue and all similar issues containing the same word will be removed from the list.  Once ignored using
+this option, the issues will not be reported again until the solution or Visual Studio is closed and reopened.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Ignore Issues in This File</ui> - Ignore all issues in the current issue's file.  The
+current issue and all other issues in the same file will be removed from the list.  If the spell check process is
+ran again, the issues will be reported again.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Ignore Issues in This Project</ui> - Ignore all issues in the current issue's project.
+The current issue and all other issues in the same project will be removed from the list.  If the spell check
+process is ran again, the issues will be reported again.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Go To Issue</ui> - Open the file in a text editor and go to the issue's location.  An
+issue in the grid can be double clicked to perform the same action.  Once positioned, the issue's word is
+highlighted.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Copy Word to Clipboard</ui> - This will copy the current issue's word to the clipboard.
+Pressing <ui>Ctrl+C</ui> in the grid will also copy the word to the clipboard.  This is useful if you are adding
+words to the ignored list in a configuration file.  You can copy and paste them into the configuration editor and
+add them to the list.</para>
+							</listItem>
+
+						</list>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fa790577-88c0-4141-b8f4-d8b70f625cfd" />
+			<link xlink:href="ddf22015-1680-4421-aaa7-dda867660522" />
+			<link xlink:href="bda126a1-e534-4172-81dc-35a32d91e4cc" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

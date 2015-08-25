@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="fa790577-88c0-4141-b8f4-d8b70f625cfd" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Selecting <ui>Tools | Spell Checker</ui> and choosing one of the solution or project spell check
+options opens the solution/project spell checker tool window.  This tool window will only be usable when a
+solution containing projects is loaded.</para>
+
+		</introduction>
+
+		<section>
+			<content>
+				<para>There are two sides to the window.  The left side lets you choose what to spell check and shows
+the results of the operation.  The right side contains the options to correct issues and will be updated to
+reflect the current issue that is selected in the grid on the left side.</para>
+
+				<mediaLink>
+					<image xlink:href="SolutionProjToolWindow"/>
+				</mediaLink>
+
+				<para>Select a topic below for more information.</para>
+
+				<list class="bullet">
+					<listItem>
+						<para>
+							<link xlink:href="9581715a-a5bc-4de5-9474-eaefa38cf211" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="ddf22015-1680-4421-aaa7-dda867660522" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="bda126a1-e534-4172-81dc-35a32d91e4cc" />
+						</para>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+		
+		<relatedTopics>
+			<link xlink:href="e8f67bc4-a8f8-4e50-ab5a-876599f3a645" />
+			<link xlink:href="53ffc5b7-b7dc-4f03-9a51-ed4176bff504" />
+			<link xlink:href="e339cac1-9783-4c2a-919f-88436c78fef8" />
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

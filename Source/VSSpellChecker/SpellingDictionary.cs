@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/23/2015
+// Updated : 08/25/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -29,6 +29,8 @@ using System.Globalization;
 using System.Linq;
 
 using Microsoft.VisualStudio.Text;
+
+using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker
 {
@@ -215,7 +217,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="word">The word to be replaced</param>
         /// <param name="replacement">The suggestion to use as the replacement</param>
-        public void ReplaceAllOccurrences(string word, SpellingSuggestion replacement)
+        public void ReplaceAllOccurrences(string word, ISpellingSuggestion replacement)
         {
             var handler = ReplaceAll;
 

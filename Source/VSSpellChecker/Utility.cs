@@ -1,8 +1,8 @@
 ﻿//===============================================================================================================
-// System  : Sandcastle Help File Builder Visual Studio Package
+// System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2015
+// Updated : 09/01/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -59,7 +59,7 @@ namespace VisualStudio.SpellChecker
         //=====================================================================
 
         /// <summary>
-        /// Get a service from the Sandcastle Help File Builder package
+        /// Get a service from the Visual Studio Spell Checker package
         /// </summary>
         /// <param name="throwOnError">True to throw an exception if the service cannot be obtained,
         /// false to return null.</param>

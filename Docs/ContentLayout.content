@@ -24,6 +24,36 @@
       <HelpKeyword index="K" term="usage notes" />
     </HelpKeywords>
   </Topic>
+  <Topic id="e8f67bc4-a8f8-4e50-ab5a-876599f3a645" visible="True" title="Spell Check as You Type">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="spell check, as you type" />
+    </HelpKeywords>
+  </Topic>
+  <Topic id="53ffc5b7-b7dc-4f03-9a51-ed4176bff504" visible="True" title="Active Document Spell Check Tool Window">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="spell check, active document" />
+    </HelpKeywords>
+  </Topic>
+  <Topic id="fa790577-88c0-4141-b8f4-d8b70f625cfd" visible="True" isExpanded="true" title="Solution/Project Spell Check Tool Window">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="spell check, solution/project" />
+    </HelpKeywords>
+    <Topic id="9581715a-a5bc-4de5-9474-eaefa38cf211" visible="True" title="Spell Checking Options">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="spell check, solution/project options" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="ddf22015-1680-4421-aaa7-dda867660522" visible="True" title="Correcting Issues">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="spell check, correcting solution/project issues" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="bda126a1-e534-4172-81dc-35a32d91e4cc" visible="True" title="Common Problems">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="spell check, common problems" />
+      </HelpKeywords>
+    </Topic>
+  </Topic>
   <Topic id="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" visible="True" title="Configuration Files">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration, configuration files" />
@@ -79,6 +109,11 @@
       <HelpKeyword index="K" term="third party content types" />
     </HelpKeywords>
   </Topic>
+  <Topic id="0ff35371-69b5-48dd-a062-037abe2469de" visible="True" isSelected="true" title="Defining Solution/Project Spell Check Classifiers">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="classifier definition" />
+    </HelpKeywords>
+  </Topic>
   <Topic id="a9ff4ce1-0d6b-4376-8d32-02dae64e2075" visible="True" title="Known Issues">
     <HelpKeywords>
       <HelpKeyword index="K" term="known issues" />
@@ -88,7 +123,12 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="d5b0b38e-0abb-45b2-943f-5628da441785" visible="True" isSelected="true" title="Version 2015.8.15.0">
+    <Topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" visible="True" title="Version vNext">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, vNext" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="d5b0b38e-0abb-45b2-943f-5628da441785" visible="True" title="Version 2015.8.15.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2015.8.15.0" />
       </HelpKeywords>

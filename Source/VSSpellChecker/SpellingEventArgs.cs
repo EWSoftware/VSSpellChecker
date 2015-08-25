@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingEventArgs.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 07/28/2015
+// Updated : 08/25/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -26,6 +26,8 @@ using System;
 using System.Globalization;
 
 using Microsoft.VisualStudio.Text;
+
+using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker
 {
@@ -81,7 +83,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="word">The word related to the event</param>
         /// <param name="replacement">The replacement to use.  If null, an empty string is used.</param>
-        public SpellingEventArgs(string word, SpellingSuggestion replacement)
+        public SpellingEventArgs(string word, ISpellingSuggestion replacement)
         {
             if(String.IsNullOrWhiteSpace(word))
                 throw new ArgumentException("The word cannot be null or empty", "word");

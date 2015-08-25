@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d"
-						 d:DesignHeight="400" d:DesignWidth="500">
+						 d:DesignHeight="460" d:DesignWidth="500">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -15,6 +15,14 @@
 				<StackPanel Orientation="Horizontal">
 					<ComboBox Name="cboSpellCheckAsYouType" Width="75" Margin="3" SelectionChanged="Property_Changed" />
 					<Label Margin="3" Content="Spell c_heck as you type" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal" Name="spIncludeInProjectSpellCheck">
+					<ComboBox Name="cboIncludeInProjectSpellCheck" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Include when performing solution/project spell checking" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboDetectDoubledWords" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Detect doubled words" />
 				</StackPanel>
 				<StackPanel Orientation="Horizontal">
 					<ComboBox Name="cboIgnoreWordsWithDigits" Width="75" Margin="3" SelectionChanged="Property_Changed" />

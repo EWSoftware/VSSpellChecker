@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceFactory.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/24/2015
+// Updated : 09/03/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -53,8 +53,16 @@ namespace VisualStudio.SpellChecker
         [Import]
         private SVsServiceProvider globalServiceProvider = null;
 
-        // This is used to track the last solution filename
-        private string lastSolutionName;
+        #endregion
+
+        #region Properties
+        //=====================================================================
+
+        /// <summary>
+        /// This is used to track the last solution filename to determine when the global dictionary cache should
+        /// be cleared.
+        /// </summary>
+        internal static string LastSolutionName { get; set; }
 
         #endregion
 
@@ -159,11 +167,11 @@ namespace VisualStudio.SpellChecker
                     // Clear the global dictionary cache when a change in solution is detected.  This handles
                     // cases where only the MEF components are loaded and not the package (i.e. a configuration
                     // has not been edited).  See VSSpellCheckerPackage.solutionEvents_AfterClosing().
-                    if(lastSolutionName == null || !lastSolutionName.Equals(solution.FullName,
+                    if(LastSolutionName == null || !LastSolutionName.Equals(solution.FullName,
                       StringComparison.OrdinalIgnoreCase))
                     {
                         GlobalDictionary.ClearDictionaryCache();
-                        lastSolutionName = solution.FullName;
+                        LastSolutionName = solution.FullName;
                     }
 
                     // See if there is a solution configuration
@@ -298,12 +306,12 @@ namespace VisualStudio.SpellChecker
                     }
                 }
                 else
-                    if(lastSolutionName != null)
+                    if(LastSolutionName != null)
                     {
                         // A solution was closed and a file has been opened outside of a solution so clear the
                         // cache and use the global dictionaries.
                         GlobalDictionary.ClearDictionaryCache();
-                        lastSolutionName = null;
+                        LastSolutionName = null;
                     }
             }
             catch(Exception ex)

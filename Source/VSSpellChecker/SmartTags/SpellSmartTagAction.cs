@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagAction.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/28/2014
+// Updated : 08/25/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -27,6 +27,8 @@ using System.Windows.Input;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 
+using VisualStudio.SpellChecker.Definitions;
+
 namespace VisualStudio.SpellChecker.SmartTags
 {
     /// <summary>
@@ -38,8 +40,9 @@ namespace VisualStudio.SpellChecker.SmartTags
         //=====================================================================
 
         private ITrackingSpan span;
-        private SpellingSuggestion replaceWith;
+        private ISpellingSuggestion replaceWith;
         private SpellingDictionary dictionary;
+
         #endregion
 
         #region Constructor
@@ -51,7 +54,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <param name="span">The word span to replace</param>
         /// <param name="replaceWith">The suggestion to replace misspelled word with</param>
         /// <param name="dictionary">The dictionary used to perform the Replace All action</param>
-        public SpellSmartTagAction(ITrackingSpan span, SpellingSuggestion replaceWith, SpellingDictionary dictionary)
+        public SpellSmartTagAction(ITrackingSpan span, ISpellingSuggestion replaceWith, SpellingDictionary dictionary)
         {
             this.span = span;
             this.replaceWith = replaceWith;

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingSuggestion.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/23/2015
+// Updated : 08/25/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -22,12 +22,14 @@
 using System;
 using System.Globalization;
 
+using VisualStudio.SpellChecker.Definitions;
+
 namespace VisualStudio.SpellChecker
 {
     /// <summary>
     /// This represents a spelling suggestion that can be used to replace a misspelled word
     /// </summary>
-    public class SpellingSuggestion
+    public class SpellingSuggestion : ISpellingSuggestion
     {
         #region Properties
         //=====================================================================

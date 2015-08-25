@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellSmartTagAction.cs
 // Author  : Franz Alex Gaisie-Essilfie
-// Updated : 2015-08-22
+// Updated : 08/25/2015
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a smart tag action for inserting multi-language spelling suggestions
@@ -24,6 +24,8 @@ using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 
+using VisualStudio.SpellChecker.Definitions;
+
 namespace VisualStudio.SpellChecker.SmartTags
 {
     /// <summary>Smart tag action for inserting multi-language spelling suggestions.</summary>
@@ -37,11 +39,8 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <param name="replaceWith">The suggestion to replace misspelled word with</param>
         /// <param name="cultures">The cultures from which the suggested word was chosen.</param>
         /// <param name="dictionary">The dictionary used to perform the Replace All action</param>
-        public MultiLanguageSpellSmartTagAction(ITrackingSpan trackingSpan,
-                                                SpellingSuggestion replaceWith,
-                                                IEnumerable<CultureInfo> cultures,
-                                                SpellingDictionary dictionary)
-            : base(trackingSpan, replaceWith, dictionary)
+        public MultiLanguageSpellSmartTagAction(ITrackingSpan trackingSpan, ISpellingSuggestion replaceWith,
+            IEnumerable<CultureInfo> cultures, SpellingDictionary dictionary) : base(trackingSpan, replaceWith, dictionary)
         {
             this.cultures = cultures.ToArray();
             this.displayText = null;
