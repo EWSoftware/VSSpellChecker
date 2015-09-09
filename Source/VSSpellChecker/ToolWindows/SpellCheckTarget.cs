@@ -1,12 +1,13 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : MisspellingType.cs
+// File    : SpellCheckTarget.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/28/2015
+// Updated : 08/26/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
-// This file contains an enumerated type that defines the different misspelling types
+// This file contains an enumerated type that defines the spell check targets for solution/project spell
+// checking.
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -15,35 +16,32 @@
 //
 //    Date     Who  Comments
 //===============================================================================================================
-// 02/28/2015  EFW  Created the code
+// 08/25/2015  EFW  Created the code
 //===============================================================================================================
 
-namespace VisualStudio.SpellChecker.Tagging
+namespace VisualStudio.SpellChecker.ToolWindows
 {
     /// <summary>
-    /// This enumerated type defines the misspelling types
+    /// This defines the spell check targets for solution/project spell checking
     /// </summary>
-    public enum MisspellingType
+    public enum SpellCheckTarget
     {
         /// <summary>
-        /// A misspelled word
+        /// No spell check target
         /// </summary>
-        MisspelledWord,
+        None,
         /// <summary>
-        /// A doubled word
+        /// The entire solution
         /// </summary>
-        DoubledWord,
+        EntireSolution,
         /// <summary>
-        /// A deprecated term from a code analysis dictionary
+        /// The current project
         /// </summary>
-        DeprecatedTerm,
+        CurrentProject,
         /// <summary>
-        /// A compound term from a code analysis dictionary
+        /// The selected items in the Solution Explorer window
         /// </summary>
-        CompoundTerm,
-        /// <summary>
-        /// An unrecognized word from a code analysis dictionary
-        /// </summary>
-        UnrecognizedWord
+        /// <remarks>The selected items may be projects, folders, or files with dependencies</remarks>
+        SelectedItems
     }
 }

@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.ToolWindows.SpellCheckControl"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+		xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
+		mc:Ignorable="d" 
+		d:DesignHeight="350" d:DesignWidth="300" Name="ucSpellCheckControl" FontSize="12">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<Grid Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+			<Label Grid.Column="0" Margin="3" Name="lblIssue"
+				Target="{Binding ElementName=txtMisspelledWord}">_Misspelled Word</Label>
+			<TextBox Grid.Column="1" Name="txtMisspelledWord" Margin="3" TextChanged="txtMisspelledWord_TextChanged" />
+			<Button Grid.Column="2" Name="btnUndo" Content="_Undo" Margin="3" Padding="10,0"
+				ToolTip="Undo changes to the misspelled word" Click="btnUndo_Click" />
+		</Grid>
+		<Grid Grid.Row="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition />
+			</Grid.RowDefinitions>
+			<TextBlock Grid.Row="0" Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow" Style="{StaticResource NotificationText}">
+No text editor is selected, the spell checker is currently disabled, or the file is excluded by filename extension.
+<LineBreak /><LineBreak />Select a text editor or edit the global configuration or the appropriate
+solution, project, folder, or file-specific configuration to enable spell checking or remove the excluded
+filename extension.</TextBlock>
+			<Label Grid.Row="1" Target="{Binding ElementName=lbSuggestions}">_Suggestions</Label>
+			<Grid Grid.Row="2">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick" />
+				<StackPanel Grid.Column="1">
+					<Button Name="btnReplace" Content="R_eplace" Width="100" Margin="3"
+						Command="vssc:SpellCheckCommands.Replace"
+						ToolTip="Replace current misspelling with the selected word" />
+					<Button Name="btnReplaceAll" Content="Replace _All" Width="100" Margin="3, 3, 3, 12"
+						Command="vssc:SpellCheckCommands.ReplaceAll"
+						ToolTip="Replace all occurrences with the selected word" />
+					<Button Name="btnIgnoreOnce" Content="_Ignore Once" Width="100" Margin="3"
+						Command="vssc:SpellCheckCommands.IgnoreOnce"
+						ToolTip="Ignore just this occurrence of the misspelled word" />
+					<Button Name="btnIgnoreAll" Content="Ig_nore All" Width="100" Margin="3, 3, 3, 12"
+						Command="vssc:SpellCheckCommands.IgnoreAll"
+						ToolTip="Ignore all occurrences of this misspelled word" />
+					<Button Name="btnAddWord" Content="Add _Word" Width="100" Margin="3" Click="btnAddWord_Click"
+						ToolTip="Add the word to the user dictionary"
+						ContextMenuOpening="btnAddWord_ContextMenuOpening">
+						<Button.ContextMenu>
+							<ContextMenu Name="ctxAddWord" MenuItem.Click="ctxAddWordMenuItem_Click" />
+						</Button.ContextMenu>
+					</Button>
+				</StackPanel>
+			</Grid>
+		</Grid>
+	</Grid>
+</UserControl>

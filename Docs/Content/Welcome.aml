@@ -8,9 +8,9 @@
 		<section>
 			<content>
 				<para>This project is a Visual Studio editor extension that checks the spelling of comments, strings, and
-plain text as you type or interactively with a tool window.  It is based largely on the spell checker extension
-originally created by Noah Richards, Roman Golovin, and Michael Lehenbauer.  This version has been extended as
-follows:</para>
+plain text as you type or interactively with a tool window.  It can also spell check an entire solution, project,
+or selected items.  It is based largely on the spell checker extension originally created by Noah Richards, Roman
+Golovin, and Michael Lehenbauer.  This version has been extended as follows:</para>
 
 				<list class="bullet">
 					<listItem>
@@ -44,6 +44,11 @@ file.</para>
 					</listItem>
 
 					<listItem>
+						<para>Added a solution/project spell checking tool window that is capable of spell checking an entire
+solution, a single project, or any combination of items selected in the Solution Explorer window.</para>
+					</listItem>
+
+					<listItem>
 						<para>Several new spell checking options have been added and all of the spell checking options have
 been exposed and can be configured.  Configurable options include:</para>
 
@@ -58,7 +63,8 @@ several dictionaries for various languages.</para>
 							</listItem>
 
 							<listItem>
-								<para>Enable or disable spell checking as you type.</para>
+								<para>Enable or disable spell checking as you type and whether or not solutions, projects,
+folders, and/or files are included in solution/project spell checking operations.</para>
 							</listItem>
 
 							<listItem>

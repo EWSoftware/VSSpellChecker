@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="53ffc5b7-b7dc-4f03-9a51-ed4176bff504" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Selecting <ui>Tools | Spell Checker | Spell Check Current Document</ui> opens the active document
+spell checker tool window.  This tool window will only be usable when a code or text editor window is selected as
+the active document window.  If a non-editor window is selected or if there are no misspellings, the buttons in
+the tool window will be disabled.  Open or click on an existing editor window containing editable text to
+activate the tool window options.  When there are misspellings in the active editor, it will be repositioned to
+the proper location and the misspelling will be highlighted.</para>
+
+			<alert class="note">
+				<para>If the misspelling is within a collapsed section, an attempt is made to expand the section and show
+the word.  If this does not occur, to make it visible, click on the editor window's tab to select it and then
+expand the section containing the cursor.  When you click on the spell checker tool window, it will reposition to
+the word and highlight it as usual.</para>
+			</alert>
+
+			<autoOutline lead="none" excludeRelatedTopics="true" />
+		</introduction>
+
+		<section address="CorrectingIssues">
+			<title>Correcting Issues</title>
+			<content>
+				<mediaLink>
+					<image xlink:href="ActiveDocToolWindow" />
+				</mediaLink>
+
+				<para>The misspelled word is shown at the top of the tool window and any suggested replacements are shown
+in the list box on the left side.  The following options are available:</para>
+
+				<list class="bullet">
+					<listItem>
+						<para><ui>Replace</ui> - Replace the current misspelled word with the selected suggestion.  Double
+clicking a suggestion in the list will also cause the misspelled word to be replaced with the double clicked
+word.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Replace All</ui> - Replace all occurrences of the misspelled word with the selected
+suggestion.  Holding down the <ui>Ctrl</ui> key when double clicking a suggestion in the list will also cause all
+occurrences of the misspelled word to be replaced with the double clicked word.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore Once</ui> - This option allows you to ignore the given instance of the misspelled
+word in the current file at the current location.  All other misspellings of the same word will still be flagged.
+The given instance will be ignored as long as the file remains open.  If closed and reopened, it will be flagged
+again.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore All</ui> - Ignore all instances of the given misspelled word for the remainder of
+the Visual Studio session.  When the solution or Visual Studio is closed and reopened the ignored word will be
+flagged again.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Add Word</ui> - This will add the word to the user dictionary so that it is no longer
+flagged as a misspelled word and will present it as a suggestion for other misspelled words when appropriate.
+Use the <ui>Edit Configuration</ui> option to remove words from the user dictionary.  Note that this button will
+be disabled for code analysis related misspellings (unrecognized word, deprecated term, and compound term) since
+the suggested replacements are what should replace the word and the term should not be added to the dictionary.</para>
+					</listItem>
+
+				</list>
+
+				<para>As with the spell check as you type option, if you are spell checking against multiple languages,
+the languages in which the suggestion appears follow the word in parentheses.  Choose the suggestion you want to
+use based on the language(s) with which it is associated.  The <ui>Add Word</ui> button will show a dropdown menu
+when spell checking against multiple languages.  Selecting an option will add the word to that language's user
+dictionary.</para>
+
+				<para>The misspelled word displayed at the top of the tool window is editable.  You may alter it to
+correct the spelling manually.  When changed, the <ui>Undo</ui>  button to the right of the text box is enabled
+and the list of suggestions is disabled.  Clicking <ui>Undo</ui> will undo any edits made to the word and enable
+the list of suggestions.  If you do modify the word, the <ui>Replace</ui> and <ui>Add Word</ui> options will use
+the modified word to perform their action.  In addition, the <ui>Add Word</ui> option will replace the original
+misspelled word with the edited word.</para>
+
+				<para>Once you have taken action on a misspelled word, the tool window will be updated and will move on
+to the next issue.  If there are no more, a "(No more issues)" message is displayed in the misspelled word text
+box.</para>
+
+			</content>
+		</section>
+
+		<section address="DoubledWords">
+			<title>Doubled Word Detection</title>
+			<content>
+				<para>The spell checker will also detect doubled words and highlight them.  In such cases, the smart tag
+will contain an option to delete the doubled word and another to ignore it once.  In the spell checker tool
+window, when a doubled word is reached the list box will contain a single "(Delete word)" entry and only the
+<ui>Replace</ui> and <ui>Ignore Once</ui> buttons will be available for use.</para>
+
+				<alert class="note">
+					<para>Due to the way Visual Studio breaks up spans of text for interactive spell checking, it will only
+be able to detect doubled words if they appear on the same line.  Doubled words that span line breaks cannot be
+detected.  To detect doubled words that span line breaks, use one of the solution/project spell checking
+options.</para>
+				</alert>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="e8f67bc4-a8f8-4e50-ab5a-876599f3a645" />
+			<link xlink:href="fa790577-88c0-4141-b8f4-d8b70f625cfd" />
+			<link xlink:href="e339cac1-9783-4c2a-919f-88436c78fef8" />
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

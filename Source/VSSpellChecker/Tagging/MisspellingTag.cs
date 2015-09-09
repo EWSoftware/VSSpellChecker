@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MisspellingTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/28/2015
+// Updated : 08/25/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -28,12 +28,14 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 
+using VisualStudio.SpellChecker.Definitions;
+
 namespace VisualStudio.SpellChecker.Tagging
 {
     /// <summary>
     /// This class represents a misspelling tag
     /// </summary>
-    internal sealed class MisspellingTag : ITag
+    internal sealed class MisspellingTag : ITag, ISpellingIssue
     {
         #region Properties
         //=====================================================================
@@ -57,7 +59,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <summary>
         /// This is used to get or set the suggestions that can be used to replace the misspelled word
         /// </summary>
-        public IEnumerable<SpellingSuggestion> Suggestions { get; set; }
+        public IEnumerable<ISpellingSuggestion> Suggestions { get; set; }
 
         /// <summary>
         /// This read-only property returns the misspelled or doubled word

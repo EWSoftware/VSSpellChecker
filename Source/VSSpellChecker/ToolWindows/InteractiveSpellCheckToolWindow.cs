@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/27/2015
+// Updated : 09/04/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -20,6 +20,8 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
@@ -44,6 +46,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
         private InteractiveSpellCheckControl ucSpellCheck;
         private uint selectionMonitorCookie, docTableCookie;
+        private object scope;
+
         #endregion
 
         #region Constructor
@@ -106,6 +110,58 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 rdt.UnadviseRunningDocTableEvents(docTableCookie);
 
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// This is overridden to pass hot keys on to the contained user control.
+        /// </summary>
+        /// <param name="m">The message to pre-process</param>
+        /// <returns>True if the message was handled, false if not</returns>
+        /// <remarks>When a WPF user control is hosted in a docked tool window, the hot keys no longer work.
+        /// This works around the problem by manually seeing if the control makes use of the hot key, and if
+        /// it does, processing it here.</remarks>
+        protected override bool PreProcessMessage(ref System.Windows.Forms.Message m)
+        {
+            if(m.Msg == 0x0100 /* WM_KEYDOWN */)
+            {
+                System.Windows.Forms.Keys keyCode = (System.Windows.Forms.Keys)m.WParam &
+                    System.Windows.Forms.Keys.KeyCode;
+
+                if(keyCode == System.Windows.Forms.Keys.F1)
+                {
+                    ApplicationCommands.Help.Execute(null, (UserControl)base.Content);
+                    return true;
+                }
+            }
+
+            if(m.Msg == 0x0104 /*WM_SYSKEYDOWN*/)
+            {
+                if(Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt))
+                {
+                    // Cache a copy of the scope on first use
+                    if(scope == null && base.Content != null)
+                    {
+                        // Get the scope for handling hot keys.  The key used here doesn't matter.  We're just
+                        // getting the scope to use.
+                        AccessKeyPressedEventArgs e = new AccessKeyPressedEventArgs("X");
+
+                        ((UserControl)base.Content).RaiseEvent(e);
+                        scope = e.Scope;
+                    }
+
+                    string key = ((char)m.WParam).ToString();
+
+                    // See if the hot key is registered for the control.  If so, handle it.  Ignore Alt+F4 though
+                    // as it should close Visual Studio (it comes through as a lowercase "s").
+                    if(scope != null && key != "s" && AccessKeyManager.IsKeyRegistered(scope, key))
+                    {
+                        AccessKeyManager.ProcessKey(scope, key, false);
+                        return true;
+                    }
+                }
+            }
+
+            return base.PreProcessMessage(ref m);
         }
         #endregion
 

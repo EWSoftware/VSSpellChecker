@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 08/23/2015
+// Updated : 09/05/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -22,19 +22,18 @@
 //===============================================================================================================
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Outlining;
 
+using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.Tagging;
 
@@ -51,8 +50,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private IWpfTextView currentTextView;
         private IOutliningManager outliningManager;
         private SpellingTagger currentTagger;
-        private List<MisspellingTag> misspellings;
         private bool updatingState, parentFocused;
+
         #endregion
 
         #region Properties
@@ -78,8 +77,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
                     else
                         currentTagger = null;
-
-                    ctxAddWord.Items.Clear();
+                    
+                    ucSpellCheck.SetAddWordContextMenuDictionaries(null);
 
                     if(currentTagger != null)
                     {
@@ -99,13 +98,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         tagger_TagsChanged(this, null);
 
                         if(currentTagger.Dictionary.DictionaryCount != 1)
-                            foreach(var d in currentTagger.Dictionary.Dictionaries)
-                                ctxAddWord.Items.Add(new MenuItem()
-                                {
-                                    Header = String.Format(CultureInfo.InvariantCulture, "{0} ({1})",
-                                        d.Culture.EnglishName, d.Culture.Name),
-                                    Tag = d.Culture
-                                });
+                            ucSpellCheck.SetAddWordContextMenuDictionaries(
+                                currentTagger.Dictionary.Dictionaries.Select(d => d.Culture));
                     }
                     else
                     {
@@ -125,7 +119,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// This is used to tell the control when the parent window has the focus
         /// </summary>
         /// <remarks>Not sure if it's a WPF or a Visual Studio thing but focus detection appears to be screwed
-        /// up.  This works around the issue so that we can reliable update state only when focused.</remarks>
+        /// up.  This works around the issue so that we can reliably update state only when focused.</remarks>
         public bool ParentFocused
         {
             get { return parentFocused; }
@@ -161,111 +155,40 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// </summary>
         private void UpdateState()
         {
-            if(updatingState)
-                return;
-
-            try
+            if(!updatingState)
             {
-                updatingState = lbSuggestions.IsEnabled = true;
+                updatingState = true;
 
-                btnReplace.IsEnabled = btnReplaceAll.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled =
-                    btnAddWord.IsEnabled = btnUndo.IsEnabled = txtMisspelledWord.IsEnabled = false;
-                lblIssue.Content = "_Misspelled Word";
-                txtMisspelledWord.Text = null;
-                lbSuggestions.Items.Clear();
-
-                if(currentTextView == null)
+                try
                 {
-                    lblDisabled.Visibility = Visibility.Visible;
-                    return;
-                }
-
-                lblDisabled.Visibility = Visibility.Collapsed;
-
-                if(currentTextView == null)
-                    return;
-
-                if(misspellings.Count == 0)
-                {
-                    txtMisspelledWord.Text = "(No more issues)";
-                    return;
-                }
-
-                var issue = misspellings[0];
-
-                if(issue.MisspellingType == MisspellingType.DoubledWord)
-                {
-                    lblIssue.Content = "_Doubled Word";
-                    btnReplace.IsEnabled = btnIgnoreOnce.IsEnabled = true;
-                    lbSuggestions.Items.Add("(Delete word)");
-                }
-                else
-                {
-                    txtMisspelledWord.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled = true;
-
-                    switch(issue.MisspellingType)
+                    if(currentTextView != null)
                     {
-                        case MisspellingType.CompoundTerm:
-                            lblIssue.Content = "Co_mpound Term";
-                            break;
+                        var currentIssue = currentTagger.CurrentMisspellings.FirstOrDefault();
 
-                        case MisspellingType.DeprecatedTerm:
-                            lblIssue.Content = "_Deprecated Term";
-                            break;
+                        ucSpellCheck.UpdateState(false, currentTagger.Dictionary.DictionaryCount > 1, currentIssue);
 
-                        case MisspellingType.UnrecognizedWord:
-                            lblIssue.Content = "Un_recognized Word";
-                            break;
-
-                        default:
-                            break;
-                    }
-
-                    if(issue.Suggestions.Any())
-                    {
-                        btnReplace.IsEnabled = btnReplaceAll.IsEnabled = true;
-                        btnAddWord.IsEnabled = (issue.MisspellingType == MisspellingType.MisspelledWord);
-
-                        IEnumerable<SpellingSuggestion> suggestions;
-
-                        // Group suggestions by word if there are multiple dictionaries
-                        if(currentTagger.Dictionary.DictionaryCount > 1)
+                        if(parentFocused && currentIssue != null)
                         {
-                            suggestions = issue.Suggestions.GroupBy(w => w.Suggestion).Select(g =>
-                                new MultiLanguageSpellingSuggestion(g.Select(w => w.Culture), g.Key));
+                            var span = currentIssue.Span.GetSpan(currentIssue.Span.TextBuffer.CurrentSnapshot);
+
+                            // If in a collapsed region, expand the region
+                            if(outliningManager != null)
+                                foreach(var region in outliningManager.GetCollapsedRegions(span, false))
+                                    if(region.IsCollapsed)
+                                        outliningManager.Expand(region);
+
+                            currentTextView.Caret.MoveTo(span.Start);
+                            currentTextView.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.AlwaysCenter);
+                            currentTextView.Selection.Select(span, false);
                         }
-                        else
-                            suggestions = issue.Suggestions;
-
-                        foreach(var s in suggestions)
-                            lbSuggestions.Items.Add(s);
-
-                        lbSuggestions.SelectedIndex = 0;
                     }
                     else
-                        lbSuggestions.Items.Add("(No suggestions)");
+                        ucSpellCheck.UpdateState(true, false, null);
                 }
-
-                txtMisspelledWord.Text = issue.Word;
-
-                if(parentFocused)
+                finally
                 {
-                    var span = issue.Span.GetSpan(issue.Span.TextBuffer.CurrentSnapshot);
-
-                    // If in a collapsed region, expand the region
-                    if(outliningManager != null)
-                        foreach(var region in outliningManager.GetCollapsedRegions(span, false))
-                            if(region.IsCollapsed)
-                                outliningManager.Expand(region);
-
-                    currentTextView.Caret.MoveTo(span.Start);
-                    currentTextView.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.AlwaysCenter);
-                    currentTextView.Selection.Select(span, false);
+                    updatingState = false;
                 }
-            }
-            finally
-            {
-                updatingState = false;
             }
         }
         #endregion
@@ -274,69 +197,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
         //=====================================================================
 
         /// <summary>
-        /// Update the list of spelling errors when notified that the spelling tags have changed
+        /// Update the current state when notified that the spelling tags have changed
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
         private void tagger_TagsChanged(object sender, SnapshotSpanEventArgs e)
         {
-            misspellings = currentTagger.CurrentMisspellings.ToList();
             this.UpdateState();
-        }
-
-        /// <summary>
-        /// When an item is double clicked, handle it as a request to replace the misspelling with the selected
-        /// word.  If Ctrl is held down, it is treated as a request to replace all occurrences.
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void lbSuggestions_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            var elem = lbSuggestions.InputHitTest(e.GetPosition(lbSuggestions)) as UIElement;
-
-            // Only do it if an item is double clicked
-            while(elem != null && elem != lbSuggestions)
-            {
-                if(elem is ListBoxItem)
-                {
-                    if(Keyboard.Modifiers == ModifierKeys.Control)
-                        btnReplaceAll_Click(sender, e);
-                    else
-                        btnReplace_Click(sender, e);
-
-                    break;
-                }
-
-                elem = VisualTreeHelper.GetParent(elem) as UIElement;
-            }
-        }
-
-        /// <summary>
-        /// Update the control states when the misspelled word changes
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void txtMisspelledWord_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if(!updatingState && misspellings.Count != 0)
-            {
-                bool hasChanged = !txtMisspelledWord.Text.Trim().Equals(misspellings[0].Word,
-                    StringComparison.OrdinalIgnoreCase);
-
-                btnUndo.IsEnabled = hasChanged;
-                lbSuggestions.IsEnabled = !hasChanged;
-            }
-        }
-
-        /// <summary>
-        /// Undo changes to the misspelled word
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnUndo_Click(object sender, RoutedEventArgs e)
-        {
-            if(misspellings.Count != 0)
-                txtMisspelledWord.Text = misspellings[0].Word;
         }
 
         /// <summary>
@@ -346,35 +213,25 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         /// <remarks>Since we're making the change through the text buffer, the <c>TagsChanged</c> event will
         /// be raised and will notify us of the remaining misspellings.</remarks>
-        private void btnReplace_Click(object sender, RoutedEventArgs e)
+        private void cmdReplace_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             ITrackingSpan span;
-            string word;
+            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
 
-            if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
-                if(misspellings[0].MisspellingType != MisspellingType.DoubledWord)
+            if(currentIssue != null && currentIssue.Word.Length != 0)
+                if(currentIssue.MisspellingType != MisspellingType.DoubledWord)
                 {
-                    if(!lbSuggestions.IsEnabled)
-                        word = txtMisspelledWord.Text.Trim();
-                    else
+                    var suggestion = ucSpellCheck.SelectedSuggestion;
+
+                    if(suggestion != null)
                     {
-                        if(lbSuggestions.SelectedIndex < 0)
-                        {
-                            if(lbSuggestions.Items.Count != 0 && lbSuggestions.SelectedIndex < 0)
-                                lbSuggestions.SelectedIndex = 0;
-
-                            return;
-                        }
-
-                        word = ((SpellingSuggestion)lbSuggestions.SelectedItem).Suggestion;
+                        span = currentIssue.Span;
+                        span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), suggestion.Suggestion);
                     }
-
-                    span = misspellings[0].Span;
-                    span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), word);
                 }
                 else
                 {
-                    span = misspellings[0].DeleteWordSpan;
+                    span = currentIssue.DeleteWordSpan;
                     span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), String.Empty);
                 }
         }
@@ -386,28 +243,16 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         /// <remarks>Since we're making the change through the dictionary, the <c>TagsChanged</c> event will
         /// be raised and will notify us of the remaining misspellings.</remarks>
-        private void btnReplaceAll_Click(object sender, RoutedEventArgs e)
+        private void cmdReplaceAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            SpellingSuggestion suggestion;
+            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
 
-            if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
+            if(currentIssue != null && currentIssue.Word.Length != 0)
             {
-                if(!lbSuggestions.IsEnabled)
-                    suggestion = new SpellingSuggestion(null, txtMisspelledWord.Text.Trim());
-                else
-                {
-                    if(lbSuggestions.SelectedIndex < 0)
-                    {
-                        if(lbSuggestions.Items.Count != 0 && lbSuggestions.SelectedIndex < 0)
-                            lbSuggestions.SelectedIndex = 0;
+                var suggestion = ucSpellCheck.SelectedSuggestion;
 
-                        return;
-                    }
-
-                    suggestion = (SpellingSuggestion)lbSuggestions.SelectedItem;
-                }
-
-                currentTagger.Dictionary.ReplaceAllOccurrences(misspellings[0].Word, suggestion);
+                if(suggestion != null)
+                    currentTagger.Dictionary.ReplaceAllOccurrences(currentIssue.Word, suggestion);
             }
         }
 
@@ -418,10 +263,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         /// <remarks>Since we're making the change through the dictionary, the <c>TagsChanged</c> event will
         /// be raised and will notify us of the remaining misspellings.</remarks>
-        private void btnIgnoreOnce_Click(object sender, RoutedEventArgs e)
+        private void cmdIgnoreOnce_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
-                currentTagger.Dictionary.IgnoreWordOnce(misspellings[0].Span);
+            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
+
+            if(currentIssue != null && currentIssue.Word.Length != 0)
+                currentTagger.Dictionary.IgnoreWordOnce(currentIssue.Span);
         }
 
         /// <summary>
@@ -431,96 +278,62 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         /// <remarks>Since we're making the change through the dictionary, the <c>TagsChanged</c> event will
         /// be raised and will notify us of the remaining misspellings.</remarks>
-        private void btnIgnoreAll_Click(object sender, RoutedEventArgs e)
+        private void cmdIgnoreAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            if(misspellings.Count != 0 && misspellings[0].Word.Length != 0)
-                currentTagger.Dictionary.IgnoreWord(misspellings[0].Word);
+            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
+
+            if(currentIssue != null && currentIssue.Word.Length != 0)
+                currentTagger.Dictionary.IgnoreWord(currentIssue.Word);
         }
 
         /// <summary>
-        /// Add the word to the dictionary if there is only one dictionary or show the context menu if there are
-        /// multiple dictionaries.
+        /// Add the word to the dictionary
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
         /// <remarks>Since we're making the change through the dictionary, the <c>TagsChanged</c> event will
         /// be raised and will notify us of the remaining misspellings.</remarks>
-        private void btnAddWord_Click(object sender, RoutedEventArgs e)
+        private void cmdAddToDictionary_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
             string word;
 
-            if(misspellings.Count != 0)
-                if(ctxAddWord.Items.Count == 0)
-                {
-                    if(!lbSuggestions.IsEnabled)
-                        word = txtMisspelledWord.Text.Trim();
-                    else
-                        word = misspellings[0].Word;
-
-                    if(word.Length != 0)
-                    {
-                        currentTagger.Dictionary.AddWordToDictionary(word, null);
-
-                        // If adding a modified word, replace the word in the file too
-                        if(!lbSuggestions.IsEnabled)
-                            btnReplace_Click(sender, e);
-                    }
-                    else
-                        MessageBox.Show("Cannot add an empty word to the dictionary", PackageResources.PackageTitle,
-                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                }
-                else
-                {
-                    btnAddWord_ContextMenuOpening(sender, null);
-                    ctxAddWord.IsOpen = true;
-                }
-        }
-
-        /// <summary>
-        /// Set the properties on the context menu when it opens
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void btnAddWord_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            if(ctxAddWord.Items.Count == 0)
-                e.Handled = true;
-            else
+            if(currentIssue != null)
             {
-                ctxAddWord.PlacementTarget = btnAddWord;
-                ctxAddWord.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-                ContextMenuService.SetPlacement(btnAddWord, System.Windows.Controls.Primitives.PlacementMode.Bottom);
-            }
-        }
-
-        /// <summary>
-        /// Handle Add Word context menu item clicks
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void ctxAddWordMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var item = e.Source as MenuItem;
-            string word;
-
-            if(item != null && misspellings.Count != 0)
-            {
-                if(!lbSuggestions.IsEnabled)
-                    word = txtMisspelledWord.Text.Trim();
-                else
-                    word = misspellings[0].Word;
+                word = ucSpellCheck.MispelledWord;
 
                 if(word.Length != 0)
                 {
-                    currentTagger.Dictionary.AddWordToDictionary(word, (CultureInfo)item.Tag);
+                    // If the parameter is a CultureInfo instance, the word will be added to the dictionary for
+                    // that culture.  If null, it's added to the first available dictionary.
+                    currentTagger.Dictionary.AddWordToDictionary(word, e.Parameter as CultureInfo);
 
                     // If adding a modified word, replace the word in the file too
-                    if(!lbSuggestions.IsEnabled)
-                        btnReplace_Click(sender, e);
+                    if(!word.Equals(currentIssue.Word, StringComparison.OrdinalIgnoreCase))
+                        cmdReplace_Executed(sender, e);
                 }
                 else
                     MessageBox.Show("Cannot add an empty word to the dictionary", PackageResources.PackageTitle,
                         MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+        }
+
+        /// <summary>
+        /// View help for this tool window
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void cmdHelp_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start("https://github.com/EWSoftware/VSSpellChecker/wiki/" +
+                    "53ffc5b7-b7dc-4f03-9a51-ed4176bff504");
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Unable to navigate to website.  Reason: " + ex.Message,
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
         #endregion

@@ -28,7 +28,12 @@ verbatim strings which typically contain such occurrences.</para>
 					<listItem>
 						<para>Due to the way Visual Studio breaks up spans of text for interactive spell checking, it will
 only be able to detect doubled words if they appear on the same line.  Doubled words that span line breaks cannot
-be detected.</para>
+be detected.  Use the solution/project spell checking tool window to find doubled words that span line breaks.</para>
+					</listItem>
+
+					<listItem>
+						<para>For a list of common issues related to solution/project spell checking, see the related
+<link xlink:href="bda126a1-e534-4172-81dc-35a32d91e4cc" /> topic.</para>
 					</listItem>
 
 				</list>

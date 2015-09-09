@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff, Franz Alex Gaisie-Essilfie
-// Updated : 08/23/2015
+// Updated : 08/25/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -32,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
-using System.Globalization;
 using System.Linq;
 
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -41,6 +40,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
+using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker.SmartTags
@@ -217,7 +217,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// <param name="suggestions">The suggestions to use as the replacement</param>
         /// <returns>A read-only collection of smart tag action sets</returns>
         private ReadOnlyCollection<SmartTagActionSet> GetMisspellingSmartTagActions(SnapshotSpan errorSpan,
-          MisspellingType misspellingType, IEnumerable<SpellingSuggestion> suggestions)
+          MisspellingType misspellingType, IEnumerable<ISpellingSuggestion> suggestions)
         {
             List<SmartTagActionSet> smartTagSets = new List<SmartTagActionSet>();
             List<ISmartTagAction> actions = new List<ISmartTagAction>();

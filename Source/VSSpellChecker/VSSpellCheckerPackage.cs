@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/11/2015
+// Updated : 08/27/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 05/20/2013  EFW  Created the code
+// 08/23/2015  EFW  Added support for solution/project spell checking
 //===============================================================================================================
 
 using System;
@@ -34,6 +35,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Editors;
+using VisualStudio.SpellChecker.ProjectSpellCheck;
+using VisualStudio.SpellChecker.ToolWindows;
 
 namespace VisualStudio.SpellChecker
 {
@@ -54,8 +57,11 @@ namespace VisualStudio.SpellChecker
     [Guid(GuidList.guidVSSpellCheckerPkgString)]
     // This attribute lets the shell know that this package exposes some menus
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    // This attribute lets the shell know that this package exposes a tool window
+    // These attributes lets the shell know that this package exposes tool windows
     [ProvideToolWindow(typeof(ToolWindows.InteractiveSpellCheckToolWindow),
+      Orientation = ToolWindowOrientation.Right, Style = VsDockStyle.Float, MultiInstances = false,
+      Transient = false, PositionX = 100, PositionY = 100, Width = 300, Height = 300)]
+    [ProvideToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow),
       Orientation = ToolWindowOrientation.Right, Style = VsDockStyle.Float, MultiInstances = false,
       Transient = false, PositionX = 100, PositionY = 100, Width = 300, Height = 300)]
     // This attribute lets the shell know we provide a spelling configuration file editor
@@ -128,37 +134,49 @@ namespace VisualStudio.SpellChecker
 
             if(mcs != null)
             {
-                // Create the command for button SpellCheckerConfiguration
                 CommandID commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
                     (int)PkgCmdIDList.SpellCheckerConfiguration);
                 OleMenuCommand menuItem = new OleMenuCommand(SpellCheckerConfigurationExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
 
-                // Create the command for button SpellCheckInteractive
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckInteractive);
                 menuItem = new OleMenuCommand(SpellCheckInteractiveExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
 
-                // Create the command for button AddSpellCheckerConfigForItem
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
                     (int)PkgCmdIDList.AddSpellCheckerConfigForItem);
                 menuItem = new OleMenuCommand(AddSpellCheckerConfigExecuteHandler, null,
                     AddSpellCheckerConfigQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
-                // Create the command for button AddSpellCheckerConfigForSelItem
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
                     (int)PkgCmdIDList.AddSpellCheckerConfigForSelItem);
                 menuItem = new OleMenuCommand(AddSpellCheckerConfigExecuteHandler, null,
                     AddSpellCheckerConfigQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
-                // Create the command for button AddSpellCheckerConfigCtx
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
                     (int)PkgCmdIDList.AddSpellCheckerConfigCtx);
                 menuItem = new OleMenuCommand(AddSpellCheckerConfigExecuteHandler, null,
                     AddSpellCheckerConfigQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
+
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckEntireSolution);
+                menuItem = new OleMenuCommand(SpellCheckEntireSolutionExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckCurrentProject);
+                menuItem = new OleMenuCommand(SpellCheckCurrentProjectExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckSelectedItems);
+                menuItem = new OleMenuCommand(SpellCheckSelectedItemsExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.ViewSpellCheckToolWindow);
+                menuItem = new OleMenuCommand(ViewSpellCheckToolWindowExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
             }
 
             // Register for solution events so that we can clear the global dictionary cache when necessary
@@ -339,6 +357,86 @@ namespace VisualStudio.SpellChecker
                     "configuration file.  Reason: {0}", ex.Message);
             }
         }
+
+        /// <summary>
+        /// Show the solution/project spell checker tool window and spell check the entire solution
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void SpellCheckEntireSolutionExecuteHandler(object sender, EventArgs e)
+        {
+            var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
+
+            if(window == null || window.Frame == null)
+                throw new NotSupportedException("Unable to create solution/project spell checker tool window");
+
+            var windowFrame = (IVsWindowFrame)window.Frame;
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+            var control = window.Content as SolutionProjectSpellCheckControl;
+
+            if(control != null)
+                control.SpellCheck(SpellCheckTarget.EntireSolution);
+        }
+
+        /// <summary>
+        /// Show the solution/project spell checker tool window and spell check the current project
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void SpellCheckCurrentProjectExecuteHandler(object sender, EventArgs e)
+        {
+            var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
+
+            if(window == null || window.Frame == null)
+                throw new NotSupportedException("Unable to create solution/project spell checker tool window");
+
+            var windowFrame = (IVsWindowFrame)window.Frame;
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+            var control = window.Content as SolutionProjectSpellCheckControl;
+
+            if(control != null)
+                control.SpellCheck(SpellCheckTarget.CurrentProject);
+        }
+
+        /// <summary>
+        /// Show the solution/project spell checker tool window and spell check the selected items from the
+        /// Solution Explorer window.
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void SpellCheckSelectedItemsExecuteHandler(object sender, EventArgs e)
+        {
+            var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
+
+            if(window == null || window.Frame == null)
+                throw new NotSupportedException("Unable to create solution/project spell checker tool window");
+
+            var windowFrame = (IVsWindowFrame)window.Frame;
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+            var control = window.Content as SolutionProjectSpellCheckControl;
+
+            if(control != null)
+                control.SpellCheck(SpellCheckTarget.SelectedItems);
+        }
+
+        /// <summary>
+        /// Show the solution/project spell checker tool window but don't execute any action
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void ViewSpellCheckToolWindowExecuteHandler(object sender, EventArgs e)
+        {
+            var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
+
+            if(window == null || window.Frame == null)
+                throw new NotSupportedException("Unable to create solution/project spell checker tool window");
+
+            var windowFrame = (IVsWindowFrame)window.Frame;
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+        }
         #endregion
 
         #region Helper methods
@@ -443,31 +541,10 @@ namespace VisualStudio.SpellChecker
                 else
                     if(folderName == null)
                     {
-                        // Since we can't create an exhaustive list of file types that we cannot spell check,
-                        // take a peek at the first 1024 bytes.  If it looks like a binary file, ignore it.
-                        // Quick and dirty but mostly effective.
-                        try
-                        {
-                            using(StreamReader sr = new StreamReader(settingsFilename, true))
-                            {
-                                var fileChars = new char[1024];
-                                var validChars = new[] { '\b', '\t', '\r', '\n', '\x07', '\x0B', '\x0C' };
-
-                                // Note the length as it may be less than the maximum
-                                int length = sr.Read(fileChars, 0, fileChars.Length);
-
-                                if(fileChars.Take(length).Any(c => c < 32 && !validChars.Contains(c)))
-                                    settingsFilename = null;
-                                else
-                                    settingsFilename += ".vsspell";
-                            }
-                        }
-                        catch(Exception ex)
-                        {
-                            // Ignore errors, just don't offer to add a settings file
+                        if(SpellCheckFileInfo.IsBinaryFile(settingsFilename))
                             settingsFilename = null;
-                            System.Diagnostics.Debug.WriteLine(ex);
-                        }
+                        else
+                            settingsFilename += ".vsspell";
                     }
                     else
                         settingsFilename += ".vsspell";

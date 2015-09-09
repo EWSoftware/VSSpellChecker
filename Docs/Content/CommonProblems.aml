@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="bda126a1-e534-4172-81dc-35a32d91e4cc" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This topic covers some common problems that you may encounter while using the solution/project spell
+checking tool window.</para>
+
+			<autoOutline lead="none" excludeRelatedTopics="true" />
+		</introduction>
+
+		<section address="Feedback">
+			<title>Request for Feedback</title>
+			<content>
+				<para>This tool window is currently in a beta state.  As such, you may find issues or missing features.
+In such cases, an issue can be opened to report the problem or suggest a new feature.  However, before doing so:</para>
+
+				<list class="bullet">
+					<listItem>
+						<para>Review the common problems sections below to see if your issue is covered there.  If not,
+check the following locations.</para>
+					</listItem>
+
+					<listItem>
+						<para>Check the <externalLink>
+							<linkText>closed issues</linkText>
+							<linkAlternateText>closed issues</linkAlternateText>
+							<linkUri>https://github.com/EWSoftware/VSSpellChecker/issues?q=is%3Aissue+is%3Aclosed</linkUri>
+							<linkTarget>_blank</linkTarget>
+						</externalLink> list to see if the issue or suggestion has already been made and resolved.</para>
+					</listItem>
+
+					<listItem>
+						<para>Check the <externalLink>
+								<linkText>open issues</linkText>
+								<linkAlternateText>open issues</linkAlternateText>
+								<linkUri>https://github.com/EWSoftware/VSSpellChecker/issues</linkUri>
+								<linkTarget>_blank</linkTarget>
+							</externalLink> list to see if the issue or suggestion has already been made but is pending a
+resolution.</para>
+					</listItem>
+
+					<listItem>
+						<para>If you find that your issue is not covered, open a new issue and supply as much detail as you
+can along with any relevant examples if possible.</para>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+
+		<section address="OpenFiles">
+			<title>Files Open in Editors</title>
+			<content>
+				<para>If a file is currently open in an text editor, the spell checker will make an attempt to get the
+file's current content from the text editor rather than using the content on disk.  This allows it to spell check
+the active content including any unsaved edits.  However, custom file editors such as form designers, XAML
+designers, resource file editors, etc. may not provide a means of obtaining the current text content for the
+file.  In such cases the file's content will be read from disk and spell checked.  Any spelling issues in unsaved
+content will not be detected until the file is saved and the spell checking process is ran again.</para>
+
+				<para>As mentioned, when an issue is corrected, the tool window will open the file in a text editor
+window.  If a custom editor is open for the affected file and it does not support opening a related text editor
+view, you will be prompted to close the custom editor first.  If you choose not to do so, the correction
+operation is canceled.  Some editors such as the resource file editor do support opening a related text editor
+view of the file.  In such cases, making changes to the text editor will update the related custom editor.</para>
+
+				<para>In cases where the content on disk contains issues but differs from the unsaved content, you may be
+told that the issue cannot be corrected because the text has been changed at the issue's location.  Save any
+pending changes to open files and rerun the spell checking process to obtain accurate results based on the up to
+date content.</para>
+
+			</content>
+		</section>
+
+		<section address="AdditionalEdits">
+			<title>Editing Spell Checked Files</title>
+			<content>
+				<para>When an issue in the solution/project spell checking tool window is corrected, it will
+automatically adjust the location of any other issues in the same file based on the change made.  If you make any
+other changes to the file's content or use the active document tool window or smart tags to fix issues, the
+solution/project spell checking tool window will be unaware of those changes.  If you subsequently attempt to
+correct an issue in which the text at the issue's location no longer matches the word, you will be notified that
+the change cannot be made.  The file will be opened and the cursor positioned at the issues prior location.  If
+you can find the issue relative to the old location, you can correct it manually.  To get the solution/project
+spell checking tool window back in synch, rerun the spell checking process.</para>
+			</content>
+		</section>
+
+		<section address="IssueDifferences">
+			<title>Differences in Issues Reporting</title>
+			<content>
+				<para>The solution/project spell checker uses a different method of classifying text to find items that
+it needs to spell check.  The spell check as you type and active document spell checking tool windows rely on
+the classification spans provided by the text editor.  The solution/project spell checking tool window relies on
+its own internal text parsers to classify text based on the file type.  As such, this may result in differences
+between what is reported by it and the spell check as you type and active document spell checking tool window.</para>
+
+				<para>A common difference is doubled word detection.  The interactive spell checkers cannot detect
+doubled words across line breaks as typically, the spans provided by the editor are limited to a single line of
+text.  However, the solution/project spell checker can detect doubled words across line breaks.  As such, you may
+see a reported doubled word issue in which there doesn't appear to be a doubled word in the text column.  In such
+cases, the doubled word is typically at the start of the line and the first word is at the end of the prior line
+which is not shown.  You can use the <ui>Go To Issue</ui> option to verify that this is the case and handle the
+issue accordingly.</para>
+
+				<para>The solution/project text parser may report issues incorrectly under certain conditions.  For
+example, it relies on a series of regular expressions to find text that appears to be comments and literal
+strings.  If the text in a source code file is formatted in such a way that a mismatch occurs and it is
+classified as something that it is not, you may see incorrect issues reported.  An example may be a comment
+delimiter sequence that appears withing a literal string.  See the closed and open issues lists to see if the
+problem has been reported as noted above.  It may be possible to adjust the classifiers to handle some cases.</para>
+			</content>
+		</section>
+
+		<section address="IncorrectPlainText">
+			<title>File Content Incorrectly Treated as Plain Text</title>
+			<content>
+				<para>As mentioned, the solution/project spell checking tool window uses its own set of classifiers to
+parse each file's content accordingly based on the determined file type.  An attempt has been made to provide
+support for as many common file types as possible.  However, the Visual Studio ecosystem is quite large and there
+are many languages and/or file types that may not be handled at the present time.  As a fallback, the parser will
+attempt to treat any unrecognized file types first as XML if they appear to contain XML or, failing that, as
+plain text.</para>
+
+				<para>If you see a file in which a large number of issues are reported that appear to be code or other
+such elements, it is quite possible the file or at least part of its content is being treated as plain text
+because it was not recognized.  See the closed and open issues lists to see if the problem for the given file
+type has been reported as noted above.  You can also use the information found in the
+<link xlink:href="0ff35371-69b5-48dd-a062-037abe2469de" /> topic to define a new classifier for any unknown file
+types.  If you do so, feel free to submit these new classifications by opening a new issue so that they can be
+included in a future release.</para>
+			</content>
+		</section>
+
+		<section address="HtmlContent">
+			<title>HTML File Content Issues</title>
+			<content>
+				<para>The current HTML classifier should handle most HTML content without issue.  However, it currently
+skips <codeInline>script</codeInline> element content and may not handle specialized script content such as
+that found in ASP.NET or Razor files.  If you find that it is not reporting issues in some content or is not
+handling certain sections of a file appropriately, please open an issue and provide as much detail as possible
+along with example content.  An attempt will be made to handle issues as they occur and include fixes in
+subsequent releases.  Please bear in mind that web development is not my area of expertise so help may be
+required in resolving some issues.</para>
+			</content>
+		</section>
+		
+		<relatedTopics>
+			<link xlink:href="fa790577-88c0-4141-b8f4-d8b70f625cfd" />
+			<link xlink:href="9581715a-a5bc-4de5-9474-eaefa38cf211" />
+			<link xlink:href="ddf22015-1680-4421-aaa7-dda867660522" />
+			<link xlink:href="0ff35371-69b5-48dd-a062-037abe2469de" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

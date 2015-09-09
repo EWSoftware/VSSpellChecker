@@ -16,6 +16,21 @@ will be unavailable until it is turned back on.</para>
 					</listItem>
 
 					<listItem>
+						<para><ui>Include when performing solution/project spell checking</ui> - This option is available in
+all configurations except the global configuration.  If set to Yes or Inherited (from the global configuration),
+it will include the related files in the solution/project spell checking process.  If set to No, the related
+files will be excluded from the process.  For example, this offers a convenient way of excluding an entire folder
+of files from being spell checked as part of the solution/project as it does with the option above for
+interactive spell checking.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Detect doubled words</ui> - This will cause the spell checker to report instances of
+doubled words.  An option to remove the duplicate word or ignore it will be offered as the options to correct
+any instances that are found.  The default is enabled.</para>
+					</listItem>
+
+					<listItem>
 						<para><ui>Ignore words with digits</ui> - This will cause the spell checker to ignore any words
 containing digits.  The default is enabled.</para>
 					</listItem>

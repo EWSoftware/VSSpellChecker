@@ -61,7 +61,7 @@ using System.Runtime.InteropServices;
 //      Revision (typically zero unless multiple releases are made on the same day)
 //
 // This versioning scheme allows build component and plug-in developers to use the same major, minor, and build
-// numbers as the Sandcastle tools to indicate with which version their components are compatible.
+// numbers as the spell checker to indicate with which version their components are compatible.
 //
 internal static partial class AssemblyInfo
 {

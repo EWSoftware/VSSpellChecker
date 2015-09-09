@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/24/2015
+// Updated : 09/06/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -43,6 +43,16 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Spell check as you type
         /// </summary>
         public const string SpellCheckAsYouType = "SpellCheckAsYouType";
+
+        /// <summary>
+        /// Include in project spell check
+        /// </summary>
+        public const string IncludeInProjectSpellCheck = "IncludeInProjectSpellCheck";
+
+        /// <summary>
+        /// Detect doubled words
+        /// </summary>
+        public const string DetectDoubledWords = "DetectDoubledWords";
 
         /// <summary>
         /// Ignore words with digits

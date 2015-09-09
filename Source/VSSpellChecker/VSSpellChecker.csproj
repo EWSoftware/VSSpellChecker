@@ -98,6 +98,18 @@
     <Compile Include="GlobalDictionary.cs" />
     <Compile Include="IgnoredCharacterClass.cs" />
     <Compile Include="Configuration\SpellCheckerConfiguration.cs" />
+    <Compile Include="ProjectSpellCheck\ClassifierFactory.cs" />
+    <Compile Include="ProjectSpellCheck\CodeClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\FileMisspelling.cs" />
+    <Compile Include="ProjectSpellCheck\HtmlClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\PlainTextClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\RangeClassification.cs" />
+    <Compile Include="ProjectSpellCheck\RegexClassification.cs" />
+    <Compile Include="ProjectSpellCheck\RegexClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\SpellCheckFileInfo.cs" />
+    <Compile Include="ProjectSpellCheck\SpellCheckSpan.cs" />
+    <Compile Include="ProjectSpellCheck\TextClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\XmlClassifier.cs" />
     <Compile Include="SmartTags\DictionaryAction.cs" />
     <Compile Include="SmartTags\DoubledWordSmartTagAction.cs" />
     <Compile Include="SmartTags\LabelSmartTagAction.cs" />
@@ -105,7 +117,6 @@
     <Compile Include="SpellingEventArgs.cs" />
     <Compile Include="SpellingServiceProxy.cs" />
     <Compile Include="SpellingSuggestion.cs" />
-    <Compile Include="Tagging\MisspellingType.cs" />
     <Compile Include="Theme\ThemeColors.cs" />
     <Compile Include="Theme\ThemeColorId.cs" />
     <Compile Include="Theme\TeamFoundationColors.cs" />
@@ -122,6 +133,7 @@
     <Compile Include="Tagging\NaturalTextTag.cs" />
     <Compile Include="Tagging\PlainTextTagger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WordSplitter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\Resources.Designer.cs">
@@ -154,6 +166,18 @@
     </Compile>
     <Compile Include="Editors\Pages\XmlFilesUserControl.xaml.cs">
       <DependentUpon>XmlFilesUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ToolWindows\SolutionProjectSpellCheckToolWindow.cs" />
+    <Compile Include="ToolWindows\SolutionProjectSpellCheckControl.xaml.cs">
+      <DependentUpon>SolutionProjectSpellCheckControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ToolWindows\SpellCheckCommands.cs" />
+    <Compile Include="ToolWindows\SpellCheckControl.xaml.cs">
+      <DependentUpon>SpellCheckControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ToolWindows\SpellCheckTarget.cs" />
+    <Compile Include="ToolWindows\SpinnerControl.xaml.cs">
+      <DependentUpon>SpinnerControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utility.cs" />
     <Compile Include="VSSpellCheckerPackage.cs" />
@@ -255,6 +279,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
@@ -391,6 +416,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Content Include="Classifications.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <None Include="NHunspell\NHunspell.vsspell" />
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -402,6 +432,10 @@
     </Reference>
     <Reference Include="EnvDTE80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -435,6 +469,7 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="UIAutomationProvider" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <!-- Conditionally include Visual Studio version specific references -->
@@ -510,6 +545,18 @@
     <Page Include="Editors\Pages\XmlFilesUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ToolWindows\SolutionProjectSpellCheckControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolWindows\SpellCheckControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolWindows\SpinnerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

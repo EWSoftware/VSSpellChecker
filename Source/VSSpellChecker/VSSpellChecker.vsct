@@ -24,9 +24,10 @@
 			 GUID to identify the package that provides the command defined inside it. -->
 	<Commands package="guidPackage">
 		<Groups>
-			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0101"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0102"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" priority="0xFFF0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" priority="0x0100"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" priority="0x0101"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerFileGroup" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="NewItemMenuGroup" priority="0x07B0"/>
@@ -48,6 +49,42 @@
 					<ButtonText>Spell Check Current Document</ButtonText>
 					<MenuText>Spell Check Current Document</MenuText>
 					<ToolTipText>Spell check the current document</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckEntireSolution" priority="0x0100">
+				<Strings>
+					<CommandName>cmdidSpellCheckEntireSolution</CommandName>
+					<ButtonText>Spell Check Entire Solution</ButtonText>
+					<MenuText>Spell Check Entire Solution</MenuText>
+					<ToolTipText>Spell check the entire solution</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckCurrentProject" priority="0x0101">
+				<Strings>
+					<CommandName>cmdidSpellCheckCurrentProject</CommandName>
+					<ButtonText>Spell Check Current Project</ButtonText>
+					<MenuText>Spell Check Current Project</MenuText>
+					<ToolTipText>Spell check the current project</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckSelectedItems" priority="0x0102">
+				<Strings>
+					<CommandName>cmdidSpellCheckSelectedItems</CommandName>
+					<ButtonText>Spell Check Selected Items</ButtonText>
+					<MenuText>Spell Check Selected Items</MenuText>
+					<ToolTipText>Spell check the selected items in Solution Explorer</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+				<Strings>
+					<CommandName>cmdidViewSpellCheckToolWindow</CommandName>
+					<ButtonText>Open the Solution/Project Spell Checker Window</ButtonText>
+					<MenuText>Open the Solution/Project Spell Checker Window</MenuText>
+					<ToolTipText>Open the solution/project spell checker tool window</ToolTipText>
 				</Strings>
 			</Button>
 
@@ -80,7 +117,6 @@
 					<ToolTipText>Add a spell checker configuration file</ToolTipText>
 				</Strings>
 			</Button>
-
 		</Buttons>
 
 		<Menus>
@@ -102,13 +138,16 @@
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
 		</CommandPlacement>
-		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0101">
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0102">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
 		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" priority="0xFFF0">
 			<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
 		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" priority="0x0101">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
 		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" priority="0x0100">
@@ -122,6 +161,18 @@
 		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="AddSpellCheckerConfigCtx" priority="0x0100">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckEntireSolution" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckCurrentProject" priority="0x0101">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckSelectedItems" priority="0x0102">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
 		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0xFFF0">
 			<Parent guid="guidSHLMainMenu" id="IDM_VS_CSCD_SOLUTION_ADD" />
@@ -149,9 +200,14 @@
 			<IDSymbol name="SpellCheckerConfiguration" value="0x0003" />
 			<IDSymbol name="SpellCheckInteractive" value="0x0007" />
 			<IDSymbol name="SpellCheckerMenu" value="0x0002" />
+			<IDSymbol name="SpellCheckerSolution" value="0x0014" />
 			<IDSymbol name="AddSpellCheckerConfigForItem" value="0x0009" />
 			<IDSymbol name="AddSpellCheckerConfigForSelItem" value="0x000A" />
 			<IDSymbol name="AddSpellCheckerConfigCtx" value="0x000B" />
+			<IDSymbol name="SpellCheckEntireSolution" value="0x0010" />
+			<IDSymbol name="SpellCheckCurrentProject" value="0x0011" />
+			<IDSymbol name="SpellCheckSelectedItems" value="0x0012" />
+			<IDSymbol name="ViewSpellCheckToolWindow" value="0x0013" />
 			<IDSymbol name="SolutionExplorerAddCtx" value="0x000C" />
 			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />
 			<IDSymbol name="NewItemMenuGroup" value="0x000E" />

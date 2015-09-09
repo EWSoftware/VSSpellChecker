@@ -3,69 +3,16 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+		xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
 		mc:Ignorable="d" 
 		d:DesignHeight="350" d:DesignWidth="300" Name="ucInteractiveSpellCheck" FontSize="12">
-	<UserControl.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary x:Uid="VisualStudioThemeResources"
-					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
-	</UserControl.Resources>
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto" />
-			<RowDefinition/>
-		</Grid.RowDefinitions>
-		<Grid Grid.Row="0">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="Auto" />
-				<ColumnDefinition />
-				<ColumnDefinition Width="Auto" />
-			</Grid.ColumnDefinitions>
-			<Label Grid.Column="0" Margin="3" Name="lblIssue"
-				Target="{Binding ElementName=txtMisspelledWord}">_Misspelled Word</Label>
-			<TextBox Grid.Column="1" Name="txtMisspelledWord" Margin="3" TextChanged="txtMisspelledWord_TextChanged" />
-			<Button Grid.Column="2" Name="btnUndo" Content="_Undo" Margin="3" Padding="10,0"
-				ToolTip="Undo changes to the misspelled word" Click="btnUndo_Click" />
-		</Grid>
-		<Grid Grid.Row="1">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="Auto" />
-				<RowDefinition Height="Auto" />
-				<RowDefinition />
-			</Grid.RowDefinitions>
-			<TextBlock Grid.Row="0" Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow" Style="{StaticResource NotificationText}">
-No text editor is selected, the spell checker is currently disabled, or the file is excluded by filename extension.
-<LineBreak /><LineBreak />Select a text editor or edit the global configuration or the appropriate
-solution, project, folder, or file-specific configuration to enable spell checking or remove the excluded
-filename extension.</TextBlock>
-			<Label Grid.Row="1" Target="{Binding ElementName=lbSuggestions}">_Suggestions</Label>
-			<Grid Grid.Row="2">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition />
-					<ColumnDefinition Width="Auto" />
-				</Grid.ColumnDefinitions>
-				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick" />
-				<StackPanel Grid.Column="1">
-					<Button Name="btnReplace" Content="R_eplace" Width="100" Margin="3"
-						ToolTip="Replace current misspelling with the selected word" Click="btnReplace_Click" />
-					<Button Name="btnReplaceAll" Content="Replace _All" Width="100" Margin="3, 3, 3, 12"
-						ToolTip="Replace all occurrences with the selected word" Click="btnReplaceAll_Click" />
-					<Button Name="btnIgnoreOnce" Content="_Ignore Once" Width="100" Margin="3"
-						ToolTip="Ignore just this occurrence of the misspelled word" Click="btnIgnoreOnce_Click" />
-					<Button Name="btnIgnoreAll" Content="Ig_nore All" Width="100" Margin="3, 3, 3, 12"
-						ToolTip="Ignore all occurrences of this misspelled word" Click="btnIgnoreAll_Click" />
-					<Button Name="btnAddWord" Content="Add _Word" Width="100" Margin="3"
-						ToolTip="Add the word to the user dictionary" Click="btnAddWord_Click"
-						ContextMenuOpening="btnAddWord_ContextMenuOpening">
-						<Button.ContextMenu>
-							<ContextMenu Name="ctxAddWord" MenuItem.Click="ctxAddWordMenuItem_Click" />
-						</Button.ContextMenu>
-					</Button>
-				</StackPanel>
-			</Grid>
-		</Grid>
-	</Grid>
+	<UserControl.CommandBindings>
+		<CommandBinding Command="vssc:SpellCheckCommands.Replace" Executed="cmdReplace_Executed" />
+		<CommandBinding Command="vssc:SpellCheckCommands.ReplaceAll" Executed="cmdReplaceAll_Executed" />
+		<CommandBinding Command="vssc:SpellCheckCommands.IgnoreOnce" Executed="cmdIgnoreOnce_Executed" />
+		<CommandBinding Command="vssc:SpellCheckCommands.IgnoreAll" Executed="cmdIgnoreAll_Executed" />
+		<CommandBinding Command="vssc:SpellCheckCommands.AddToDictionary" Executed="cmdAddToDictionary_Executed" />
+		<CommandBinding Command="ApplicationCommands.Help" Executed="cmdHelp_Executed" />
+	</UserControl.CommandBindings>
+	<vssc:SpellCheckControl x:Name="ucSpellCheck" />
 </UserControl>

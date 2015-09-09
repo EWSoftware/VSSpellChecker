@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2015
+// Updated : 09/06/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -70,11 +70,27 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
-        /// This is used to get or set whether or not to spell checking as you type is enabled
+        /// This is used to get or set whether or not to spell check the file as you type
         /// </summary>
         /// <value>This is true by default</value>
         [DefaultValue(true)]
         public bool SpellCheckAsYouType { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to spell check the file as part of the solution/project
+        /// spell checking process.
+        /// </summary>
+        /// <value>This is true by default</value>
+        [DefaultValue(true)]
+        public bool IncludeInProjectSpellCheck { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to detect doubled words as part of the spell checking
+        /// process.
+        /// </summary>
+        /// <value>This is true by default</value>
+        [DefaultValue(true)]
+        public bool DetectDoubledWords { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not to ignore words containing digits
@@ -295,8 +311,8 @@ namespace VisualStudio.SpellChecker.Configuration
             {
                 return new string[] { "c", "code", "codeEntityReference", "codeReference", "codeInline",
                     "command", "environmentVariable", "fictitiousUri", "foreignPhrase", "link", "linkTarget",
-                    "linkUri", "localUri", "replaceable", "see", "seeAlso", "unmanagedCodeEntityReference",
-                    "token" };
+                    "linkUri", "localUri", "replaceable", "resheader", "see", "seeAlso", "style",
+                    "unmanagedCodeEntityReference", "token" };
             }
         }
 
@@ -326,11 +342,11 @@ namespace VisualStudio.SpellChecker.Configuration
 
             dictionaryLanguages = new List<CultureInfo>();
 
-            this.SpellCheckAsYouType = this.IgnoreWordsWithDigits = this.IgnoreWordsInAllUppercase =
-                this.IgnoreFormatSpecifiers = this.IgnoreFilenamesAndEMailAddresses =
-                this.IgnoreXmlElementsInText = this.DetermineResourceFileLanguageFromName =
-                this.InheritExcludedExtensions = this.InheritAdditionalDictionaryFolders =
-                this.InheritIgnoredWords = this.InheritXmlSettings = true;
+            this.SpellCheckAsYouType = this.IncludeInProjectSpellCheck = this.DetectDoubledWords =
+                this.IgnoreWordsWithDigits = this.IgnoreWordsInAllUppercase = this.IgnoreFormatSpecifiers =
+                this.IgnoreFilenamesAndEMailAddresses = this.IgnoreXmlElementsInText =
+                this.DetermineResourceFileLanguageFromName = this.InheritExcludedExtensions =
+                this.InheritAdditionalDictionaryFolders = this.InheritIgnoredWords = this.InheritXmlSettings = true;
 
             this.TreatUnderscoreAsSeparator = false;
 
@@ -404,6 +420,12 @@ namespace VisualStudio.SpellChecker.Configuration
                 var configuration = new SpellingConfigurationFile(filename, this);
 
                 this.SpellCheckAsYouType = configuration.ToBoolean(PropertyNames.SpellCheckAsYouType);
+                
+                // This option is always true for the global configuration
+                if(configuration.ConfigurationType != ConfigurationType.Global)
+                    this.IncludeInProjectSpellCheck = configuration.ToBoolean(PropertyNames.IncludeInProjectSpellCheck);
+
+                this.DetectDoubledWords = configuration.ToBoolean(PropertyNames.DetectDoubledWords);
                 this.IgnoreWordsWithDigits = configuration.ToBoolean(PropertyNames.IgnoreWordsWithDigits);
                 this.IgnoreWordsInAllUppercase = configuration.ToBoolean(PropertyNames.IgnoreWordsInAllUppercase);
                 this.IgnoreFormatSpecifiers = configuration.ToBoolean(PropertyNames.IgnoreFormatSpecifiers);

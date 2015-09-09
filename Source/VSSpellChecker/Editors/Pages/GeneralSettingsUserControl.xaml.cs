@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 09/06/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -75,13 +75,18 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             else
                 dataSource.AddRange(new[] { PropertyState.Yes, PropertyState.No });
 
-            cboSpellCheckAsYouType.ItemsSource = cboIgnoreWordsWithDigits.ItemsSource =
+            cboSpellCheckAsYouType.ItemsSource = cboIncludeInProjectSpellCheck.ItemsSource =
+                cboDetectDoubledWords.ItemsSource = cboIgnoreWordsWithDigits.ItemsSource =
                 cboIgnoreAllUppercase.ItemsSource = cboIgnoreFormatSpecifiers.ItemsSource =
                 cboIgnoreFilenamesAndEMail.ItemsSource = cboIgnoreXmlInText.ItemsSource =
                 cboTreatUnderscoresAsSeparators.ItemsSource = dataSource;
 
             cboSpellCheckAsYouType.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.SpellCheckAsYouType);
+            cboIncludeInProjectSpellCheck.SelectedValue = configuration.ToPropertyState(
+                PropertyNames.IncludeInProjectSpellCheck);
+            cboDetectDoubledWords.SelectedValue = configuration.ToPropertyState(
+                PropertyNames.DetectDoubledWords);
             cboIgnoreWordsWithDigits.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.IgnoreWordsWithDigits);
             cboIgnoreAllUppercase.SelectedValue = configuration.ToPropertyState(
@@ -96,9 +101,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 PropertyNames.TreatUnderscoreAsSeparator);
 
             if(configuration.ConfigurationType != ConfigurationType.Global)
-                rbInheritIgnoredCharClass.Visibility = Visibility.Visible;
+                spIncludeInProjectSpellCheck.Visibility = rbInheritIgnoredCharClass.Visibility = Visibility.Visible;
             else
-                rbInheritIgnoredCharClass.Visibility = Visibility.Collapsed;
+                spIncludeInProjectSpellCheck.Visibility = rbInheritIgnoredCharClass.Visibility = Visibility.Collapsed;
 
             if(!configuration.HasProperty(PropertyNames.IgnoreCharacterClass) &&
               configuration.ConfigurationType != ConfigurationType.Global)
@@ -127,6 +132,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             configuration.StoreProperty(PropertyNames.SpellCheckAsYouType,
                 ((PropertyState)cboSpellCheckAsYouType.SelectedValue).ToPropertyValue());
+            configuration.StoreProperty(PropertyNames.IncludeInProjectSpellCheck,
+                ((PropertyState)cboIncludeInProjectSpellCheck.SelectedValue).ToPropertyValue());
+            configuration.StoreProperty(PropertyNames.DetectDoubledWords,
+                ((PropertyState)cboDetectDoubledWords.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.IgnoreWordsWithDigits,
                 ((PropertyState)cboIgnoreWordsWithDigits.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.IgnoreWordsInAllUppercase,

@@ -111,6 +111,13 @@
 		<Setter Property="TextBlock.Background" Value="{StaticResource NotificationBrushKey}" />
 		<Setter Property="TextBlock.Foreground" Value="{StaticResource NotificationTextBrushKey}" />
 	</Style>
+	<Style x:Key="PlainText" TargetType="{x:Type TextBlock}">
+		<Setter Property="TextBlock.Foreground" Value="{StaticResource ToolWindowTextBrushKey}" />
+	</Style>
+	<Style x:Key="ShadedText" TargetType="{x:Type TextBlock}">
+		<Setter Property="TextBlock.Background" Value="{StaticResource ItemSelectedNotFocusedBrushKey}" />
+		<Setter Property="TextBlock.Foreground" Value="{StaticResource ItemSelectedTextNotFocusedBrushKey}" />
+	</Style>
 	<Style x:Key="TitleText" TargetType="{x:Type TextBlock}">
 		<Setter Property="TextBlock.FontWeight" Value="Bold" />
 		<Setter Property="TextBlock.FontSize" Value="15" />
@@ -761,4 +768,195 @@
 		</Setter>
 	</Style>
 
+	<!-- Data grid controls -->
+	<Style x:Key="{ComponentResourceKey ResourceId=DataGridSelectAllButtonStyle, TypeInTargetAssembly={x:Type DataGrid}}"
+		TargetType="{x:Type Button}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Button}">
+					<Grid>
+						<Rectangle x:Name="Border" SnapsToDevicePixels="True" Margin="-1,-1,0,0"
+							Stroke="{StaticResource LightBorderBrushKey}" Fill="{StaticResource MenuBackgroundBrushKey}" />
+						<Polygon x:Name="Arrow" Fill="{StaticResource ItemTextBrushKey}" HorizontalAlignment="Right"
+							Margin="8,8,3,3" Opacity="0.3" Points="0,10 10,10 10,0" Stretch="Uniform" VerticalAlignment="Bottom"/>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Fill" TargetName="Border" Value="{StaticResource ButtonHoverBackgroundBrushKey}"/>
+						</Trigger>
+						<Trigger Property="IsPressed" Value="True">
+							<Setter Property="Fill" TargetName="Border" Value="{StaticResource MenuBackgroundBrushKey}"/>
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="False">
+							<Setter Property="Visibility" TargetName="Arrow" Value="Collapsed"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style x:Key="{x:Type DataGridRow}" TargetType="{x:Type DataGridRow}">
+		<Setter Property="Background" Value="{StaticResource ItemBrushKey}" />
+	</Style>
+
+	<Style x:Key="{x:Type DataGridCell}" TargetType="{x:Type DataGridCell}">
+		<Style.Triggers>
+			<Trigger Property="IsSelected" Value="True">
+				<Setter Property="Background" Value="{StaticResource ItemSelectedBrushKey}"/>
+				<Setter Property="Foreground" Value="{StaticResource ItemSelectedTextBrushKey}"/>
+				<Setter Property="BorderBrush" Value="{StaticResource ItemSelectedBorderBrushKey}"/>
+			</Trigger>
+			<Trigger Property="IsKeyboardFocusWithin" Value="True">
+				<Setter Property="BorderBrush" Value="{StaticResource ItemSelectedBorderBrushKey}"/>
+			</Trigger>
+			<MultiTrigger>
+				<MultiTrigger.Conditions>
+					<Condition Property="IsSelected" Value="true"/>
+					<Condition Property="Selector.IsSelectionActive" Value="false"/>
+				</MultiTrigger.Conditions>
+				<Setter Property="Background" Value="{StaticResource ItemSelectedNotFocusedBrushKey}"/>
+				<Setter Property="BorderBrush" Value="{StaticResource ItemSelectedBorderNotFocusedBrushKey}"/>
+				<Setter Property="Foreground" Value="{StaticResource ItemSelectedTextNotFocusedBrushKey}"/>
+			</MultiTrigger>
+			<Trigger Property="IsEnabled" Value="false">
+				<Setter Property="Foreground" Value="{StaticResource DisabledTextBrushKey}"/>
+			</Trigger>
+		</Style.Triggers>
+	</Style>
+
+	<Style x:Key="ColumnHeaderGripperStyle" TargetType="{x:Type Thumb}">
+		<Setter Property="Width" Value="8"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Cursor" Value="SizeWE"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Thumb}">
+					<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"/>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style x:Key="{x:Type DataGridColumnHeader}" TargetType="{x:Type DataGridColumnHeader}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type DataGridColumnHeader}">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+						<Border x:Name="BackgroundBorder" BorderThickness="1,1,1,1" Grid.ColumnSpan="2" Margin="-1,-1,0,0"
+							Background="{StaticResource ButtonBackgroundBrushKey}"
+							BorderBrush="{StaticResource LightBorderBrushKey}" />
+						<ContentPresenter Margin="6,3,6,3" VerticalAlignment="Center" />
+						<Path x:Name="SortArrow" Visibility="Collapsed" Data="M0,0 L1,0 0.5,1 z" Stretch="Fill"
+							Grid.Column="1" Width="8" Height="6" Margin="0,0,8,0" Fill="{StaticResource ItemTextBrushKey}"
+							VerticalAlignment="Center" RenderTransformOrigin="0.5,0.4" />
+						<Rectangle Width="1" Fill="Transparent" HorizontalAlignment="Right" Grid.ColumnSpan="2" />
+						<Rectangle Width="1" Margin="0,0,1,0" Fill="Transparent"
+							HorizontalAlignment="Right" Grid.ColumnSpan="2" />
+						<Thumb x:Name="PART_LeftHeaderGripper" HorizontalAlignment="Left"
+							Style="{StaticResource ColumnHeaderGripperStyle}"/>
+						<Thumb x:Name="PART_RightHeaderGripper" HorizontalAlignment="Right"
+							Style="{StaticResource ColumnHeaderGripperStyle}"/>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="SortDirection" Value="{x:Null}">
+							<Setter TargetName="BackgroundBorder" Property="Background"
+								Value="{StaticResource ButtonBackgroundBrushKey}" />
+						</Trigger>
+						<MultiTrigger>
+							<MultiTrigger.Conditions>
+								<Condition Property="IsMouseOver" Value="True" />
+							</MultiTrigger.Conditions>
+							<Setter Property="Background" TargetName="BackgroundBorder"
+									Value="{StaticResource ButtonHoverBackgroundBrushKey}" />
+						</MultiTrigger>
+						<Trigger Property="SortDirection" Value="Ascending">
+							<Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
+							<Setter TargetName="SortArrow" Property="RenderTransform">
+								<Setter.Value>
+									<RotateTransform Angle="180" />
+								</Setter.Value>
+							</Setter>
+						</Trigger>
+						<Trigger Property="SortDirection" Value="Descending">
+							<Setter TargetName="SortArrow" Property="Visibility" Value="Visible" />
+						</Trigger>
+						<Trigger Property="DisplayIndex" Value="0">
+							<Setter Property="Visibility" Value="Collapsed" TargetName="PART_LeftHeaderGripper"></Setter>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<BooleanToVisibilityConverter x:Key="bool2VisibilityConverter"/>
+
+	<Style x:Key="RowHeaderGripperStyle" TargetType="{x:Type Thumb}">
+		<Setter Property="Height" Value="8"/>
+		<Setter Property="Background" Value="Transparent"/>
+		<Setter Property="Cursor" Value="SizeNS"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Thumb}">
+					<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"/>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- For some reason, data grid row header styles don't work implicitly.  As such, an explicit style must be
+			 created and assigned to the RowHeaderStyle property in the DataGrid implicit style (see below). -->
+	<Style x:Key="ThemedDataGridRowHeaderStyle" TargetType="{x:Type DataGridRowHeader}">
+		<Setter Property="Background" Value="{StaticResource ButtonBackgroundBrushKey}" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type DataGridRowHeader}">
+					<Grid>
+						<Themes:DataGridHeaderBorder IsSelected="{TemplateBinding IsRowSelected}"
+							IsHovered ="{TemplateBinding IsMouseOver}" IsPressed="{TemplateBinding IsPressed}"
+							BorderBrush="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}, Path=HorizontalGridLinesBrush}"
+							Background="{TemplateBinding Background}" BorderThickness="0,1,1,1"
+							Padding ="{TemplateBinding Padding}" Orientation="Horizontal"
+							SeparatorVisibility="{TemplateBinding SeparatorVisibility}"
+							SeparatorBrush="{TemplateBinding SeparatorBrush}" Margin="0,-1,0,0">
+							<StackPanel Orientation="Horizontal">
+								<ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+									VerticalAlignment="Center"/>
+								<Control SnapsToDevicePixels="false"
+									Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=(Validation.HasError), Converter={StaticResource bool2VisibilityConverter}}"
+                  Template="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=ValidationErrorTemplate}" />
+							</StackPanel>
+						</Themes:DataGridHeaderBorder>
+						<Thumb x:Name="PART_TopHeaderGripper" VerticalAlignment="Top" Height="3"
+							Style="{StaticResource RowHeaderGripperStyle}"/>
+						<Thumb x:Name="PART_BottomHeaderGripper" VerticalAlignment="Bottom" Height="3"
+							Style="{StaticResource RowHeaderGripperStyle}"/>
+					</Grid>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter Property="Background" Value="{StaticResource ButtonHoverBackgroundBrushKey}" />
+						</Trigger>
+						<Trigger Property="IsRowSelected" Value="True">
+							<Setter Property="Background" Value="{StaticResource ButtonHoverBackgroundBrushKey}" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style x:Key="{x:Type DataGrid}" TargetType="{x:Type DataGrid}">
+		<Setter Property="BorderBrush" Value="{StaticResource LightBorderBrushKey}" />
+		<Setter Property="Background" Value="{StaticResource MenuBackgroundBrushKey}"/>
+		<Setter Property="Foreground" Value="{StaticResource ItemTextBrushKey}"/>
+		<Setter Property="VerticalGridLinesBrush" Value="{StaticResource LightBorderBrushKey}" />
+		<Setter Property="HorizontalGridLinesBrush" Value="{StaticResource LightBorderBrushKey}" />
+		<!-- Must be set explicitly.  See comments on style. -->
+		<Setter Property="RowHeaderStyle" Value="{DynamicResource ThemedDataGridRowHeaderStyle}" />
+	</Style>
 </ResourceDictionary>
