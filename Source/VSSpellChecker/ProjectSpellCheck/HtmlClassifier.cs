@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/31/2015
+// Updated : 09/13/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -111,20 +111,24 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     break;
 
                 case HtmlNodeType.Element:
-                    foreach(var attribute in node.Attributes)
-                        if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(attribute.Name) &&
-                          !String.IsNullOrWhiteSpace(attribute.Value))
-                            spans.Add(new SpellCheckSpan
-                            {
-                                Span = new Span(this.AdjustedOffset(this.GetOffset(attribute.Line,
-                                    attribute.LinePosition + attribute.Name.Length + 1), attribute.Value),
-                                    attribute.Value.Length),
-                                Text = attribute.Value,
-                                Classification = RangeClassification.AttributeValue
-                            });
+                    // TODO: Ignore PHP script for now.  Need a separate parser for PHP files to return just
+                    // comments and string literals within PHP script blocks.  The agility pack doesn't know
+                    // about them so it doesn't extract them properly.
+                    if(node.Name != "<?")
+                        foreach(var attribute in node.Attributes)
+                            if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(attribute.Name) &&
+                              !String.IsNullOrWhiteSpace(attribute.Value))
+                                spans.Add(new SpellCheckSpan
+                                {
+                                    Span = new Span(this.AdjustedOffset(this.GetOffset(attribute.Line,
+                                        attribute.LinePosition + attribute.Name.Length + 1), attribute.Value),
+                                        attribute.Value.Length),
+                                    Text = attribute.Value,
+                                    Classification = RangeClassification.AttributeValue
+                                });
 
-                    // TODO: Parse script for comments and literal strings?  This may need extending for other
-                    // ASP.NET inline code elements if necessary.
+                    // TODO: Parse script for comments and literal strings?  May need a separate parser for
+                    // ASP.NET and Razor inline code elements.
                     if(node.Name != "script" && !this.SpellCheckConfiguration.IgnoredXmlElements.Contains(node.Name) &&
                       node.HasChildNodes)
                         foreach(HtmlNode subnode in node.ChildNodes)

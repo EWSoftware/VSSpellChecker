@@ -106,6 +106,8 @@
     <Compile Include="ProjectSpellCheck\RangeClassification.cs" />
     <Compile Include="ProjectSpellCheck\RegexClassification.cs" />
     <Compile Include="ProjectSpellCheck\RegexClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\ReportingServicesClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\ResourceFileClassifier.cs" />
     <Compile Include="ProjectSpellCheck\SpellCheckFileInfo.cs" />
     <Compile Include="ProjectSpellCheck\SpellCheckSpan.cs" />
     <Compile Include="ProjectSpellCheck\TextClassifier.cs" />

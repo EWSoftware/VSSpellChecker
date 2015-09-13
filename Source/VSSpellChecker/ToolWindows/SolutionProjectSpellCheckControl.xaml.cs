@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/06/2015
+// Updated : 09/10/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -200,8 +200,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 cboSpellCheckTarget.Items.Add("Entire solution");
 
+                // Website projects use a folder name for the project so remove the trailing backslash
                 foreach(string p in projectNames)
-                    cboSpellCheckTarget.Items.Add(Path.GetFileName(p));
+                    if(p.Length > 1 && p[p.Length - 1] == '\\')
+                        cboSpellCheckTarget.Items.Add(Path.GetFileName(p.Substring(0, p.Length - 1)));
+                    else
+                        cboSpellCheckTarget.Items.Add(Path.GetFileName(p));
 
                 cboSpellCheckTarget.Items.Add("Selected Solution Explorer items");
                 cboSpellCheckTarget.SelectedIndex = 0;
@@ -393,7 +397,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="replacement">The replacement text to use in determining the adjustment</param>
         private void AdjustAffectedIssues(FileMisspelling issue, string replacement)
         {
-            int adjustment = replacement.Length - issue.Span.Length;
+            int adjustment;
+            
+            if(issue.MisspellingType != MisspellingType.DoubledWord)
+                adjustment = replacement.Length - issue.Span.Length;
+            else
+                adjustment = replacement.Length - issue.DeleteWordSpan.Length;
 
             var relatedIssues = ((IList<FileMisspelling>)dgIssues.ItemsSource).Where(i =>
                 i.CanonicalName.Equals(issue.CanonicalName, StringComparison.OrdinalIgnoreCase) &&
@@ -804,7 +813,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 }
 
                 if(files.Count != 0)
+                {
                     codeAnalysisFiles.Add(p.FullPath, files);
+
+                    var excludeFiles = new HashSet<string>(codeAnalysisFiles.Values.SelectMany(c => c).Distinct(),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    spellCheckFiles = spellCheckFiles.Where(s => !excludeFiles.Contains(s.CanonicalName)).ToList();
+                }
             }
 
             try
@@ -898,7 +914,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 var issue = issues[idx];
 
                 // Get suggestions if not already set
-                if(issue.MisspellingType != MisspellingType.DoubledWord && !issue.SuggestionsDetermined)
+                if(!issue.SuggestionsDetermined)
                 {
                     issue.SuggestionsDetermined = true;
                     issue.Suggestions = issue.Dictionary.SuggestCorrections(issue.Word);

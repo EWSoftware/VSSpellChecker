@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
-// Updated : 09/02/2015
+// Updated : 09/10/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -149,6 +149,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Span = this.DeleteWordSpan = span;
             this.Word = word;
             this.Suggestions = suggestions ?? new SpellingSuggestion[0];
+            this.SuggestionsDetermined = (suggestions != null);
         }
 
         /// <summary>
@@ -176,6 +177,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.DeleteWordSpan = deleteWordSpan;
             this.Word = word;
             this.Suggestions = new SpellingSuggestion[0];
+            this.SuggestionsDetermined = true;
         }
         #endregion
     }

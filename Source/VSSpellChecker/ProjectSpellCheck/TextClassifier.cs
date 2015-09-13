@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/01/2015
+// Updated : 09/10/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 using VisualStudio.SpellChecker.Configuration;
 
@@ -110,7 +111,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             this.Filename = filename;
             this.SpellCheckConfiguration = spellCheckConfiguration;
-            this.SetText(File.ReadAllText(filename));
+
+            using(StreamReader sr = new StreamReader(filename, Encoding.Default, true))
+            {
+                this.SetText(sr.ReadToEnd());
+            }
         }
         #endregion
 

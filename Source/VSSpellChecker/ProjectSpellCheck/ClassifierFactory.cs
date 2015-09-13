@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/08/2015
+// Updated : 09/10/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -100,6 +100,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                         case "XmlClassifier":
                             classifier = new XmlClassifier(filename, spellCheckConfiguration);
+                            break;
+
+                        case "ReportingServicesClassifier":
+                            classifier = new ReportingServicesClassifier(filename, spellCheckConfiguration);
+                            break;
+
+                        case "ResourceFileClassifier":
+                            classifier = new ResourceFileClassifier(filename, spellCheckConfiguration);
                             break;
 
                         case "HtmlClassifier":

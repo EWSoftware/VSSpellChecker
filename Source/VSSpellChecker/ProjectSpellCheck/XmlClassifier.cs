@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/08/2015
+// Updated : 09/13/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -23,6 +23,8 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 using Microsoft.VisualStudio.Text;
@@ -39,7 +41,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         #region Private data members
         //=====================================================================
 
-        private bool isResxFile;
+        private static Regex reXmlEncoding = new Regex("^<\\?xml.*?encoding\\s*=\\s*\"(?<Encoding>.*?)\".*?\\?>");
 
         #endregion
 
@@ -54,18 +56,42 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public XmlClassifier(string filename, SpellCheckerConfiguration spellCheckConfiguration) :
           base(filename, spellCheckConfiguration)
         {
-            isResxFile = Path.GetExtension(filename).Equals(".resx", StringComparison.OrdinalIgnoreCase);
+            try
+            {
+                // If an encoding is specified, re-read it using the correct encoding
+                Match m = reXmlEncoding.Match(this.Text);
+
+                if(m.Success)
+                {
+                    var encoding = Encoding.GetEncoding(m.Groups["Encoding"].Value);
+
+                    if(encoding != Encoding.Default)
+                    {
+                        using(StreamReader sr = new StreamReader(filename, encoding, true))
+                        {
+                            this.SetText(sr.ReadToEnd());
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                // Ignore errors for invalid encodings.  We'll just use the default
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
         #endregion
 
+        #region Methods
+        //=====================================================================
+
         /// <inheritdoc />
-        /// <remarks>For resource files (.resx), certain common comment words are automatically excluded and
-        /// <c>data</c> and <c>metadata</c> elements with a <c>type</c> attribute are automatically ignored.</remarks>
         public override IEnumerable<SpellCheckSpan> Parse()
         {
             List<SpellCheckSpan> spans = new List<SpellCheckSpan>();
             XmlReaderSettings rs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse };
-            string value;
+            Stack<string> elementNames = new Stack<string>();
+            string elementName = String.Empty, value;
 
             // For parsing, convert carriage returns to spaces to maintain the correct offsets.  The XML reader
             // converts CR/LF pairs to a single LF which throws off the positions otherwise.
@@ -92,10 +118,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                         if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(reader.LocalName))
                                         {
                                             // Set the approximate position of the value assuming the format:
-                                            // attrName="value".  The value must be encoded to get an accurate
-                                            // position (quotes excluded).
-                                            value = WebUtility.HtmlEncode(reader.Value).Replace("&quot;", "\"").Replace(
-                                                "&#39;", "'");
+                                            // attrName="value".  The value may need to be encoded to get an
+                                            // accurate position (quotes excluded).
+                                            value = reader.Value;
+
+                                            if(!value.Equals(this.Text.Substring(this.GetOffset(lineInfo.LineNumber,
+                                              lineInfo.LinePosition + reader.Settings.LinePositionOffset +
+                                              reader.Name.Length + 2)), StringComparison.Ordinal))
+                                            {
+                                                value = WebUtility.HtmlEncode(value).Replace("&quot;", "\"").Replace(
+                                                    "&#39;", "'");
+                                            }
 
                                             spans.Add(new SpellCheckSpan
                                             {
@@ -111,22 +144,31 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                     reader.MoveToElement();
                                 }
 
+                                if(!reader.IsEmptyElement)
+                                {
+                                    elementNames.Push(elementName);
+                                    elementName = reader.LocalName;
+                                }
+
                                 // Is it an element in which to skip the content?
                                 if(this.SpellCheckConfiguration.IgnoredXmlElements.Contains(reader.LocalName) ||
-                                  (isResxFile && (reader.LocalName == "data" || reader.LocalName == "metadata") &&
-                                  reader.GetAttribute("type") != null))
+                                  this.ShouldSkipElement(reader))
                                 {
                                     reader.Skip();
                                     continue;
                                 }
                                 break;
 
-                            case XmlNodeType.Comment:
-                                value = reader.Value;
+                            case XmlNodeType.EndElement:
+                                if(elementNames.Count != 0)
+                                    elementName = elementNames.Pop();
+                                else
+                                    elementName = String.Empty;
+                                break;
 
-                                if(isResxFile)
-                                    value = value.Replace("mimetype", "        ").Replace(
-                                        "resheader", "         ").Replace("microsoft-resx", "              ");
+                            case XmlNodeType.Comment:
+                                // Apply adjustments to the comments if necessary
+                                value = this.AdjustCommentText(reader.Value);
 
                                 spans.Add(new SpellCheckSpan
                                 {
@@ -148,17 +190,18 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                 break;
 
                             case XmlNodeType.Text:
-                                // The value must be encoded to get an accurate position (quotes excluded)
-                                value = WebUtility.HtmlEncode(reader.Value).Replace("&quot;", "\"").Replace(
-                                    "&#39;", "'");
+                                // The value may need to be encoded to get an accurate position (quotes excluded)
+                                value = reader.Value;
 
-                                spans.Add(new SpellCheckSpan
+                                if(!value.Equals(this.Text.Substring(this.GetOffset(lineInfo.LineNumber,
+                                  lineInfo.LinePosition), value.Length).Replace('\r', ' '), StringComparison.Ordinal))
                                 {
-                                    Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
-                                        value.Length),
-                                    Text = value,
-                                    Classification = RangeClassification.InnerText
-                                });
+                                    value = WebUtility.HtmlEncode(value).Replace("&quot;", "\"").Replace(
+                                        "&#39;", "'");
+                                }
+
+                                spans.AddRange(this.ClassifyText(elementName, value, this.GetOffset(
+                                    lineInfo.LineNumber, lineInfo.LinePosition)));
                                 break;
 
                             default:
@@ -177,5 +220,49 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 return spans;
             }
         }
+
+        /// <summary>
+        /// This can be overridden to adjust the comment text based on rules specific to a given file type such
+        /// as removing text that should not be spell checked to prevent false reports.
+        /// </summary>
+        /// <param name="comments">The comments to adjust</param>
+        /// <returns>The comments with any necessary adjustments made.  Note that the overall length of the text
+        /// and the positions of any remaining words should stay the same.  The default implementation simply
+        /// returns the comment text unmodified.</returns>
+        protected virtual string AdjustCommentText(string comments)
+        {
+            return comments;
+        }
+
+        /// <summary>
+        /// This can be overridden to determine whether or not to skip an element not otherwise excluded in the
+        /// spell checker configuration settings.
+        /// </summary>
+        /// <param name="reader">The XML reader used to determine whether or not the element should be skipped</param>
+        /// <returns>True if it should, false if not.  The base implementation always returns false.</returns>
+        protected virtual bool ShouldSkipElement(XmlReader reader)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// This can be overridden to further classify or limit the spans spell checked within an XML elements
+        /// inner text.
+        /// </summary>
+        /// <param name="elementName">The name of the element containing the text</param>
+        /// <param name="text">The text to classify</param>
+        /// <param name="offset">The starting offset of the text within the file</param>
+        /// <returns>An enumerable list of spans to spell check.  By default, this returns the entire range as a
+        /// single text span.</returns>
+        protected virtual IEnumerable<SpellCheckSpan> ClassifyText(string elementName, string text, int offset)
+        {
+            yield return new SpellCheckSpan
+            {
+                Span = new Span(offset, text.Length),
+                Text = text,
+                Classification = RangeClassification.InnerText
+            };
+        }
+        #endregion
     }
 }

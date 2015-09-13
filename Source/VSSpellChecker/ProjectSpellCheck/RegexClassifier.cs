@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/01/2015
+// Updated : 09/10/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -150,7 +150,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 {
                     // The spans overlap.  If overlapped entirely, remove one or the other.  If partially
                     // overlapping, combine them and account for the overlap if they are of the same type.
-                    // If overlapped but of a different type, leave them alone.
+                    // If overlapped but of a different type, leave them alone except the noted special case.
                     if(current.Span.OverlapsWith(next.Span))
                     {
                         if(current.Span.Contains(next.Span))
@@ -175,6 +175,21 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                     spans.Remove(next);
                                     idx--;
                                 }
+                                else
+                                    if((current.Classification == RangeClassification.NormalStringLiteral ||
+                                      current.Classification == RangeClassification.VerbatimStringLiteral ||
+                                      current.Classification == RangeClassification.InterpolatedStringLiteral) &&
+                                      (next.Classification == RangeClassification.SingleLineComment ||
+                                      next.Classification == RangeClassification.XmlDocComments ||
+                                      next.Classification == RangeClassification.QuadSlashComment ||
+                                      next.Classification == RangeClassification.DelimitedComments))
+                                    {
+                                        // Special case.  Parts of a URL, XPath query, or what looks like block
+                                        // comment delimiters within a literal string may get picked up as a
+                                        // comment span.  In this case, we'll ignore the incorrect comment span.
+                                        spans.Remove(next);
+                                        idx--;
+                                    }
                     }
                     else
                         if(current.Classification == next.Classification)

@@ -30,12 +30,25 @@ just returns all of the file's content as a single block to be broken up into wo
 check them based on the active configuration settings.  For example, it skips the inner text of unwanted XML
 elements and spell checks the values of attributes that have been specified as needing spell checking.  This
 classifier can only be used on well-formed XML content.</para>
+					</listItem>
 
-						<para>For resource (<localUri>.resx</localUri>) files, this classifier will automatically ignore
-certain words common to the default comments in resource files which describe the elements within it.  It also
-automatically ignores <codeInline>data</codeInline> and <codeInline>metadata</codeInline> elements with a
-<codeInline>type</codeInline> attribute which typically do not contain a value that should be spell checked.
-A common example is base 64 encoded image data.  This prevents a number of unwanted issues being reported.</para>
+					<listItem>
+						<para><codeInline>ResourceFileClassifier</codeInline> - This is a variant of the XML classifier used
+for resource files (<localUri>.resx</localUri>).  This classifier will automatically ignore certain non-words
+common to the default comments in resource files which describe the elements within it.  It also automatically
+ignores <codeInline>data</codeInline> and <codeInline>metadata</codeInline> elements with a
+<codeInline>type</codeInline> attribute with any value or a <codeInline>mimetype</codeInline> attribute with
+"base64" in its value.  These typically do not contain a value that should be spell checked.  A common example is
+base 64 encoded image data.  This prevents a number of unwanted issues being reported.</para>
+					</listItem>
+
+					<listItem>
+						<para><codeInline>ReportingServicesClassifier</codeInline> - This is a variant of the XML classifier
+used for Reporting Services report files (<localUri>.rdl</localUri> and <localUri>.rdlc</localUri>).  This
+classifier will automatically ignore various elements that should not be spell checked, will limit the content
+that is spell check in <codeInline>Code</codeInline> elements to comments and string literals, and will limit the
+content that is spell checked in expressions to literal strings.  This prevents a number of unwanted issues being
+reported.</para>
 					</listItem>
 
 					<listItem>
@@ -231,6 +244,11 @@ and define the mappings.  You can reuse the existing classifier IDs if you find 
 				<para>Redefining a classifier or an extension with an ID that appears in the standard configuration file
 will effectively replace its definition with yours.  This is a convenient way to try out changes or fixes to the
 existing classifier expressions should you find an issue with them.</para>
+
+				<alert class="important">
+					<para>Any changes made to the classifications configuration file will not take effect until Visual
+Studio is restarted.</para>
+				</alert>
 
 <code language="XML" title="Example Custom Configuration Files">
 &lt;Classifications&gt;
