@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/06/2015
+// Updated : 09/14/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
 
@@ -47,6 +48,7 @@ namespace VisualStudio.SpellChecker.Configuration
             recognizedWords;
         private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
+        private List<Regex> exclusionExpressions;
         private Dictionary<string, string> deprecatedTerms, compoundTerms;
         private Dictionary<string, IList<string>> unrecognizedWords;
         #endregion
@@ -223,6 +225,23 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This is used to indicate whether or not exclusion expressions are inherited by other configurations
+        /// </summary>
+        /// <value>The default is true so that sub-configurations inherit all exclusion expressions from higher
+        /// level configurations.</value>
+        [DefaultValue(true)]
+        public bool InheritExclusionExpressions { get; set; }
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of exclusion regular expressions that will be used
+        /// to find ranges of text that should not be spell checked.
+        /// </summary>
+        public IEnumerable<Regex> ExclusionExpressions
+        {
+            get { return exclusionExpressions; }
+        }
+
+        /// <summary>
         /// This is used to indicate whether or not ignored XML elements and included attributes are inherited by
         /// other configurations.
         /// </summary>
@@ -333,7 +352,7 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         /// <summary>
-        /// constructor
+        /// Constructor
         /// </summary>
         public SpellCheckerConfiguration()
         {
@@ -346,7 +365,8 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.IgnoreWordsWithDigits = this.IgnoreWordsInAllUppercase = this.IgnoreFormatSpecifiers =
                 this.IgnoreFilenamesAndEMailAddresses = this.IgnoreXmlElementsInText =
                 this.DetermineResourceFileLanguageFromName = this.InheritExcludedExtensions =
-                this.InheritAdditionalDictionaryFolders = this.InheritIgnoredWords = this.InheritXmlSettings = true;
+                this.InheritAdditionalDictionaryFolders = this.InheritIgnoredWords =
+                this.InheritExclusionExpressions = this.InheritXmlSettings = true;
 
             this.TreatUnderscoreAsSeparator = false;
 
@@ -358,10 +378,11 @@ namespace VisualStudio.SpellChecker.Configuration
 
             additionalDictionaryFolders = new List<string>();
 
+            exclusionExpressions = new List<Regex>();
+
             deprecatedTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             compoundTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             unrecognizedWords = new Dictionary<string, IList<string>>(StringComparer.OrdinalIgnoreCase);
-
         }
         #endregion
 
@@ -525,6 +546,31 @@ namespace VisualStudio.SpellChecker.Configuration
                     }
                     else
                         ignoredWords = tempHashSet;
+                }
+
+                this.InheritExclusionExpressions = configuration.ToBoolean(PropertyNames.InheritExclusionExpressions);
+
+                if(configuration.HasProperty(PropertyNames.ExclusionExpressions))
+                {
+                    var tempList = new List<Regex>(configuration.ToRegexes(PropertyNames.ExclusionExpressions,
+                        PropertyNames.ExclusionExpressionItem));
+
+                    if(this.InheritExclusionExpressions)
+                    {
+                        if(tempList.Count != 0)
+                        {
+                            tempHashSet = new HashSet<string>(exclusionExpressions.Select(r => r.ToString()));
+
+                            foreach(Regex exp in tempList)
+                                if(!tempHashSet.Contains(exp.ToString()))
+                                {
+                                    exclusionExpressions.Add(exp);
+                                    tempHashSet.Add(exp.ToString());
+                                }
+                        }
+                    }
+                    else
+                        exclusionExpressions = tempList;
                 }
 
                 this.InheritXmlSettings = configuration.ToBoolean(PropertyNames.InheritXmlSettings);

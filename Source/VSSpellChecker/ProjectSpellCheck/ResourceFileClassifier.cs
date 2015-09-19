@@ -69,7 +69,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             string mimeType = reader.GetAttribute("mimetype");
 
-            if(!String.IsNullOrWhiteSpace(mimeType) && mimeType.IndexOf("base64") != -1)
+            if(!String.IsNullOrWhiteSpace(mimeType) && mimeType.IndexOf("base64", StringComparison.Ordinal) != -1)
                 return true;
 
             return !String.IsNullOrWhiteSpace(reader.GetAttribute("type"));

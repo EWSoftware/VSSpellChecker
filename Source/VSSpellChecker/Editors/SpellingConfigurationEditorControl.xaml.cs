@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 09/15/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -28,6 +28,7 @@ using System.IO;
 using System.Web;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -109,6 +110,7 @@ namespace VisualStudio.SpellChecker.Editors
                 typeof(GeneralSettingsUserControl),
                 typeof(CSharpOptionsUserControl),
                 typeof(IgnoredWordsUserControl),
+                typeof(ExclusionExpressionsUserControl),
                 typeof(ExcludedExtensionsUserControl),
                 typeof(XmlFilesUserControl),
                 typeof(CodeAnalysisUserControl)
@@ -250,7 +252,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnHelp_Click(object sender, RoutedEventArgs e)
+        private void cmdHelp_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             TreeViewItem item = (TreeViewItem)tvPages.SelectedItem;
 

@@ -78,6 +78,12 @@
     <Compile Include="Editors\Pages\ExcludedExtensionsUserControl.xaml.cs">
       <DependentUpon>ExcludedExtensionsUserControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\Pages\ExclusionExpressionAddEditForm.xaml.cs">
+      <DependentUpon>ExclusionExpressionAddEditForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\Pages\ExclusionExpressionsUserControl.xaml.cs">
+      <DependentUpon>ExclusionExpressionsUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\Pages\FileInfoUserControl.xaml.cs">
       <DependentUpon>FileInfoUserControl.xaml</DependentUpon>
     </Compile>
@@ -509,6 +515,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Editors\Pages\ExcludedExtensionsUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Editors\Pages\ExclusionExpressionAddEditForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\Pages\ExclusionExpressionsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -300,7 +300,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             if(currentIssue != null)
             {
-                word = ucSpellCheck.MispelledWord;
+                word = ucSpellCheck.MisspelledWord;
 
                 if(word.Length != 0)
                 {

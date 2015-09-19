@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
+// Updated : 09/14/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -154,11 +154,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     case RangeClassification.SingleLineComment:
                         comment = span.Text.Trim();
 
-                        if(quadSlashDelimiter != null && comment.Length > quadSlashDelimiter.Length &&
+                        if(quadSlashDelimiter != null && comment.Length >= quadSlashDelimiter.Length &&
                           comment.Substring(0, quadSlashDelimiter.Length) == quadSlashDelimiter)
                             span.Classification = RangeClassification.QuadSlashComment;
                         else
-                            if(xmlDocCommentDelimiter != null && comment.Length > xmlDocCommentDelimiter.Length &&
+                            if(xmlDocCommentDelimiter != null && comment.Length >= xmlDocCommentDelimiter.Length &&
                               comment.Substring(0, xmlDocCommentDelimiter.Length) == xmlDocCommentDelimiter)
                                 span.Classification = RangeClassification.XmlDocComments;
                         break;
@@ -166,7 +166,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     case RangeClassification.DelimitedComments:
                         comment = span.Text.Trim();
 
-                        if(oldStyleDocCommentDelimiter != null && comment.Length > oldStyleDocCommentDelimiter.Length &&
+                        if(oldStyleDocCommentDelimiter != null && comment.Length >= oldStyleDocCommentDelimiter.Length &&
                           comment.Substring(0, oldStyleDocCommentDelimiter.Length) == oldStyleDocCommentDelimiter)
                             span.Classification = RangeClassification.XmlDocComments;
                         break;

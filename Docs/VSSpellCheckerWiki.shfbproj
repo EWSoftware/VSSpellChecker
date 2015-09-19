@@ -86,6 +86,7 @@
     <None Include="Content\ConfigOptions\CSharpOptions.aml" />
     <None Include="Content\ConfigOptions\DictionarySettings.aml" />
     <None Include="Content\ConfigOptions\ExcludedExtensions.aml" />
+    <None Include="Content\ConfigOptions\ExclusionExpressions.aml" />
     <None Include="Content\ConfigOptions\GeneralSettings.aml" />
     <None Include="Content\ConfigOptions\IgnoredWords.aml" />
     <None Include="Content\ConfigOptions\XMLFiles.aml" />
@@ -110,7 +111,7 @@
     <None Include="Content\VersionHistory\v2015.3.1.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2015.8.15.0.aml" />
-    <None Include="Content\VersionHistory\vNext.aml" />
+    <None Include="Content\VersionHistory\v2015.9.19.0.aml" />
     <None Include="Content\Welcome.aml" />
     <None Include="VSSpellCheckerWiki.shfbproj.vsspell" />
   </ItemGroup>

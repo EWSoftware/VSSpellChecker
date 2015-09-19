@@ -1,0 +1,38 @@
+﻿<Window x:Class="VisualStudio.SpellChecker.Editors.Pages.ExclusionExpressionAddEditForm"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	Title="Add an Exclusion Expression" Width="600" ResizeMode="NoResize" SizeToContent="Height"
+	WindowStartupLocation="CenterScreen" Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FocusManager.FocusedElement="{Binding ElementName=txtExpression}">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition />
+		</Grid.ColumnDefinitions>
+		<Label Grid.Row="0" Grid.Column="0" Margin="3" Content="Regular Expression" HorizontalAlignment="Right" />
+		<TextBox Grid.Row="0" Grid.Column="1"  Name="txtExpression" Margin="3" HorizontalAlignment="Stretch" />
+		<Label Grid.Row="1" Grid.Column="0" Margin="3" Content="Options" HorizontalAlignment="Right" />
+		<StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+			<CheckBox Name="chkIgnoreCase" Margin="3" Content="Ignore Case" />
+			<CheckBox Name="chkMultiLine" Margin="10, 3" Content="Multi-line" />
+			<CheckBox Name="chkSingleLine" Margin="10, 3" Content="Single Line" />
+		</StackPanel>
+		<Button Grid.Row="2" Grid.Column="0" Name="btnSave" Content="Save" Margin="3" Width="80"
+			HorizontalAlignment="Left" Click="btnSave_Click" />
+		<Button Grid.Row="2" Grid.Column="1" Name="btnCancel" Content="Cancel" Margin="3" Width="80" HorizontalAlignment="Right"
+			IsCancel="True" />
+	</Grid>
+</Window>

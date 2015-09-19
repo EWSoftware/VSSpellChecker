@@ -15,7 +15,20 @@
     <Ignore>Kamecke</Ignore>
     <Ignore>Lehenbauer</Ignore>
     <Ignore>Ruhmann</Ignore>
+    <Ignore>xml</Ignore>
+    <Ignore>xaml</Ignore>
+    <Ignore>html</Ignore>
+    <Ignore>htmlx</Ignore>
+    <Ignore>csharp</Ignore>
+    <Ignore>plaintext</Ignore>
+    <Ignore>mimetype</Ignore>
+    <Ignore>resheader</Ignore>
   </IgnoredWords>
   <InheritExcludedExtensions>True</InheritExcludedExtensions>
   <InheritXmlSettings>True</InheritXmlSettings>
+  <InheritExclusionExpressions>True</InheritExclusionExpressions>
+  <ExclusionExpressions>
+    <Expression Match="[a-z]{2}-([A-Z]{2}|Cyrl|Latn)" />
+    <Expression Match="\\\\\w+" />
+  </ExclusionExpressions>
 </SpellCheckerConfiguration>

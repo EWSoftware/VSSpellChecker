@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/24/2015
+// Updated : 09/15/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace VisualStudio.SpellChecker.Configuration
@@ -556,6 +557,51 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// Convert a configuration element to an enumerable list of regular expressions or return an empty
+        /// enumeration if not found.
+        /// </summary>
+        /// <param name="propertyName">The property name to retrieve</param>
+        /// <param name="valueName">The value element name of the sub-elements within the parent property</param>
+        /// <returns>An enumerable list of the regular expressions</returns>
+        /// <remarks>Each expression item is expected to have a <c>Match</c> attribute that defines the regular
+        /// expression and an optional <c>Options</c> attribute that defines the regular expression options,
+        /// if any.  All expressions are created with a 100 millisecond time out.</remarks>
+        public IEnumerable<Regex> ToRegexes(string propertyName, string valueName)
+        {
+            string match, options;
+            Regex regex;
+            RegexOptions regexOpts;
+
+            var property = this.GetPropertyElement(propertyName);
+
+            if(property != null && property.HasElements)
+                foreach(var value in property.Descendants(valueName))
+                {
+                    regex = null;
+
+                    try
+                    {
+                        match = (string)value.Attribute("Match");
+                        options = (string)value.Attribute("Options");
+
+                        if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options, out regexOpts))
+                            regexOpts = RegexOptions.None;
+
+                        if(!String.IsNullOrWhiteSpace(match))
+                            regex = new Regex(match, regexOpts, TimeSpan.FromMilliseconds(100));
+                    }
+                    catch(Exception ex)
+                    {
+                        // Ignore invalid expressions
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+
+                    if(regex != null)
+                        yield return regex;
+                }
+        }
+
+        /// <summary>
         /// Store a property in the configuration file or remove it if the value is null
         /// </summary>
         /// <param name="prpertyName">The property name</param>
@@ -579,7 +625,7 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
-        /// Store an enumerable list of value in the configuration file or removes it if the list is null
+        /// Stores an enumerable list of values in the configuration file or removes them if the list is null
         /// </summary>
         /// <param name="prpertyName">The property name that will contain the items</param>
         /// <param name="itemName">The item name for the value elements</param>
@@ -596,6 +642,41 @@ namespace VisualStudio.SpellChecker.Configuration
                     property.RemoveNodes();
 
                 property.Add(values.Select(v => new XElement(itemName) { Value = v }));
+            }
+            else
+            {
+                property = this.GetPropertyElement(propertyName);
+
+                if(property != null)
+                    property.Remove();
+            }
+        }
+
+        /// <summary>
+        /// Stores an enumerable list of regular expressions in the configuration file or removes them if the
+        /// list is null.
+        /// </summary>
+        /// <param name="prpertyName">The property name that will contain the expressions</param>
+        /// <param name="itemName">The item name for the expression elements</param>
+        /// <param name="values">The enumerable list of regular expressions</param>
+        /// <remarks>The expressions are stored in the named item element with a <c>Match</c> attribute set to
+        /// the regular expression and an <c>Options</c> attribute set to the regular expression options if any
+        /// are defined.</remarks>
+        public void StoreRegexes(string propertyName, string itemName, IEnumerable<Regex> expressions)
+        {
+            XElement property;
+
+            if(expressions != null)
+            {
+                property = this.GetOrCreatePropertyElement(propertyName);
+
+                if(property.HasElements)
+                    property.RemoveNodes();
+
+                property.Add(expressions.Select(exp => new XElement(itemName,
+                    new XAttribute("Match", exp.ToString()),
+                    exp.Options == RegexOptions.None ? null :
+                        new XAttribute("Options", exp.Options.ToString()))));
             }
             else
             {

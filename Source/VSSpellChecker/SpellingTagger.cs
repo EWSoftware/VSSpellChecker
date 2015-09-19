@@ -638,7 +638,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>An enumerable list of misspelling tags</returns>
         private IEnumerable<MisspellingTag> GetMisspellingsInSpans(NormalizedSnapshotSpanCollection spans)
         {
-            List<Match> xmlTags = null;
+            List<Match> rangeExclusions = new List<Match>();
             IList<string> spellingAlternates;
             SnapshotSpan errorSpan, deleteWordSpan;
             Microsoft.VisualStudio.Text.Span lastWord;
@@ -653,9 +653,23 @@ namespace VisualStudio.SpellChecker
             {
                 textToSplit = span.GetText();
 
+                rangeExclusions.Clear();
+
                 // Note the location of all XML elements if needed
                 if(configuration.IgnoreXmlElementsInText)
-                    xmlTags = WordSplitter.XmlElement.Matches(textToSplit).OfType<Match>().ToList();
+                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).OfType<Match>());
+
+                // Add exclusions from the configuration if any
+                foreach(var exclude in configuration.ExclusionExpressions)
+                    try
+                    {
+                        rangeExclusions.AddRange(exclude.Matches(textToSplit).OfType<Match>());
+                    }
+                    catch(RegexMatchTimeoutException ex)
+                    {
+                        // Ignore expression timeouts
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
 
                 lastWord = new Microsoft.VisualStudio.Text.Span();
 
@@ -667,8 +681,8 @@ namespace VisualStudio.SpellChecker
                     textToCheck = textToSplit.Substring(word.Start, word.Length);
 
                     // Spell check the word if it looks like one and is not ignored
-                    if(wordSplitter.IsProbablyARealWord(textToCheck) && (xmlTags == null || xmlTags.Count == 0 ||
-                      !xmlTags.Any(match => word.Start >= match.Index &&
+                    if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||
+                      !rangeExclusions.Any(match => word.Start >= match.Index &&
                       word.Start <= match.Index + match.Length - 1)))
                     {
                         errorSpan = new SnapshotSpan(span.Start + word.Start, word.Length);

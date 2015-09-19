@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ThemeColors.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/22/2015
+// Updated : 09/18/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -55,7 +55,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonBackgroundColor); }
+            get { return GetColor(ThemeColorId.ButtonBackgroundColor); }
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonBorderColor); }
+            get { return GetColor(ThemeColorId.ButtonBorderColor); }
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonDisabledBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonDisabledBackgroundColor); }
+            get { return GetColor(ThemeColorId.ButtonDisabledBackgroundColor); }
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonDisabledBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonDisabledBorderColor); }
+            get { return GetColor(ThemeColorId.ButtonDisabledBorderColor); }
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonDisabledForegroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonDisabledForegroundColor); }
+            get { return GetColor(ThemeColorId.ButtonDisabledForegroundColor); }
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonForegroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonForegroundColor); }
+            get { return GetColor(ThemeColorId.ButtonForegroundColor); }
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonHoverBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonHoverBackgroundColor); }
+            get { return GetColor(ThemeColorId.ButtonHoverBackgroundColor); }
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonHoverBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonHoverBorderColor); }
+            get { return GetColor(ThemeColorId.ButtonHoverBorderColor); }
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonHoverForegroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonHoverForegroundColor); }
+            get { return GetColor(ThemeColorId.ButtonHoverForegroundColor); }
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonPressedBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonPressedBackgroundColor); }
+            get { return GetColor(ThemeColorId.ButtonPressedBackgroundColor); }
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonPressedBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonPressedBorderColor); }
+            get { return GetColor(ThemeColorId.ButtonPressedBorderColor); }
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ButtonPressedForegroundColor
         {
-            get { return this.GetColor(ThemeColorId.ButtonPressedForegroundColor); }
+            get { return GetColor(ThemeColorId.ButtonPressedForegroundColor); }
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ComboBoxButtonMouseOverBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.ComboBoxButtonMouseOverBackgroundColor); }
+            get { return GetColor(ThemeColorId.ComboBoxButtonMouseOverBackgroundColor); }
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ComboBoxDisabledGlyphColor
         {
-            get { return this.GetColor(ThemeColorId.ComboBoxDisabledGlyphColor); }
+            get { return GetColor(ThemeColorId.ComboBoxDisabledGlyphColor); }
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ComboBoxGlyphColor
         {
-            get { return this.GetColor(ThemeColorId.ComboBoxGlyphColor); }
+            get { return GetColor(ThemeColorId.ComboBoxGlyphColor); }
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ComboBoxPopupBackground
         {
-            get { return this.GetColor(ThemeColorId.ComboBoxPopupBackground); }
+            get { return GetColor(ThemeColorId.ComboBoxPopupBackground); }
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color DisabledTextColor
         {
-            get { return this.GetColor(ThemeColorId.DisabledTextColor); }
+            get { return GetColor(ThemeColorId.DisabledTextColor); }
         }
 
         /// <summary>
@@ -191,7 +191,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ItemBorderColor); }
+            get { return GetColor(ThemeColorId.ItemBorderColor); }
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemColor
         {
-            get { return this.GetColor(ThemeColorId.ItemColor); }
+            get { return GetColor(ThemeColorId.ItemColor); }
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemHoverColor
         {
-            get { return this.GetColor(ThemeColorId.ItemHoverColor); }
+            get { return GetColor(ThemeColorId.ItemHoverColor); }
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemHoverBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ItemHoverBorderColor); }
+            get { return GetColor(ThemeColorId.ItemHoverBorderColor); }
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemHoverTextColor
         {
-            get { return this.GetColor(ThemeColorId.ItemHoverTextColor); }
+            get { return GetColor(ThemeColorId.ItemHoverTextColor); }
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemSelectedBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ItemSelectedBorderColor); }
+            get { return GetColor(ThemeColorId.ItemSelectedBorderColor); }
         }
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemSelectedBorderNotFocusedColor
         {
-            get { return this.GetColor(ThemeColorId.ItemSelectedBorderNotFocusedColor); }
+            get { return GetColor(ThemeColorId.ItemSelectedBorderNotFocusedColor); }
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemSelectedColor
         {
-            get { return this.GetColor(ThemeColorId.ItemSelectedColor); }
+            get { return GetColor(ThemeColorId.ItemSelectedColor); }
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemSelectedNotFocusedColor
         {
-            get { return this.GetColor(ThemeColorId.ItemSelectedNotFocusedColor); }
+            get { return GetColor(ThemeColorId.ItemSelectedNotFocusedColor); }
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemSelectedTextColor
         {
-            get { return this.GetColor(ThemeColorId.ItemSelectedTextColor); }
+            get { return GetColor(ThemeColorId.ItemSelectedTextColor); }
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemSelectedTextNotFocusedColor
         {
-            get { return this.GetColor(ThemeColorId.ItemSelectedTextNotFocusedColor); }
+            get { return GetColor(ThemeColorId.ItemSelectedTextNotFocusedColor); }
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ItemTextColor
         {
-            get { return this.GetColor(ThemeColorId.ItemTextColor); }
+            get { return GetColor(ThemeColorId.ItemTextColor); }
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color LightBorderColor
         {
-            get { return this.GetColor(ThemeColorId.LightBorderColor); }
+            get { return GetColor(ThemeColorId.LightBorderColor); }
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color LinkTextColor
         {
-            get { return this.GetColor(ThemeColorId.LinkTextColor); }
+            get { return GetColor(ThemeColorId.LinkTextColor); }
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color LinkTextHoverColor
         {
-            get { return this.GetColor(ThemeColorId.LinkTextHoverColor); }
+            get { return GetColor(ThemeColorId.LinkTextHoverColor); }
         }
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color MenuBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.MenuBackgroundColor); }
+            get { return GetColor(ThemeColorId.MenuBackgroundColor); }
         }
 
         /// <summary>
@@ -319,7 +319,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color MenuBorderColor
         {
-            get { return this.GetColor(ThemeColorId.MenuBorderColor); }
+            get { return GetColor(ThemeColorId.MenuBorderColor); }
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color MenuHoverBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.MenuHoverBackgroundColor); }
+            get { return GetColor(ThemeColorId.MenuHoverBackgroundColor); }
         }
 
         /// <summary>
@@ -335,7 +335,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color MenuHoverTextColor
         {
-            get { return this.GetColor(ThemeColorId.MenuHoverTextColor); }
+            get { return GetColor(ThemeColorId.MenuHoverTextColor); }
         }
 
         /// <summary>
@@ -343,7 +343,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color MenuSeparatorColor
         {
-            get { return this.GetColor(ThemeColorId.MenuSeparatorColor); }
+            get { return GetColor(ThemeColorId.MenuSeparatorColor); }
         }
 
         /// <summary>
@@ -351,7 +351,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color MenuTextColor
         {
-            get { return this.GetColor(ThemeColorId.MenuTextColor); }
+            get { return GetColor(ThemeColorId.MenuTextColor); }
         }
 
         /// <summary>
@@ -359,7 +359,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color NotificationColor
         {
-            get { return this.GetColor(ThemeColorId.NotificationColor); }
+            get { return GetColor(ThemeColorId.NotificationColor); }
         }
 
         /// <summary>
@@ -367,7 +367,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color NotificationTextColor
         {
-            get { return this.GetColor(ThemeColorId.NotificationTextColor); }
+            get { return GetColor(ThemeColorId.NotificationTextColor); }
         }
 
         /// <summary>
@@ -375,7 +375,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color TextBoxBorderColor
         {
-            get { return this.GetColor(ThemeColorId.TextBoxBorderColor); }
+            get { return GetColor(ThemeColorId.TextBoxBorderColor); }
         }
 
         /// <summary>
@@ -383,7 +383,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color TextBoxColor
         {
-            get { return this.GetColor(ThemeColorId.TextBoxColor); }
+            get { return GetColor(ThemeColorId.TextBoxColor); }
         }
 
         /// <summary>
@@ -391,7 +391,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color TextBoxTextColor
         {
-            get { return this.GetColor(ThemeColorId.TextBoxTextColor); }
+            get { return GetColor(ThemeColorId.TextBoxTextColor); }
         }
 
         /// <summary>
@@ -399,7 +399,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ToolWindowBackgroundColor
         {
-            get { return this.GetColor(ThemeColorId.ToolWindowBackgroundColor); }
+            get { return GetColor(ThemeColorId.ToolWindowBackgroundColor); }
         }
 
         /// <summary>
@@ -407,7 +407,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ToolWindowBorderColor
         {
-            get { return this.GetColor(ThemeColorId.ToolWindowBorderColor); }
+            get { return GetColor(ThemeColorId.ToolWindowBorderColor); }
         }
 
         /// <summary>
@@ -415,7 +415,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color ToolWindowTextColor
         {
-            get { return this.GetColor(ThemeColorId.ToolWindowTextColor); }
+            get { return GetColor(ThemeColorId.ToolWindowTextColor); }
         }
 
         /// <summary>
@@ -423,7 +423,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color TreeViewGlyphColor
         {
-            get { return this.GetColor(ThemeColorId.TreeViewGlyphColor); }
+            get { return GetColor(ThemeColorId.TreeViewGlyphColor); }
         }
 
         /// <summary>
@@ -431,7 +431,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         public Color TreeViewHoverGlyphColor
         {
-            get { return this.GetColor(ThemeColorId.TreeViewHoverGlyphColor); }
+            get { return GetColor(ThemeColorId.TreeViewHoverGlyphColor); }
         }
         #endregion
 
@@ -483,15 +483,15 @@ namespace VisualStudio.SpellChecker.Theme
         /// <returns>The theme color to use</returns>
         /// <remarks>Theme colors do not appear to be available at design time.  As such, this will return
         /// related default system colors in their place.</remarks>
-        private Color GetColor(ThemeColorId id)
+        private static Color GetColor(ThemeColorId id)
         {
-            Color? vsColor = this.GetVisualStudioColor(id);
+            Color? vsColor = GetVisualStudioColor(id);
 
             if(vsColor != null)
                 return vsColor.Value;
 
             // Get colors for design time or if something failed or wasn't defined
-            return this.GetDefaultColor(id);
+            return GetDefaultColor(id);
         }
 
         /// <summary>
@@ -499,141 +499,141 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         /// <param name="id">The theme color ID for which to get the Visual Studio theme color</param>
         /// <returns>The theme color to use or null if it could not be obtained was not recognized</returns>
-        private Color? GetVisualStudioColor(ThemeColorId id)
+        private static Color? GetVisualStudioColor(ThemeColorId id)
         {
             switch(id)
             {
                 case ThemeColorId.ButtonBackgroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonColorKey);
 
                 case ThemeColorId.ButtonBorderColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonBorderColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonBorderColorKey);
 
                 case ThemeColorId.ButtonDisabledBackgroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonDisabledColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonDisabledColorKey);
 
                 case ThemeColorId.ButtonDisabledBorderColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonDisabledBorderColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonDisabledBorderColorKey);
 
                 case ThemeColorId.ButtonDisabledForegroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonDisabledTextColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonDisabledTextColorKey);
 
                 case ThemeColorId.ButtonForegroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonTextColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonTextColorKey);
 
                 case ThemeColorId.ButtonHoverBackgroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonMouseOverColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonMouseOverColorKey);
 
                 case ThemeColorId.ButtonHoverBorderColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonMouseOverBorderColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonMouseOverBorderColorKey);
 
                 case ThemeColorId.ButtonHoverForegroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonMouseOverTextColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonMouseOverTextColorKey);
 
                 case ThemeColorId.ButtonPressedBackgroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonPressedColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonPressedColorKey);
 
                 case ThemeColorId.ButtonPressedBorderColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonPressedBorderColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonPressedBorderColorKey);
 
                 case ThemeColorId.ButtonPressedForegroundColor:
-                    return this.GetThemeColor(TeamFoundationColors.ButtonPressedTextColorKey);
+                    return GetThemeColor(TeamFoundationColors.ButtonPressedTextColorKey);
 
                 case ThemeColorId.ComboBoxButtonMouseOverBackgroundColor:
-                    return this.GetThemeColor(EnvironmentColors.ComboBoxButtonMouseOverBackgroundColorKey);
+                    return GetThemeColor(EnvironmentColors.ComboBoxButtonMouseOverBackgroundColorKey);
 
                 case ThemeColorId.ComboBoxDisabledGlyphColor:
-                    return this.GetThemeColor(EnvironmentColors.ComboBoxDisabledGlyphColorKey);
+                    return GetThemeColor(EnvironmentColors.ComboBoxDisabledGlyphColorKey);
 
                 case ThemeColorId.ComboBoxGlyphColor:
-                    return this.GetThemeColor(EnvironmentColors.ComboBoxGlyphColorKey);
+                    return GetThemeColor(EnvironmentColors.ComboBoxGlyphColorKey);
 
                 case ThemeColorId.ComboBoxPopupBackground:
-                    return this.GetThemeColor(EnvironmentColors.ComboBoxPopupBackgroundBeginColorKey);
+                    return GetThemeColor(EnvironmentColors.ComboBoxPopupBackgroundBeginColorKey);
 
                 case ThemeColorId.DisabledTextColor:
                 case ThemeColorId.LightBorderColor:
-                    return this.GetThemeColor(EnvironmentColors.SystemGrayTextColorKey);
+                    return GetThemeColor(EnvironmentColors.SystemGrayTextColorKey);
 
                 case ThemeColorId.ItemBorderColor:
                 case ThemeColorId.ItemColor:
-                    return this.GetThemeColor(TreeViewColors.BackgroundColorKey);
+                    return GetThemeColor(TreeViewColors.BackgroundColorKey);
 
                 case ThemeColorId.ItemHoverColor:
                 case ThemeColorId.ItemHoverBorderColor:
-                    return this.GetThemeColor(EnvironmentColors.CommandBarMouseOverBackgroundMiddle1ColorKey);
+                    return GetThemeColor(EnvironmentColors.CommandBarMouseOverBackgroundMiddle1ColorKey);
 
                 case ThemeColorId.ItemHoverTextColor:
                 case ThemeColorId.MenuHoverTextColor:
-                    return this.GetThemeColor(EnvironmentColors.CommandBarTextHoverColorKey);
+                    return GetThemeColor(EnvironmentColors.CommandBarTextHoverColorKey);
 
                 case ThemeColorId.ItemSelectedBorderColor:
                 case ThemeColorId.ItemSelectedColor:
-                    return this.GetThemeColor(TreeViewColors.SelectedItemActiveColorKey);
+                    return GetThemeColor(TreeViewColors.SelectedItemActiveColorKey);
 
                 case ThemeColorId.ItemSelectedBorderNotFocusedColor:
                 case ThemeColorId.ItemSelectedNotFocusedColor:
-                    return this.GetThemeColor(TreeViewColors.SelectedItemInactiveColorKey);
+                    return GetThemeColor(TreeViewColors.SelectedItemInactiveColorKey);
 
                 case ThemeColorId.ItemSelectedTextColor:
-                    return this.GetThemeColor(TreeViewColors.SelectedItemActiveTextColorKey);
+                    return GetThemeColor(TreeViewColors.SelectedItemActiveTextColorKey);
 
                 case ThemeColorId.ItemSelectedTextNotFocusedColor:
-                    return this.GetThemeColor(TreeViewColors.SelectedItemInactiveTextColorKey);
+                    return GetThemeColor(TreeViewColors.SelectedItemInactiveTextColorKey);
 
                 case ThemeColorId.ItemTextColor:
-                    return this.GetThemeColor(TreeViewColors.BackgroundTextColorKey);
+                    return GetThemeColor(TreeViewColors.BackgroundTextColorKey);
 
                 case ThemeColorId.LinkTextColor:
-                    return this.GetThemeColor(EnvironmentColors.ControlLinkTextColorKey);
+                    return GetThemeColor(EnvironmentColors.ControlLinkTextColorKey);
 
                 case ThemeColorId.LinkTextHoverColor:
-                    return this.GetThemeColor(EnvironmentColors.ControlLinkTextHoverColorKey);
+                    return GetThemeColor(EnvironmentColors.ControlLinkTextHoverColorKey);
 
                 case ThemeColorId.MenuBackgroundColor:
-                    return this.GetThemeColor(EnvironmentColors.CommandBarMenuBackgroundGradientBeginColorKey);
+                    return GetThemeColor(EnvironmentColors.CommandBarMenuBackgroundGradientBeginColorKey);
 
                 case ThemeColorId.MenuBorderColor:
-                    return this.GetThemeColor(EnvironmentColors.CommandBarMenuBorderColorKey);
+                    return GetThemeColor(EnvironmentColors.CommandBarMenuBorderColorKey);
 
                 case ThemeColorId.MenuHoverBackgroundColor:
-                    return this.GetThemeColor(EnvironmentColors.CommandBarMouseOverBackgroundBeginColorKey);
+                    return GetThemeColor(EnvironmentColors.CommandBarMouseOverBackgroundBeginColorKey);
 
                 case ThemeColorId.MenuSeparatorColor:
-                    return this.GetThemeColor(EnvironmentColors.CommandBarMenuSeparatorColorKey);
+                    return GetThemeColor(EnvironmentColors.CommandBarMenuSeparatorColorKey);
 
                 case ThemeColorId.MenuTextColor:
-                    return this.GetThemeColor(EnvironmentColors.CommandBarTextActiveColorKey);
+                    return GetThemeColor(EnvironmentColors.CommandBarTextActiveColorKey);
 
                 case ThemeColorId.NotificationColor:
-                    return this.GetThemeColor(EnvironmentColors.SystemInfoBackgroundColorKey);
+                    return GetThemeColor(EnvironmentColors.SystemInfoBackgroundColorKey);
 
                 case ThemeColorId.NotificationTextColor:
-                    return this.GetThemeColor(EnvironmentColors.SystemInfoTextColorKey);
+                    return GetThemeColor(EnvironmentColors.SystemInfoTextColorKey);
 
                 case ThemeColorId.TextBoxBorderColor:
-                    return this.GetThemeColor(EnvironmentColors.ComboBoxBorderColorKey);
+                    return GetThemeColor(EnvironmentColors.ComboBoxBorderColorKey);
 
                 case ThemeColorId.TextBoxColor:
-                    return this.GetThemeColor(EnvironmentColors.ComboBoxBackgroundColorKey);
+                    return GetThemeColor(EnvironmentColors.ComboBoxBackgroundColorKey);
 
                 case ThemeColorId.TextBoxTextColor:
-                    return this.GetThemeColor(EnvironmentColors.ComboBoxItemTextColorKey);
+                    return GetThemeColor(EnvironmentColors.ComboBoxItemTextColorKey);
 
                 case ThemeColorId.ToolWindowBackgroundColor:
-                    return this.GetThemeColor(EnvironmentColors.ToolWindowBackgroundColorKey);
+                    return GetThemeColor(EnvironmentColors.ToolWindowBackgroundColorKey);
 
                 case ThemeColorId.ToolWindowBorderColor:
-                    return this.GetThemeColor(EnvironmentColors.ToolWindowBorderColorKey);
+                    return GetThemeColor(EnvironmentColors.ToolWindowBorderColorKey);
 
                 case ThemeColorId.ToolWindowTextColor:
-                    return this.GetThemeColor(EnvironmentColors.ToolWindowTextColorKey);
+                    return GetThemeColor(EnvironmentColors.ToolWindowTextColorKey);
 
                 case ThemeColorId.TreeViewGlyphColor:
-                    return this.GetThemeColor(TreeViewColors.GlyphColorKey);
+                    return GetThemeColor(TreeViewColors.GlyphColorKey);
 
                 case ThemeColorId.TreeViewHoverGlyphColor:
-                    return this.GetThemeColor(TreeViewColors.GlyphMouseOverColorKey);
+                    return GetThemeColor(TreeViewColors.GlyphMouseOverColorKey);
 
                 default:
                     return null;
@@ -645,21 +645,31 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         /// <param name="id">The theme color ID for which to get the default system color</param>
         /// <returns>The default system color to use</returns>
-        private Color GetDefaultColor(ThemeColorId id)
+        private static Color GetDefaultColor(ThemeColorId id)
         {
             switch(id)
             {
                 case ThemeColorId.ButtonBackgroundColor:
+                    return SystemColors.ControlLightColor;
+
                 case ThemeColorId.ButtonBorderColor:
-                case ThemeColorId.ButtonDisabledBackgroundColor:
                 case ThemeColorId.ButtonDisabledBorderColor:
-                case ThemeColorId.ButtonHoverBackgroundColor:
                 case ThemeColorId.ButtonHoverBorderColor:
-                case ThemeColorId.ButtonPressedBackgroundColor:
                 case ThemeColorId.ButtonPressedBorderColor:
+                case ThemeColorId.ComboBoxButtonMouseOverBackgroundColor:
+                case ThemeColorId.ComboBoxGlyphColor:
+                case ThemeColorId.MenuBorderColor:
+                case ThemeColorId.MenuSeparatorColor:
+                case ThemeColorId.ToolWindowBorderColor:
+                case ThemeColorId.TreeViewGlyphColor:
+                case ThemeColorId.TreeViewHoverGlyphColor:
+                    return SystemColors.ControlDarkColor;
+
+                case ThemeColorId.ButtonDisabledBackgroundColor:
+                case ThemeColorId.ButtonHoverBackgroundColor:
+                case ThemeColorId.ButtonPressedBackgroundColor:
                 case ThemeColorId.MenuBackgroundColor:
                 case ThemeColorId.ToolWindowBackgroundColor:
-                case ThemeColorId.ToolWindowBorderColor:
                     return SystemColors.ControlColor;
 
                 case ThemeColorId.ButtonDisabledForegroundColor:
@@ -669,14 +679,6 @@ namespace VisualStudio.SpellChecker.Theme
                 case ThemeColorId.MenuHoverTextColor:
                 case ThemeColorId.MenuTextColor:
                     return SystemColors.ControlTextColor;
-
-                case ThemeColorId.ComboBoxButtonMouseOverBackgroundColor:
-                case ThemeColorId.ComboBoxGlyphColor:
-                case ThemeColorId.MenuBorderColor:
-                case ThemeColorId.MenuSeparatorColor:
-                case ThemeColorId.TreeViewGlyphColor:
-                case ThemeColorId.TreeViewHoverGlyphColor:
-                    return SystemColors.ControlDarkColor;
 
                 case ThemeColorId.ComboBoxDisabledGlyphColor:
                 case ThemeColorId.DisabledTextColor:
@@ -727,7 +729,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// </summary>
         /// <param name="themeResourceKey">The theme resource key for which to get the color</param>
         /// <returns>The color for the theme resource key or null if it could not be obtained</returns>
-        private Color? GetThemeColor(ThemeResourceKey themeResourceKey)
+        private static Color? GetThemeColor(ThemeResourceKey themeResourceKey)
         {
             try
             {

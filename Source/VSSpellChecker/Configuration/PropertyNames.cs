@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/06/2015
+// Updated : 09/14/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -173,6 +173,21 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Ignored words item
         /// </summary>
         public const string IgnoredWordsItem = "Ignore";
+
+        /// <summary>
+        /// Inherit exclusion expressions
+        /// </summary>
+        public const string InheritExclusionExpressions = "InheritExclusionExpressions";
+
+        /// <summary>
+        /// Exclusion expressions
+        /// </summary>
+        public const string ExclusionExpressions = "ExclusionExpressions";
+
+        /// <summary>
+        /// Exclusion expression item
+        /// </summary>
+        public const string ExclusionExpressionItem = "Expression";
 
         /// <summary>
         /// Inherit XML settings

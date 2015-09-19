@@ -2,7 +2,7 @@
 <topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>Release notes for version vNext.</para>
+			<para>Release notes for version 2015.9.19.0.</para>
 		</introduction>
 
 		<section>
@@ -60,6 +60,12 @@ you do not find it useful.</para>
 					</listItem>
 
 					<listItem>
+						<para>Added a new <link xlink:href="6216eedb-6434-4cad-be06-576814e0b735" /> configuration category
+that allows you to define regular expressions that are used to exclude spans of text from the spell checking
+process.</para>
+					</listItem>
+
+					<listItem>
 						<para>The <codeInline>style</codeInline> and <codeInline>resheader</codeInline> elements were added
 as default XML elements to ignore.</para>
 					</listItem>
@@ -76,9 +82,15 @@ selected languages is empty.</para>
 					</listItem>
 
 					<listItem>
-						<para>Merged changes from Alex Essilfie to group suggestions by word when using multiple
+						<para>Merged changes from Franz Alex Gaisie-Essilfie to group suggestions by word when using multiple
 dictionaries rather than by language.  This presents a more concise list of suggestions.  The language(s) for
 each word are shown after the word in the list.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed up issues in the C# comment text tagger with XML documentation comment elements that span
+lines and added support for spell checking XML documentation comment attributes and ignoring unwanted XML
+documentation comment elements based on the configuration settings (certain limitations apply).</para>
 					</listItem>
 				</list>
 

@@ -80,14 +80,14 @@ automatically adjust the location of any other issues in the same file based on 
 other changes to the file's content or use the active document tool window or smart tags to fix issues, the
 solution/project spell checking tool window will be unaware of those changes.  If you subsequently attempt to
 correct an issue in which the text at the issue's location no longer matches the word, you will be notified that
-the change cannot be made.  The file will be opened and the cursor positioned at the issues prior location.  If
+the change cannot be made.  The file will be opened and the cursor positioned at the issue's prior location.  If
 you can find the issue relative to the old location, you can correct it manually.  To get the solution/project
 spell checking tool window back in synch, rerun the spell checking process.</para>
 			</content>
 		</section>
 
 		<section address="IssueDifferences">
-			<title>Differences in Issues Reporting</title>
+			<title>Differences in Issues Reported</title>
 			<content>
 				<para>The solution/project spell checker uses a different method of classifying text to find items that
 it needs to spell check.  The spell check as you type and active document spell checking tool windows rely on
@@ -109,6 +109,16 @@ strings.  If the text in a source code file is formatted in such a way that a mi
 classified as something that it is not, you may see incorrect issues reported.  An example may be a comment
 delimiter sequence that appears withing a literal string.  See the closed and open issues lists to see if the
 problem has been reported as noted above.  It may be possible to adjust the classifiers to handle some cases.</para>
+			</content>
+		</section>
+
+		<section address="NonWords">
+			<title>Reducing Misspelling Reports for Non-Words</title>
+			<content>
+				<para>In many cases, a large number of non-words will be reported as misspellings.  Examples include
+format strings in designer files, CSS class names, control names, etc.  You can sometimes reduce the number of
+misspellings for such non-words by defining exclusion expressions in the spell checker configuration file.  See
+the <link xlink:href="6216eedb-6434-4cad-be06-576814e0b735" /> topic for more information and some examples.</para>
 			</content>
 		</section>
 

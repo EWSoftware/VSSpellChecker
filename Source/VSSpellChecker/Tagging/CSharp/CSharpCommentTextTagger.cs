@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 04/21/2015
+// Updated : 09/18/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -20,6 +20,8 @@
 // 04/14/2013  EFW  Added a check for #region directives so that the region title is spell checked too
 // 06/12/2014  EFW  Added support for ignoring certain items (verbatim string, quad-slash comments, etc.
 // 04/21/2015  EFW  Added support for ignoring interpolated strings
+// 09/18/2015  EFW  Fixed up issues with XML doc comment elements that span lines and added support for spell
+//                  checking XML doc comment attributes and ignoring unwanted XML doc comment elements.
 //===============================================================================================================
 
 using System;
@@ -97,6 +99,18 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <value>The default is false to include interpolated strings</value>
         public bool IgnoreInterpolatedStrings { get; set; }
 
+        /// <summary>
+        /// This is used to get or set the list of element names that should not have their content spell checked
+        /// </summary>
+        /// <value>The default is an empty list</value>
+        public IEnumerable<string> IgnoredXmlElements { get; set; }
+
+        /// <summary>
+        /// This is used to get or set the list of attribute names that should have their value spell checked
+        /// </summary>
+        /// <value>The default is an empty list</value>
+        public IEnumerable<string> SpellCheckedAttributes { get; set; }
+
         #endregion
 
         #region Constructor
@@ -109,6 +123,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         public CSharpCommentTextTagger(ITextBuffer buffer)
         {
             _buffer = buffer;
+
+            this.IgnoredXmlElements = this.SpellCheckedAttributes = new string[0];
 
             // Populate our cache initially
             ITextSnapshot snapshot = _buffer.CurrentSnapshot;
@@ -275,15 +291,29 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         ScanMultiLineString(p);
                         break;
 
+                    case State.DocComment:
+                        ScanDocComment(p);
+                        break;
+
+                    case State.DocCommentXml:
+                        ScanDocCommentXml(p);
+                        break;
+
                     default:
                         Debug.Fail("Invalid state at beginning of line.");
                         break;
                 }
             }
 
-            // End Of Line state must be one of these.
-            Debug.Assert(p.State == State.Default || p.State == State.MultiLineString ||
-                p.State == State.MultiLineComment || p.State == State.MultiLineDocComment);
+            // End of line state should be one of these.  If not, reset it as the content probably isn't well
+            // formed.
+            if(p.State != State.Default && p.State != State.MultiLineString &&
+              p.State != State.MultiLineComment && p.State != State.MultiLineDocComment &&
+              p.State != State.DocCommentXml)
+            {
+                System.Diagnostics.Debug.WriteLine("Unexpected end of line state.  Resetting it to default.");
+                p.State = State.Default;
+            }
 
             return p.State;
         }
@@ -388,7 +418,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             }
         }
 
-        private static void ScanDocComment(LineProgress p)
+        private void ScanDocComment(LineProgress p)
         {
             p.StartNaturalText();
 
@@ -396,7 +426,12 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             {
                 if(p.Char() == '<')
                 {
-                    p.EndNaturalText();
+                    // Note that we can only ignore an unwanted element if it is contained on the same line.
+                    // Elements that can span lines like "code", will still be spell checked here.
+                    if(p.NextChar() != '/' || !this.IgnoredXmlElements.Contains(p.DetermineElementName()))
+                        p.EndNaturalText();
+                    else
+                        p.IgnoreSpan();
 
                     p.Advance();
                     p.State = State.DocCommentXml;
@@ -410,10 +445,12 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
             // End of line.  Record what we have and revert to default state.
             p.EndNaturalText();
-            p.State = State.Default;
+
+            if(p.State == State.DocComment)
+                p.State = State.Default;
         }
 
-        private static void ScanDocCommentXml(LineProgress p)
+        private void ScanDocCommentXml(LineProgress p)
         {
             while(!p.EndOfLine)
             {
@@ -421,6 +458,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 {
                     p.Advance(1);
                     p.State = State.DocCommentXmlString;
+                    p.StartNaturalText();
+
                     ScanDocCommentXmlString(p);
                 }
                 else
@@ -435,16 +474,22 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         p.Advance();
             }
 
-            // End of line.  Never found the '>' for the tag, but whatever.  We revert to default state.
-            p.State = State.Default;
+            // End of line.  Never found the '>' for the tag.  However, XML doc comment elements can span lines
+            // so we'll remain in the DocCommentXml state.
         }
 
-        private static void ScanDocCommentXmlString(LineProgress p)
+        private void ScanDocCommentXmlString(LineProgress p)
         {
             while(!p.EndOfLine)
             {
                 if(p.Char() == '"')
                 {
+                    // Only return the attribute value if it should be spell checked
+                    if(this.SpellCheckedAttributes.Contains(p.DetermineAttributeName()))
+                        p.EndNaturalText();
+                    else
+                        p.IgnoreSpan();
+
                     p.Advance(1);
                     p.State = State.DocCommentXml;
 
@@ -454,8 +499,10 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 p.Advance();
             }
 
-            // End of line.  Never found the '"' to close the string, but whatever.  We revert to default state.
-            p.State = State.Default;
+            // End of line.  Never found the '"' to close the string, but whatever.  We revert to the
+            // DocCommentXml state and ignore the span.
+            p.State = State.DocCommentXml;
+            p.IgnoreSpan();
         }
 
         private void ScanMultiLineComment(LineProgress p)

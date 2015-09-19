@@ -56,7 +56,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <summary>
         /// This returns the current misspelled word with any edits made in the user control
         /// </summary>
-        public string MispelledWord
+        public string MisspelledWord
         {
             get { return txtMisspelledWord.Text.Trim(); }
         }

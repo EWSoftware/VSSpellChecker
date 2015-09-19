@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : LineProgress.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/06/2014
+// Updated : 09/18/2015
 // Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -18,6 +18,7 @@
 // ==============================================================================================================
 // 04/14/2013  EFW  Imported the code into the project
 // 04/14/2013  EFW  Added the NextSegment() method
+// 09/18/2015  EFW  Added methods to ignore a span, determine an XML element name, and XML attribute name
 //===============================================================================================================
 
 using System;
@@ -169,6 +170,66 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     _linePosition - _naturalTextStart));
 
             _naturalTextStart = -1;
+        }
+
+        /// <summary>
+        /// Ignore a span
+        /// </summary>
+        public void IgnoreSpan()
+        {
+            _naturalTextStart = -1;
+        }
+
+        /// <summary>
+        /// This is used to determine an XML doc comment element name if possible so that we can exclude
+        /// unwanted content from being spell checked.
+        /// </summary>
+        /// <returns>The element name if possible or an empty string if not</returns>
+        public string DetermineElementName()
+        {
+            int start, pos = _naturalTextStart;
+
+            while(pos > 0 && _lineText[pos] != '<' && _lineText[pos] != '/')
+                pos--;
+
+            if(pos < 1 || _lineText[pos] == '/')
+                return String.Empty;
+
+            start = ++pos;
+
+            while(pos < _naturalTextStart && _lineText[pos] != '>' && !System.Char.IsWhiteSpace(_lineText[pos]))
+                pos++;
+
+            if(pos >= _naturalTextStart)
+                return String.Empty;
+
+            return _lineText.Substring(start, pos - start);
+        }
+
+        /// <summary>
+        /// This is used to determine an XML doc comment attribute name if possible so that we can exclude
+        /// unwanted value strings from being spell checked.
+        /// </summary>
+        /// <returns>The attribute name if possible or an empty string if not</returns>
+        public string DetermineAttributeName()
+        {
+            int end, pos = _naturalTextStart;
+
+            while(pos > 0 && _lineText[pos] != '=')
+                pos--;
+
+            if(pos < 1)
+                return String.Empty;
+
+            end = pos--;
+
+            while(pos > 0 && _lineText[pos] != '<' && !System.Char.IsWhiteSpace(_lineText[pos]))
+                pos--;
+
+            if(pos < 1)
+                return String.Empty;
+
+            return _lineText.Substring(pos + 1, end - pos - 1);
         }
         #endregion
     }

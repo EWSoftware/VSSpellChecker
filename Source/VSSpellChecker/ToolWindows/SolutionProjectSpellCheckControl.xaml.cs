@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
+// Updated : 09/19/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -183,25 +183,25 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <summary>
         /// Update the list of projects that can be spell checked
         /// </summary>
-        /// <param name="projectNames"></param>
-        public void UpdateProjects(IEnumerable<string> projectNames)
+        /// <param name="spellCheckProjectNames">An enumerable list of project names that should be spell checked</param>
+        public void UpdateProjects(IEnumerable<string> spellCheckProjectNames)
         {
             // If spell checking is in progress, cancel it
             this.CancelSpellCheck(false);
 
-            this.projectNames.Clear();
+            projectNames.Clear();
 
             cboSpellCheckTarget.Items.Clear();
             dgIssues.ItemsSource = null;
 
-            if(projectNames != null && projectNames.Count() != 0)
+            if(spellCheckProjectNames != null && spellCheckProjectNames.Count() != 0)
             {
-                this.projectNames.AddRange(projectNames);
+                projectNames.AddRange(spellCheckProjectNames);
 
                 cboSpellCheckTarget.Items.Add("Entire solution");
 
                 // Website projects use a folder name for the project so remove the trailing backslash
-                foreach(string p in projectNames)
+                foreach(string p in spellCheckProjectNames)
                     if(p.Length > 1 && p[p.Length - 1] == '\\')
                         cboSpellCheckTarget.Items.Add(Path.GetFileName(p.Substring(0, p.Length - 1)));
                     else
@@ -317,24 +317,26 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// This is used to open the given file in a text editor if possible
         /// </summary>
         /// <param name="filename">The filename for which to open a text editor</param>
-        /// <returns>True if successful, false if not</returns>
-        private bool OpenTextEditorForFile(string filename)
+        /// <returns>The window frame reference if successful, null if not</returns>
+        private static IVsWindowFrame OpenTextEditorForFile(string filename)
         {
             Microsoft.VisualStudio.OLE.Interop.IServiceProvider ppSP;
             IVsUIHierarchy ppHier;
-            IVsWindowFrame ppWindowFrame;
+            IVsWindowFrame ppWindowFrame = null;
             uint pitemid;
-            bool success = false;
 
             var openDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, SVsUIShellOpenDocument>(false);
 
             if(openDoc != null && openDoc.OpenDocumentViaProject(filename, VSConstants.LOGVIEWID_TextView,
               out ppSP, out ppHier, out pitemid, out ppWindowFrame) == VSConstants.S_OK)
             {
-                success = (ppWindowFrame != null && ppWindowFrame.Show() == VSConstants.S_OK);
+                // On occasion, the call above is successful but we get a null frame for some reason
+                if(ppWindowFrame != null)
+                    if(ppWindowFrame.Show() != VSConstants.S_OK)
+                        ppWindowFrame = null;
             }
 
-            return success;
+            return ppWindowFrame;
         }
 
         /// <summary>
@@ -347,23 +349,22 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// not select any text at that location.</param>
         /// <returns>Returns the text view if the document could be opened in a text editor instance or was
         /// already open in one.  Returns null if the reference could not be obtained.</returns>
-        private IVsTextView GetTextViewForDocument(string filename, int position, int selectionLength)
+        private static IVsTextView GetTextViewForDocument(string filename, int position, int selectionLength)
         {
             IVsTextView textView = null;
+            var frame = OpenTextEditorForFile(filename);
 
-            if(this.OpenTextEditorForFile(filename))
+            if(frame != null)
             {
-                var textManager = Utility.GetServiceFromPackage<IVsTextManager, SVsTextManager>(false);
+                textView = VsShellUtilities.GetTextView(frame);
 
-                if(textManager != null && textManager.GetActiveView(1, null, out textView) == VSConstants.S_OK &&
-                  position != -1)
+                if(textView != null && position != -1)
                 {
                     int line, column, topLine;
 
-                    if(textView.GetLineAndColumn(position, out line, out column) == VSConstants.S_OK)
+                    if(textView.GetLineAndColumn(position, out line, out column) == VSConstants.S_OK &&
+                      textView.SetCaretPos(line, column) == VSConstants.S_OK)
                     {
-                        textView.SetCaretPos(line, column);
-
                         if(selectionLength != -1)
                             textView.SetSelection(line, column, line, column + selectionLength);
 
@@ -409,7 +410,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 i.Span.Start > issue.Span.Start);
 
             foreach(var ri in relatedIssues)
+            {
                 ri.Span = new Span(ri.Span.Start + adjustment, ri.Span.Length);
+
+                if(ri.MisspellingType == MisspellingType.DoubledWord)
+                    ri.DeleteWordSpan = new Span(ri.DeleteWordSpan.Start + adjustment, ri.DeleteWordSpan.Length);
+            }
         }
 
         /// <summary>
@@ -449,7 +455,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="filename">The filename of the document for which to get the content</param>
         /// <returns>The document content if the file is still open or null if it could not be found</returns>
         /// <remarks>This runs on the UI thread as it has to access the running document table</remarks>
-        private string GetDocumentText(string filename)
+        private static string GetDocumentText(string filename)
         {
             string documentText;
 
@@ -557,7 +563,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 // If open in an editor, use the current text from it if possible
                                 if(openDocuments.Contains(file.CanonicalName))
                                 {
-                                    documentText = this.GetDocumentText(file.CanonicalName);
+                                    documentText = GetDocumentText(file.CanonicalName);
 
                                     if(documentText != null)
                                         classifier.SetText(documentText);
@@ -596,7 +602,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             {
                 wordSplitter.Configuration = null;
             }
-            
+
             return issues;
         }
 
@@ -609,7 +615,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private IEnumerable<FileMisspelling> GetMisspellingsInSpans(SpellingDictionary dictionary,
           IEnumerable<SpellCheckSpan> spans)
         {
-            List<Match> urlsAndXmlTags = null;
+            List<Match> rangeExclusions = null;
             IList<string> spellingAlternates;
             Span errorSpan, deleteWordSpan, lastWord;
             string textToSplit, textToCheck, preferredTerm;
@@ -625,11 +631,23 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 textToSplit = span.Text;
 
                 // Always ignore URLs
-                urlsAndXmlTags = WordSplitter.Url.Matches(textToSplit).OfType<Match>().ToList();
+                rangeExclusions = WordSplitter.Url.Matches(textToSplit).OfType<Match>().ToList();
 
                 // Note the location of all XML elements if needed
                 if(wordSplitter.Configuration.IgnoreXmlElementsInText)
-                    urlsAndXmlTags.AddRange(WordSplitter.XmlElement.Matches(textToSplit).OfType<Match>());
+                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).OfType<Match>());
+
+                // Add exclusions from the configuration if any
+                foreach(var exclude in wordSplitter.Configuration.ExclusionExpressions)
+                    try
+                    {
+                        rangeExclusions.AddRange(exclude.Matches(textToSplit).OfType<Match>());
+                    }
+                    catch(RegexMatchTimeoutException ex)
+                    {
+                        // Ignore expression timeouts
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
 
                 lastWord = new Span();
 
@@ -638,8 +656,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     textToCheck = textToSplit.Substring(word.Start, word.Length);
 
                     // Spell check the word if it looks like one and is not ignored
-                    if(wordSplitter.IsProbablyARealWord(textToCheck) && (urlsAndXmlTags.Count == 0 ||
-                      !urlsAndXmlTags.Any(match => word.Start >= match.Index &&
+                    if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||
+                      !rangeExclusions.Any(match => word.Start >= match.Index &&
                       word.Start <= match.Index + match.Length - 1)))
                     {
                         errorSpan = new Span(span.Span.Start + word.Start, word.Length);
@@ -897,6 +915,19 @@ namespace VisualStudio.SpellChecker.ToolWindows
         }
 
         /// <summary>
+        /// Copy just the selected issue's word to the clipboard, not the whole row
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void dgIssues_CopyingRowClipboardContent(object sender, DataGridRowClipboardEventArgs e)
+        {
+            var currentCell = e.ClipboardRowContent[4];
+
+            e.ClipboardRowContent.Clear();
+            e.ClipboardRowContent.Add(currentCell);
+        }
+
+        /// <summary>
         /// Update the spell check control when the selection changes in the grid
         /// </summary>
         /// <param name="sender">The sender of the event</param>
@@ -1051,22 +1082,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
         }
 
         /// <summary>
-        /// Copy the word from the current issue to the clipboard
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void cmdCopy_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            int idx = dgIssues.SelectedIndex;
-
-            if(idx != -1)
-            {
-                var currentIssue = ucSpellCheck.CurrentIssue;
-                Clipboard.SetText(currentIssue.Word);
-            }
-        }
-
-        /// <summary>
         /// Replace the current misspelled word with the selected word
         /// </summary>
         /// <param name="sender">The sender of the event</param>
@@ -1080,13 +1095,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
             {
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
                 var currentIssue = issues[dgIssues.SelectedIndex];
-                var textView = this.GetTextViewForDocument(currentIssue.CanonicalName, currentIssue.Span.Start, -1);
+                var textView = GetTextViewForDocument(currentIssue.CanonicalName, currentIssue.Span.Start, -1);
                         
                 if(textView != null)
                 {
-                    if(textView.GetLineAndColumn(currentIssue.Span.Start, out line, out column) == VSConstants.S_OK)
+                    if(textView.GetLineAndColumn(currentIssue.Span.Start, out line, out column) ==
+                      VSConstants.S_OK && textView.SetCaretPos(line, column) == VSConstants.S_OK)
                     {
-                        textView.SetCaretPos(line, column);
                         textView.SetSelection(line, column, line, column + currentIssue.Span.Length);
 
                         if(textView.GetTextStream(line, column, line, column + currentIssue.Span.Length,
@@ -1097,31 +1112,30 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             {
                                 var suggestion = ucSpellCheck.SelectedSuggestion;
 
-                                if(suggestion != null)
+                                if(suggestion != null && textView.ReplaceTextOnLine(line, column,
+                                  currentIssue.Span.Length, suggestion.Suggestion,
+                                  suggestion.Suggestion.Length) == VSConstants.S_OK)
                                 {
-                                    textView.ReplaceTextOnLine(line, column, currentIssue.Span.Length,
-                                        suggestion.Suggestion, suggestion.Suggestion.Length);
-                                    textView.SetSelection(line, column, line, column + suggestion.Suggestion.Length);
-
+                                    textView.SetSelection(line, column, line, column +
+                                        suggestion.Suggestion.Length);
                                     issues.RemoveAt(dgIssues.SelectedIndex);
 
                                     this.AdjustAffectedIssues(currentIssue, suggestion.Suggestion);
                                 }
                             }
                             else
-                            {
                                 if(textView.GetLineAndColumn(currentIssue.DeleteWordSpan.Start, out line,
-                                  out column) == VSConstants.S_OK)
+                                  out column) == VSConstants.S_OK && textView.SetCaretPos(line, column) ==
+                                  VSConstants.S_OK)
                                 {
-                                    textView.SetCaretPos(line, column);
-                                    textView.ReplaceTextOnLine(line, column, currentIssue.DeleteWordSpan.Length,
-                                        String.Empty, 0);
+                                    if(textView.ReplaceTextOnLine(line, column, currentIssue.DeleteWordSpan.Length,
+                                      String.Empty, 0) == VSConstants.S_OK)
+                                    {
+                                        issues.RemoveAt(dgIssues.SelectedIndex);
 
-                                    issues.RemoveAt(dgIssues.SelectedIndex);
-
-                                    this.AdjustAffectedIssues(currentIssue, String.Empty);
+                                        this.AdjustAffectedIssues(currentIssue, String.Empty);
+                                    }
                                 }
-                            }
 
                             if(idx >= dgIssues.Items.Count)
                                 idx = dgIssues.Items.Count - 1;
@@ -1182,7 +1196,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var file in replacements)
                 {
-                    var textView = this.GetTextViewForDocument(file.Key, -1, -1);
+                    var textView = GetTextViewForDocument(file.Key, -1, -1);
 
                     if(textView == null)
                     {
@@ -1198,9 +1212,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     foreach(var misspelling in file)
                     {
-                        if(textView.GetLineAndColumn(misspelling.Span.Start, out line, out column) == VSConstants.S_OK)
+                        if(textView.GetLineAndColumn(misspelling.Span.Start, out line, out column) ==
+                          VSConstants.S_OK && textView.SetCaretPos(line, column) == VSConstants.S_OK)
                         {
-                            textView.SetCaretPos(line, column);
                             textView.SetSelection(line, column, line, column + misspelling.Span.Length);
 
                             if(textView.GetTextStream(line, column, line, column + misspelling.Span.Length,
@@ -1225,13 +1239,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                             replacementWord = replacementWord.Substring(0, 1).ToLower(language) +
                                                 replacementWord.Substring(1);
 
-                                textView.ReplaceTextOnLine(line, column, viewWord.Length, replacementWord,
-                                    replacementWord.Length);
-                                textView.SetSelection(line, column, line, column + replacementWord.Length);
+                                if(textView.ReplaceTextOnLine(line, column, viewWord.Length, replacementWord,
+                                  replacementWord.Length) == VSConstants.S_OK)
+                                {
+                                    textView.SetSelection(line, column, line, column + replacementWord.Length);
+                                    replacementsPeformed.Add(misspelling);
 
-                                replacementsPeformed.Add(misspelling);
-
-                                this.AdjustAffectedIssues(misspelling, replacementWord);
+                                    this.AdjustAffectedIssues(misspelling, replacementWord);
+                                }
                             }
                             else
                             {
@@ -1398,7 +1413,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             if(currentIssue != null)
             {
-                if(this.GetTextViewForDocument(currentIssue.CanonicalName, currentIssue.Span.Start,
+                if(GetTextViewForDocument(currentIssue.CanonicalName, currentIssue.Span.Start,
                   currentIssue.Span.Length) == null)
                 {
                     MessageBox.Show("Unable to open a text editor window for " + currentIssue.Filename,
@@ -1423,7 +1438,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             {
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
                 var currentIssue = issues[idx];
-                word = ucSpellCheck.MispelledWord;
+                word = ucSpellCheck.MisspelledWord;
 
                 if(word.Length != 0)
                 {
@@ -1458,12 +1473,5 @@ namespace VisualStudio.SpellChecker.ToolWindows
             }
         }
         #endregion
-
-        private void dgIssues_CopyingRowClipboardContent(object sender, DataGridRowClipboardEventArgs e)
-        {
-            var currentCell = e.ClipboardRowContent[4];
-            e.ClipboardRowContent.Clear();
-            e.ClipboardRowContent.Add(currentCell);
-        }
     }
 }

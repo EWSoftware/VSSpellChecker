@@ -46,10 +46,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public Span Span { get; set; }
 
         /// <summary>
-        /// This read-only property returns the span for deleting a doubled word which includes leading
-        /// whitespace.
+        /// This is used to get or set the span for deleting a doubled word which includes leading whitespace
         /// </summary>
-        public Span DeleteWordSpan { get; private set; }
+        public Span DeleteWordSpan { get; set; }
 
         /// <summary>
         /// This is used to get or set the suggestions that can be used to replace the misspelled word

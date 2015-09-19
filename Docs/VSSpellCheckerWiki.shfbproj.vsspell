@@ -7,15 +7,18 @@
   <InheritIgnoredWords>True</InheritIgnoredWords>
   <IgnoredWords>
     <Ignore>Allman</Ignore>
-    <Ignore>Cyrl</Ignore>
+    <Ignore>Essilfie</Ignore>
     <Ignore>Golovin</Ignore>
     <Ignore>htmlx</Ignore>
-    <Ignore>Latn</Ignore>
     <Ignore>Lehenbauer</Ignore>
     <Ignore>Ruhmann</Ignore>
     <Ignore>xclick</Ignore>
-    <Ignore>Essilfie</Ignore>
+    <Ignore>Gaisie</Ignore>
   </IgnoredWords>
   <InheritExcludedExtensions>True</InheritExcludedExtensions>
   <InheritXmlSettings>True</InheritXmlSettings>
+  <InheritExclusionExpressions>True</InheritExclusionExpressions>
+  <ExclusionExpressions>
+    <Expression Match="[a-z]{2}-([A-Z]{2}|Cyrl|Latn)" />
+  </ExclusionExpressions>
 </SpellCheckerConfiguration>

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellingSuggestion.cs
 // Author  : Franz Alex Gaisie-Essilfie
-// Updated : 2015-08-22
+// Updated : 09/18/2015
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to represent spelling suggestions from multiple dictionaries
@@ -18,6 +18,7 @@
 // 2015-08-22  FAGE  Created the code
 //===============================================================================================================
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -25,7 +26,7 @@ using System.Linq;
 namespace VisualStudio.SpellChecker
 {
     /// <summary>
-    ///   This represents a multi-language spelling suggestion that can be used to replace a misspelled word.
+    /// This represents a multi-language spelling suggestion that can be used to replace a misspelled word.
     /// </summary>
     public class MultiLanguageSpellingSuggestion : SpellingSuggestion
     {
@@ -35,8 +36,8 @@ namespace VisualStudio.SpellChecker
         /// <summary>Multi-language suggestion constructor.</summary>
         /// <param name="suggestion">The suggestion to replace misspelled word with</param>
         /// <param name="cultures">The cultures from which the suggested word was chosen.</param>
-        public MultiLanguageSpellingSuggestion(IEnumerable<CultureInfo> cultures, string suggestion)
-            : base(cultures.First(), suggestion)
+        public MultiLanguageSpellingSuggestion(IEnumerable<CultureInfo> cultures, string suggestion) :
+          base(cultures.First(), suggestion)
         {
             this.cultures = cultures;
             this.formattedText = null;
@@ -55,8 +56,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
         public override string ToString()
         {
-            return formattedText ??
-                   (formattedText = FormatSuggestion(base.Suggestion, cultures));
+            return formattedText ?? (formattedText = FormatSuggestion(base.Suggestion, cultures));
         }
 
         /// <summary>Formats the suggestion to display the language to which it applies.</summary>
@@ -64,9 +64,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="cultures">The cultures to which the suggestion applies.</param>
         public static string FormatSuggestion(string suggestion, IEnumerable<CultureInfo> cultures)
         {
-            return string.Format("{0}\t\t({1})",
-                                 suggestion,
-                                 string.Join(" | ", cultures.Select(c => c.Name).ToArray()));
+            return String.Format(CultureInfo.InvariantCulture, "{0}\t\t({1})", suggestion,
+                String.Join(" | ", cultures.Select(c => c.Name)));
         }
     }
 }

@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.Editors.Pages.ExclusionExpressionsUserControl"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	mc:Ignorable="d" d:DesignHeight="375" d:DesignWidth="500"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<TextBlock TextWrapping="Wrap" Margin="3" Grid.Row="0">Exclusion expressions are useful for excluding ranges
+of text from being spell checked using a regular expression.  Examples are common format specifier patterns in
+designer code, CSS class name patterns, control name patterns, etc.  See this page's help topic for details
+and examples.</TextBlock>
+		<CheckBox Name="chkInheritExclusionExpressions" Grid.Row="1" Margin="3" Checked="Property_Changed"
+			Unchecked="Property_Changed">
+			<TextBlock TextWrapping="Wrap">
+				Inherit exclusion expressions.  Any expressions below will be added to the inherited exclusion expressions.
+			</TextBlock>
+		</CheckBox>
+		<ListBox Name="lbExclusionExpressions" Grid.Row="2" Margin="3"
+			MouseDoubleClick="lbExclusionExpressions_MouseDoubleClick"/>
+		<StackPanel Orientation="Horizontal" Grid.Row="3" Margin="3">
+			<Button Name="btnAddExpression" Content="Add" Width="80" Margin="3"
+				ToolTip="Add a new exclusion expression" Click="btnAddExpression_Click" />
+			<Button Name="btnEditExpression" Content="Edit" Width="80" Margin="3"
+				ToolTip="Edit the selected exclusion expression" Click="btnEditExpression_Click" />
+			<Button Name="btnRemoveExpression" Content="Remove" Width="80" Margin="3"
+				ToolTip="Remove the selected exclusion expression" Click="btnRemoveExpression_Click" />
+		</StackPanel>
+	</Grid>
+</UserControl>

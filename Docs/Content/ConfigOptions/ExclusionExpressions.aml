@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="6216eedb-6434-4cad-be06-576814e0b735" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category lets you define regular expressions that are used to exclude spans of text from the
+spell checking process.  This is useful for excluding things such as common format specifier patterns in designer
+code, CSS class name patterns, control name patterns, etc.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<para>To add a new expressions, click the <ui>Add</ui> button.  A dialog box will appear in which you can
+enter the expression and indicate which options if any should be used with it (Ignore Case, Multi-line, and/or
+Single Line).  To edit an expression, select it in the list and click the <ui>Edit</ui> button or double click
+it.  The same dialog box will appear in which you can modify the expression settings.  To remove an expression,
+select it in the list and click the <ui>Remove</ui> button.</para>
+
+				<para>For non-global settings, an option is available to inherit the exclusion expressions from
+configurations above the current one.  If enabled, any additional expressions in the current configuration are
+added to those.  If disabled, the settings in the current configuration will replace the inherited list of
+exclusion expressions.  If not inherited and the list is left empty, it effectively clears the list of exclusion
+expressions.</para>
+
+				<para>The following are some common date/time format specifiers that may appear in designer code.  In
+designer code, the format specifiers are typically not contained with braces and are thus included in the spell
+checking process.  This can result in a large number of misspelling reports for non-words such as "dd" and "yyyy"
+in format specifiers such as "MM/dd/yyyy".  By using one or more exclusion expressions to ignore such spans,
+they can be removed and not reported.</para>
+
+<code language="none" title="Example Date Format Specifier Exclusion Expressions">
+d{1,2}, yyyy
+d{3,4} MM/dd
+d{3,4}, MMM
+dd MMM
+dd/yyyy
+ddd dd
+hh:mm tt
+M{3,4} yyyy
+MMM.d{1,2}
+</code>
+
+				<para>Another example is CSS class name or control ID patterns.  For example, adding the expression
+<codeInline>btn[a-z\-]*?</codeInline> would prevent the ID and class names from being reported in the following
+line of Razor code in an HTML file.</para>
+
+<code language="html" title=" ">
+@Html.MyButton("Save", id: "btn-save", classes: "btn btn-default my-btn-class")
+</code>
+
+				<alert class="tip">
+					<para>It is possible that a large number of exclusion expressions may slow down the overall spell
+checking process, especially for spell checking as you type.  It may be better to define expressions common to a
+particular type of project within that project's solution or project spell checking configuration file rather
+than putting all of them in the global configuration.</para>
+				</alert>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

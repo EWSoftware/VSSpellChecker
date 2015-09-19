@@ -59,7 +59,7 @@
       <HelpKeyword index="K" term="configuration, configuration files" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isExpanded="true" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
@@ -81,6 +81,11 @@
     <Topic id="c592c4d8-7387-47fe-9b79-28bf0168f447" visible="True" title="Ignored Words">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, ignored words" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="6216eedb-6434-4cad-be06-576814e0b735" visible="True" title="Exclusion Expressions">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="configuration, exclusion expressions" />
       </HelpKeywords>
     </Topic>
     <Topic id="70a7fa5b-1a9e-494f-9d2c-5eb3321b2596" visible="True" title="Excluded Filename Extensions">
@@ -109,7 +114,7 @@
       <HelpKeyword index="K" term="third party content types" />
     </HelpKeywords>
   </Topic>
-  <Topic id="0ff35371-69b5-48dd-a062-037abe2469de" visible="True" isSelected="true" title="Defining Solution/Project Spell Check Classifiers">
+  <Topic id="0ff35371-69b5-48dd-a062-037abe2469de" visible="True" title="Defining Solution/Project Spell Check Classifiers">
     <HelpKeywords>
       <HelpKeyword index="K" term="classifier definition" />
     </HelpKeywords>
@@ -123,9 +128,9 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" visible="True" title="Version vNext">
+    <Topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" visible="True" isSelected="true" title="Version 2015.9.19.0">
       <HelpKeywords>
-        <HelpKeyword index="K" term="versions, vNext" />
+        <HelpKeyword index="K" term="versions, 2015.9.19.0" />
       </HelpKeywords>
     </Topic>
     <Topic id="d5b0b38e-0abb-45b2-943f-5628da441785" visible="True" title="Version 2015.8.15.0">

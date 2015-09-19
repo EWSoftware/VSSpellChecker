@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/25/2015
+// Updated : 09/18/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -101,7 +101,9 @@ namespace VisualStudio.SpellChecker.Tagging
                         IgnoreQuadrupleSlashComments = config.CSharpOptions.IgnoreQuadrupleSlashComments,
                         IgnoreNormalStrings = config.CSharpOptions.IgnoreNormalStrings,
                         IgnoreVerbatimStrings = config.CSharpOptions.IgnoreVerbatimStrings,
-                        IgnoreInterpolatedStrings = config.CSharpOptions.IgnoreInterpolatedStrings
+                        IgnoreInterpolatedStrings = config.CSharpOptions.IgnoreInterpolatedStrings,
+                        IgnoredXmlElements = config.IgnoredXmlElements,
+                        SpellCheckedAttributes = config.SpellCheckedXmlAttributes
 
                     } as ITagger<T>;
                 }

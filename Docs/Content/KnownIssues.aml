@@ -32,6 +32,21 @@ be detected.  Use the solution/project spell checking tool window to find double
 					</listItem>
 
 					<listItem>
+						<para>In C# code, the content of certain elements such as <codeInline>code</codeInline> that are
+ignored in conceptual topics and by the solution/project spell checking process will most likely be spell checked
+when using spell check as you type in the editor.  Only XML comments elements that are contained within the same
+line can be ignored due to the way the tagger is implemented.</para>
+					</listItem>
+
+					<listItem>
+						<para>On a similar note to the item above, in other languages such as VB.NET, the content of
+<codeInline>code</codeInline> elements will typically not be spell checked unless you make a change on a
+particular line within it.  Moving the cursor away from the edited line will usually clear any issues on it.
+Again, this is due to the way the tagger is implemented.  As noted, such elements are always ignored as expected
+when doing a full solution/project spell check.</para>
+					</listItem>
+
+					<listItem>
 						<para>For a list of common issues related to solution/project spell checking, see the related
 <link xlink:href="bda126a1-e534-4172-81dc-35a32d91e4cc" /> topic.</para>
 					</listItem>
