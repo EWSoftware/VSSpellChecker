@@ -200,8 +200,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     List<string> names = new List<string>();
 
                     foreach(Project p in solution.Projects)
-                        if(p.Kind != EnvDTE.Constants.vsProjectKindUnmodeled && !String.IsNullOrWhiteSpace(p.FullName))
-                            names.Add(p.FullName);
+                        AppendToProjectNames(p, names);
 
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 
@@ -215,6 +214,27 @@ namespace VisualStudio.SpellChecker.ToolWindows
             }
             else
                 ucSpellCheck.UpdateProjects(null);
+        }
+
+        private void AppendToProjectNames(Project project, List<string> names)
+        {
+            switch (project.Kind)
+            {
+                case EnvDTE.Constants.vsProjectKindSolutionItems:
+                    foreach (ProjectItem projectItem in project.ProjectItems)
+                    {
+                        AppendToProjectNames(projectItem.SubProject, names);
+                    }
+                    break;
+                case EnvDTE.Constants.vsProjectKindUnmodeled:
+                    break;
+                default:
+                    if (!String.IsNullOrWhiteSpace(project.FullName))
+                    {
+                        names.Add(project.FullName);
+                    }
+                    break;
+            }
         }
 
         /// <summary>
