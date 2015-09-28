@@ -199,9 +199,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 {
                     List<string> names = new List<string>();
 
-                    foreach(Project p in solution.Projects)
-                        if(p.Kind != EnvDTE.Constants.vsProjectKindUnmodeled && !String.IsNullOrWhiteSpace(p.FullName))
-                            names.Add(p.FullName);
+                    foreach(Project p in solution.EnumerateProjects())
+                        names.Add(p.FullName);
 
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 

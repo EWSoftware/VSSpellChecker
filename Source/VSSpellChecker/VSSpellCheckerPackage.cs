@@ -330,7 +330,7 @@ namespace VisualStudio.SpellChecker
                             else
                             {
                                 // Add solution settings file
-                                var siProject = dte2.Solution.Projects.Cast<Project>().FirstOrDefault(
+                                var siProject = dte2.Solution.EnumerateProjects().FirstOrDefault(
                                     p => p.Name == "Solution Items");
 
                                 if(siProject == null)
@@ -480,7 +480,7 @@ namespace VisualStudio.SpellChecker
 
                     if(!String.IsNullOrWhiteSpace(path))
                     {
-                        var project = dte2.Solution.Projects.OfType<Project>().FirstOrDefault(p => p.Name == item.Name);
+                        var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
 
                         if(project != null)
                         {

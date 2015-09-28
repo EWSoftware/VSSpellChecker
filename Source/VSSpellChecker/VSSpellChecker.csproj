@@ -122,6 +122,7 @@
     <Compile Include="SmartTags\DoubledWordSmartTagAction.cs" />
     <Compile Include="SmartTags\LabelSmartTagAction.cs" />
     <Compile Include="SmartTags\MultiLanguageSpellSmartTagAction.cs" />
+    <Compile Include="SolutionExtensions.cs" />
     <Compile Include="SpellingEventArgs.cs" />
     <Compile Include="SpellingServiceProxy.cs" />
     <Compile Include="SpellingSuggestion.cs" />

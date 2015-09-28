@@ -139,7 +139,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         {
                                             currentProject = (string)startupProjects.GetValue(0);
 
-                                            var item = dte2.Solution.Item(currentProject);
+                                            var item = dte2.Solution.EnumerateProjects().FirstOrDefault(
+                                                p => p.UniqueName == currentProject);
 
                                             if(item != null)
                                                 currentProject = item.FullName;
