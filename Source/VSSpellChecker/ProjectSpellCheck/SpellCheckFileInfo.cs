@@ -260,7 +260,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                         if(!String.IsNullOrWhiteSpace(path))
                         {
-                            var project = dte2.Solution.Projects.OfType<Project>().FirstOrDefault(p => p.Name == item.Name);
+                            var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
 
                             if(project != null)
                                 projects.Add(project.FullName);
