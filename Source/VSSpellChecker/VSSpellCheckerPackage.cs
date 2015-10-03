@@ -486,6 +486,13 @@ namespace VisualStudio.SpellChecker
                         {
                             containingProject = project;
                             settingsFilename = project.FullName;
+
+                            // Website projects are named after the folder rather than a file
+                            if(settingsFilename.Length > 1 && settingsFilename[settingsFilename.Length - 1] == '\\')
+                            {
+                                folderName = settingsFilename;
+                                settingsFilename += item.Name;
+                            }
                         }
                     }
                 }

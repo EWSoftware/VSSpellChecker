@@ -274,7 +274,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             if(!updatingState && this.CurrentIssue != null)
             {
                 bool hasChanged = !txtMisspelledWord.Text.Trim().Equals(this.CurrentIssue.Word,
-                    StringComparison.OrdinalIgnoreCase);
+                    StringComparison.Ordinal);
 
                 btnUndo.IsEnabled = hasChanged;
                 lbSuggestions.IsEnabled = !hasChanged;

@@ -450,10 +450,15 @@ namespace VisualStudio.SpellChecker.Theme
         #region INotifyPropertyChanged implementation
         //=====================================================================
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The property changed event
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// This raises the <see cref="PropertyChanged"/> event
+        /// </summary>
+        /// <param name="propertyName">The property name that changed</param>
         private void OnPropertyChanged(string propertyName)
         {
             var handler = PropertyChanged;
@@ -654,14 +659,11 @@ namespace VisualStudio.SpellChecker.Theme
 
                 case ThemeColorId.ButtonBorderColor:
                 case ThemeColorId.ButtonDisabledBorderColor:
-                case ThemeColorId.ButtonHoverBorderColor:
-                case ThemeColorId.ButtonPressedBorderColor:
                 case ThemeColorId.ComboBoxButtonMouseOverBackgroundColor:
-                case ThemeColorId.ComboBoxGlyphColor:
+                case ThemeColorId.LightBorderColor:
                 case ThemeColorId.MenuBorderColor:
                 case ThemeColorId.MenuSeparatorColor:
                 case ThemeColorId.ToolWindowBorderColor:
-                case ThemeColorId.TreeViewGlyphColor:
                 case ThemeColorId.TreeViewHoverGlyphColor:
                     return SystemColors.ControlDarkColor;
 
@@ -676,13 +678,19 @@ namespace VisualStudio.SpellChecker.Theme
                 case ThemeColorId.ButtonForegroundColor:
                 case ThemeColorId.ButtonHoverForegroundColor:
                 case ThemeColorId.ButtonPressedForegroundColor:
-                case ThemeColorId.MenuHoverTextColor:
+                case ThemeColorId.ComboBoxGlyphColor:
                 case ThemeColorId.MenuTextColor:
+                case ThemeColorId.TreeViewGlyphColor:
                     return SystemColors.ControlTextColor;
+
+                case ThemeColorId.ButtonHoverBorderColor:
+                case ThemeColorId.ButtonPressedBorderColor:
+                case ThemeColorId.LinkTextColor:
+                case ThemeColorId.LinkTextHoverColor:
+                    return SystemColors.HotTrackColor;
 
                 case ThemeColorId.ComboBoxDisabledGlyphColor:
                 case ThemeColorId.DisabledTextColor:
-                case ThemeColorId.LightBorderColor:
                     return SystemColors.GrayTextColor;
 
                 case ThemeColorId.ComboBoxPopupBackground:
@@ -694,27 +702,26 @@ namespace VisualStudio.SpellChecker.Theme
 
                 case ThemeColorId.ItemHoverColor:
                 case ThemeColorId.ItemHoverBorderColor:
-                case ThemeColorId.ItemSelectedBorderColor:
-                case ThemeColorId.ItemSelectedBorderNotFocusedColor:
-                case ThemeColorId.ItemSelectedColor:
                 case ThemeColorId.ItemSelectedNotFocusedColor:
-                case ThemeColorId.MenuHoverBackgroundColor:
-                    return SystemColors.HighlightColor;
+                    return SystemColors.ControlLightColor;
 
                 case ThemeColorId.ItemHoverTextColor:
-                case ThemeColorId.ItemSelectedTextColor:
                 case ThemeColorId.ItemSelectedTextNotFocusedColor:
-                    return SystemColors.HighlightTextColor;
-
                 case ThemeColorId.ItemTextColor:
                 case ThemeColorId.NotificationTextColor:
                 case ThemeColorId.TextBoxTextColor:
                 case ThemeColorId.ToolWindowTextColor:
                     return SystemColors.WindowTextColor;
 
-                case ThemeColorId.LinkTextColor:
-                case ThemeColorId.LinkTextHoverColor:
-                    return SystemColors.HotTrackColor;
+                case ThemeColorId.ItemSelectedBorderColor:
+                case ThemeColorId.ItemSelectedBorderNotFocusedColor:
+                case ThemeColorId.ItemSelectedColor:
+                case ThemeColorId.MenuHoverBackgroundColor:
+                    return SystemColors.HighlightColor;
+
+                case ThemeColorId.ItemSelectedTextColor:
+                case ThemeColorId.MenuHoverTextColor:
+                    return SystemColors.HighlightTextColor;
 
                 case ThemeColorId.TextBoxBorderColor:
                     return SystemColors.WindowFrameColor;

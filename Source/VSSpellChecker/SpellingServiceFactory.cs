@@ -194,7 +194,16 @@ namespace VisualStudio.SpellChecker
                           !String.IsNullOrWhiteSpace(projectItem.ContainingProject.FullName))
                         {
                             projectFilename = projectItem.ContainingProject.FullName;
-                            filename = projectFilename + ".vsspell";
+
+                            // Website projects are named after the folder
+                            if(projectFilename.Length > 1 && projectFilename[projectFilename.Length - 1] == '\\')
+                            {
+                                filename = Path.GetFileName(projectFilename.Substring(0, projectFilename.Length - 1));
+                                filename = projectFilename + filename + ".vsspell";
+                            }
+                            else
+                                filename = projectFilename + ".vsspell";
+
                             projectItem = solution.FindProjectItem(filename);
 
                             if(projectItem != null)

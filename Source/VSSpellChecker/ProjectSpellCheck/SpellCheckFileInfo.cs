@@ -251,20 +251,26 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                   item.Project.Kind != EnvDTE.Constants.vsProjectKindUnmodeled &&
                   item.Project.Kind != EnvDTE.Constants.vsProjectKindMisc)
                 {
-                    // Looks like a project
-                    Property fullPath = item.Project.Properties.Item("FullPath");
+                    string path = null;
 
-                    if(fullPath != null && fullPath.Value != null)
+                    // Looks like a project.  Not all of them implement properties though.
+                    if(item.Project.Properties != null)
                     {
-                        string path = (string)fullPath.Value;
+                        Property fullPath = item.Project.Properties.Item("FullPath");
 
-                        if(!String.IsNullOrWhiteSpace(path))
-                        {
-                            var project = dte2.Solution.Projects.OfType<Project>().FirstOrDefault(p => p.Name == item.Name);
+                        if(fullPath != null && fullPath.Value != null)
+                            path = (string)fullPath.Value;
+                    }
+                    else
+                        if(String.IsNullOrWhiteSpace(path) && item.Project.FullName.EndsWith("proj", StringComparison.OrdinalIgnoreCase))
+                            path = item.Project.FullName;
 
-                            if(project != null)
-                                projects.Add(project.FullName);
-                        }
+                    if(!String.IsNullOrWhiteSpace(path))
+                    {
+                        var project = dte2.Solution.Projects.OfType<Project>().FirstOrDefault(p => p.Name == item.Name);
+
+                        if(project != null)
+                            projects.Add(project.FullName);
                     }
                 }
                 else
