@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/02/2015
+// Updated : 10/14/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -27,6 +27,7 @@ using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.Text;
 
 using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.ProjectSpellCheck;
 
 namespace VisualStudio.SpellChecker
 {
@@ -58,6 +59,13 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public SpellCheckerConfiguration Configuration { get; set; }
 
+        /// <summary>
+        /// The range classification
+        /// </summary>
+        /// <remarks>This is used during solution/project spell checking to change how certain parts of the
+        /// word splitting process are handled.</remarks>
+        public RangeClassification Classification { get; set; }
+
         #endregion
 
         #region Helper methods
@@ -81,7 +89,8 @@ namespace VisualStudio.SpellChecker
                 // positive in file paths (i.e. \Folder\transform\File.txt flags "ransform" as a misspelled word
                 // because of the lowercase "t" following the backslash) but I can live with that.  If they are
                 // common enough, they can be added to the configuration's ignored word list as an escaped word.
-                if(text[i] == '\\')
+                // This is skipped in solution/project spell checking for verbatim strings.
+                if(text[i] == '\\' && this.Classification != RangeClassification.VerbatimStringLiteral)
                 {
                     end = i + 1;
 

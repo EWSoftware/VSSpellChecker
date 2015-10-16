@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/03/2015
+// Updated : 10/13/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -174,6 +174,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 else
                 {
                     txtMisspelledWord.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled = true;
+                    btnAddWord.IsEnabled = (currentIssue.MisspellingType == MisspellingType.MisspelledWord);
 
                     switch(currentIssue.MisspellingType)
                     {
@@ -196,7 +197,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     if(currentIssue.Suggestions.Any())
                     {
                         btnReplace.IsEnabled = btnReplaceAll.IsEnabled = true;
-                        btnAddWord.IsEnabled = (currentIssue.MisspellingType == MisspellingType.MisspelledWord);
 
                         IEnumerable<ISpellingSuggestion> suggestions;
 

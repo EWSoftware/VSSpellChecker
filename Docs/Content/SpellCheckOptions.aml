@@ -21,9 +21,7 @@ checks the entire solution.</para>
 					<listItem>
 						<para><ui>Max Issues</ui> - This option lets you specify the maximum number of spell checking issues
 that will be reported.  The default is 5,000 which should be sufficient for most projects.  If you have a very
-large number of projects in a solution, you can increase this value up to 99,999 as you see fit.  Note that the
-number entered may not be matched exactly.  Spell checking will stop after the process finishes the file in which
-the maximum is exceeded.</para>
+large number of projects in a solution, you can increase this value up to 99,999 as you see fit.</para>
 					</listItem>
 
 					<listItem>

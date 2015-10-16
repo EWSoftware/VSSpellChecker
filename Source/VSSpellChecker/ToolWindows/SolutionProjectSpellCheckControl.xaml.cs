@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/19/2015
+// Updated : 10/14/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -129,7 +129,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                     if(project != null && project.Kind != EnvDTE.Constants.vsProjectKindUnmodeled)
                                         currentProject = project.FullName;
                                 }
-                                
+
                                 if(String.IsNullOrWhiteSpace(currentProject))
                                     if(dte2.Solution.SolutionBuild != null)
                                     {
@@ -139,7 +139,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         {
                                             currentProject = (string)startupProjects.GetValue(0);
 
-                                            var item = dte2.Solution.Item(currentProject);
+                                            var item = dte2.Solution.EnumerateProjects().FirstOrDefault(
+                                                p => p.UniqueName == currentProject);
 
                                             if(item != null)
                                                 currentProject = item.FullName;
@@ -399,7 +400,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void AdjustAffectedIssues(FileMisspelling issue, string replacement)
         {
             int adjustment;
-            
+
             if(issue.MisspellingType != MisspellingType.DoubledWord)
                 adjustment = replacement.Length - issue.Span.Length;
             else
@@ -585,6 +586,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                     issue.LineText = classifier[issue.LineNumber].Trim();
 
                                     issues.Add(issue);
+
+                                    if(issues.Count >= maxIssues)
+                                        break;
                                 }
                             }
                         }
@@ -650,6 +654,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
 
                 lastWord = new Span();
+
+                wordSplitter.Classification = span.Classification;
 
                 foreach(var word in wordSplitter.GetWordsInText(textToSplit))
                 {
@@ -1096,7 +1102,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
                 var currentIssue = issues[dgIssues.SelectedIndex];
                 var textView = GetTextViewForDocument(currentIssue.CanonicalName, currentIssue.Span.Start, -1);
-                        
+
                 if(textView != null)
                 {
                     if(textView.GetLineAndColumn(currentIssue.Span.Start, out line, out column) ==

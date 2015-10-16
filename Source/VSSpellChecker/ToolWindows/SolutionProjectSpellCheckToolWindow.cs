@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/05/2015
+// Updated : 10/13/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -110,7 +110,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
             {
                 solutionEvents.Opened -= solutionEvents_OpenedClosed;
                 solutionEvents.AfterClosing -= solutionEvents_OpenedClosed;
-                solutionEvents.ProjectAdded -= solutionEvents_ProjectAdded;
                 solutionEvents.ProjectRemoved -= solutionEvents_ProjectRemoved;
                 solutionEvents.ProjectRenamed -= solutionEvents_ProjectRenamed;
 
@@ -197,11 +196,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(solution != null && !String.IsNullOrWhiteSpace(solution.FullName))
                 {
+                    // Only add this event after the solution is opened.  For solutions with subprojects, the
+                    // ProjectAdded event fires before this one which makes it look like we're ready to start
+                    // before everything is fully loaded.
+                    solutionEvents.ProjectAdded -= solutionEvents_ProjectAdded;
+
                     List<string> names = new List<string>();
 
-                    foreach(Project p in solution.Projects)
-                        if(p.Kind != EnvDTE.Constants.vsProjectKindUnmodeled && !String.IsNullOrWhiteSpace(p.FullName))
-                            names.Add(p.FullName);
+                    foreach(Project p in solution.EnumerateProjects())
+                        names.Add(p.FullName);
 
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 
@@ -209,6 +212,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 }
                 else
                 {
+                    // Disconnect when closed (see above)
+                    solutionEvents.ProjectAdded -= solutionEvents_ProjectAdded;
+
                     ucSpellCheck.UpdateProjects(null);
                     SpellingServiceFactory.LastSolutionName = null;
                 }

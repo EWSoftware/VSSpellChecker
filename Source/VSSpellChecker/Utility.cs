@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/01/2015
+// Updated : 10/13/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -19,10 +19,13 @@
 //===============================================================================================================
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
+using EnvDTE;
 using EnvDTE80;
 
 using Microsoft.VisualStudio;
@@ -139,7 +142,7 @@ namespace VisualStudio.SpellChecker
                                 if(!String.IsNullOrEmpty(ppzsFilename))
                                     return ppzsFilename;
                             }
-                            catch(NotImplementedException )
+                            catch(NotImplementedException)
                             {
                                 // Secondary buffers throw an exception rather than returning E_NOTIMPL so we'll
                                 // ignore these.  They are typically used for inline CSS, script, etc. and can be
@@ -290,6 +293,43 @@ namespace VisualStudio.SpellChecker
 
         #region Project and source control interaction
         //=====================================================================
+
+        /// <summary>
+        /// Enumerate all of the projects within the given solution
+        /// </summary>
+        /// <param name="solution">The solution from which to get the projects</param>
+        /// <returns>An enumerable list of all projects in the solution including subprojects nested within
+        /// solution item folders.</returns>
+        public static IEnumerable<Project> EnumerateProjects(this Solution solution)
+        {
+            return solution.Projects.OfType<Project>().SelectMany(EnumerateProjects);
+        }
+
+        /// <summary>
+        /// This handles enumeration of subprojects when necessary and ignores unmodeled projects
+        /// </summary>
+        /// <param name="project">The project to return, ignore, or enumerate</param>
+        /// <returns>An enumerable list of zero or more projects based on the kind of project passed in</returns>
+        public static IEnumerable<Project> EnumerateProjects(this Project project)
+        {
+            switch(project.Kind)
+            {
+                case EnvDTE.Constants.vsProjectKindSolutionItems:
+                    foreach(ProjectItem projectItem in project.ProjectItems)
+                        if(projectItem.SubProject != null)
+                            foreach(var result in EnumerateProjects(projectItem.SubProject))
+                                yield return result;
+                    break;
+
+                case EnvDTE.Constants.vsProjectKindUnmodeled:
+                    break;
+
+                default:
+                    if(!String.IsNullOrWhiteSpace(project.FullName))
+                        yield return project;
+                    break;
+            }
+        }
 
         /// <summary>
         /// This is used to determine if the given user dictionary words file can be written to

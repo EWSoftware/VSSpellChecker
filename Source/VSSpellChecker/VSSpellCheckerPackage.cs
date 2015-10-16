@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/27/2015
+// Updated : 10/13/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -329,7 +329,9 @@ namespace VisualStudio.SpellChecker
                             }
                             else
                             {
-                                // Add solution settings file
+                                // Add solution settings file.  Don't enumerate projects to find an existing copy
+                                // of the folder.  It's not a project so it won't be found that way.  Just search
+                                // the project collection.  It'll be at the root level if it exists.
                                 var siProject = dte2.Solution.Projects.Cast<Project>().FirstOrDefault(
                                     p => p.Name == "Solution Items");
 
@@ -480,7 +482,7 @@ namespace VisualStudio.SpellChecker
 
                     if(!String.IsNullOrWhiteSpace(path))
                     {
-                        var project = dte2.Solution.Projects.OfType<Project>().FirstOrDefault(p => p.Name == item.Name);
+                        var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
 
                         if(project != null)
                         {

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/08/2015
+// Updated : 10/14/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -247,6 +247,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             // the entire set based on what was selected.
             foreach(SelectedItem item in dte2.SelectedItems)
             {
+                // For vsProjectKindSolutionItems, enumerate projects first if there are any and then fall
+                // through to handle solution items.
+                if(item.Project != null && item.Project.Kind == EnvDTE.Constants.vsProjectKindSolutionItems)
+                    projects.AddRange(item.Project.EnumerateProjects().Select(p => p.FullName));
+
                 if(item.Project != null && item.Project.Kind != EnvDTE.Constants.vsProjectKindSolutionItems &&
                   item.Project.Kind != EnvDTE.Constants.vsProjectKindUnmodeled &&
                   item.Project.Kind != EnvDTE.Constants.vsProjectKindMisc)
@@ -267,7 +272,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     if(!String.IsNullOrWhiteSpace(path))
                     {
-                        var project = dte2.Solution.Projects.OfType<Project>().FirstOrDefault(p => p.Name == item.Name);
+                        var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
 
                         if(project != null)
                             projects.Add(project.FullName);
