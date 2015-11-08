@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/06/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -48,6 +48,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
+using VisualStudio.SpellChecker.ProjectSpellCheck;
 using VisualStudio.SpellChecker.Tagging;
 
 namespace VisualStudio.SpellChecker
@@ -173,7 +174,11 @@ namespace VisualStudio.SpellChecker
             _misspellings = new List<MisspellingTag>();
             wordsIgnoredOnce = new List<IgnoredWord>();
 
-            wordSplitter = new WordSplitter { Configuration = configuration };
+            wordSplitter = new WordSplitter
+            {
+                Configuration = configuration,
+                Mnemonic = ClassifierFactory.GetMnemonic(buffer.GetFilename())
+            };
 
             _buffer.Changed += BufferChanged;
             _naturalTextAggregator.TagsChanged += AggregatorTagsChanged;
@@ -642,7 +647,8 @@ namespace VisualStudio.SpellChecker
             IList<string> spellingAlternates;
             SnapshotSpan errorSpan, deleteWordSpan;
             Microsoft.VisualStudio.Text.Span lastWord;
-            string textToSplit, textToCheck, preferredTerm;
+            string textToSplit, actualWord, textToCheck, preferredTerm;
+            int mnemonicPos;
             var ignoredWords = wordsIgnoredOnce;
 
             // **************************************************************************************************
@@ -678,7 +684,13 @@ namespace VisualStudio.SpellChecker
                     if(_isClosed)
                         yield break;
 
-                    textToCheck = textToSplit.Substring(word.Start, word.Length);
+                    actualWord = textToSplit.Substring(word.Start, word.Length);
+                    mnemonicPos = actualWord.IndexOf(wordSplitter.Mnemonic);
+
+                    if(mnemonicPos == -1)
+                        textToCheck = actualWord;
+                    else
+                        textToCheck = actualWord.Substring(0, mnemonicPos) + actualWord.Substring(mnemonicPos + 1);
 
                     // Spell check the word if it looks like one and is not ignored
                     if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||
@@ -690,12 +702,12 @@ namespace VisualStudio.SpellChecker
                         // Check for a doubled word.  This isn't perfect as it won't detected doubled words
                         // across a line break.
                         if(configuration.DetectDoubledWords && lastWord.Length != 0 &&
-                          textToSplit.Substring(lastWord.Start, lastWord.Length).Equals(textToCheck,
+                          textToSplit.Substring(lastWord.Start, lastWord.Length).Equals(actualWord,
                           StringComparison.OrdinalIgnoreCase) && String.IsNullOrWhiteSpace(textToSplit.Substring(
                           lastWord.Start + lastWord.Length, word.Start - lastWord.Start - lastWord.Length)))
                         {
                             // If the doubled word is not being ignored at the current location, return it
-                            if(!ignoredWords.Any(w => w.StartPoint == errorSpan.Start && w.Word.Equals(textToCheck,
+                            if(!ignoredWords.Any(w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
                               StringComparison.OrdinalIgnoreCase)))
                             {
                                 // Delete the whitespace ahead of it too
@@ -713,7 +725,7 @@ namespace VisualStudio.SpellChecker
 
                         // If the word is not being ignored, perform the other checks
                         if(!_dictionary.ShouldIgnoreWord(textToCheck) && !ignoredWords.Any(
-                          w => w.StartPoint == errorSpan.Start && w.Word.Equals(textToCheck,
+                          w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
                           StringComparison.OrdinalIgnoreCase)))
                         {
                             // Handle code analysis dictionary checks first as they may be not be recognized as

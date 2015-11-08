@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/14/2015
+// Updated : 10/27/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -146,6 +146,13 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <value>This is false by default</value>
         [DefaultValue(false)]
         public bool TreatUnderscoreAsSeparator { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not mnemonics are ignored within words
+        /// </summary>
+        /// <value>This is true by default.  If false, mnemonic characters act as word breaks.</value>
+        [DefaultValue(true)]
+        public bool IgnoreMnemonics { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not to try to determine the language for resource files based
@@ -366,7 +373,7 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.IgnoreFilenamesAndEMailAddresses = this.IgnoreXmlElementsInText =
                 this.DetermineResourceFileLanguageFromName = this.InheritExcludedExtensions =
                 this.InheritAdditionalDictionaryFolders = this.InheritIgnoredWords =
-                this.InheritExclusionExpressions = this.InheritXmlSettings = true;
+                this.InheritExclusionExpressions = this.InheritXmlSettings = this.IgnoreMnemonics = true;
 
             this.TreatUnderscoreAsSeparator = false;
 
@@ -454,6 +461,7 @@ namespace VisualStudio.SpellChecker.Configuration
                     PropertyNames.IgnoreFilenamesAndEMailAddresses);
                 this.IgnoreXmlElementsInText = configuration.ToBoolean(PropertyNames.IgnoreXmlElementsInText);
                 this.TreatUnderscoreAsSeparator = configuration.ToBoolean(PropertyNames.TreatUnderscoreAsSeparator);
+                this.IgnoreMnemonics = configuration.ToBoolean(PropertyNames.IgnoreMnemonics);
                 this.IgnoreCharacterClass = configuration.ToEnum<IgnoredCharacterClass>(
                     PropertyNames.IgnoreCharacterClass);
                 this.DetermineResourceFileLanguageFromName = configuration.ToBoolean(
@@ -473,6 +481,8 @@ namespace VisualStudio.SpellChecker.Configuration
                     PropertyNames.CSharpOptionsIgnoreVerbatimStrings);
                 csharpOptions.IgnoreInterpolatedStrings = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreInterpolatedStrings);
+                csharpOptions.ApplyToAllCStyleLanguages = configuration.ToBoolean(
+                    PropertyNames.CSharpOptionsApplyToAllCStyleLanguages);
 
                 cadOptions.ImportCodeAnalysisDictionaries = configuration.ToBoolean(
                     PropertyNames.CadOptionsImportCodeAnalysisDictionaries);

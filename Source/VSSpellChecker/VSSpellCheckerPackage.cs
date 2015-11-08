@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/13/2015
+// Updated : 10/26/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -72,6 +72,13 @@ namespace VisualStudio.SpellChecker
     [ProvideBindingPath()]
     public class VSSpellCheckerPackage : Package
     {
+        #region Private data members
+        //=====================================================================
+
+        private SolutionEvents solutionEvents;
+
+        #endregion
+
         #region Properties
         //=====================================================================
 
@@ -184,7 +191,7 @@ namespace VisualStudio.SpellChecker
 
             if(dte != null && dte.Events != null)
             {
-                var solutionEvents = dte.Events.SolutionEvents;
+                solutionEvents = dte.Events.SolutionEvents;
 
                 if(solutionEvents != null)
                     solutionEvents.AfterClosing += solutionEvents_AfterClosing;
@@ -202,7 +209,7 @@ namespace VisualStudio.SpellChecker
         /// detects a change in solution.  This package will not load unless a configuration is edited.  This is
         /// needed to consistently clear the cache if editing configurations in different solutions without
         /// opening any spell checked files.</remarks>
-        void solutionEvents_AfterClosing()
+        private void solutionEvents_AfterClosing()
         {
             GlobalDictionary.ClearDictionaryCache();
         }

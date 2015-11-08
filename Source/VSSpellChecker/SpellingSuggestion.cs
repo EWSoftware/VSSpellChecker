@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingSuggestion.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/25/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -113,5 +113,37 @@ namespace VisualStudio.SpellChecker
             return this.Suggestion;
         }
         #endregion
+
+        #region Helper methods
+        //=====================================================================
+
+        /// <summary>
+        /// This is used to add a mnemonic to the suggestion
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic character</param>
+        /// <param name="letter">The letter before which the mnemonic is added</param>
+        public void AddMnemonic(char mnemonic, char letter)
+        {
+            string suggestion = this.Suggestion;
+            int pos = suggestion.IndexOf(letter);
+
+            if(pos == -1)
+            {
+                if(Char.IsUpper(letter))
+                    letter = Char.ToLower(letter, this.Culture);
+                else
+                    if(Char.IsLower(letter))
+                        letter = Char.ToUpper(letter, this.Culture);
+
+                pos = suggestion.IndexOf(letter);
+
+                if(pos == -1)
+                    return;
+            }
+
+            this.Suggestion = suggestion.Substring(0, pos) + mnemonic.ToString() + suggestion.Substring(pos);
+        }
+        #endregion
+
     }
 }

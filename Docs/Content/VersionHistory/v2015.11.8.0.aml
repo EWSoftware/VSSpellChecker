@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="a3eaed0f-fcf3-4df8-8889-7073395601a5" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed the solution/project spell checking tool window so that it correctly handles projects
+nested within solution item folders.  Thanks to Bart Koelman for supplying the suggested fix for this.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed up a couple of minor issues related to handling website project filenames.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the spell check tool windows so that the <ui>Undo</ui> button is enabled when only the
+case of the misspelled word changes.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the spell check tool windows so that the <ui>Add Word</ui> button remains enabled when
+there are no suggestions.</para>
+					</listItem>
+
+					<listItem>
+						<para>The project/solution spell check process will now stop at the exact number of maximum issues
+rather than finishing the current file.  This prevents a large number of unwanted issues from being reported if
+the last file to process is large and contains many issues.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the solution/project spell checking process to ignore escape sequences in verbatim
+strings when splitting words.  Spell check as you type will still report any text after the escape sequence as a
+misspelling.  That remains a known issue with the noted workarounds.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added TypeScript (<localUri>.ts</localUri>) files as a recognized file type for
+solution/project spell checking.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for a new <ui>Ignore Mnemonics</ui> general configuration option that allows
+ignoring mnemonics within spell checked words.  This can significantly reduce the number of false reports in
+UI label control text.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for a new <ui>Apply To All C-Style Languages</ui> C# configuration option.  If
+enabled, it applies the C# options to all C-style languages as applicable.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

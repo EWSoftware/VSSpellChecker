@@ -69,6 +69,17 @@ containing underscores will be ignored.  Enabling this option will treat the und
 each word separated by the underscores will be spell checked along with all the other text.</para>
 					</listItem>
 
+					<listItem>
+						<para><ui>Ignore mnemonics within words</ui> - This option is enabled by default.  It causes the
+spell checker to ignore the mnemonic character (ampersand) within words being spell checked rather than treating
+it as a word separator thus causing the text before and after it to be treated as separate words and possibly
+reporting them as misspellings.</para>
+
+						<para>If a misspelled word contains a mnemonic, it will be reported with the mnemonic and each
+suggested replacement will have a matching mnemonic if it contains a matching letter.  This allows you to see
+where the mnemonic is placed or if it will be lost in the replacement.</para>
+					</listItem>
+
 				</list>
 			</content>
 		</section>

@@ -4,7 +4,8 @@
 		<introduction>
 			<para>This category contains several options that let you fine tune how C# source code files are spell
 checked.  The following options are available.  All of them are disabled by default so that the associated
-elements are included for spell checking.</para>
+elements are included for spell checking.  By enabling the last option, it is also possible to have these options
+applied to all C-style code as applicable.</para>
 		</introduction>
 
 		<section>
@@ -49,6 +50,12 @@ Enabling this option prevents their content from being checked for spelling erro
 skipping interpolated strings which may only contain property format specifiers.  Enabling this option prevents
 their content from being checked for spelling errors.  If left disabled, all string content except text within
 braces which denote format specifiers will be spell checked.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Apply the above options to all C-style languages as applicable</ui> - If this option is
+enabled, the above options are applied to all C-style languages as applicable.  For example, all of the comments
+options and the normal string literal option will be applied to C, C++, JavaScript, etc.</para>
 					</listItem>
 
 				</list>

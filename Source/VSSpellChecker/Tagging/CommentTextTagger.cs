@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/18/2015
+// Updated : 10/29/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -37,6 +37,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
+using VisualStudio.SpellChecker.ProjectSpellCheck;
 using VisualStudio.SpellChecker.Tagging.CSharp;
 
 namespace VisualStudio.SpellChecker.Tagging
@@ -88,7 +89,11 @@ namespace VisualStudio.SpellChecker.Tagging
 
                 // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
                 // configuration options to exclude certain elements from being spell checked if not wanted.
-                if(buffer.ContentType.IsOfType("csharp"))
+                // Through the configuration options, we can also specify this tagger be used for all C-style
+                // code.  Not all configuration options will apply but the structure is similar enough to make
+                // most of them relevant.
+                if(buffer.ContentType.IsOfType("csharp") || (config.CSharpOptions.ApplyToAllCStyleLanguages &&
+                  ClassifierFactory.IsCStyleCode(buffer.GetFilename())))
                 {
                     // The C# options are passed to the tagger for local use since it tracks the state of the
                     // lines in the buffer.  Changing the global options will require that any open editors be

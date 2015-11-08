@@ -112,6 +112,7 @@
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2015.8.15.0.aml" />
     <None Include="Content\VersionHistory\v2015.9.19.0.aml" />
+    <None Include="Content\VersionHistory\v2015.11.8.0.aml" />
     <None Include="Content\Welcome.aml" />
     <None Include="VSSpellCheckerWiki.shfbproj.vsspell" />
   </ItemGroup>

@@ -466,6 +466,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     result = hierarchy.GetCanonicalName(itemId, out canonicalName);
 
                     if(result == VSConstants.S_OK && !String.IsNullOrWhiteSpace(canonicalName) &&
+                      canonicalName.IndexOfAny(Path.GetInvalidPathChars()) == -1 &&
                       Path.IsPathRooted(canonicalName) && !canonicalName.EndsWith("\\", StringComparison.Ordinal) &&
                       !canonicalName.Equals(projectName, StringComparison.OrdinalIgnoreCase))
                     {

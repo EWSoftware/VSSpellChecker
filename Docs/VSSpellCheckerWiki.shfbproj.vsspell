@@ -8,12 +8,14 @@
   <IgnoredWords>
     <Ignore>Allman</Ignore>
     <Ignore>Essilfie</Ignore>
+    <Ignore>Gaisie</Ignore>
     <Ignore>Golovin</Ignore>
     <Ignore>htmlx</Ignore>
+    <Ignore>Koelman</Ignore>
     <Ignore>Lehenbauer</Ignore>
     <Ignore>Ruhmann</Ignore>
     <Ignore>xclick</Ignore>
-    <Ignore>Gaisie</Ignore>
+    <Ignore>yyyy</Ignore>
   </IgnoredWords>
   <InheritExcludedExtensions>True</InheritExcludedExtensions>
   <InheritXmlSettings>True</InheritXmlSettings>

@@ -2,13 +2,11 @@
 <topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>Release notes for version 2015.9.19.0.</para>
+			<para>Changes in this release:</para>
 		</introduction>
 
 		<section>
-			<title>Changes in This Release</title>
 			<content>
-
 				<list class="bullet">
 					<listItem>
 						<para>The main feature of this release is the

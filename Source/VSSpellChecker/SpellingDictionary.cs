@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/25/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -101,11 +101,23 @@ namespace VisualStudio.SpellChecker
         /// This is used to suggest corrections for a misspelled word
         /// </summary>
         /// <param name="word">The misspelled word for which to get suggestions</param>
-        /// <returns>An enumerable list of zero or more suggested correct spellings.  If there is only one
-        /// dictionary, only the list of suggestions is returned.  If multiple dictionaries are used, each set of
-        /// suggestions is preceded by an entry for the culture.</returns>
+        /// <returns>An enumerable list of zero or more suggested correct spellings.  Each suggestion contains
+        /// the dictionary culture with which it is associated.  If the word contains a mnemonic, it is removed
+        /// in order to find the suggestions.  Each word in the returned list of suggestions will contain the
+        /// mnemonic if it contains a matching letter.</remarks>
         public IEnumerable<SpellingSuggestion> SuggestCorrections(string word)
         {
+            char mnemonicCharacter = '\x0', mnemonicLetter = '\x0';
+            int pos = word.IndexOfAny(new[] { '&', '_' });
+
+            // Remove the mnemonic if present.  It will be added to each suggestion below.
+            if(pos != -1)
+            {
+                mnemonicCharacter = word[pos];
+                mnemonicLetter = word[pos + 1];
+                word = word.Substring(0, pos) + word.Substring(pos + 1);
+            }
+
             // IMPORTANT: ALWAYS return an actual list here not an enumeration.  This list can get used a lot
             // and deferred execution has a significant impact on performance.
             List<SpellingSuggestion> allSuggestions = new List<SpellingSuggestion>();
@@ -115,6 +127,10 @@ namespace VisualStudio.SpellChecker
             else
                 foreach(var d in this.Dictionaries)
                     allSuggestions.AddRange(d.SuggestCorrections(word));
+
+            if(mnemonicCharacter != '\x0')
+                foreach(var suggestion in allSuggestions)
+                    suggestion.AddMnemonic(mnemonicCharacter, mnemonicLetter);
 
             return allSuggestions;
         }
@@ -181,6 +197,8 @@ namespace VisualStudio.SpellChecker
         /// <returns>True if the word should be ignored, false if not</returns>
         public bool ShouldIgnoreWord(string word)
         {
+            word = word.Replace("&", String.Empty).Replace("_", String.Empty);
+
             if(String.IsNullOrWhiteSpace(word) || ignoredWords.Contains(word))
                 return true;
 

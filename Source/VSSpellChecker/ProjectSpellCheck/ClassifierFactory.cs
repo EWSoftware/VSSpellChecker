@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
+// Updated : 10/29/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -49,6 +49,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             public string ClassifierType { get; set; }
 
             /// <summary>
+            /// The mnemonic character used by the file type
+            /// </summary>
+            public char Mnemonic { get; set; }
+
+            /// <summary>
             /// This is used to get or set the classifier configuration, if any
             /// </summary>
             public XElement Configuration { get; set; }
@@ -66,6 +71,56 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         #region Helper methods
         //=====================================================================
+
+        /// <summary>
+        /// This is used to determine if the file contains C-style code based on its extension
+        /// </summary>
+        /// <param name="filename">The filename to check</param>
+        public static bool IsCStyleCode(string filename)
+        {
+            if(filename == null)
+                return false;
+
+            string id, extension = Path.GetExtension(filename);
+
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            if(!String.IsNullOrWhiteSpace(extension))
+                extension = extension.Substring(1);
+
+            return (extensionMap.TryGetValue(extension, out id) && id == "CStyle");
+        }
+
+        /// <summary>
+        /// This is used to get the mnemonic character used by the file based on its extension
+        /// </summary>
+        /// <param name="filename">The filename for which to get the mnemonic character</param>
+        /// <returns>The mnemonic character for the file type.  The ampersand and underscore are the only
+        /// supported mnemonic characters.</returns>
+        public static char GetMnemonic(string filename)
+        {
+            if(filename != null)
+            {
+                ClassifierDefinition definition;
+                string id, extension = Path.GetExtension(filename);
+
+                if(extensionMap == null)
+                    LoadClassifierConfiguration();
+
+                if(!String.IsNullOrWhiteSpace(extension))
+                    extension = extension.Substring(1);
+
+                if(!extensionMap.TryGetValue(extension, out id))
+                    id = FileIsXml(filename) ? "XML" : "PlainText";
+
+                if(id != "None" && definitions.TryGetValue(id, out definition) && (definition.Mnemonic == '&' ||
+                  definition.Mnemonic == '_'))
+                    return definition.Mnemonic;
+            }
+
+            return '&';
+        }
 
         /// <summary>
         /// This is used to get the classifier for the given file
@@ -159,6 +214,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             definitions[(string)classifier.Attribute("Id")] = new ClassifierDefinition
                             {
                                 ClassifierType = (string)classifier.Attribute("Type"),
+                                Mnemonic = ((string)classifier.Attribute("Mnemonic") ?? "&")[0],
                                 Configuration = classifier
                             };
 

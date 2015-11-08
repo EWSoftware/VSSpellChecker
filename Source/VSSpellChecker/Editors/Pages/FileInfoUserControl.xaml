@@ -13,64 +13,65 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>
-	<StackPanel>
-		<TextBlock Name="tbGlobal" TextWrapping="Wrap" Margin="10, 10, 10, 0">
+	<ScrollViewer VerticalScrollBarVisibility="Auto">
+		<StackPanel>
+			<TextBlock Name="tbGlobal" TextWrapping="Wrap" Margin="10, 10, 10, 0">
 			This file is used to configure the global spell checker settings.  These are the base settings used in the
 absence of, and inherited by, solution, project, folder, and file-specific configuration files.
-		</TextBlock>
-		<TextBlock Name="tbSolution" TextWrapping="Wrap" Margin="10, 10, 10, 0">
+			</TextBlock>
+			<TextBlock Name="tbSolution" TextWrapping="Wrap" Margin="10, 10, 10, 0">
 			This file is used to configure the spell checker settings for the solution.  Options that are set in this
 configuration will override the global settings and will be inherited by projects, folders, and files.
-		</TextBlock>
-		<TextBlock Name="tbProject" TextWrapping="Wrap" Margin="10, 10, 10, 0">
+			</TextBlock>
+			<TextBlock Name="tbProject" TextWrapping="Wrap" Margin="10, 10, 10, 0">
 			This file is used to configure the spell checker settings for the specified project.  Options that are set
 in this configuration will override the global settings and solution settings and will be inherited by the
 project's folders and files.
-		</TextBlock>
-		<TextBlock Name="tbFolder" TextWrapping="Wrap" Margin="10, 10, 10, 0">
+			</TextBlock>
+			<TextBlock Name="tbFolder" TextWrapping="Wrap" Margin="10, 10, 10, 0">
 			This file is used to configure the spell checker settings for the specified folder and its sub-folders.
 Options that are set in this configuration will override the global settings, solution settings, and project
 settings and will be inherited by all files within the folder and its sub-folders.  Sub-folders may themselves
 contain configuration files that make further changes to the configuration settings.
-		</TextBlock>
-		<TextBlock Name="tbFile" TextWrapping="Wrap" Margin="10, 10, 10, 0">
+			</TextBlock>
+			<TextBlock Name="tbFile" TextWrapping="Wrap" Margin="10, 10, 10, 0">
 			This file is used to configure the spell checker settings for the specified project file.  Options that are
 set in this configuration will override the global settings, solution settings, project settings, and folder
 settings.
-		</TextBlock>
-		<TextBlock TextWrapping="Wrap" Margin="10, 10, 10, 0">Select a category on the left to edit the settings.
+			</TextBlock>
+			<TextBlock TextWrapping="Wrap" Margin="10, 10, 10, 0">Select a category on the left to edit the settings.
 Save this file to store the changes.  Changes made to any configuration file will typically not take effect until
 you close and re-open the spell checked file in which you want the changes to apply.</TextBlock>
-		<TextBlock TextWrapping="Wrap" Margin="10, 10, 10, 0">To set the spelling tag underline color, select
+			<TextBlock TextWrapping="Wrap" Margin="10, 10, 10, 0">To set the spelling tag underline color, select
 <Bold>Tools | Options | Environment | Fonts and Colors</Bold> and select the <Bold>Spelling Error</Bold>
 display item.</TextBlock>
-		<FlowDocumentScrollViewer Name="fdvAddConfigs" VerticalScrollBarVisibility="Hidden" IsEnabled="False">
-			<FlowDocument FontFamily="Verdana" FontSize="12" PagePadding="10" TextAlignment="Left">
-				<Section Name="secAddFileSpecific">
-					<Paragraph>To add folder or file-specific settings, use one of the following methods when a solution
+			<FlowDocumentScrollViewer Name="fdvAddConfigs" VerticalScrollBarVisibility="Hidden" IsEnabled="False">
+				<FlowDocument FontFamily="Verdana" FontSize="12" PagePadding="10" TextAlignment="Left">
+					<Section Name="secAddFileSpecific">
+						<Paragraph>To add folder or file-specific settings, use one of the following methods when a solution
 file is loaded:</Paragraph>
-					<List>
-						<ListItem>
-							<Paragraph>Select the solution, a project, a folder, or a file in the <Bold>Solution Explorer</Bold>
+						<List>
+							<ListItem>
+								<Paragraph>Select the solution, a project, a folder, or a file in the <Bold>Solution Explorer</Bold>
 	window and use the <Bold>File</Bold> | <Bold>New</Bold> | <Bold>Spell Checker Configuration File for Selected
 	Item</Bold> option to add a configuration for the selected item.<LineBreak/></Paragraph>
-						</ListItem>
-						<ListItem>
-							<Paragraph>Right click on the solution, a project, or a folder in the <Bold>Solution Explorer</Bold>
+							</ListItem>
+							<ListItem>
+								<Paragraph>Right click on the solution, a project, or a folder in the <Bold>Solution Explorer</Bold>
 	window and use the <Bold>Add</Bold> | <Bold>Spell Checker Configuration File</Bold> context menu option to add
 	a configuration file for the selected item.<LineBreak/></Paragraph>
-						</ListItem>
-						<ListItem>
-							<Paragraph>Right click on a file that can be spell checked (source code, text, HTML, XML, etc.) in
+							</ListItem>
+							<ListItem>
+								<Paragraph>Right click on a file that can be spell checked (source code, text, HTML, XML, etc.) in
 the <Bold>Solution Explorer</Bold> window and use the <Bold>Add Spell Checker Configuration File</Bold> context
 menu option to add a configuration file for the selected item.  Note that for project systems that support it,
 the configuration file will be added as a dependent item for the file selected like a designer or resource file
 for a form.  Expand the file node in the Solution Explorer to see it.</Paragraph>
-						</ListItem>
-					</List>
-				</Section>
-
-			</FlowDocument>
-		</FlowDocumentScrollViewer>
-	</StackPanel>
+							</ListItem>
+						</List>
+					</Section>
+				</FlowDocument>
+			</FlowDocumentScrollViewer>
+		</StackPanel>
+	</ScrollViewer>
 </UserControl>

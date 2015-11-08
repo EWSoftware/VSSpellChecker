@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/06/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -79,7 +79,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 cboDetectDoubledWords.ItemsSource = cboIgnoreWordsWithDigits.ItemsSource =
                 cboIgnoreAllUppercase.ItemsSource = cboIgnoreFormatSpecifiers.ItemsSource =
                 cboIgnoreFilenamesAndEMail.ItemsSource = cboIgnoreXmlInText.ItemsSource =
-                cboTreatUnderscoresAsSeparators.ItemsSource = dataSource;
+                cboTreatUnderscoresAsSeparators.ItemsSource = cboIgnoreMnemonics.ItemsSource = dataSource;
 
             cboSpellCheckAsYouType.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.SpellCheckAsYouType);
@@ -99,6 +99,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 PropertyNames.IgnoreXmlElementsInText);
             cboTreatUnderscoresAsSeparators.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.TreatUnderscoreAsSeparator);
+            cboIgnoreMnemonics.SelectedValue = configuration.ToPropertyState(
+                PropertyNames.IgnoreMnemonics);
 
             if(configuration.ConfigurationType != ConfigurationType.Global)
                 spIncludeInProjectSpellCheck.Visibility = rbInheritIgnoredCharClass.Visibility = Visibility.Visible;
@@ -148,6 +150,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 ((PropertyState)cboIgnoreXmlInText.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.TreatUnderscoreAsSeparator,
                 ((PropertyState)cboTreatUnderscoresAsSeparators.SelectedValue).ToPropertyValue());
+            configuration.StoreProperty(PropertyNames.IgnoreMnemonics,
+                ((PropertyState)cboIgnoreMnemonics.SelectedValue).ToPropertyValue());
 
             if(rbInheritIgnoredCharClass.IsChecked.Value)
                 configuration.StoreProperty(PropertyNames.IgnoreCharacterClass, null);

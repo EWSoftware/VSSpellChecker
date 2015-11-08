@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/14/2015
+// Updated : 10/29/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -85,6 +85,11 @@ namespace VisualStudio.SpellChecker.Configuration
         public const string TreatUnderscoreAsSeparator = "TreatUnderscoreAsSeparator";
 
         /// <summary>
+        /// Ignore mnemonics
+        /// </summary>
+        public const string IgnoreMnemonics = "IgnoreMnemonics";
+
+        /// <summary>
         /// Ignore character class
         /// </summary>
         public const string IgnoreCharacterClass = "IgnoreCharacterClass";
@@ -128,6 +133,11 @@ namespace VisualStudio.SpellChecker.Configuration
         /// C# - Ignore interpolated strings
         /// </summary>
         public const string CSharpOptionsIgnoreInterpolatedStrings = "CSharpOptions.IgnoreInterpolatedStrings";
+
+        /// <summary>
+        /// C# - Apply to all C-style languages
+        /// </summary>
+        public const string CSharpOptionsApplyToAllCStyleLanguages = "CSharpOptions.ApplyToAllCStyleLanguages";
 
         /// <summary>
         /// Inherit excluded extensions

@@ -128,7 +128,12 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" visible="True" isSelected="true" title="Version 2015.9.19.0">
+    <Topic id="a3eaed0f-fcf3-4df8-8889-7073395601a5" visible="True" isSelected="true" title="Version 2015.11.8.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2015.11.8.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" visible="True" title="Version 2015.9.19.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2015.9.19.0" />
       </HelpKeywords>

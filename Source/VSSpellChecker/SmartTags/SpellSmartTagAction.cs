@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagAction.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/25/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -70,7 +70,7 @@ namespace VisualStudio.SpellChecker.SmartTags
         /// </summary>
         public virtual string DisplayText
         {
-            get { return replaceWith.Suggestion; }
+            get { return replaceWith.Suggestion.Replace("_", "__"); }
         }
 
         /// <summary>

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/05/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -176,6 +176,11 @@ namespace VisualStudio.SpellChecker
             if(String.IsNullOrWhiteSpace(word))
                 return false;
 
+            string originalWord = word;
+
+            // Remove mnemonics
+            word = word.Replace("&", String.Empty).Replace("_", String.Empty);
+
             if(this.ShouldIgnoreWord(word) || this.IsSpelledCorrectly(word))
                 return true;
 
@@ -193,7 +198,9 @@ namespace VisualStudio.SpellChecker
             }
 
             this.AddSuggestion(word);
-            this.NotifySpellingServicesOfChange(word);
+
+            // Must pass the original word with mnemonics as it must match the span text
+            this.NotifySpellingServicesOfChange(originalWord);
 
             return true;
         }
@@ -210,7 +217,8 @@ namespace VisualStudio.SpellChecker
 
             lock(ignoredWords)
             {
-                ignoredWords.Add(word);
+                // Remove mnemonics here but pass the original word below as it must match the span text
+                ignoredWords.Add(word.Replace("&", String.Empty).Replace("_", String.Empty));
             }
 
             this.NotifySpellingServicesOfChange(word);
@@ -227,7 +235,7 @@ namespace VisualStudio.SpellChecker
         {
             lock(ignoredWords)
             {
-                return ignoredWords.Contains(word);
+                return ignoredWords.Contains(word.Replace("&", String.Empty).Replace("_", String.Empty));
             }
         }
         #endregion

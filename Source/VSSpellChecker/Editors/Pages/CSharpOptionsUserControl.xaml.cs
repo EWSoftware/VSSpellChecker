@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpOptionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 10/29/2015
 // Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -77,28 +77,24 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             cboIgnoreXmlDocComments.ItemsSource = cboIgnoreDelimitedComments.ItemsSource =
                 cboIgnoreStandardSingleLineComments.ItemsSource = cboIgnoreQuadrupleSlashComments.ItemsSource =
                 cboIgnoreNormalStrings.ItemsSource = cboIgnoreVerbatimStrings.ItemsSource =
-                cboIgnoreInterpolatedStrings.ItemsSource = dataSource;
+                cboIgnoreInterpolatedStrings.ItemsSource = cboApplyToAllCStyleLanguages.ItemsSource = dataSource;
 
             cboIgnoreXmlDocComments.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreXmlDocComments);
-
             cboIgnoreDelimitedComments.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreDelimitedComments);
-
             cboIgnoreStandardSingleLineComments.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreStandardSingleLineComments);
-
             cboIgnoreQuadrupleSlashComments.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreQuadrupleSlashComments);
-
             cboIgnoreNormalStrings.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreNormalStrings);
-
             cboIgnoreVerbatimStrings.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreVerbatimStrings);
-
             cboIgnoreInterpolatedStrings.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.CSharpOptionsIgnoreInterpolatedStrings);
+            cboApplyToAllCStyleLanguages.SelectedValue = configuration.ToPropertyState(
+                PropertyNames.CSharpOptionsApplyToAllCStyleLanguages);
         }
 
         /// <inheritdoc />
@@ -118,6 +114,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 ((PropertyState)cboIgnoreVerbatimStrings.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.CSharpOptionsIgnoreInterpolatedStrings,
                 ((PropertyState)cboIgnoreInterpolatedStrings.SelectedValue).ToPropertyValue());
+            configuration.StoreProperty(PropertyNames.CSharpOptionsApplyToAllCStyleLanguages,
+                ((PropertyState)cboApplyToAllCStyleLanguages.SelectedValue).ToPropertyValue());
         }
 
         /// <inheritdoc />

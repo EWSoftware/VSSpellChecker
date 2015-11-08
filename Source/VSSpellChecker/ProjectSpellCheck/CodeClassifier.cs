@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/14/2015
+// Updated : 10/29/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -43,7 +43,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         private string xmlDocCommentDelimiter, quadSlashDelimiter, oldStyleDocCommentDelimiter;
-        private bool isCSharp;
+        private bool isCSharp, isCStyleCode;
 
         #endregion
 
@@ -65,6 +65,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             oldStyleDocCommentDelimiter = (string)classifierConfiguration.Attribute("OldStyleDocCommentDelimiter");
 
             isCSharp = filename.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
+            isCStyleCode = (spellCheckConfiguration.CSharpOptions.ApplyToAllCStyleLanguages &&
+                ClassifierFactory.IsCStyleCode(filename));
         }
         #endregion
 
@@ -72,9 +74,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         /// <inheritdoc />
-        /// <remarks>This classifier will ignore elements excluded by the C# options in C# files and will
-        /// classify XML documentation comments to eliminated things that shouldn't be spell checked within
-        /// them.</remarks>
+        /// <remarks>This classifier will ignore elements excluded by the C# options in C# files and, if wanted,
+        /// all C-style code.  It will also classify XML documentation comments to eliminated things that
+        /// shouldn't be spell checked within them.</remarks>
         public override IEnumerable<SpellCheckSpan> Parse()
         {
             int line, column;
@@ -83,10 +85,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             foreach(var span in spans)
             {
-                // These options currently only apply to C#.  In theory, they could be applied to all C-style
-                // languages but I'd have to update the tagger to support any C-style language with them which
-                // I haven't looked into doing yet.
-                if(isCSharp)
+                // Apply the C# options to C# code and, if wanted, all C-style code
+                if(isCSharp || isCStyleCode)
                 {
                     var opts = this.SpellCheckConfiguration.CSharpOptions;
                     var classification = span.Classification;

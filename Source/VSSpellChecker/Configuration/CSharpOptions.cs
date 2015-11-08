@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpOptions.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
+// Updated : 10/29/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -81,5 +81,13 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <value>The default is false to include interpolated strings</value>
         [DefaultValue(false)]
         public bool IgnoreInterpolatedStrings { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to apply these options to all C-style languages
+        /// </summary>
+        /// <value>The default is false to only apply the settings to C# code.  If enabled, only the options
+        /// relevant to the language are used based on how the code is parsed by the tagger.</value>
+        [DefaultValue(false)]
+        public bool ApplyToAllCStyleLanguages { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/14/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -561,6 +561,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             // If null, the file type is ignored
                             if(classifier != null)
                             {
+                                wordSplitter.Mnemonic = ClassifierFactory.GetMnemonic(file.Filename);
+
                                 // If open in an editor, use the current text from it if possible
                                 if(openDocuments.Contains(file.CanonicalName))
                                 {
@@ -593,9 +595,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             }
                         }
                     }
-
-                    if(issues.Count >= maxIssues)
-                        break;
                 }
             }
             catch(OperationCanceledException)
@@ -622,7 +621,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
             List<Match> rangeExclusions = null;
             IList<string> spellingAlternates;
             Span errorSpan, deleteWordSpan, lastWord;
-            string textToSplit, textToCheck, preferredTerm;
+            string textToSplit, actualWord, textToCheck, preferredTerm;
+            int mnemonicPos;
 
             // **************************************************************************************************
             // NOTE: If anything changes here, update the related tagger spell checking code in
@@ -659,7 +659,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var word in wordSplitter.GetWordsInText(textToSplit))
                 {
-                    textToCheck = textToSplit.Substring(word.Start, word.Length);
+                    actualWord = textToSplit.Substring(word.Start, word.Length);
+                    mnemonicPos = actualWord.IndexOf(wordSplitter.Mnemonic);
+
+                    if(mnemonicPos == -1)
+                        textToCheck = actualWord;
+                    else
+                        textToCheck = actualWord.Substring(0, mnemonicPos) + actualWord.Substring(mnemonicPos + 1);
 
                     // Spell check the word if it looks like one and is not ignored
                     if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||
@@ -670,7 +676,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                         // Check for a doubled word
                         if(wordSplitter.Configuration.DetectDoubledWords && lastWord.Length != 0 &&
-                          textToSplit.Substring(lastWord.Start, lastWord.Length).Equals(textToCheck,
+                          textToSplit.Substring(lastWord.Start, lastWord.Length).Equals(actualWord,
                           StringComparison.OrdinalIgnoreCase) && String.IsNullOrWhiteSpace(textToSplit.Substring(
                           lastWord.Start + lastWord.Length, word.Start - lastWord.Start - lastWord.Length)))
                         {
@@ -678,7 +684,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             deleteWordSpan = new Span(span.Span.Start + lastWord.Start + lastWord.Length,
                                 word.Length + word.Start - lastWord.Start - lastWord.Length);
 
-                            yield return new FileMisspelling(errorSpan, deleteWordSpan, textToCheck);
+                            yield return new FileMisspelling(errorSpan, deleteWordSpan, actualWord);
 
                             lastWord = word;
                             continue;
@@ -695,7 +701,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                               wordSplitter.Configuration.DeprecatedTerms.TryGetValue(textToCheck, out preferredTerm))
                             {
                                 yield return new FileMisspelling(MisspellingType.DeprecatedTerm, errorSpan,
-                                    textToCheck, new[] { new SpellingSuggestion(null, preferredTerm) });
+                                    actualWord, new[] { new SpellingSuggestion(null, preferredTerm) });
                                 continue;
                             }
 
@@ -703,7 +709,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                               wordSplitter.Configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
                             {
                                 yield return new FileMisspelling(MisspellingType.CompoundTerm, errorSpan,
-                                    textToCheck, new[] { new SpellingSuggestion(null, preferredTerm) });
+                                    actualWord, new[] { new SpellingSuggestion(null, preferredTerm) });
                                 continue;
                             }
 
@@ -711,7 +717,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                               wordSplitter.Configuration.UnrecognizedWords.TryGetValue(textToCheck, out spellingAlternates))
                             {
                                 yield return new FileMisspelling(MisspellingType.UnrecognizedWord, errorSpan,
-                                    textToCheck, spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
+                                    actualWord, spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
                                 continue;
                             }
 
@@ -741,7 +747,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         continue;
                                 }
 
-                                yield return new FileMisspelling(errorSpan, textToCheck);
+                                yield return new FileMisspelling(errorSpan, actualWord);
                             }
                         }
                     }

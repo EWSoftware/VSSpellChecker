@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/14/2015
+// Updated : 10/28/2015
 // Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -17,6 +17,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 09/02/2015  EFW  Moved the word splitting code into its own class for use in project spell checking as well
+// 10/27/2015  EFW  Added support for ignoring mnemonics
 //===============================================================================================================
 
 using System;
@@ -40,14 +41,16 @@ namespace VisualStudio.SpellChecker
         //=====================================================================
 
         // Word break characters (\u201C/\u201D = Unicode quotes, \u2026 = Ellipsis character).
-        // Specifically excludes: _ . ' @
-        private const string wordBreakChars = " \t!\"#$%&()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u2026";
+        // Specifically excludes: _ . ' @ &
+        private const string wordBreakChars = " \t!\"#$%()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u2026";
 
         // Regular expressions used to find things that look like XML elements and URLs
         internal static Regex XmlElement = new Regex(@"<[A-Za-z/]+?.*?>");
 
         internal static Regex Url = new Regex(@"(ht|f)tp(s?)\:\/\/[0-9a-z]([-.\w]*[0-9a-z])*(:(0-9)*)*(\/?)" +
             @"([a-z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?", RegexOptions.IgnoreCase);
+
+        private char mnemonic;
 
         #endregion
 
@@ -66,6 +69,32 @@ namespace VisualStudio.SpellChecker
         /// word splitting process are handled.</remarks>
         public RangeClassification Classification { get; set; }
 
+        /// <summary>
+        /// The mnemonic character
+        /// </summary>
+        public char Mnemonic
+        {
+            get { return mnemonic; }
+            set
+            {
+                if(value != '&' && value != '_')
+                    value = '&';
+
+                mnemonic = value;
+            }
+        }
+        #endregion
+
+        #region Constructor
+        //=====================================================================
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public WordSplitter()
+        {
+            mnemonic = '&';
+        }
         #endregion
 
         #region Helper methods
@@ -113,7 +142,7 @@ namespace VisualStudio.SpellChecker
                                     // Find the end of the word
                                     int wordEnd = end;
 
-                                    while(++wordEnd < text.Length && !this.IsWordBreakCharacter(text[wordEnd]))
+                                    while(++wordEnd < text.Length && !this.IsWordBreakCharacter(text[wordEnd], true))
                                         ;
 
                                     if(this.Configuration.ShouldIgnoreWord(text.Substring(end - 1, --wordEnd - i + 1)))
@@ -339,14 +368,28 @@ namespace VisualStudio.SpellChecker
                 }
 
                 // Skip word separator
-                if(this.IsWordBreakCharacter(text[i]))
+                if(this.IsWordBreakCharacter(text[i], true))
                     continue;
 
                 // Find the end of the word
                 end = i;
 
-                while(++end < text.Length && !this.IsWordBreakCharacter(text[end]))
+                while(++end < text.Length && !this.IsWordBreakCharacter(text[end], false))
                     ;
+
+                // Special case if ignoring mnemonics.  If the word ends in what looks like an XML entity, break
+                // it before the entity (i.e. "Caption&gt;" will only return "Caption").
+                if(mnemonic == '&' && end < text.Length && text[end] == ';' && this.Configuration.IgnoreMnemonics)
+                {
+                    int tempEnd = end;
+
+                    while(--tempEnd > i)
+                        if(text[tempEnd] == '&')
+                        {
+                            end = tempEnd;
+                            break;
+                        }
+                }
 
                 // Skip XML entity reference &[name];
                 if(end < text.Length && i > 0 && text[i - 1] == '&' && text[end] == ';')
@@ -359,8 +402,9 @@ namespace VisualStudio.SpellChecker
                 while(i < end && text[i] == '\'')
                     i++;
 
-                // Skip trailing apostrophes, periods, and at-signs
-                while(--end > i && (text[end] == '\'' || text[end] == '.' || text[end] == '@'))
+                // Skip trailing apostrophes, periods, at-signs, and mnemonics
+                while(--end > i && (text[end] == '\'' || text[end] == '.' || text[end] == '@' ||
+                  text[end] == mnemonic))
                     ;
 
                 end++;    // Move back to last match
@@ -377,11 +421,14 @@ namespace VisualStudio.SpellChecker
         /// See if the specified character is a word break character
         /// </summary>
         /// <param name="c">The character to check</param>
+        /// <param name="includingMnemonic">True to also include the mnemonic character as a word break or false
+        /// to ignore it.</param>
         /// <returns>True if the character is a word break, false if not</returns>
-        private bool IsWordBreakCharacter(char c)
+        private bool IsWordBreakCharacter(char c, bool includingMnemonic)
         {
             return wordBreakChars.Contains(c) || Char.IsWhiteSpace(c) ||
-                (c == '_' && this.Configuration.TreatUnderscoreAsSeparator) ||
+                (c == '_' && mnemonic != '_' && this.Configuration.TreatUnderscoreAsSeparator) ||
+                (c == mnemonic && (!this.Configuration.IgnoreMnemonics || includingMnemonic)) ||
                 ((c == '.' || c == '@') && !this.Configuration.IgnoreFilenamesAndEMailAddresses);
         }
 
@@ -416,14 +463,14 @@ namespace VisualStudio.SpellChecker
                 return false;
 
             // Check for underscores and digits
-            if(word.Any(c => c == '_' || (Char.IsDigit(c) && this.Configuration.IgnoreWordsWithDigits)))
+            if(word.Any(c => (c == '_' && mnemonic != '_') || (Char.IsDigit(c) && this.Configuration.IgnoreWordsWithDigits)))
                 return false;
 
             // Ignore if all digits (this only happens if the Ignore Words With Digits option is false)
-            if(!word.Any(c => Char.IsLetter(c)))
+            if(!word.Any(c => Char.IsLetter(c) && c != mnemonic))
                 return false;
 
-            // Ignore if all uppercase, accounting for apostrophes and digits
+            // Ignore if all uppercase, accounting for apostrophes, digits, and mnemonics
             if(word.All(c => Char.IsUpper(c) || !Char.IsLetter(c)))
                 return !this.Configuration.IgnoreWordsInAllUppercase;
 
