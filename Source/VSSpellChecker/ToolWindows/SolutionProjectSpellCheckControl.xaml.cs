@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/28/2015
+// Updated : 12/16/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -34,6 +34,7 @@ using System.Windows.Input;
 using EnvDTE;
 using EnvDTE80;
 
+using Microsoft.Win32;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -1483,6 +1484,73 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     MessageBox.Show("Cannot add an empty word to the dictionary", PackageResources.PackageTitle,
                         MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
+        }
+
+        /// <summary>
+        /// Export issues to a CSV file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void cmdExportIssues_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
+            int idx = dgIssues.SelectedIndex;
+
+            if(idx != -1 && e.Command != SpellCheckCommands.ExportAllIssues)
+            {
+                var currentIssue = issues[idx];
+
+                if(e.Command == SpellCheckCommands.ExportProjectIssues)
+                    issues = issues.Where(i => i.ProjectName == currentIssue.ProjectName).ToList();
+                else
+                    issues = issues.Where(i => i.Filename == currentIssue.Filename).ToList();
+            }
+
+            if(issues.Count != 0)
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+
+                dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                dlg.FileName = "SpellingIssues.csv";
+                dlg.DefaultExt = ".csv";
+                dlg.Filter = "Spelling Issues Files (*.csv)|*.csv|All Files (*.*)|*.*";
+
+                if((dlg.ShowDialog() ?? false))
+                {
+                    try
+                    {
+                        using(StreamWriter sw = new StreamWriter(dlg.FileName))
+                        {
+                            sw.WriteLine("Project,File,Line #,Issue,Word,Text");
+
+                            foreach(var issue in issues)
+                            {
+                                sw.Write(issue.ProjectName.ToCsvField(true));
+                                sw.Write(issue.Filename.ToCsvField(true));
+                                sw.Write(issue.LineNumber.ToCsvField(true));
+                                sw.Write(issue.IssueDescription.ToCsvField(true));
+                                sw.Write(issue.Word.ToCsvField(true));
+                                sw.WriteLine(issue.LineText.ToCsvField(false));
+                            }
+                        }
+
+                        if(MessageBox.Show("The issues have been exported.  Would you like to open the file now?",
+                          PackageResources.PackageTitle, MessageBoxButton.YesNo, MessageBoxImage.Question,
+                          MessageBoxResult.No) == MessageBoxResult.Yes)
+                        {
+                            System.Diagnostics.Process.Start(dlg.FileName);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show("Error exporting spell check issues: " + ex.Message, PackageResources.PackageTitle,
+                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    }
+                }
+            }
+            else
+                MessageBox.Show("Select an issue for export first", PackageResources.PackageTitle,
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
         #endregion
     }

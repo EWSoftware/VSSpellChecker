@@ -113,6 +113,14 @@ words to the ignored list in a configuration file.  You can copy and paste them 
 add them to the list.</para>
 							</listItem>
 
+							<listItem>
+								<para><ui>Export</ui> - This contains a submenu with three options: Export All Issues, Export
+Project Issues (only those related to the project of the current issue), and Export File Issues (only those
+related to the file of the current issue).  The selected issues will be exported to a comma-separated values
+(CSV) file suitable for opening in Microsoft Excel or another such application.  Once exported, you will be asked
+whether or not you want to open the file.</para>
+							</listItem>
+
 						</list>
 					</listItem>
 

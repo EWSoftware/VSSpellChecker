@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/13/2015
+// Updated : 12/16/2015
 // Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -386,6 +386,34 @@ namespace VisualStudio.SpellChecker
                 return dte.SourceControl.CheckOutItem(dictionaryWordsFile);
 
             return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+        }
+        #endregion
+
+        #region To CSV field extension method
+        //=====================================================================
+
+        /// <summary>
+        /// This converts a value to a string suitable for writing to a text file as a comma-separated value (CSV)
+        /// </summary>
+        /// <param name="value">The value to write</param>
+        /// <param name="writeSeparator">True to add a comma separator to the value, false if not</param>
+        /// <returns>The value in a form suitable for writing to a CSV file</returns>
+        public static string ToCsvField(this object value, bool writeSeparator)
+        {
+            string fieldValue;
+
+            if(value == null)
+                fieldValue = String.Empty;
+            else
+                fieldValue = value.ToString();
+
+            if(fieldValue.IndexOfAny(new[] { ',', '\"'}) != -1)
+                fieldValue = "\"" + fieldValue.Replace("\"", "\"\"") + "\"";
+
+            if(writeSeparator)
+                fieldValue += ",";
+
+            return fieldValue;
         }
         #endregion
     }

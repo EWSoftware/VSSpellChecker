@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCommands.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/04/2015
+// Updated : 12/16/2015
 // Note    : Copyright 2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -196,6 +196,72 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         typeof(SpellCheckCommands));
 
                 return addToDictionary;
+            }
+        }
+        #endregion
+
+        #region Export All Issues command
+        //=====================================================================
+
+        private static RoutedUICommand exportAllIssues;
+
+        /// <summary>
+        /// Export all issues to a CSV file
+        /// </summary>
+        /// <remarks>This command has no default key binding</remarks>
+        public static RoutedUICommand ExportAllIssues
+        {
+            get
+            {
+                if(exportAllIssues == null)
+                    exportAllIssues = new RoutedUICommand("Export All Issues", "ExportAllIssues",
+                        typeof(SpellCheckCommands));
+
+                return exportAllIssues;
+            }
+        }
+        #endregion
+
+        #region Export Project Issues command
+        //=====================================================================
+
+        private static RoutedUICommand exportProjectIssues;
+
+        /// <summary>
+        /// Export project issues to a CSV file
+        /// </summary>
+        /// <remarks>This command has no default key binding</remarks>
+        public static RoutedUICommand ExportProjectIssues
+        {
+            get
+            {
+                if(exportProjectIssues == null)
+                    exportProjectIssues = new RoutedUICommand("Export Project Issues", "ExportProjectIssues",
+                        typeof(SpellCheckCommands));
+
+                return exportProjectIssues;
+            }
+        }
+        #endregion
+
+        #region Export File Issues command
+        //=====================================================================
+
+        private static RoutedUICommand exportFileIssues;
+
+        /// <summary>
+        /// Export file issues to a CSV file
+        /// </summary>
+        /// <remarks>This command has no default key binding</remarks>
+        public static RoutedUICommand ExportFileIssues
+        {
+            get
+            {
+                if(exportFileIssues == null)
+                    exportFileIssues = new RoutedUICommand("Export File Issues", "ExportFileIssues",
+                        typeof(SpellCheckCommands));
+
+                return exportFileIssues;
             }
         }
         #endregion
