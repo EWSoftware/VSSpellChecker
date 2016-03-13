@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/29/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/10/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
@@ -21,9 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 using VisualStudio.SpellChecker.Configuration;
@@ -65,7 +63,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         private static Dictionary<string, ClassifierDefinition> definitions;
         private static Dictionary<string, string> extensionMap;
-        private static List<Regex> ignoredFilePatterns;
 
         #endregion
 
@@ -138,49 +135,46 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(extensionMap == null)
                 LoadClassifierConfiguration();
 
-            if(!ignoredFilePatterns.Any(p => p.IsMatch(filename)))
-            {
-                if(!String.IsNullOrWhiteSpace(extension))
-                    extension = extension.Substring(1);
+            if(!String.IsNullOrWhiteSpace(extension))
+                extension = extension.Substring(1);
 
-                if(!extensionMap.TryGetValue(extension, out id))
-                    id = FileIsXml(filename) ? "XML" : "PlainText";
+            if(!extensionMap.TryGetValue(extension, out id))
+                id = FileIsXml(filename) ? "XML" : "PlainText";
 
-                if(id != "None" && definitions.TryGetValue(id, out definition))
-                    switch(definition.ClassifierType)
-                    {
-                        case "PlainTextClassifier":
-                            classifier = new PlainTextClassifier(filename, spellCheckConfiguration);
-                            break;
+            if(id != "None" && definitions.TryGetValue(id, out definition))
+                switch(definition.ClassifierType)
+                {
+                    case "PlainTextClassifier":
+                        classifier = new PlainTextClassifier(filename, spellCheckConfiguration);
+                        break;
 
-                        case "XmlClassifier":
-                            classifier = new XmlClassifier(filename, spellCheckConfiguration);
-                            break;
+                    case "XmlClassifier":
+                        classifier = new XmlClassifier(filename, spellCheckConfiguration);
+                        break;
 
-                        case "ReportingServicesClassifier":
-                            classifier = new ReportingServicesClassifier(filename, spellCheckConfiguration);
-                            break;
+                    case "ReportingServicesClassifier":
+                        classifier = new ReportingServicesClassifier(filename, spellCheckConfiguration);
+                        break;
 
-                        case "ResourceFileClassifier":
-                            classifier = new ResourceFileClassifier(filename, spellCheckConfiguration);
-                            break;
+                    case "ResourceFileClassifier":
+                        classifier = new ResourceFileClassifier(filename, spellCheckConfiguration);
+                        break;
 
-                        case "HtmlClassifier":
-                            classifier = new HtmlClassifier(filename, spellCheckConfiguration);
-                            break;
+                    case "HtmlClassifier":
+                        classifier = new HtmlClassifier(filename, spellCheckConfiguration);
+                        break;
 
-                        case "CodeClassifier":
-                            classifier = new CodeClassifier(filename, spellCheckConfiguration, definition.Configuration);
-                            break;
+                    case "CodeClassifier":
+                        classifier = new CodeClassifier(filename, spellCheckConfiguration, definition.Configuration);
+                        break;
 
-                        case "RegexClassifier":
-                            classifier = new RegexClassifier(filename, spellCheckConfiguration, definition.Configuration);
-                            break;
+                    case "RegexClassifier":
+                        classifier = new RegexClassifier(filename, spellCheckConfiguration, definition.Configuration);
+                        break;
 
-                        default:
-                            break;
-                    }
-            }
+                    default:
+                        break;
+                }
 
             return classifier;
         }
@@ -194,7 +188,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             definitions = new Dictionary<string, ClassifierDefinition>(StringComparer.OrdinalIgnoreCase);
             extensionMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            ignoredFilePatterns = new List<Regex>();
 
             List<string> locations = new List<string>
             { 
@@ -220,15 +213,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                         foreach(var extension in config.Descendants("Extension"))
                             extensionMap[(string)extension.Attribute("Value")] = (string)extension.Attribute("Classifier");
-
-                        foreach(var ignoredFile in config.Descendants("Ignore"))
-                        {
-                            string pattern = (string)ignoredFile.Attribute("File");
-
-                            if(!String.IsNullOrWhiteSpace(pattern))
-                                ignoredFilePatterns.Add(new Regex(Regex.Escape(pattern).Replace(
-                                    @"\*", ".*").Replace(@"\?", ".") + "$", RegexOptions.IgnoreCase));
-                        }
                     }
             }
             catch(Exception ex)

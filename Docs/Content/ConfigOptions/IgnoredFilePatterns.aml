@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="70a7fa5b-1a9e-494f-9d2c-5eb3321b2596" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category lets you define sets of files to exclude from being spell checked by using a filename
+wildcard pattern.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<para>To add a new ignored wildcard pattern, enter it in the text box and click the <ui>Add</ui> button.
+The wildcard characters <localUri>?</localUri> and <localUri>*</localUri> can be used to match any single
+character or range of characters respectively.  The pattern can be a filename alone or can include a full or
+partial path.  For example, the default global configuration contains an entry for <localUri>\bin\\*</localUri>
+that ignores all files in the <localUri>.\bin</localUri> folder which may appear in website projects.  It also
+contains several other entries to ignore common script and designer files that typically should not be spell
+checked.</para>
+
+				<para>To remove an ignored file pattern, select it in the list and click the <ui>Remove</ui> button.  To
+reset the list to the default set of ignored file patterns, click the <ui>Default</ui> button.
+				</para>
+
+				<para>For non-global settings, an option is available to inherit the ignored file patterns from
+configurations above the current one.  If enabled, any additional ignored file patterns in the current
+configuration are added to those.  If disabled, the settings in the current configuration will replace the
+inherited list of ignored file patterns.  If not inherited and the list is left empty, it effectively clears the
+list of ignored file patterns.</para>
+				
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

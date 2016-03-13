@@ -213,7 +213,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                             }
                                             catch(ArgumentException)
                                             {
-                                                // Not an IWpfGetView so ignore it
+                                                // Not an IWpfTextView so ignore it
                                             }
                                     }
 

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker
 // File    : AssemblyInfoShared.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 11/8/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 03/12/2016
+// Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // Visual Studio spell checker common assembly attributes
@@ -70,7 +70,7 @@ internal static partial class AssemblyInfo
     // This is used to set the version in the spell checker configuration files.  This should remain unchanged to
     // maintain compatibility with prior releases.  It should only be changed if a breaking change is made that
     // requires the configuration file to be upgraded to a newer format.
-    public const string ConfigSchemaVersion = "2015.7.24.0";
+    public const string ConfigSchemaVersion = "2016.3.10.0";
 
     // Common assembly strong name version - DO NOT CHANGE UNLESS NECESSARY.
     //
@@ -83,15 +83,15 @@ internal static partial class AssemblyInfo
     //
     // This is used to set the assembly file version.  This will change with each new release.  MSIs only
     // support a Major value between 0 and 255 so we drop the century from the year on this one.
-    public const string FileVersion = "15.11.8.0";
+    public const string FileVersion = "16.3.12.0";
 
     // Common product version
     //
     // This may contain additional text to indicate Alpha or Beta states.  The version number will always match
     // the file version above but includes the century on the year.
-    public const string ProductVersion = "2015.11.8.0";
+    public const string ProductVersion = "2016.3.12.0";
 
     // Assembly copyright information
-    public const string Copyright = "Copyright \xA9 2013-2015, Eric Woodruff, All Rights Reserved.\r\n" +
-        "Portions Copyright \xA9 2010-2015, Microsoft Corporation, All Rights Reserved.";
+    public const string Copyright = "Copyright \xA9 2013-2016, Eric Woodruff, All Rights Reserved.\r\n" +
+        "Portions Copyright \xA9 2010-2016, Microsoft Corporation, All Rights Reserved.";
 }

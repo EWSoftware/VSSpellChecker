@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/26/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 03/10/2016
+// Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
@@ -312,7 +312,7 @@ namespace VisualStudio.SpellChecker
                     if(dte2 != null)
                     {
                         // Don't add it again if it's already there, just open it
-                        var existingItem = dte2.Solution.FindProjectItem(settingsFilename);
+                        var existingItem = dte2.Solution.FindProjectItemForFile(settingsFilename);
 
                         if(existingItem == null)
                         {
@@ -324,7 +324,8 @@ namespace VisualStudio.SpellChecker
                                 // If file settings, add them as a dependency if possible
                                 if(!settingsFilename.StartsWith(containingProject.FullName, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    existingItem = dte2.Solution.FindProjectItem(Path.GetFileNameWithoutExtension(settingsFilename));
+                                    existingItem = dte2.Solution.FindProjectItemForFile(
+                                        Path.GetFileNameWithoutExtension(settingsFilename));
 
                                     if(existingItem != null && existingItem.ProjectItems != null)
                                         existingItem = existingItem.ProjectItems.AddFromFile(settingsFilename);

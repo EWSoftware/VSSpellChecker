@@ -41,6 +41,20 @@ consisting of all uppercase letters.  The default is enabled.</para>
 					</listItem>
 
 					<listItem>
+						<para><ui>Ignore words in mixed case</ui> - This will cause the spell checker to ignore any words
+consisting of mixed/camel case letters.  The default is enabled.  Note that if disabled, it may result in a large
+number of false reports of misspellings especially on control prefixes such as <codeInline>btn</codeInline> and
+<codeInline>txt</codeInline>.  These can be added as ignored words to suppress them.  Disabling this option may
+also result in false reports of doubled words where the one of the words is part of a mixed case word preceded
+or followed by another occurrence of the same word.</para>
+
+						<para>Mixed case words that also include an underscore, period, or at sign will not be included for
+spell checking even if this option is disabled based on the option related to the special word break character's
+setting (treat underscores as separators is disabled, ignore words that look like filenames/e-mail addresses
+is enabled)</para>
+					</listItem>
+
+					<listItem>
 						<para><ui>Ignore .NET and C-style format string specifiers</ui> - This will cause the spell checker
 to skip text in .NET and C-style format specifiers (i.e. <codeInline>{0:MM/dd/yyyy}</codeInline> and
 <codeInline>%ld</codeInline>).  This prevents the text within them from showing up as misspelled words.  The

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/14/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/10/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to hold information about a file that will be spell checked
@@ -568,8 +568,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            return (!config.IncludeInProjectSpellCheck ||
-                config.IsExcludedByExtension(Path.GetExtension(this.Filename)) ||
+            return (!config.IncludeInProjectSpellCheck || config.ShouldExcludeFile(this.CanonicalName) ||
                 IsBinaryFile(this.CanonicalName)) ? null : config;
         }
 

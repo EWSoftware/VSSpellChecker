@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/27/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/12/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -44,11 +44,10 @@ namespace VisualStudio.SpellChecker.Configuration
         private CSharpOptions csharpOptions;
         private CodeAnalysisDictionaryOptions cadOptions;
 
-        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, excludedExtensions,
-            recognizedWords;
+        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords;
         private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
-        private List<Regex> exclusionExpressions;
+        private List<Regex> exclusionExpressions, ignoredFilePatterns;
         private Dictionary<string, string> deprecatedTerms, compoundTerms;
         private Dictionary<string, IList<string>> unrecognizedWords;
         #endregion
@@ -107,6 +106,13 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <value>This is true by default</value>
         [DefaultValue(true)]
         public bool IgnoreWordsInAllUppercase { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore words in mixed/camel case
+        /// </summary>
+        /// <value>This is true by default</value>
+        [DefaultValue(true)]
+        public bool IgnoreWordsInMixedCase { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not to ignore .NET and C-style format string specifiers
@@ -179,21 +185,20 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
-        /// This is used to indicate whether or not excluded extensions are inherited by other configurations
+        /// This is used to indicate whether or not ignored file patterns are inherited by other configurations
         /// </summary>
-        /// <value>The default is true so that sub-configurations inherit all excluded extensions from higher
-        /// level configurations.</value>
+        /// <value>The default is true so that sub-configurations inherit all ignored files from higher level
+        /// configurations.</value>
         [DefaultValue(true)]
-        public bool InheritExcludedExtensions { get; set; }
+        public bool InheritIgnoredFilePatterns { get; set; }
 
         /// <summary>
-        /// This read-only property returns an enumerable list of excluded filename extensions
+        /// This read-only property returns an enumerable list of ignored file patterns
         /// </summary>
-        /// <remarks>Filenames with an extension in this set will not be spell checked.  An entry consisting of a
-        /// single period will exclude files without an extension.</remarks>
-        public IEnumerable<string> ExcludedExtensions
+        /// <remarks>Filenames matching the patterns in this set will not be spell checked</remarks>
+        public IEnumerable<Regex> IgnoredFilePatterns
         {
-            get { return excludedExtensions; }
+            get { return ignoredFilePatterns; }
         }
 
         /// <summary>
@@ -329,6 +334,20 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This read-only property returns the default list of ignored file patterns
+        /// </summary>
+        public static IEnumerable<string> DefaultIgnoredFilePatterns
+        {
+            get
+            {
+                return new[] { @"\bin\*", "*.min.cs", "*.min.js", "CodeAnalysisLog.xml", "GlobalSuppressions.*",
+                    "Resources.Designer.*", "Settings.Designer.cs", "Settings.settings", "UpgradeLog.htm",
+                    "bootstrap*.css", "bootstrap*.js", "html5shiv.js", "jquery*.d.ts", "jquery*.js", "respond*.js",
+                    "robots.txt" };
+            }
+        }
+
+        /// <summary>
         /// This read-only property returns the default list of ignored XML elements
         /// </summary>
         public static IEnumerable<string> DefaultIgnoredXmlElements
@@ -369,23 +388,24 @@ namespace VisualStudio.SpellChecker.Configuration
             dictionaryLanguages = new List<CultureInfo>();
 
             this.SpellCheckAsYouType = this.IncludeInProjectSpellCheck = this.DetectDoubledWords =
-                this.IgnoreWordsWithDigits = this.IgnoreWordsInAllUppercase = this.IgnoreFormatSpecifiers =
-                this.IgnoreFilenamesAndEMailAddresses = this.IgnoreXmlElementsInText =
-                this.DetermineResourceFileLanguageFromName = this.InheritExcludedExtensions =
-                this.InheritAdditionalDictionaryFolders = this.InheritIgnoredWords =
-                this.InheritExclusionExpressions = this.InheritXmlSettings = this.IgnoreMnemonics = true;
+                this.IgnoreWordsWithDigits = this.IgnoreWordsInAllUppercase = this.IgnoreWordsInMixedCase =
+                this.IgnoreFormatSpecifiers = this.IgnoreFilenamesAndEMailAddresses =
+                this.IgnoreXmlElementsInText = this.DetermineResourceFileLanguageFromName =
+                this.InheritIgnoredFilePatterns = this.InheritAdditionalDictionaryFolders =
+                this.InheritIgnoredWords = this.InheritExclusionExpressions = this.InheritXmlSettings =
+                this.IgnoreMnemonics = true;
 
             this.TreatUnderscoreAsSeparator = false;
 
             ignoredWords = new HashSet<string>(DefaultIgnoredWords, StringComparer.OrdinalIgnoreCase);
             ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
             spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
-            excludedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             recognizedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             additionalDictionaryFolders = new List<string>();
 
             exclusionExpressions = new List<Regex>();
+            ignoredFilePatterns = new List<Regex>(DefaultIgnoredFilePatterns.Select(p => p.RegexFromFilePattern()));
 
             deprecatedTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             compoundTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -397,19 +417,13 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         /// <summary>
-        /// This is used to determine if a file is to be excluded from spell checking by its extension
+        /// This is used to determine if the file should be excluded by name
         /// </summary>
-        /// <param name="extension">The filename extension to check</param>
+        /// <param name="filename">The filename to check</param>
         /// <returns>True to exclude the file from spell checking, false to include it</returns>
-        public bool IsExcludedByExtension(string extension)
+        public bool ShouldExcludeFile(string filename)
         {
-            if(extension == null)
-                return false;
-
-            if(extension.Length == 0 || extension[0] != '.')
-                extension = "." + extension;
-
-            return excludedExtensions.Contains(extension);
+            return (String.IsNullOrWhiteSpace(filename) || ignoredFilePatterns.Any(p => p.IsMatch(filename)));
         }
 
         /// <summary>
@@ -456,6 +470,7 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.DetectDoubledWords = configuration.ToBoolean(PropertyNames.DetectDoubledWords);
                 this.IgnoreWordsWithDigits = configuration.ToBoolean(PropertyNames.IgnoreWordsWithDigits);
                 this.IgnoreWordsInAllUppercase = configuration.ToBoolean(PropertyNames.IgnoreWordsInAllUppercase);
+                this.IgnoreWordsInMixedCase = configuration.ToBoolean(PropertyNames.IgnoreWordsInMixedCase);
                 this.IgnoreFormatSpecifiers = configuration.ToBoolean(PropertyNames.IgnoreFormatSpecifiers);
                 this.IgnoreFilenamesAndEMailAddresses = configuration.ToBoolean(
                     PropertyNames.IgnoreFilenamesAndEMailAddresses);
@@ -497,23 +512,6 @@ namespace VisualStudio.SpellChecker.Configuration
                 cadOptions.TreatCasingExceptionsAsIgnoredWords = configuration.ToBoolean(
                     PropertyNames.CadOptionsTreatCasingExceptionsAsIgnoredWords);
 
-                this.InheritExcludedExtensions = configuration.ToBoolean(PropertyNames.InheritExcludedExtensions);
-
-                if(configuration.HasProperty(PropertyNames.ExcludedExtensions))
-                {
-                    tempHashSet = new HashSet<string>(configuration.ToValues(PropertyNames.ExcludedExtensions,
-                        PropertyNames.ExcludedExtensionsItem), StringComparer.OrdinalIgnoreCase);
-
-                    if(this.InheritExcludedExtensions)
-                    {
-                        if(tempHashSet.Count != 0)
-                            foreach(string ext in tempHashSet)
-                                excludedExtensions.Add(ext);
-                    }
-                    else
-                        excludedExtensions = tempHashSet;
-                }
-
                 this.InheritAdditionalDictionaryFolders = configuration.ToBoolean(
                     PropertyNames.InheritAdditionalDictionaryFolders);
 
@@ -548,7 +546,8 @@ namespace VisualStudio.SpellChecker.Configuration
                     tempHashSet = new HashSet<string>(configuration.ToValues(PropertyNames.IgnoredWords,
                         PropertyNames.IgnoredWordsItem), StringComparer.OrdinalIgnoreCase);
 
-                    if(this.InheritIgnoredWords)
+                    // For global configurations, we always want to replace the default set
+                    if(this.InheritIgnoredWords && configuration.ConfigurationType != ConfigurationType.Global)
                     {
                         if(tempHashSet.Count != 0)
                             foreach(string word in tempHashSet)
@@ -583,6 +582,34 @@ namespace VisualStudio.SpellChecker.Configuration
                         exclusionExpressions = tempList;
                 }
 
+                this.InheritIgnoredFilePatterns = configuration.ToBoolean(PropertyNames.InheritIgnoredFilePatterns);
+
+                if(configuration.HasProperty(PropertyNames.IgnoredFilePatterns))
+                {
+                    var tempList = new List<string>(configuration.ToValues(PropertyNames.IgnoredFilePatterns,
+                        PropertyNames.IgnoredFilePatternItem));
+
+                    // For global configurations, we always want to replace the default set
+                    if(!this.InheritIgnoredFilePatterns || configuration.ConfigurationType == ConfigurationType.Global)
+                        ignoredFilePatterns.Clear();
+
+                    if(tempList.Count != 0)
+                    {
+                        tempHashSet = new HashSet<string>(ignoredFilePatterns.Select(r => r.ToString()));
+
+                        foreach(string exp in tempList)
+                        {
+                            Regex pattern = exp.RegexFromFilePattern();
+
+                            if(!tempHashSet.Contains(pattern.ToString()))
+                            {
+                                ignoredFilePatterns.Add(pattern);
+                                tempHashSet.Add(pattern.ToString());
+                            }
+                        }
+                    }
+                }
+
                 this.InheritXmlSettings = configuration.ToBoolean(PropertyNames.InheritXmlSettings);
 
                 if(configuration.HasProperty(PropertyNames.IgnoredXmlElements))
@@ -590,7 +617,8 @@ namespace VisualStudio.SpellChecker.Configuration
                     tempHashSet = new HashSet<string>(configuration.ToValues(PropertyNames.IgnoredXmlElements,
                         PropertyNames.IgnoredXmlElementsItem));
 
-                    if(this.InheritXmlSettings)
+                    // For global configurations, we always want to replace the default set
+                    if(this.InheritXmlSettings && configuration.ConfigurationType != ConfigurationType.Global)
                     {
                         if(tempHashSet.Count != 0)
                             foreach(string element in tempHashSet)
@@ -605,7 +633,8 @@ namespace VisualStudio.SpellChecker.Configuration
                     tempHashSet = new HashSet<string>(configuration.ToValues(PropertyNames.SpellCheckedXmlAttributes,
                         PropertyNames.SpellCheckedXmlAttributesItem));
 
-                    if(this.InheritXmlSettings)
+                    // For global configurations, we always want to replace the default set
+                    if(this.InheritXmlSettings && configuration.ConfigurationType != ConfigurationType.Global)
                     {
                         if(tempHashSet.Count != 0)
                             foreach(string attr in tempHashSet)

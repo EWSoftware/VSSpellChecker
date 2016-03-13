@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/28/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 03/12/2016
+// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that handles splitting spans of text up into individual words for spell checking
@@ -411,7 +411,61 @@ namespace VisualStudio.SpellChecker
 
                 // Ignore anything less than two characters
                 if(end - i > 1)
-                    yield return Span.FromBounds(i, end);
+                {
+                    if(this.Configuration.IgnoreWordsInMixedCase)
+                    {
+                        yield return Span.FromBounds(i, end);
+                    }
+                    else
+                    {
+                        // If spell checking mixed/camel case words, see if this is one
+                        string word = text.Substring(i, end - i);
+
+                        if(Char.IsLetter(word[0]) && word.Skip(1).Any(c => Char.IsUpper(c)))
+                        {
+                            // An exception is if it appears in the code analysis dictionary options.  These may
+                            // be camel cased but the user wants them replaced with something else.  Another
+                            // exception is if the word contains a special word break character which will
+                            // cause the word as a whole to be ignored when the related option is enabled/disabled.
+                            if((this.Configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
+                              this.Configuration.DeprecatedTerms.ContainsKey(word)) ||
+                              (this.Configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
+                              this.Configuration.CompoundTerms.ContainsKey(word)) ||
+                              word.IndexOfAny(new[] { '_', '.', '@' }) != -1)
+                            {
+                                yield return Span.FromBounds(i, end);
+                            }
+                            else
+                            {
+                                int split = i;
+
+                                while(split < end)
+                                {
+                                    // Skip consecutive uppercase letters (i.e NHunSpell).  This may not always
+                                    // be accurate but it's the best we can do.
+                                    while(split + 1 < end && Char.IsUpper(text[split + 1]))
+                                        split++;
+
+                                    i = split;
+                                    split++;
+
+                                    while(split < end && !Char.IsUpper(text[split]))
+                                        split++;
+
+                                    // A common occurrence is a final uppercase letter followed by 's' such as
+                                    // IDs or GUIDs.  Ignore those.
+                                    if(split - i == 2 && Char.IsUpper(text[i]) && text[i + 1] == 's')
+                                        i = split;
+
+                                    if(split - i > 1)
+                                        yield return Span.FromBounds(i, split);
+                                }
+                            }
+                        }
+                        else
+                            yield return Span.FromBounds(i, end);
+                    }
+                }
 
                 i = --end;
             }
@@ -437,7 +491,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="word">The word to check</param>
         /// <returns>True if it appears to be a real word or false if any of the following conditions are met:
-        /// 
+        ///
         /// <list type="bullet">
         ///     <description>The word contains a period or an at-sign (it looks like a filename or an e-mail
         /// address) and those words are being ignored.  We may miss a few real misspellings in this case due
@@ -474,7 +528,7 @@ namespace VisualStudio.SpellChecker
             if(word.All(c => Char.IsUpper(c) || !Char.IsLetter(c)))
                 return !this.Configuration.IgnoreWordsInAllUppercase;
 
-            // Ignore if camel cased
+            // Ignore if mixed/camel cased
             if(Char.IsLetter(word[0]) && word.Skip(1).Any(c => Char.IsUpper(c)))
             {
                 // An exception is if it appears in the code analysis dictionary options.  These may be camel

@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceFactory.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/03/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 03/10/2016
+// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the spelling dictionary service factory
@@ -34,6 +34,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 
 using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.ProjectSpellCheck;
 
 namespace VisualStudio.SpellChecker
 {
@@ -87,7 +88,7 @@ namespace VisualStudio.SpellChecker
                 // Generate the configuration settings unique to the file
                 config = this.GenerateConfiguration(buffer);
 
-                if(!config.SpellCheckAsYouType || config.IsExcludedByExtension(buffer.GetFilenameExtension()))
+                if(config == null || !config.SpellCheckAsYouType || config.ShouldExcludeFile(buffer.GetFilename()))
                 {
                     // Mark it as disabled so that we don't have to check again
                     buffer.Properties[SpellCheckerDisabledKey] = true;
@@ -176,14 +177,14 @@ namespace VisualStudio.SpellChecker
 
                     // See if there is a solution configuration
                     filename = solution.FullName + ".vsspell";
-                    projectItem = solution.FindProjectItem(filename);
+                    projectItem = solution.FindProjectItemForFile(filename);
 
                     if(projectItem != null)
                         config.Load(filename);
 
                     // Find the project item for the file we are opening
                     bufferFilename = buffer.GetFilename();
-                    projectItem = (bufferFilename != null) ? solution.FindProjectItem(bufferFilename) : null;
+                    projectItem = solution.FindProjectItemForFile(bufferFilename);
 
                     if(projectItem != null)
                     {
@@ -204,7 +205,7 @@ namespace VisualStudio.SpellChecker
                             else
                                 filename = projectFilename + ".vsspell";
 
-                            projectItem = solution.FindProjectItem(filename);
+                            projectItem = solution.FindProjectItemForFile(filename);
 
                             if(projectItem != null)
                                 config.Load(filename);
@@ -224,7 +225,7 @@ namespace VisualStudio.SpellChecker
                                     {
                                         projectPath = Path.Combine(projectPath, folder);
                                         filename = Path.Combine(projectPath, folder + ".vsspell");
-                                        projectItem = solution.FindProjectItem(filename);
+                                        projectItem = solution.FindProjectItemForFile(filename);
 
                                         if(projectItem != null)
                                             config.Load(filename);
@@ -240,7 +241,7 @@ namespace VisualStudio.SpellChecker
                                 if(projectItem != null && projectItem.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile)
                                 {
                                     filename = (string)projectItem.Properties.Item("FullPath").Value + ".vsspell";
-                                    projectItem = solution.FindProjectItem(filename);
+                                    projectItem = solution.FindProjectItemForFile(filename);
 
                                     if(projectItem != null)
                                         config.Load(filename);
@@ -249,7 +250,7 @@ namespace VisualStudio.SpellChecker
 
                             // And finally, look for file-specific settings for the item itself
                             filename = (string)fileItem.Properties.Item("FullPath").Value + ".vsspell";
-                            projectItem = solution.FindProjectItem(filename);
+                            projectItem = solution.FindProjectItemForFile(filename);
 
                             if(projectItem != null)
                                 config.Load(filename);
@@ -260,7 +261,7 @@ namespace VisualStudio.SpellChecker
                                 // Looks like a solution item, see if a related setting file exists
                                 filename = bufferFilename + ".vsspell";
 
-                                projectItem = solution.FindProjectItem(filename);
+                                projectItem = solution.FindProjectItemForFile(filename);
 
                                 if(projectItem != null)
                                     config.Load(filename);

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/15/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/11/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to load and save spell checker configuration files
@@ -196,11 +196,6 @@ namespace VisualStudio.SpellChecker.Configuration
         /// </summary>
         private void UpgradeConfiguration()
         {
-            string[] propertyNames = new[] { PropertyNames.SpellCheckAsYouType,
-                PropertyNames.IgnoreWordsWithDigits, PropertyNames.IgnoreWordsInAllUppercase,
-                PropertyNames.IgnoreFormatSpecifiers, PropertyNames.IgnoreFilenamesAndEMailAddresses,
-                PropertyNames.IgnoreXmlElementsInText, PropertyNames.TreatUnderscoreAsSeparator };
-
             var format = root.Attribute("Format");
 
             if(format != null)
@@ -208,30 +203,31 @@ namespace VisualStudio.SpellChecker.Configuration
                 Version fileFormat = new Version(format.Value),
                     currentVersion = new Version(AssemblyInfo.ConfigSchemaVersion);
 
-                // If they've downgraded, there's nothing to convert
+                // If they've downgraded, there's nothing to convert.  Any property settings from newer
+                // configurations will have to be added back to the older configuration file format by
+                // editing the configuration file.
                 if(fileFormat < currentVersion)
                 {
-                    // There's only one prior schema version so far (2015.2.1.0)
-
-                    // DefaultLanguage got replaced by SelectedLanguages in schema version 2015.7.24.0
-                    var defaultLanguage = root.Element("DefaultLanguage");
-
-                    if(defaultLanguage != null)
-                    {
-                        if(!String.IsNullOrWhiteSpace(defaultLanguage.Value))
-                            root.Add(new XElement(PropertyNames.SelectedLanguages,
-                                new XElement(PropertyNames.SelectedLanguagesItem, defaultLanguage.Value)));
-
-                        defaultLanguage.Remove();
-                    }
+                    this.ConvertDefaultLanguage();
+                    this.ConvertExcludedExtensionsToIgnoredFilePatterns();
                 }
 
                 format.Value = AssemblyInfo.ConfigSchemaVersion;
-
-                return;
             }
+            else
+                this.ConvertFromOriginalFormat();
+        }
 
-            // Convert from the first version to the new configuration format
+        /// <summary>
+        /// Convert from the very first format to the latest format
+        /// </summary>
+        private void ConvertFromOriginalFormat()
+        {
+            string[] propertyNames = new[] { PropertyNames.SpellCheckAsYouType,
+                PropertyNames.IgnoreWordsWithDigits, PropertyNames.IgnoreWordsInAllUppercase,
+                PropertyNames.IgnoreFormatSpecifiers, PropertyNames.IgnoreFilenamesAndEMailAddresses,
+                PropertyNames.IgnoreXmlElementsInText, PropertyNames.TreatUnderscoreAsSeparator };
+
             document.AddFirst(new XComment(" Visual Studio Spell Checker configuration file - " +
                 "[https://github.com/EWSoftware/VSSpellChecker]\r\n     Do not edit the XML.  Use the " +
                 "configuration file editor in Visual Studio to modify the settings. "));
@@ -309,7 +305,7 @@ namespace VisualStudio.SpellChecker.Configuration
                 root.Add(new XElement(PropertyNames.IgnoreCharacterClass, ignoredCharacterClass.Value));
             }
 
-            // Convert excluded extensions to a list
+            // Convert excluded extensions to a list of ignored file patterns
             var excludeExts = root.Element("ExcludeByFilenameExtension");
 
             if(excludeExts != null)
@@ -320,8 +316,12 @@ namespace VisualStudio.SpellChecker.Configuration
 
                 if(!String.IsNullOrWhiteSpace(excluded))
                 {
-                    excludeExts = new XElement(PropertyNames.ExcludedExtensions);
+                    excludeExts = new XElement(PropertyNames.IgnoredFilePatterns);
                     root.Add(excludeExts);
+
+                    // Add the default set and then the user's values
+                    foreach(string pattern in SpellCheckerConfiguration.DefaultIgnoredFilePatterns)
+                        excludeExts.Add(new XElement(PropertyNames.IgnoredFilePatternItem, pattern));
 
                     foreach(string ext in excluded.Split(new[] { ',', ' ', '\t', '\r', '\n' },
                       StringSplitOptions.RemoveEmptyEntries))
@@ -333,9 +333,88 @@ namespace VisualStudio.SpellChecker.Configuration
                         else
                             addExt = ext;
 
-                        excludeExts.Add(new XElement(PropertyNames.ExcludedExtensionsItem, addExt));
+                        if(addExt != ".")
+                            excludeExts.Add(new XElement(PropertyNames.IgnoredFilePatternItem, "*" + addExt));
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Convert DefaultLanguage which got replaced by SelectedLanguages in schema version 2015.7.24.0
+        /// </summary>
+        private void ConvertDefaultLanguage()
+        {
+            var defaultLanguage = root.Element("DefaultLanguage");
+
+            if(defaultLanguage != null)
+            {
+                if(!String.IsNullOrWhiteSpace(defaultLanguage.Value))
+                {
+                    // If downgraded and then upgraded, the element may already exist
+                    var selectedLanguages = root.Element(PropertyNames.SelectedLanguages);
+
+                    if(selectedLanguages == null)
+                    {
+                        root.Add(new XElement(PropertyNames.SelectedLanguages,
+                            new XElement(PropertyNames.SelectedLanguagesItem, defaultLanguage.Value)));
+                    }
+                    else
+                    {
+                        selectedLanguages.RemoveNodes();
+                        selectedLanguages.Add(new XElement(PropertyNames.SelectedLanguagesItem,
+                            defaultLanguage.Value));
+                    }
+                }
+
+                defaultLanguage.Remove();
+            }
+        }
+
+        /// <summary>
+        /// Convert ExcludedExtensions which got replaced by IgnoredFilePatterns in schema version 2016.3.10.0
+        /// </summary>
+        private void ConvertExcludedExtensionsToIgnoredFilePatterns()
+        {
+            var excludeExts = root.Element("InheritExcludedExtensions");
+
+            if(excludeExts != null)
+            {
+                excludeExts.Remove();
+
+                var inheritIgnored = root.Element(PropertyNames.InheritIgnoredFilePatterns);
+
+                // If downgraded and then upgraded, the element may already exist
+                if(inheritIgnored != null)
+                    inheritIgnored.Value = excludeExts.Value;
+                else
+                    root.Add(new XElement(PropertyNames.InheritIgnoredFilePatterns, excludeExts.Value));
+            }
+
+            excludeExts = root.Element("ExcludedExtension");
+
+            if(excludeExts != null)
+            {
+                excludeExts.Remove();
+
+                // If downgraded and then upgraded, the element may already exist
+                var ignoredPatterns = root.Element(PropertyNames.IgnoredFilePatterns);
+
+                if(ignoredPatterns == null)
+                {
+                    ignoredPatterns = new XElement(PropertyNames.IgnoredFilePatterns);
+                    root.Add(ignoredPatterns);
+                }
+                else
+                    ignoredPatterns.RemoveNodes();
+
+                // Add the default set and then the user's values
+                foreach(string pattern in SpellCheckerConfiguration.DefaultIgnoredFilePatterns)
+                    ignoredPatterns.Add(new XElement(PropertyNames.IgnoredFilePatternItem, pattern));
+
+                foreach(var ext in excludeExts.Descendants("Exclude"))
+                    if(ext.Value != ".")
+                        ignoredPatterns.Add(new XElement(PropertyNames.IgnoredFilePatternItem, "*" + ext.Value));
             }
         }
 

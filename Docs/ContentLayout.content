@@ -88,9 +88,9 @@
         <HelpKeyword index="K" term="configuration, exclusion expressions" />
       </HelpKeywords>
     </Topic>
-    <Topic id="70a7fa5b-1a9e-494f-9d2c-5eb3321b2596" visible="True" title="Excluded Filename Extensions">
+    <Topic id="70a7fa5b-1a9e-494f-9d2c-5eb3321b2596" visible="True" title="Ignored Files">
       <HelpKeywords>
-        <HelpKeyword index="K" term="configuration, excluded filename extensions" />
+        <HelpKeyword index="K" term="configuration, ignored files" />
       </HelpKeywords>
     </Topic>
     <Topic id="db9ee77f-6932-4df7-bd06-e94f20fc7450" visible="True" title="XML Files">
@@ -128,6 +128,11 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="a81683de-f3ea-4698-847a-d87c3f1e8477" visible="True" title="Version 2016.3.12.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2016.3.12.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="a3eaed0f-fcf3-4df8-8889-7073395601a5" visible="True" isSelected="true" title="Version 2015.11.8.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2015.11.8.0" />

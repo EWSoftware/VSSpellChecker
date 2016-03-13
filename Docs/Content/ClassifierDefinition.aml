@@ -216,26 +216,6 @@ to reaching the point of determining the classifier type.</para>
 					</content>
 				</section>
 
-				<section address="IgnoredFile">
-					<title>IgnoredFiles</title>
-					<content>
-						<para>This element contains a list of filename patterns that should be ignored automatically when
-performing a solution/project spell check.  It consists of a set of <codeInline>Ignore</codeInline> elements that
-define a filename or wildcard to ignore.</para>
-					</content>
-				</section>
-
-				<section address="Ignore">
-					<title>Ignore</title>
-					<content>
-						<para>This element is used to define a filename pattern that should be ignored automatically.  The
-<codeInline>File</codeInline> attribute contains a filename or wildcard pattern to match.  The filename pattern
-can contain folders if necessary.  For example, the default configuration contains an entry for
-<localUri>\bin\*</localUri> that ignores all files in the <localUri>.\bin</localUri> folder which may appear in
-website projects.  It also contains several other entries to ignore common script and designer files that
-typically should not be spell checked.</para>
-					</content>
-				</section>
 			</sections>
 		</section>
 
@@ -287,18 +267,6 @@ Studio is restarted.</para>
 &lt;/Classifications&gt;
 </code>
 
-<code language="XML" title=" ">
-&lt;Classifications&gt;
-	&lt;!-- This example adds some ignored file entries --&gt;
-	&lt;IgnoredFiles&gt;
-		&lt;!-- Ignore everything in the .\DataFiles folder --&gt;
-		&lt;Ignore File="\DataFiles\*" /&gt;
-
-		&lt;!-- Ignore all designer files --&gt;
-		&lt;Ignore File="*.Designer.*" /&gt;
-	&lt;/IgnoredFiles&gt;
-&lt;/Classifications&gt;
-</code>
 			</content>
 			
 		</section>

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/16/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 03/11/2016
+// Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a utility class with extension and utility methods.
@@ -266,6 +266,24 @@ namespace VisualStudio.SpellChecker
         //=====================================================================
 
         /// <summary>
+        /// This is used to convert a wildcard file pattern to an equivalent regular expression
+        /// </summary>
+        /// <param name="pattern">The wildcard file pattern</param>
+        /// <returns>A regular expression that can be used to match the given file wildcard pattern</returns>
+        public static Regex RegexFromFilePattern(this string pattern)
+        {
+            if(String.IsNullOrWhiteSpace(pattern))
+                pattern = @"\--";
+
+            // Make sure it starts with a backslash so that it doesn't match the end of an unrelated filename
+            // (i.e. "Utilities.*" doesn't match "FileUtilities.*").
+            if(pattern[0] != '\\')
+                pattern = @"\" + pattern;
+
+            return new Regex(Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$", RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
         /// Convert the named property value to the appropriate selection state
         /// </summary>
         /// <param name="configuration">The configuration file from which to obtain the property value</param>
@@ -288,11 +306,26 @@ namespace VisualStudio.SpellChecker
         {
             return (state == PropertyState.Inherited) ? (bool?)null : state == PropertyState.Yes ? true : false;
         }
-
         #endregion
 
         #region Project and source control interaction
         //=====================================================================
+
+        /// <summary>
+        /// This is used to find configuration file project items more efficiently
+        /// </summary>
+        /// <param name="solution">The solution to search</param>
+        /// <param name="filename">The filename to find</param>
+        /// <returns>The project item of the configuration file if found or null if not found</returns>
+        public static ProjectItem FindProjectItemForFile(this Solution solution, string filename)
+        {
+            // If the file doesn't exist, we don't need to look any further.  This saves searching the solution
+            // which can be slow for extremely large projects.
+            if(String.IsNullOrWhiteSpace(filename) || !File.Exists(filename))
+                return null;
+
+            return solution.FindProjectItem(filename);
+        }
 
         /// <summary>
         /// Enumerate all of the projects within the given solution
@@ -364,8 +397,8 @@ namespace VisualStudio.SpellChecker
 
             // See if the user file or its related dictionary is part of the solution.  If neither are, we can
             // write to it if not read-only.
-            var userItem = dte.Solution.FindProjectItem(dictionaryWordsFile);
-            var dictItem = dte.Solution.FindProjectItem(dictionaryFile);
+            var userItem = dte.Solution.FindProjectItemForFile(dictionaryWordsFile);
+            var dictItem = dte.Solution.FindProjectItemForFile(dictionaryFile);
 
             if(dictItem == null && userItem == null)
                 return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);

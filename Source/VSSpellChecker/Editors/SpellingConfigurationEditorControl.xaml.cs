@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/15/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/12/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit spell checker configuration settings files
@@ -111,7 +111,7 @@ namespace VisualStudio.SpellChecker.Editors
                 typeof(CSharpOptionsUserControl),
                 typeof(IgnoredWordsUserControl),
                 typeof(ExclusionExpressionsUserControl),
-                typeof(ExcludedExtensionsUserControl),
+                typeof(IgnoredFilePatternsUserControl),
                 typeof(XmlFilesUserControl),
                 typeof(CodeAnalysisUserControl)
             };

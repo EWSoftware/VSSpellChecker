@@ -75,8 +75,8 @@
     <Compile Include="Editors\Pages\CodeAnalysisUserControl.xaml.cs">
       <DependentUpon>CodeAnalysisUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Editors\Pages\ExcludedExtensionsUserControl.xaml.cs">
-      <DependentUpon>ExcludedExtensionsUserControl.xaml</DependentUpon>
+    <Compile Include="Editors\Pages\IgnoredFilePatternsUserControl.xaml.cs">
+      <DependentUpon>IgnoredFilePatternsUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editors\Pages\ExclusionExpressionAddEditForm.xaml.cs">
       <DependentUpon>ExclusionExpressionAddEditForm.xaml</DependentUpon>
@@ -514,7 +514,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Editors\Pages\ExcludedExtensionsUserControl.xaml">
+    <Page Include="Editors\Pages\IgnoredFilePatternsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

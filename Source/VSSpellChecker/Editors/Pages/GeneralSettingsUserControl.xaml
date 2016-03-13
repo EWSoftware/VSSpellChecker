@@ -42,6 +42,10 @@
 						<Label Margin="3" Content="Ignore words in all uppercase" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
+						<ComboBox Name="cboIgnoreMixedCase" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<Label Margin="3" Content="Ignore words in mixed/camel case" />
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
 						<ComboBox Name="cboIgnoreFormatSpecifiers" Width="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore .NET and C-style format string specifiers" />
 					</StackPanel>

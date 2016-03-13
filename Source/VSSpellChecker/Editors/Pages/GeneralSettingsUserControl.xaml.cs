@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/28/2015
-// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
+// Updated : 03/12/2016
+// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the general spell checker configuration settings
@@ -77,9 +77,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             cboSpellCheckAsYouType.ItemsSource = cboIncludeInProjectSpellCheck.ItemsSource =
                 cboDetectDoubledWords.ItemsSource = cboIgnoreWordsWithDigits.ItemsSource =
-                cboIgnoreAllUppercase.ItemsSource = cboIgnoreFormatSpecifiers.ItemsSource =
-                cboIgnoreFilenamesAndEMail.ItemsSource = cboIgnoreXmlInText.ItemsSource =
-                cboTreatUnderscoresAsSeparators.ItemsSource = cboIgnoreMnemonics.ItemsSource = dataSource;
+                cboIgnoreAllUppercase.ItemsSource = cboIgnoreMixedCase.ItemsSource =
+                cboIgnoreFormatSpecifiers.ItemsSource = cboIgnoreFilenamesAndEMail.ItemsSource =
+                cboIgnoreXmlInText.ItemsSource = cboTreatUnderscoresAsSeparators.ItemsSource =
+                cboIgnoreMnemonics.ItemsSource = dataSource;
 
             cboSpellCheckAsYouType.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.SpellCheckAsYouType);
@@ -91,6 +92,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 PropertyNames.IgnoreWordsWithDigits);
             cboIgnoreAllUppercase.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.IgnoreWordsInAllUppercase);
+            cboIgnoreMixedCase.SelectedValue = configuration.ToPropertyState(
+                PropertyNames.IgnoreWordsInMixedCase);
             cboIgnoreFormatSpecifiers.SelectedValue = configuration.ToPropertyState(
                 PropertyNames.IgnoreFormatSpecifiers);
             cboIgnoreFilenamesAndEMail.SelectedValue = configuration.ToPropertyState(
@@ -142,6 +145,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 ((PropertyState)cboIgnoreWordsWithDigits.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.IgnoreWordsInAllUppercase,
                 ((PropertyState)cboIgnoreAllUppercase.SelectedValue).ToPropertyValue());
+            configuration.StoreProperty(PropertyNames.IgnoreWordsInMixedCase,
+                ((PropertyState)cboIgnoreMixedCase.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.IgnoreFormatSpecifiers,
                 ((PropertyState)cboIgnoreFormatSpecifiers.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.IgnoreFilenamesAndEMailAddresses,

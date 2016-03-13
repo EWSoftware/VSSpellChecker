@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/29/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/12/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class containing the configuration property name constants
@@ -63,6 +63,11 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Ignore words in all uppercase
         /// </summary>
         public const string IgnoreWordsInAllUppercase = "IgnoreWordsInAllUppercase";
+
+        /// <summary>
+        /// Ignore words in mixed/camel case
+        /// </summary>
+        public const string IgnoreWordsInMixedCase = "IgnoreWordsInMixedCase";
 
         /// <summary>
         /// Ignore format specifiers
@@ -140,19 +145,19 @@ namespace VisualStudio.SpellChecker.Configuration
         public const string CSharpOptionsApplyToAllCStyleLanguages = "CSharpOptions.ApplyToAllCStyleLanguages";
 
         /// <summary>
-        /// Inherit excluded extensions
+        /// Inherit ignored file patterns
         /// </summary>
-        public const string InheritExcludedExtensions = "InheritExcludedExtensions";
+        public const string InheritIgnoredFilePatterns = "InheritIgnoredFilePatterns";
 
         /// <summary>
-        /// Excluded filename extensions list
+        /// Ignored file patterns
         /// </summary>
-        public const string ExcludedExtensions = "ExcludedExtension";
+        public const string IgnoredFilePatterns = "IgnoredFilePatterns";
 
         /// <summary>
-        /// Excluded filename extensions list item
+        /// Ignored file pattern item
         /// </summary>
-        public const string ExcludedExtensionsItem = "Exclude";
+        public const string IgnoredFilePatternItem = "FilePattern";
 
         /// <summary>
         /// Inherit additional dictionary folders

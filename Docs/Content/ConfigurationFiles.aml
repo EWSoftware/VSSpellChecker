@@ -57,8 +57,8 @@ project settings, and folder settings.</para>
 				<para>When a project file that can be spell checked is opened, the global settings are merged with any
 defined solution, project, folder, and file settings.  In all settings other than global, properties default to
 being inherited rather than being set to a specific default value.  If set to a specific value in a settings
-file, they override any settings loaded earlier in the chain.  Additional dictionary folders, excluded
-extensions, ignored words, ignored XML elements, and spell checked XML attributes get special treatment.  Each
+file, they override any settings loaded earlier in the chain.  Additional dictionary folders, ignored filename
+patterns, ignored words, ignored XML elements, and spell checked XML attributes get special treatment.  Each
 can be inherited and added to or, if marked as not to be inherited, can replace the lists from previous settings
 files earlier in the chain.  This provides for very flexible settings that should cover a wide variety of
 situations.</para>

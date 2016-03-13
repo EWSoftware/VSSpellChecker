@@ -68,11 +68,7 @@ folders, and/or files are included in solution/project spell checking operations
 							</listItem>
 
 							<listItem>
-								<para>Ignore words with digits.</para>
-							</listItem>
-
-							<listItem>
-								<para>Ignore words in all uppercase.</para>
+								<para>Ignore words with digits, in all uppercase, and/or mixed case.</para>
 							</listItem>
 
 							<listItem>
@@ -97,7 +93,7 @@ checked.</para>
 							</listItem>
 
 							<listItem>
-								<para>Exclude files from spell checking by filename extension.</para>
+								<para>Exclude files from spell checking by filename wildcard pattern.</para>
 							</listItem>
 
 							<listItem>

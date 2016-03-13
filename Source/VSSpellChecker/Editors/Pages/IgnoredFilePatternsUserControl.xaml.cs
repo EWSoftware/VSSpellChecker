@@ -1,12 +1,12 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : ExcludedExtensionsUserControl.xaml.cs
+// File    : IgnoredFilePatternsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/11/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
-// This file contains a user control used to edit the excluded extensions spell checker configuration settings
+// This file contains a user control used to edit the ignore file patterns spell checker configuration settings
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 02/08/2015  EFW  Created the code
+// 03/10/2016  EFW  Changed from extensions only to full filename wildcard patterns
 //===============================================================================================================
 
 using System;
@@ -30,9 +31,9 @@ using VisualStudio.SpellChecker.Configuration;
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
     /// <summary>
-    /// This user control is used to edit the excluded extensions spell checker configuration settings
+    /// This user control is used to edit the ignored file patterns spell checker configuration settings
     /// </summary>
-    public partial class ExcludedExtensionsUserControl : UserControl, ISpellCheckerConfiguration
+    public partial class IgnoredFilePatternsUserControl : UserControl, ISpellCheckerConfiguration
     {
         #region Constructor
         //=====================================================================
@@ -40,7 +41,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <summary>
         /// Constructor
         /// </summary>
-        public ExcludedExtensionsUserControl()
+        public IgnoredFilePatternsUserControl()
         {
             InitializeComponent();
         }
@@ -58,7 +59,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public string Title
         {
-            get { return "Excluded Filename Extensions"; }
+            get { return "Ignored Files"; }
         }
 
         /// <inheritdoc />
@@ -70,28 +71,31 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
         {
-            IEnumerable<string> words;
-            lbExcludedExtensions.Items.Clear();
+            IEnumerable<string> patterns;
+            lbIgnoredFilePatterns.Items.Clear();
 
             if(configuration.ConfigurationType == ConfigurationType.Global)
             {
-                chkInheritExcludedExtensions.IsChecked = false;
-                chkInheritExcludedExtensions.Visibility = Visibility.Collapsed;
+                chkInheritIgnoredFilePatterns.IsChecked = false;
+                chkInheritIgnoredFilePatterns.Visibility = Visibility.Collapsed;
             }
             else
-                chkInheritExcludedExtensions.IsChecked = configuration.ToBoolean(PropertyNames.InheritExcludedExtensions);
+                chkInheritIgnoredFilePatterns.IsChecked = configuration.ToBoolean(PropertyNames.InheritIgnoredFilePatterns);
 
-            if(configuration.HasProperty(PropertyNames.ExcludedExtensions))
-                words = configuration.ToValues(PropertyNames.ExcludedExtensions, PropertyNames.ExcludedExtensionsItem);
+            if(configuration.HasProperty(PropertyNames.IgnoredFilePatterns))
+                patterns = configuration.ToValues(PropertyNames.IgnoredFilePatterns, PropertyNames.IgnoredFilePatternItem);
             else
-                words = Enumerable.Empty<string>();
+                if(!chkInheritIgnoredFilePatterns.IsChecked.Value && configuration.ConfigurationType == ConfigurationType.Global)
+                    patterns = SpellCheckerConfiguration.DefaultIgnoredFilePatterns;
+                else
+                    patterns = Enumerable.Empty<string>();
 
-            foreach(string el in words)
-                lbExcludedExtensions.Items.Add(el);
+            foreach(string el in patterns)
+                lbIgnoredFilePatterns.Items.Add(el);
 
             var sd = new SortDescription { Direction = ListSortDirection.Ascending };
 
-            lbExcludedExtensions.Items.SortDescriptions.Add(sd);
+            lbIgnoredFilePatterns.Items.SortDescriptions.Add(sd);
         }
 
         /// <inheritdoc />
@@ -99,14 +103,20 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             HashSet<string> newList = null;
 
-            if(lbExcludedExtensions.Items.Count != 0)
-                newList = new HashSet<string>(lbExcludedExtensions.Items.OfType<string>(),
+            if(lbIgnoredFilePatterns.Items.Count != 0 || !chkInheritIgnoredFilePatterns.IsChecked.Value)
+            {
+                newList = new HashSet<string>(lbIgnoredFilePatterns.Items.OfType<string>(),
                     StringComparer.OrdinalIgnoreCase);
 
-            if(configuration.ConfigurationType != ConfigurationType.Global)
-                configuration.StoreProperty(PropertyNames.InheritExcludedExtensions, chkInheritExcludedExtensions.IsChecked);
+                if(configuration.ConfigurationType == ConfigurationType.Global &&
+                  newList.SetEquals(SpellCheckerConfiguration.DefaultIgnoredFilePatterns))
+                    newList = null;
+            }
 
-            configuration.StoreValues(PropertyNames.ExcludedExtensions, PropertyNames.ExcludedExtensionsItem, newList);
+            if(configuration.ConfigurationType != ConfigurationType.Global)
+                configuration.StoreProperty(PropertyNames.InheritIgnoredFilePatterns, chkInheritIgnoredFilePatterns.IsChecked);
+
+            configuration.StoreValues(PropertyNames.IgnoredFilePatterns, PropertyNames.IgnoredFilePatternItem, newList);
         }
 
         /// <inheritdoc />
@@ -118,69 +128,77 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <summary>
-        /// Add one or more new excluded extensions to the list
+        /// Add a new ignored filename pattern to the list
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnAddExcludedExt_Click(object sender, RoutedEventArgs e)
+        private void btnAddFilePattern_Click(object sender, RoutedEventArgs e)
         {
-            txtExcludedExtension.Text = txtExcludedExtension.Text.Trim();
+            txtFilePattern.Text = txtFilePattern.Text.Trim();
 
-            if(txtExcludedExtension.Text.Length != 0)
-                foreach(string ext in txtExcludedExtension.Text.Split(new[] { ' ', '\t', ',' },
-                  StringSplitOptions.RemoveEmptyEntries))
-                {
-                    string addExt;
+            if(txtFilePattern.Text.Length != 0)
+                lbIgnoredFilePatterns.Items.Add(txtFilePattern.Text);
 
-                    if(ext[0] != '.')
-                        addExt = "." + ext;
-                    else
-                        addExt = ext;
-
-                    lbExcludedExtensions.Items.Add(addExt);
-                }
-
-            txtExcludedExtension.Text = null;
+            txtFilePattern.Text = null;
             Property_Changed(sender, e);
         }
 
         /// <summary>
-        /// Remove the selected extension from the list of excluded extensions
+        /// Remove the selected filename pattern from the list
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnRemoveExcludedExt_Click(object sender, RoutedEventArgs e)
+        private void btnRemoveFilePattern_Click(object sender, RoutedEventArgs e)
         {
-            int idx = lbExcludedExtensions.SelectedIndex;
+            int idx = lbIgnoredFilePatterns.SelectedIndex;
 
             if(idx != -1)
-                lbExcludedExtensions.Items.RemoveAt(idx);
+                lbIgnoredFilePatterns.Items.RemoveAt(idx);
 
-            if(lbExcludedExtensions.Items.Count != 0)
+            if(lbIgnoredFilePatterns.Items.Count != 0)
             {
                 if(idx < 0)
                     idx = 0;
                 else
-                    if(idx >= lbExcludedExtensions.Items.Count)
-                        idx = lbExcludedExtensions.Items.Count - 1;
+                    if(idx >= lbIgnoredFilePatterns.Items.Count)
+                        idx = lbIgnoredFilePatterns.Items.Count - 1;
 
-                lbExcludedExtensions.SelectedIndex = idx;
+                lbIgnoredFilePatterns.SelectedIndex = idx;
             }
 
             Property_Changed(sender, e);
         }
 
         /// <summary>
-        /// Clear the list of excluded extensions
+        /// Clear the list of ignored file patterns
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnClearExcludedExts_Click(object sender, RoutedEventArgs e)
+        private void btnClearFilePatterns_Click(object sender, RoutedEventArgs e)
         {
-            lbExcludedExtensions.Items.Clear();
+            lbIgnoredFilePatterns.Items.Clear();
 
             var sd = new SortDescription { Direction = ListSortDirection.Ascending };
-            lbExcludedExtensions.Items.SortDescriptions.Add(sd);
+            lbIgnoredFilePatterns.Items.SortDescriptions.Add(sd);
+
+            Property_Changed(sender, e);
+        }
+
+        /// <summary>
+        /// Reset the list to the list of default ignored file patterns
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnDefaultFilePatterns_Click(object sender, RoutedEventArgs e)
+        {
+            lbIgnoredFilePatterns.Items.Clear();
+
+            if(!chkInheritIgnoredFilePatterns.IsChecked.Value)
+                foreach(string el in SpellCheckerConfiguration.DefaultIgnoredFilePatterns)
+                    lbIgnoredFilePatterns.Items.Add(el);
+
+            var sd = new SortDescription { Direction = ListSortDirection.Ascending };
+            lbIgnoredFilePatterns.Items.SortDescriptions.Add(sd);
 
             Property_Changed(sender, e);
         }

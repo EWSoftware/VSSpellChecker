@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/23/2015
-// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
+// Updated : 03/10/2016
+// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the spell checker dictionary settings
@@ -314,7 +314,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     // See if there is a solution configuration
                     filename = solution.FullName + ".vsspell";
-                    projectItem = solution.FindProjectItem(filename);
+                    projectItem = solution.FindProjectItemForFile(filename);
 
                     if(projectItem != null)
                         config.Load(filename);
@@ -324,9 +324,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     // Find the project item for the file we are opening
                     if(configType != ConfigurationType.Folder)
-                        projectItem = solution.FindProjectItem(relatedFilename);
+                        projectItem = solution.FindProjectItemForFile(relatedFilename);
                     else
-                        projectItem = solution.FindProjectItem(Path.Combine(relatedFilename, relatedFilename + ".vsspell"));
+                        projectItem = solution.FindProjectItemForFile(Path.Combine(relatedFilename,
+                            relatedFilename + ".vsspell"));
 
                     if(projectItem != null)
                     {
@@ -337,7 +338,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                           !String.IsNullOrWhiteSpace(projectItem.ContainingProject.FullName))
                         {
                             filename = projectItem.ContainingProject.FullName + ".vsspell";
-                            projectItem = solution.FindProjectItem(filename);
+                            projectItem = solution.FindProjectItemForFile(filename);
 
                             if(projectItem != null)
                                 config.Load(filename);
@@ -363,7 +364,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                                           Path.GetFileNameWithoutExtension(filename) == relatedFilename)
                                             return config;
 
-                                        projectItem = solution.FindProjectItem(filename);
+                                        projectItem = solution.FindProjectItemForFile(filename);
 
                                         if(projectItem != null)
                                             config.Load(filename);
@@ -379,7 +380,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                                 if(projectItem != null && projectItem.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile)
                                 {
                                     filename = (string)projectItem.Properties.Item("FullPath").Value + ".vsspell";
-                                    projectItem = solution.FindProjectItem(filename);
+                                    projectItem = solution.FindProjectItemForFile(filename);
 
                                     if(projectItem != null)
                                         config.Load(filename);
