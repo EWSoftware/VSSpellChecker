@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2016
+// Updated : 05/12/2016
 // Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -164,6 +164,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 configuration.StoreProperty(PropertyNames.IgnoreCharacterClass,
                     rbIncludeAll.IsChecked.Value ? IgnoredCharacterClass.None : rbIgnoreNonLatin.IsChecked.Value ?
                         IgnoredCharacterClass.NonLatin : IgnoredCharacterClass.NonAscii);
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />

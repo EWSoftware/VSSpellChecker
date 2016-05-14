@@ -98,9 +98,14 @@
         <HelpKeyword index="K" term="configuration, XML files" />
       </HelpKeywords>
     </Topic>
-    <Topic id="e01bd3d9-c525-4407-8c65-fcdb64539299" visible="True" title="Code Analysis Dictionaries">
+    <Topic id="e01bd3d9-c525-4407-8c65-fcdb64539299" visible="True" isSelected="true" title="Code Analysis Dictionaries">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, code analysis dictionaries" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="e23551ac-52f5-4505-b2d2-0728c7607fd3" visible="True" title="Visual Studio WPF Text Boxes">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="configuration, WPF text boxes" />
       </HelpKeywords>
     </Topic>
   </Topic>
@@ -133,7 +138,7 @@
         <HelpKeyword index="K" term="versions, 2016.3.12.0" />
       </HelpKeywords>
     </Topic>
-    <Topic id="a3eaed0f-fcf3-4df8-8889-7073395601a5" visible="True" isSelected="true" title="Version 2015.11.8.0">
+    <Topic id="a3eaed0f-fcf3-4df8-8889-7073395601a5" visible="True" title="Version 2015.11.8.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2015.11.8.0" />
       </HelpKeywords>

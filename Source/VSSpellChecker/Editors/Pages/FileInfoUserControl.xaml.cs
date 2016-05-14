@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileInfoUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 05/12/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to provide some information about the settings file
@@ -84,6 +84,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             // Nothing to save here, just refresh the information
             this.LoadConfiguration(configuration);
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
 #pragma warning disable 67

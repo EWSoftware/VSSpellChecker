@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredFilePatternsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/11/2016
+// Updated : 05/12/2016
 // Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -117,6 +117,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 configuration.StoreProperty(PropertyNames.InheritIgnoredFilePatterns, chkInheritIgnoredFilePatterns.IsChecked);
 
             configuration.StoreValues(PropertyNames.IgnoredFilePatterns, PropertyNames.IgnoredFilePatternItem, newList);
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />

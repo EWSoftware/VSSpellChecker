@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2016
+// Updated : 05/12/2016
 // Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -14,7 +14,7 @@
 // documentation, and source files.
 //
 //    Date     Who  Comments
-//===============================================================================================================
+// ==============================================================================================================
 // 02/01/2015  EFW  Refactored the configuration settings to allow for solution and project specific settings
 // 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
@@ -47,7 +47,7 @@ namespace VisualStudio.SpellChecker.Configuration
         private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords;
         private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
-        private List<Regex> exclusionExpressions, ignoredFilePatterns;
+        private List<Regex> exclusionExpressions, ignoredFilePatterns, visualStudioExclusions;
         private Dictionary<string, string> deprecatedTerms, compoundTerms;
         private Dictionary<string, IList<string>> unrecognizedWords;
         #endregion
@@ -316,6 +316,23 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This is used to indicate whether or not to spell check any WPF text box within Visual Studio
+        /// </summary>
+        /// <value>The default is true.  This option only applies to the global configuration.</value>
+        [DefaultValue(true)]
+        public bool EnableWpfTextBoxSpellChecking { get; set; }
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of exclusion regular expressions that will be used
+        /// to exclude WPF text boxes in Visual Studio editor and tool windows from being spell checked.
+        /// </summary>
+        /// <value>This option only applies to the global configuration.</value>
+        public IEnumerable<Regex> VisualStudioExclusions
+        {
+            get { return visualStudioExclusions; }
+        }
+
+        /// <summary>
         /// This read-only property returns the default list of ignored words
         /// </summary>
         /// <remarks>The default list includes words starting with what looks like an escape sequence such as
@@ -372,6 +389,30 @@ namespace VisualStudio.SpellChecker.Configuration
                     "PreferredAlternate", "SpellingAlternates", "title", "term", "Text", "ToolTip" };
             }
         }
+
+        /// <summary>
+        /// This read-only property returns the default list of excluded Visual Studio text box IDs
+        /// </summary>
+        public static IEnumerable<string> DefaultVisualStudioExclusions
+        {
+            get
+            {
+                return new[] {
+                    @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|filterTextBox|searchTextBox|tboxFilter)(?# Various search text boxes)",
+                    @"Microsoft.VisualStudio.Web.Publish.PublishUI.PublishDialog.*(?# Website publishing dialog box)",
+                    @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
+                    @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
+                    @"1c79180c-bb93-46d2-b4d3-f22e7015a6f1\.txtFindID(?# SHFB resource item editor)",
+                    @"581e89c0-e423-4453-bde3-a0403d5f380d\.ucEntityReferences\.txtFindName(?# SHFB entity references)",
+                    @"7aad2922-72a2-42c1-a077-85f5097a8fa7\.txtFindID(?# SHFB content layout editor)",
+                    @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
+                    @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
+                    @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
+                    @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
+                    @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression(?# Spell checker exclusion expression editor)"
+                };
+            }
+        }
         #endregion
 
         #region Constructor
@@ -393,7 +434,7 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.IgnoreXmlElementsInText = this.DetermineResourceFileLanguageFromName =
                 this.InheritIgnoredFilePatterns = this.InheritAdditionalDictionaryFolders =
                 this.InheritIgnoredWords = this.InheritExclusionExpressions = this.InheritXmlSettings =
-                this.IgnoreMnemonics = true;
+                this.IgnoreMnemonics = this.EnableWpfTextBoxSpellChecking = true;
 
             this.TreatUnderscoreAsSeparator = false;
 
@@ -406,6 +447,7 @@ namespace VisualStudio.SpellChecker.Configuration
 
             exclusionExpressions = new List<Regex>();
             ignoredFilePatterns = new List<Regex>(DefaultIgnoredFilePatterns.Select(p => p.RegexFromFilePattern()));
+            visualStudioExclusions = new List<Regex>(DefaultVisualStudioExclusions.Select(p => new Regex(p)));
 
             deprecatedTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             compoundTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -463,9 +505,22 @@ namespace VisualStudio.SpellChecker.Configuration
 
                 this.SpellCheckAsYouType = configuration.ToBoolean(PropertyNames.SpellCheckAsYouType);
                 
-                // This option is always true for the global configuration
                 if(configuration.ConfigurationType != ConfigurationType.Global)
+                {
+                    // This option is always true for the global configuration
                     this.IncludeInProjectSpellCheck = configuration.ToBoolean(PropertyNames.IncludeInProjectSpellCheck);
+                }
+                else
+                {
+                    // These only apply to the global configuration
+                    if(configuration.HasProperty(PropertyNames.VisualStudioIdExclusions))
+                    {
+                        this.EnableWpfTextBoxSpellChecking = configuration.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking);
+
+                        visualStudioExclusions = new List<Regex>(configuration.ToRegexes(PropertyNames.VisualStudioIdExclusions,
+                            PropertyNames.VisualStudioIdExclusionItem));
+                    }
+                }
 
                 this.DetectDoubledWords = configuration.ToBoolean(PropertyNames.DetectDoubledWords);
                 this.IgnoreWordsWithDigits = configuration.ToBoolean(PropertyNames.IgnoreWordsWithDigits);

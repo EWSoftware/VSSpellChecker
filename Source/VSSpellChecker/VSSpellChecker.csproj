@@ -87,6 +87,9 @@
     <Compile Include="Editors\Pages\FileInfoUserControl.xaml.cs">
       <DependentUpon>FileInfoUserControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\Pages\VisualStudioUserControl.xaml.cs">
+      <DependentUpon>VisualStudioUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\PropertyState.cs" />
     <Compile Include="Editors\SimpleEditorFactory.cs" />
     <Compile Include="Editors\SimpleEditorPane.cs" />
@@ -142,6 +145,10 @@
     <Compile Include="Tagging\PlainTextTagger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WordSplitter.cs" />
+    <Compile Include="WpfTextBox\MenuCommand.cs" />
+    <Compile Include="WpfTextBox\SpellingErrorAdorner.cs" />
+    <Compile Include="VSSpellCheckEverywherePackage.cs" />
+    <Compile Include="WpfTextBox\WpfTextBoxSpellChecker.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\Resources.Designer.cs">
@@ -529,6 +536,10 @@
     <Page Include="Editors\Pages\FileInfoUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\Pages\VisualStudioUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Editors\SpellingConfigurationEditorControl.xaml">
       <SubType>Designer</SubType>

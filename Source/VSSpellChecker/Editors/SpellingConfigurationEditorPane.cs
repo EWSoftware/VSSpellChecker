@@ -40,7 +40,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         public SpellingConfigurationEditorPane()
         {
-            base.UIControl.ConfigurationChanged += ucSpellingConfigurationEditor_ConfigurationChanged;
+            this.UIControl.ConfigurationChanged += ucSpellingConfigurationEditor_ConfigurationChanged;
         }
         #endregion
 
@@ -62,7 +62,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <inheritdoc />
         protected override void LoadFile(string fileName)
         {
-            base.UIControl.LoadConfiguration(fileName);
+            this.UIControl.LoadConfiguration(fileName);
         }
 
         /// <inheritdoc />
@@ -70,8 +70,8 @@ namespace VisualStudio.SpellChecker.Editors
         {
             Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SetWaitCursor();
 
-            if(base.IsDirty || !fileName.Equals(base.UIControl.Filename, StringComparison.OrdinalIgnoreCase))
-                base.UIControl.SaveConfiguration(fileName);
+            if(this.IsDirty || !fileName.Equals(this.UIControl.Filename, StringComparison.OrdinalIgnoreCase))
+                this.UIControl.SaveConfiguration(fileName);
         }
         #endregion
 
@@ -85,7 +85,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <param name="e">The event arguments</param>
         private void ucSpellingConfigurationEditor_ConfigurationChanged(object sender, EventArgs e)
         {
-            base.OnContentChanged();
+            this.OnContentChanged();
         }
         #endregion
     }

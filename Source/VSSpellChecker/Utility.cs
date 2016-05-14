@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/11/2016
+// Updated : 04/27/2016
 // Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -74,6 +74,9 @@ namespace VisualStudio.SpellChecker
             where TService : class
         {
             IServiceProvider provider = VSSpellCheckerPackage.Instance;
+
+            if(provider == null)
+                provider = VSSpellCheckEverywherePackage.Instance;
 
             TInterface service = (provider == null) ? null : provider.GetService(typeof(TService)) as TInterface;
 

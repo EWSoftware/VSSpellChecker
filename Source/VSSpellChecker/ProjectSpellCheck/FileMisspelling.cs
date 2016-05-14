@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
-// Updated : 09/10/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 04/29/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that represents a misspelling withing a project file
@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Windows;
 
 using Microsoft.VisualStudio.Text;
 
@@ -49,6 +50,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// This is used to get or set the span for deleting a doubled word which includes leading whitespace
         /// </summary>
         public Span DeleteWordSpan { get; set; }
+
+        /// <summary>
+        /// The bounds of the misspelled word when used by the WPF text box spell checker
+        /// </summary>
+        public Rect ActualBounds { get; set; }
 
         /// <summary>
         /// This is used to get or set the suggestions that can be used to replace the misspelled word
@@ -149,6 +155,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Word = word;
             this.Suggestions = suggestions ?? new SpellingSuggestion[0];
             this.SuggestionsDetermined = (suggestions != null);
+            this.ActualBounds = Rect.Empty;
         }
 
         /// <summary>
@@ -177,6 +184,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Word = word;
             this.Suggestions = new SpellingSuggestion[0];
             this.SuggestionsDetermined = true;
+            this.ActualBounds = Rect.Empty;
         }
         #endregion
     }

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2016
+// Updated : 05/10/2016
 // Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -14,7 +14,7 @@
 // documentation, and source files.
 //
 //    Date     Who  Comments
-//===============================================================================================================
+// ==============================================================================================================
 // 02/01/2015  EFW  Refactored configuration settings
 // 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
@@ -228,6 +228,21 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Spell checked XML attributes item
         /// </summary>
         public const string SpellCheckedXmlAttributesItem = "SpellCheck";
+
+        /// <summary>
+        /// Enable WPF text box spell checking
+        /// </summary>
+        public const string EnableWpfTextBoxSpellChecking = "EnableWpfTextBoxSpellChecking";
+
+        /// <summary>
+        /// Visual Studio ID exclusion expressions
+        /// </summary>
+        public const string VisualStudioIdExclusions = "VisualStudioIdExclusions";
+
+        /// <summary>
+        /// Visual Studio ID Exclusion expression item
+        /// </summary>
+        public const string VisualStudioIdExclusionItem = "IdExpression";
 
         /// <summary>
         /// Code analysis dictionary - Import code analysis dictionaries

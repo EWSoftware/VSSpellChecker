@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/10/2016
+// Updated : 05/12/2016
 // Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -170,6 +170,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             configuration.StoreValues(PropertyNames.SelectedLanguages, PropertyNames.SelectedLanguagesItem,
                 lbSelectedLanguages.Items.OfType<SpellCheckerDictionary>().Select(d => d.Culture.Name));
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />

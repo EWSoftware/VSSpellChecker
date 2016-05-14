@@ -17,6 +17,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="Auto" />
@@ -24,15 +25,17 @@
 		</Grid.ColumnDefinitions>
 		<Label Grid.Row="0" Grid.Column="0" Margin="3" Content="Regular Expression" HorizontalAlignment="Right" />
 		<TextBox Grid.Row="0" Grid.Column="1"  Name="txtExpression" Margin="3" HorizontalAlignment="Stretch" />
-		<Label Grid.Row="1" Grid.Column="0" Margin="3" Content="Options" HorizontalAlignment="Right" />
-		<StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+		<Label Grid.Row="1" Grid.Column="0" Margin="3" Content="Comment" HorizontalAlignment="Right" />
+		<TextBox Grid.Row="1" Grid.Column="1"  Name="txtComment" Margin="3" HorizontalAlignment="Stretch" />
+		<Label Grid.Row="2" Grid.Column="0" Margin="3" Content="Options" HorizontalAlignment="Right" />
+		<StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
 			<CheckBox Name="chkIgnoreCase" Margin="3" Content="Ignore Case" />
 			<CheckBox Name="chkMultiLine" Margin="10, 3" Content="Multi-line" />
 			<CheckBox Name="chkSingleLine" Margin="10, 3" Content="Single Line" />
 		</StackPanel>
-		<Button Grid.Row="2" Grid.Column="0" Name="btnSave" Content="Save" Margin="3" Width="80"
+		<Button Grid.Row="3" Grid.Column="0" Name="btnSave" Content="Save" Margin="3" Width="80"
 			HorizontalAlignment="Left" Click="btnSave_Click" />
-		<Button Grid.Row="2" Grid.Column="1" Name="btnCancel" Content="Cancel" Margin="3" Width="80" HorizontalAlignment="Right"
+		<Button Grid.Row="3" Grid.Column="1" Name="btnCancel" Content="Cancel" Margin="3" Width="80" HorizontalAlignment="Right"
 			IsCancel="True" />
 	</Grid>
 </Window>

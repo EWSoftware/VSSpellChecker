@@ -89,6 +89,7 @@
     <None Include="Content\ConfigOptions\ExclusionExpressions.aml" />
     <None Include="Content\ConfigOptions\GeneralSettings.aml" />
     <None Include="Content\ConfigOptions\IgnoredWords.aml" />
+    <None Include="Content\ConfigOptions\VisualStudioWPFTextBoxes.aml" />
     <None Include="Content\ConfigOptions\XMLFiles.aml" />
     <None Include="Content\ConfigurationFiles.aml" />
     <None Include="Content\Contributing.aml" />
