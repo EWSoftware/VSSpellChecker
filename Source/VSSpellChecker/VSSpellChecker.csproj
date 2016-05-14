@@ -128,6 +128,7 @@
     <Compile Include="SpellingEventArgs.cs" />
     <Compile Include="SpellingServiceProxy.cs" />
     <Compile Include="SpellingSuggestion.cs" />
+    <Compile Include="Tagging\PhpTextTaggerProvider.cs" />
     <Compile Include="Theme\ThemeColors.cs" />
     <Compile Include="Theme\ThemeColorId.cs" />
     <Compile Include="Theme\TeamFoundationColors.cs" />
