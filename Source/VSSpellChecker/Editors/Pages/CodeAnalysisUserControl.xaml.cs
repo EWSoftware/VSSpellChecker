@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeAnalysisUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 05/12/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the code analysis dictionary configuration settings
@@ -143,6 +143,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         rbIgnoreAll.IsChecked.Value ? RecognizedWordHandling.IgnoreAllWords :
                             rbAddToDictionary.IsChecked.Value ? RecognizedWordHandling.AddAllWords :
                                 RecognizedWordHandling.AttributeDeterminesUsage);
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />

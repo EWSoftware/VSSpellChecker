@@ -11,9 +11,9 @@ code, CSS class name patterns, control name patterns, etc.</para>
 			<content>
 				<para>To add a new expressions, click the <ui>Add</ui> button.  A dialog box will appear in which you can
 enter the expression and indicate which options if any should be used with it (Ignore Case, Multi-line, and/or
-Single Line).  To edit an expression, select it in the list and click the <ui>Edit</ui> button or double click
-it.  The same dialog box will appear in which you can modify the expression settings.  To remove an expression,
-select it in the list and click the <ui>Remove</ui> button.</para>
+Single Line).  A comment can also be entered to describe the entry.  To edit an expression, select it in the list
+and click the <ui>Edit</ui> button or double click it.  The same dialog box will appear in which you can modify
+the expression settings.  To remove an expression, select it in the list and click the <ui>Remove</ui> button.</para>
 
 				<para>For non-global settings, an option is available to inherit the exclusion expressions from
 configurations above the current one.  If enabled, any additional expressions in the current configuration are

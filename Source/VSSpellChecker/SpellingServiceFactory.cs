@@ -171,6 +171,7 @@ namespace VisualStudio.SpellChecker
                     if(LastSolutionName == null || !LastSolutionName.Equals(solution.FullName,
                       StringComparison.OrdinalIgnoreCase))
                     {
+                        WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
                         GlobalDictionary.ClearDictionaryCache();
                         LastSolutionName = solution.FullName;
                     }
@@ -320,6 +321,7 @@ namespace VisualStudio.SpellChecker
                     {
                         // A solution was closed and a file has been opened outside of a solution so clear the
                         // cache and use the global dictionaries.
+                        WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
                         GlobalDictionary.ClearDictionaryCache();
                         LastSolutionName = null;
                     }

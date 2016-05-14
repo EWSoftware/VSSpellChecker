@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Guids.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/27/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 04/27/2016
+// Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains various GUIDs for the package
@@ -14,7 +14,7 @@
 // documentation, and source files.
 //
 //    Date     Who  Comments
-//===============================================================================================================
+// ==============================================================================================================
 // 05/20/2013  EFW  Created the code
 //===============================================================================================================
 
@@ -28,9 +28,13 @@ namespace VisualStudio.SpellChecker
     static class GuidList
     {
         /// <summary>
-        /// Package GUID (string form)
+        /// VSSpellChecker Package GUID (string form)
         /// </summary>
         public const string guidVSSpellCheckerPkgString = "86b8a6ea-6a96-4e31-b31d-943e86581421";
+        /// <summary>
+        /// VSSpellCheckEverywhere Package GUID (string form)
+        /// </summary>
+        public const string guidVSSpellCheckEverywherePkgString = "A447DC7A-A901-442C-B183-87DCBF015C1E";
         /// <summary>
         /// Command set GUID (string form)
         /// </summary>

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2016
+// Updated : 05/12/2016
 // Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -113,7 +113,9 @@ namespace VisualStudio.SpellChecker.Editors
                 typeof(ExclusionExpressionsUserControl),
                 typeof(IgnoredFilePatternsUserControl),
                 typeof(XmlFilesUserControl),
-                typeof(CodeAnalysisUserControl)
+                typeof(CodeAnalysisUserControl),
+                // Global only, should always be last
+                typeof(VisualStudioUserControl)
             };
 
             try
@@ -160,7 +162,17 @@ namespace VisualStudio.SpellChecker.Editors
             this.SetTitle();
 
             foreach(TreeViewItem item in tvPages.Items)
-                ((ISpellCheckerConfiguration)item.Tag).LoadConfiguration(configFile);
+            {
+                ISpellCheckerConfiguration page = ((ISpellCheckerConfiguration)item.Tag);
+
+                if(page.AppliesTo(configFile.ConfigurationType))
+                {
+                    item.Visibility = Visibility.Visible;
+                    page.LoadConfiguration(configFile);
+                }
+                else
+                    item.Visibility = Visibility.Collapsed;
+            }
         }
 
         /// <summary>
@@ -176,10 +188,22 @@ namespace VisualStudio.SpellChecker.Editors
             foreach(TreeViewItem item in tvPages.Items)
             {
                 ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
-                page.SaveConfiguration(configFile);
+
+                if(page.AppliesTo(configFile.ConfigurationType))
+                    page.SaveConfiguration(configFile);
             }
 
-            if(!configFile.Save())
+            if(configFile.Save())
+            {
+                if(configFile.ConfigurationType == ConfigurationType.Global)
+                {
+                    if(configFile.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking))
+                        VSSpellCheckEverywherePackage.Instance.ConnectSpellChecker();
+
+                    WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
+                }
+            }
+            else
                 MessageBox.Show("Unable to save spell checking configuration", PackageResources.PackageTitle,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
         }
@@ -302,7 +326,12 @@ namespace VisualStudio.SpellChecker.Editors
                   MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
                 {
                     foreach(TreeViewItem item in tvPages.Items)
-                        ((ISpellCheckerConfiguration)item.Tag).LoadConfiguration(newConfigFile);
+                    {
+                        ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
+
+                        if(page.AppliesTo(configFile.ConfigurationType))
+                            page.LoadConfiguration(newConfigFile);
+                    }
 
                     this.OnConfigurationChanged(sender, e);
                 }

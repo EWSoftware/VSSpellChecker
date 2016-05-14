@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpOptionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/29/2015
-// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
+// Updated : 05/12/2016
+// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the C# spell checker configuration settings
@@ -116,6 +116,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 ((PropertyState)cboIgnoreInterpolatedStrings.SelectedValue).ToPropertyValue());
             configuration.StoreProperty(PropertyNames.CSharpOptionsApplyToAllCStyleLanguages,
                 ((PropertyState)cboApplyToAllCStyleLanguages.SelectedValue).ToPropertyValue());
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />

@@ -1,12 +1,13 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : ExclusionExpressionsUserControl.xaml.cs
+// File    : VisualStudioUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 05/12/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Note    : Copyright 2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
-// This file contains a user control used to edit the exclusion expression spell checker configuration settings
+// This file contains a user control used to edit the Visual Studio WPF text box spell checker configuration
+// settings.
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -32,9 +33,10 @@ using VisualStudio.SpellChecker.Configuration;
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
     /// <summary>
-    /// This user control is used to edit the exclusion expression spell checker configuration settings
+    /// This user control is used to edit the Visual Studio WPF text box spell checker configuration settings
     /// </summary>
-    public partial class ExclusionExpressionsUserControl : UserControl, ISpellCheckerConfiguration
+    /// <remarks>This page only applies to global configurations</remarks>
+    public partial class VisualStudioUserControl : UserControl, ISpellCheckerConfiguration
     {
         #region Private data members
         //=====================================================================
@@ -49,7 +51,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <summary>
         /// Constructor
         /// </summary>
-        public ExclusionExpressionsUserControl()
+        public VisualStudioUserControl()
         {
             InitializeComponent();
         }
@@ -67,13 +69,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public string Title
         {
-            get { return "Exclusion Expressions"; }
+            get { return "Visual Studio WPF Text Boxes"; }
         }
 
         /// <inheritdoc />
         public string HelpUrl
         {
-            get { return "6216eedb-6434-4cad-be06-576814e0b735"; }
+            get { return "e23551ac-52f5-4505-b2d2-0728c7607fd3"; }
         }
 
         /// <inheritdoc />
@@ -83,21 +85,23 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             lbExclusionExpressions.Items.Clear();
 
-            if(configuration.ConfigurationType == ConfigurationType.Global)
+            // Will be null if resetting to default ID list
+            if(configuration != null)
             {
-                chkInheritExclusionExpressions.IsChecked = false;
-                chkInheritExclusionExpressions.Visibility = Visibility.Collapsed;
-            }
-            else
-                chkInheritExclusionExpressions.IsChecked = configuration.ToBoolean(PropertyNames.InheritExclusionExpressions);
+                if(!this.AppliesTo(configuration.ConfigurationType))
+                    return;
 
-            if(configuration.HasProperty(PropertyNames.ExclusionExpressions))
-            {
-                expressions = configuration.ToRegexes(PropertyNames.ExclusionExpressions,
-                    PropertyNames.ExclusionExpressionItem).OrderBy(exp => exp.ToString()).ToList();
+                chkEnableWpfTextBoxSpellChecking.IsChecked = configuration.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking);
+
+                if(configuration.HasProperty(PropertyNames.VisualStudioIdExclusions))
+                {
+                    expressions = configuration.ToRegexes(PropertyNames.VisualStudioIdExclusions,
+                        PropertyNames.VisualStudioIdExclusionItem).OrderBy(exp => exp.ToString()).ToList();
+                }
+                else
+                    expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioExclusions.Select(
+                        p => new Regex(p)));
             }
-            else
-                expressions = new List<Regex>();
 
             foreach(var exp in expressions)
             {
@@ -115,17 +119,28 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public void SaveConfiguration(SpellingConfigurationFile configuration)
         {
-            if(configuration.ConfigurationType != ConfigurationType.Global)
-                configuration.StoreProperty(PropertyNames.InheritExclusionExpressions, chkInheritExclusionExpressions.IsChecked);
+            if(this.AppliesTo(configuration.ConfigurationType))
+            {
+                configuration.StoreProperty(PropertyNames.EnableWpfTextBoxSpellChecking, chkEnableWpfTextBoxSpellChecking.IsChecked);
 
-            configuration.StoreRegexes(PropertyNames.ExclusionExpressions, PropertyNames.ExclusionExpressionItem,
-                expressions.Count == 0 ? null : expressions);
+                var newList = new HashSet<string>(lbExclusionExpressions.Items.OfType<string>(),
+                    StringComparer.OrdinalIgnoreCase);
+
+                if(newList.SetEquals(SpellCheckerConfiguration.DefaultVisualStudioExclusions))
+                {
+                    configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
+                        PropertyNames.VisualStudioIdExclusionItem, null);
+                }
+                else
+                    configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
+                        PropertyNames.VisualStudioIdExclusionItem, expressions.Count == 0 ? null : expressions);
+            }
         }
 
         /// <inheritdoc />
         public bool AppliesTo(ConfigurationType configurationType)
         {
-            return true;
+            return (configurationType == ConfigurationType.Global);
         }
 
         /// <inheritdoc />
@@ -224,6 +239,21 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                 lbExclusionExpressions.SelectedIndex = idx;
             }
+        }
+
+        /// <summary>
+        /// Reset the list to the list of default ignored text box IDs
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnDefaultIDs_Click(object sender, RoutedEventArgs e)
+        {
+            expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioExclusions.Select(
+                p => new Regex(p)));
+
+            this.LoadConfiguration(null);
+
+            Property_Changed(sender, e);
         }
 
         /// <summary>

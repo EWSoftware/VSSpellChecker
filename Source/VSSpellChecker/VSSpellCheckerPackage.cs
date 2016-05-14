@@ -211,6 +211,7 @@ namespace VisualStudio.SpellChecker
         /// opening any spell checked files.</remarks>
         private void solutionEvents_AfterClosing()
         {
+            WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
             GlobalDictionary.ClearDictionaryCache();
         }
 

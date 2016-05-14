@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ExclusionExpressionAddEditForm.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/15/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 05/06/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a window used to edit exclusion expressions for the configuration file
@@ -27,7 +27,7 @@ using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
     /// <summary>
-    /// This form is used to add or edit a regular expression
+    /// This form is used to add or edit an exclusion regular expression for the configuration file
     /// </summary>
     public partial class ExclusionExpressionAddEditForm : Window
     {
@@ -35,6 +35,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         private Regex expression;
+
+        private static Regex reComment = new Regex(@"^.*?(?<Comment>\(\?\#[^\)]*?\))$");
 
         #endregion
 
@@ -52,7 +54,18 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 {
                     this.Title = "Edit an Exclusion Expression";
 
-                    txtExpression.Text = expression.ToString();
+                    string expr = expression.ToString();
+                    Match m = reComment.Match(expr);
+
+                    if(m.Success)
+                    {
+                        txtExpression.Text = expr.Substring(0, m.Groups["Comment"].Index);
+                        txtComment.Text = expr.Substring(m.Groups["Comment"].Index + 3,
+                            expr.Length - m.Groups["Comment"].Index - 4).Trim();
+                    }
+                    else
+                        txtExpression.Text = expr;
+
                     chkIgnoreCase.IsChecked = ((expression.Options & RegexOptions.IgnoreCase) != 0);
                     chkMultiLine.IsChecked = ((expression.Options & RegexOptions.Multiline) != 0);
                     chkSingleLine.IsChecked = ((expression.Options & RegexOptions.Singleline) != 0);
@@ -91,6 +104,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             RegexOptions options = RegexOptions.None;
+            string expr = null;
 
             if(txtExpression.Text.Trim().Length == 0)
             {
@@ -110,14 +124,20 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 if(chkSingleLine.IsChecked.Value)
                     options |= RegexOptions.Singleline;
 
-                expression = new Regex(txtExpression.Text, options);
+                expr = txtExpression.Text;
+
+                if(txtComment.Text.Trim().Length != 0)
+                    expr += String.Format("(?# {0})", txtComment.Text.Trim());
+
+                expression = new Regex(expr, options);
 
                 this.DialogResult = true;
             }
             catch(ArgumentException ex)
             {
-                MessageBox.Show("The regular expression is not valid.  Error " + ex.Message,
-                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show(String.Format("The regular expression is not valid.\r\n\r\nExpression: {0}\r\n" +
+                    "Error: {1}", expr, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
+                    MessageBoxImage.Exclamation);
             }
         }
         #endregion
