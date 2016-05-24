@@ -1,13 +1,12 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : PhpTextTaggerProvider.cs
-// Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
+// Authors : Miloslav Beňo (DevSense - http://www.devsense.com/)
 // Updated : 04/28/2016
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Note    : Copyright 2016, DevSense, All rights reserved
 // Compiler: Microsoft Visual C#
 //
-// This file contains a class that represents provider for php text tagger
+// This file contains a class used to provide tags for PHP files
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -19,25 +18,19 @@
 // 04/14/2016  MB   Added support for PHP files in the editor
 //===============================================================================================================
 
-
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-using VisualStudio.SpellChecker.Definitions;
-using Microsoft.VisualStudio.Text.Classification;
-using VisualStudio.SpellChecker.Tagging;
-
 namespace VisualStudio.SpellChecker.Tagging
 {
-	/// <summary>
-	/// This class provides text tagger PHP Code when PHP Tools for Visual Studio are installed
-	/// </summary>
-	[Export(typeof(ITaggerProvider))]
+    /// <summary>
+    /// This class provides tags for PHP files when PHP Tools for Visual Studio are installed
+    /// </summary>
+    [Export(typeof(ITaggerProvider))]
 	[ContentType("Phalanger")] // Because of legacy reasons ContentType is Phalanger, not PHP
 	[TagType(typeof(NaturalTextTag))]
 	class PhpTextTaggerProvider : ITaggerProvider
@@ -50,7 +43,7 @@ namespace VisualStudio.SpellChecker.Tagging
 		{
 			var classifier = classifierAggregatorService.GetClassifier(buffer);
 
-			//Use existing comment text tagger, it works well with PHP classifier
+			// Use existing comment text tagger, it works well with PHP classifier
 			return new CommentTextTagger(buffer, classifier, null, null) as ITagger<T>;
 		}
 	}

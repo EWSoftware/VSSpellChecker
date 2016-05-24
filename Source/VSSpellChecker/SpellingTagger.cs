@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/28/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 05/23/2016
+// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the spelling tagger
@@ -39,7 +39,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows.Documents;
 using System.Windows.Threading;
 
 using Microsoft.VisualStudio.Text;
@@ -174,10 +173,13 @@ namespace VisualStudio.SpellChecker
             _misspellings = new List<MisspellingTag>();
             wordsIgnoredOnce = new List<IgnoredWord>();
 
+            string filename = buffer.GetFilename();
+
             wordSplitter = new WordSplitter
             {
                 Configuration = configuration,
-                Mnemonic = ClassifierFactory.GetMnemonic(buffer.GetFilename())
+                Mnemonic = ClassifierFactory.GetMnemonic(filename),
+                IsCStyleCode = ClassifierFactory.IsCStyleCode(filename)
             };
 
             _buffer.Changed += BufferChanged;
@@ -489,7 +491,7 @@ namespace VisualStudio.SpellChecker
             {
                 // If anything fails during the handling of a dispatcher tick, just ignore it.  If we don't guard
                 // against those exceptions, the user will see a crash.
-                System.Diagnostics.Debug.WriteLine(ex);
+                Debug.WriteLine(ex);
 
                 Debug.Fail("Exception!" + ex.Message);
             }
@@ -562,7 +564,7 @@ namespace VisualStudio.SpellChecker
                 // If anything fails in the background thread, just ignore it.  It's possible that the background
                 // thread will run on VS shutdown, at which point calls into WPF throw exceptions.  If we don't
                 // guard against those exceptions, the user will see a crash on exit.
-                System.Diagnostics.Debug.WriteLine(ex);
+                Debug.WriteLine(ex);
 
                 Debug.Fail("Exception!" + ex.Message);
             }
@@ -674,7 +676,7 @@ namespace VisualStudio.SpellChecker
                     catch(RegexMatchTimeoutException ex)
                     {
                         // Ignore expression timeouts
-                        System.Diagnostics.Debug.WriteLine(ex);
+                        Debug.WriteLine(ex);
                     }
 
                 lastWord = new Microsoft.VisualStudio.Text.Span();

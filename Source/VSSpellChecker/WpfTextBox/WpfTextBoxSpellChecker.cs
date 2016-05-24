@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/12/2016
+// Updated : 05/23/2016
 // Note    : Copyright 2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -86,7 +86,11 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
             lock(syncRoot)
             {
-                wordSplitter = new WordSplitter { Configuration = configuration, Mnemonic = '&' };
+                wordSplitter = new WordSplitter
+                {
+                    Configuration = configuration,
+                    Classification = RangeClassification.PlainText
+                };
             }
 
             misspelledWords = new List<FileMisspelling>();

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/12/2016
+// Updated : 05/23/2016
 // Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -70,6 +70,12 @@ namespace VisualStudio.SpellChecker
         public RangeClassification Classification { get; set; }
 
         /// <summary>
+        /// This is used to get or set whether the file contains C-style code
+        /// </summary>
+        /// <remarks>This affects whether or not escape sequence checking will be performed</remarks>
+        public bool IsCStyleCode { get; set; }
+
+        /// <summary>
         /// The mnemonic character
         /// </summary>
         public char Mnemonic
@@ -118,8 +124,7 @@ namespace VisualStudio.SpellChecker
                 // positive in file paths (i.e. \Folder\transform\File.txt flags "ransform" as a misspelled word
                 // because of the lowercase "t" following the backslash) but I can live with that.  If they are
                 // common enough, they can be added to the configuration's ignored word list as an escaped word.
-                // This is skipped in solution/project spell checking for verbatim strings.
-                if(text[i] == '\\' && this.Classification != RangeClassification.VerbatimStringLiteral)
+                if(text[i] == '\\')
                 {
                     end = i + 1;
 
@@ -155,6 +160,28 @@ namespace VisualStudio.SpellChecker
                                 }
                         }
 
+                        switch(this.Classification)
+                        {
+                            // For these classifications, skip further checking.  These aren't likely to contain
+                            // escape sequences that need skipping.  Note that we only get a classification when
+                            // doing solution/project spell checking.
+                            case RangeClassification.PlainText:
+                            case RangeClassification.XmlFileComment:
+                            case RangeClassification.XmlFileCData:
+                            case RangeClassification.AttributeValue:
+                            case RangeClassification.InnerText:
+                            case RangeClassification.VerbatimStringLiteral:
+                            case RangeClassification.RegionDirective:
+                                continue;
+
+                            default:
+                                // For all others, base it on whether or not this is C-style code
+                                if(!this.IsCStyleCode)
+                                    continue;
+
+                                break;
+                        }
+
                         // Escape sequences
                         switch(text[end])
                         {
@@ -173,12 +200,13 @@ namespace VisualStudio.SpellChecker
                                 i++;
                                 break;
 
-                            case 'x':   // xh[h[h[h]]] or xhh[hh]
+                            case 'x':   // xh[h[h[h]]]
                                 while(++end < text.Length && (end - i) < 6 && (Char.IsDigit(text[end]) ||
                                   (Char.ToLower(text[end]) >= 'a' && Char.ToLower(text[end]) <= 'f')))
                                     ;
 
-                                i = --end;
+                                if((--end - i) > 1)
+                                    i = end;
                                 break;
 
                             case 'u':   // uhhhh

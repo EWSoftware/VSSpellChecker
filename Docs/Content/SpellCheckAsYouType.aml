@@ -4,7 +4,8 @@
 		<introduction>
 			<para>In text editor windows, misspellings are highlighted by underlining them with a squiggly line.  Place
 the mouse over the word and click the down arrow on the smart tag to see the available options.  Alternately, you
-can place the cursor anywhere in the word and press <ui>Ctrl+.</ui> to show the smart tag options.</para>
+can place the cursor anywhere in the word and press <ui>Ctrl+.</ui> or <ui>Shift+Alt+F10</ui> depending on your
+version of Visual Studio to show the smart tag options.</para>
 		</introduction>
 
 		<section>

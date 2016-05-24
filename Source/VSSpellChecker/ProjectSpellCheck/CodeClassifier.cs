@@ -217,7 +217,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             Span = new Span(this.GetOffset(textNode.Line, textNode.LinePosition),
                                 textNode.Text.Length),
                             Text = textNode.Text,
-                            Classification = RangeClassification.InnerText
+                            Classification = RangeClassification.XmlCommentsInnerText
                         });
                     break;
 
