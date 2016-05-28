@@ -49,6 +49,10 @@ solution, a single project, or any combination of items selected in the Solution
 					</listItem>
 
 					<listItem>
+						<para>An option is available to spell check any WPF text box within Visual Studio.</para>
+					</listItem>
+
+					<listItem>
 						<para>Several new spell checking options have been added and all of the spell checking options have
 been exposed and can be configured.  Configurable options include:</para>
 

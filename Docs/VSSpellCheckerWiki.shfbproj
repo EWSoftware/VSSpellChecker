@@ -45,7 +45,7 @@
     <NamingMethod>Guid</NamingMethod>
     <HelpTitle>Visual Studio Spell Checker Documentation</HelpTitle>
     <FeedbackEMailAddress>Eric%40EWoodruff.us</FeedbackEMailAddress>
-    <CopyrightText>Copyright \xA9 2013-2015, Eric Woodruff, All rights reserved</CopyrightText>
+    <CopyrightText>Copyright \xA9 2013-2016, Eric Woodruff, All rights reserved</CopyrightText>
     <CopyrightHref>https://GitHub.com/EWSoftware/VSSpellChecker</CopyrightHref>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <NamespaceSummaries>
@@ -53,6 +53,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
+    <HelpFileVersion>2016.5.28.0</HelpFileVersion>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->
@@ -115,6 +116,7 @@
     <None Include="Content\VersionHistory\v2015.9.19.0.aml" />
     <None Include="Content\VersionHistory\v2015.11.8.0.aml" />
     <None Include="Content\VersionHistory\v2016.3.12.0.aml" />
+    <None Include="Content\VersionHistory\v2016.5.28.0.aml" />
     <None Include="Content\Welcome.aml" />
     <None Include="VSSpellCheckerWiki.shfbproj.vsspell" />
   </ItemGroup>

@@ -16,6 +16,8 @@
     <Ignore>Ruhmann</Ignore>
     <Ignore>xclick</Ignore>
     <Ignore>yyyy</Ignore>
+    <Ignore>Miloslav</Ignore>
+    <Ignore>Beňo</Ignore>
   </IgnoredWords>
   <InheritXmlSettings>True</InheritXmlSettings>
   <InheritExclusionExpressions>True</InheritExclusionExpressions>

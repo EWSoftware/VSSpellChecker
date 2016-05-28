@@ -98,7 +98,7 @@
         <HelpKeyword index="K" term="configuration, XML files" />
       </HelpKeywords>
     </Topic>
-    <Topic id="e01bd3d9-c525-4407-8c65-fcdb64539299" visible="True" isSelected="true" title="Code Analysis Dictionaries">
+    <Topic id="e01bd3d9-c525-4407-8c65-fcdb64539299" visible="True" title="Code Analysis Dictionaries">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, code analysis dictionaries" />
       </HelpKeywords>
@@ -133,6 +133,11 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="3f7ff8cc-5493-4f6d-a1f4-99f9e245f621" visible="True" isSelected="true" title="Version 2016.5.28.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2016.5.28.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="a81683de-f3ea-4698-847a-d87c3f1e8477" visible="True" title="Version 2016.3.12.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2016.3.12.0" />
