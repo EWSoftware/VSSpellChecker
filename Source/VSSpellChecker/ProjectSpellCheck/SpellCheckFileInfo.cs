@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/10/2016
+// Updated : 07/27/2016
 // Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -35,6 +35,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {
     internal class SpellCheckFileInfo
     {
+        #region Private data members
+        //=====================================================================
+
+        private static SpellCheckFileInfo IgnoredHierarchyItem = new SpellCheckFileInfo();
+
+        #endregion
+
         #region Properties
         //=====================================================================
 
@@ -302,7 +309,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         if(item.ProjectItem.Properties != null)
                         {
                             // Looks like a folder or file item
-                            Property fullPath = item.ProjectItem.Properties.Item("FullPath");
+                            Property fullPath = null;
+
+                            if(item.ProjectItem.Kind != EnvDTE.Constants.vsProjectItemKindVirtualFolder)
+                                fullPath = item.ProjectItem.Properties.Item("FullPath");
 
                             if(fullPath != null && fullPath.Value != null)
                             {
@@ -411,22 +421,25 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 // The node is not the root of another hierarchy, it is a regular node
                 var projectFile = DetermineProjectFileInformation(hierarchy, itemId);
 
-                if(projectFile != null)
-                    projectFiles.Add(projectFile);
-
-                result = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild, out value);
-
-                while(result == VSConstants.S_OK && value != null && value is int)
+                if(projectFile != IgnoredHierarchyItem)
                 {
-                    visibleChildNode = (uint)(int)value;
+                    if(projectFile != null)
+                        projectFiles.Add(projectFile);
 
-                    if(visibleChildNode == VSConstants.VSITEMID_NIL)
-                        break;
+                    result = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild, out value);
 
-                    ProcessHierarchyNodeRecursively(hierarchy, visibleChildNode, projectFiles);
+                    while(result == VSConstants.S_OK && value != null && value is int)
+                    {
+                        visibleChildNode = (uint)(int)value;
 
-                    value = null;
-                    result = hierarchy.GetProperty(visibleChildNode, (int)__VSHPROPID.VSHPROPID_NextVisibleSibling, out value);
+                        if(visibleChildNode == VSConstants.VSITEMID_NIL)
+                            break;
+
+                        ProcessHierarchyNodeRecursively(hierarchy, visibleChildNode, projectFiles);
+
+                        value = null;
+                        result = hierarchy.GetProperty(visibleChildNode, (int)__VSHPROPID.VSHPROPID_NextVisibleSibling, out value);
+                    }
                 }
             }
         }
@@ -440,6 +453,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// unrecognized nodes.</remarks>
         private static SpellCheckFileInfo DetermineProjectFileInformation(IVsHierarchy hierarchy, uint itemId)
         {
+            Guid guid;
             int result;
             object value;
             string projectName = "", name, canonicalName;
@@ -462,6 +476,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 if(result == VSConstants.S_OK && value != null)
                 {
                     name = value.ToString();
+
+                    // Certain project folders in C++ projects return a GUID for their name.  These should be
+                    // ignored (References, External Dependencies, etc.).
+                    if(name.Length != 0 && name[0] == '{' && Guid.TryParse(name, out guid))
+                        return IgnoredHierarchyItem;
 
                     result = hierarchy.GetCanonicalName(itemId, out canonicalName);
 

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="849b4568-2e2c-47a0-8a13-cb2b7640314b" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Added \U201E (double low-9 quotation mark) as a work break character.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for spell checking markdown files within the Visual Studio text editor when using
+the <externalLink>
+							<linkText>Markdown Editor</linkText>
+							<linkAlternateText>Markdown Editor</linkAlternateText>
+							<linkUri>https://visualstudiogallery.msdn.microsoft.com/eaab33c3-437b-4918-8354-872dfe5d1bfe</linkUri>
+							<linkTarget>_blank</linkTarget>
+						</externalLink> extension created by Mads Kristensen.</para>
+					
+						<alert class="important">
+							<para>You will need a Markdown Editor release later than 1.5.11 made after July 27, 2016 in order
+for spell checking to have the proper effect on all parts of the markdown file's content.</para>
+						</alert>
+					
+					</listItem>
+
+					<listItem>
+						<para>Updated the solution/project spell check to ignore certain pseudo-folders such as External
+Dependencies in C++ projects.</para>
+					</listItem>
+				</list>
+			
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

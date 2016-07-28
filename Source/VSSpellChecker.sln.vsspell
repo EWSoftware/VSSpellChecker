@@ -6,6 +6,9 @@
   <SelectedLanguages />
   <InheritIgnoredWords>True</InheritIgnoredWords>
   <IgnoredWords>
+    <Ignore>\transform</Ignore>
+    <Ignore>arn</Ignore>
+    <Ignore>Beňo</Ignore>
     <Ignore>blackspikeltd</Ignore>
     <Ignore>csharp</Ignore>
     <Ignore>Essilfie</Ignore>
@@ -15,20 +18,18 @@
     <Ignore>Hannes</Ignore>
     <Ignore>html</Ignore>
     <Ignore>htmlx</Ignore>
+    <Ignore>hunspells</Ignore>
+    <Ignore>jquery</Ignore>
     <Ignore>Kamecke</Ignore>
     <Ignore>Lehenbauer</Ignore>
+    <Ignore>Miloslav</Ignore>
     <Ignore>mimetype</Ignore>
     <Ignore>plaintext</Ignore>
     <Ignore>resheader</Ignore>
     <Ignore>Ruhmann</Ignore>
     <Ignore>xaml</Ignore>
     <Ignore>xml</Ignore>
-    <Ignore>Miloslav</Ignore>
-    <Ignore>Beňo</Ignore>
-    <Ignore>arn</Ignore>
-    <Ignore>hunspells</Ignore>
-    <Ignore>jquery</Ignore>
-    <Ignore>\transform</Ignore>
+    <Ignore>Kristensen</Ignore>
   </IgnoredWords>
   <InheritXmlSettings>True</InheritXmlSettings>
   <InheritExclusionExpressions>True</InheritExclusionExpressions>

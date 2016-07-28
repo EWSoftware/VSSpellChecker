@@ -87,6 +87,13 @@ namespace VisualStudio.SpellChecker.Tagging
                 if(config == null)
                     return null;
 
+                // Markdown has its own tagger
+                if(buffer.ContentType.IsOfType("Markdown"))
+                {
+                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
+                        config.IgnoredXmlElements, config.SpellCheckedXmlAttributes) as ITagger<T>;
+                }
+
                 // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
                 // configuration options to exclude certain elements from being spell checked if not wanted.
                 // Through the configuration options, we can also specify this tagger be used for all C-style

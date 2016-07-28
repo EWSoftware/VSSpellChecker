@@ -53,7 +53,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2016.5.28.0</HelpFileVersion>
+    <HelpFileVersion>2016.7.28.0</HelpFileVersion>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->
@@ -111,6 +111,7 @@
     <None Include="Content\VersionHistory\v2014.9.7.0.aml" />
     <None Include="Content\VersionHistory\v2015.2.21.0.aml" />
     <None Include="Content\VersionHistory\v2015.3.1.0.aml" />
+    <None Include="Content\VersionHistory\v2016.7.28.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2015.8.15.0.aml" />
     <None Include="Content\VersionHistory\v2015.9.19.0.aml" />

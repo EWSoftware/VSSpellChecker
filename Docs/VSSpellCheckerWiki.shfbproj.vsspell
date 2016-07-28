@@ -7,17 +7,18 @@
   <InheritIgnoredWords>True</InheritIgnoredWords>
   <IgnoredWords>
     <Ignore>Allman</Ignore>
+    <Ignore>Beňo</Ignore>
     <Ignore>Essilfie</Ignore>
     <Ignore>Gaisie</Ignore>
     <Ignore>Golovin</Ignore>
     <Ignore>htmlx</Ignore>
     <Ignore>Koelman</Ignore>
     <Ignore>Lehenbauer</Ignore>
+    <Ignore>Miloslav</Ignore>
     <Ignore>Ruhmann</Ignore>
     <Ignore>xclick</Ignore>
     <Ignore>yyyy</Ignore>
-    <Ignore>Miloslav</Ignore>
-    <Ignore>Beňo</Ignore>
+    <Ignore>Kristensen</Ignore>
   </IgnoredWords>
   <InheritXmlSettings>True</InheritXmlSettings>
   <InheritExclusionExpressions>True</InheritExclusionExpressions>

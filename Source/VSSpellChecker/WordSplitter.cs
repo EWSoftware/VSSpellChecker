@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 05/23/2016
+// Updated : 07/26/2016
 // Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -40,9 +40,9 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        // Word break characters (\u201C/\u201D = Unicode quotes, \u2026 = Ellipsis character).
+        // Word break characters (\u201C \u201D \u201E = Unicode quotes, \u2026 = Ellipsis character).
         // Specifically excludes: _ . ' @ &
-        private const string wordBreakChars = " \t!\"#$%()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u2026";
+        private const string wordBreakChars = " \t!\"#$%()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u201E\u2026";
 
         // Regular expressions used to find things that look like XML elements and URLs
         internal static Regex XmlElement = new Regex(@"<[A-Za-z/]+?.*?>");
