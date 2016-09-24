@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DoubledWordSmartTagAction.cs
 // Authors : Eric Woodruff
-// Updated : 06/06/2014
-// Note    : Copyright 2014, Eric Woodruff, All rights reserved
+// Updated : 09/23/2016
+// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a smart tag action for deleting doubled words
@@ -20,13 +20,15 @@
 
 using System;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 
 namespace VisualStudio.SpellChecker.SmartTags
 {
+    // Stop VS2015 complaining about the obsolete types.  We still need to support VS2013.
+    #pragma warning disable 618
+
     /// <summary>
     /// Smart tag action for deleting doubled words
     /// </summary>
@@ -95,4 +97,6 @@ namespace VisualStudio.SpellChecker.SmartTags
         }
         #endregion
     }
+
+    #pragma warning restore 618
 }

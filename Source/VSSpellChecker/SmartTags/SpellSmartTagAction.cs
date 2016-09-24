@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTagAction.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/28/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+// Updated : 09/23/2016
+// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -31,6 +31,9 @@ using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.SmartTags
 {
+    // Stop VS2015 complaining about the obsolete types.  We still need to support VS2013.
+    #pragma warning disable 618
+
     /// <summary>
     /// Smart tag action for inserting spelling suggestions
     /// </summary>
@@ -109,4 +112,6 @@ namespace VisualStudio.SpellChecker.SmartTags
         }
         #endregion
     }
+
+    #pragma warning restore 618
 }

@@ -39,7 +39,6 @@
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
 					<RowDefinition />
-					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 				<Border Grid.Row="0" BorderBrush="{StaticResource LightBorderBrushKey}" BorderThickness="1"
 					CornerRadius="2" Margin="3">
@@ -102,20 +101,16 @@
 							<Separator />
 							<MenuItem Command="vssc:SpellCheckCommands.GoToIssue" />
 							<MenuItem Command="ApplicationCommands.Copy" Header="Copy Word to Clipboard" />
-							<MenuItem Header="Export">
+                            <Separator />
+                            <MenuItem Header="Export">
 								<MenuItem Command="vssc:SpellCheckCommands.ExportAllIssues" />
 								<MenuItem Command="vssc:SpellCheckCommands.ExportProjectIssues" />
 								<MenuItem Command="vssc:SpellCheckCommands.ExportFileIssues" />
 							</MenuItem>
-						</ContextMenu>
+                            <MenuItem Header="Edit Configuration File" Name="miEditConfig" />
+                        </ContextMenu>
 					</DataGrid.ContextMenu>
 				</DataGrid>
-				<TextBlock Grid.Row="2" Margin="3" Padding="3" TextWrapping="Wrap" Style="{StaticResource ShadedText}">
-					This tool window is in beta.  Found a problem or want to suggest an enhancement?
-					<Hyperlink Name="lnkFeedback"
-						NavigateUri="https://github.com/EWSoftware/VSSpellChecker/wiki/bda126a1-e534-4172-81dc-35a32d91e4cc"
-						Click="lnkFeedback_Click">Open an Issue</Hyperlink>
-				</TextBlock>
 			</Grid>
 		</Grid>
 		<GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center"

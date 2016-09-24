@@ -191,7 +191,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                         projectPath = file.CanonicalName.Substring(0, idx);
 
                                         filePath = configNames.FirstOrDefault(n => n.StartsWith(projectPath,
-                                            StringComparison.OrdinalIgnoreCase) && !n.Equals(file.CanonicalName,
+                                            StringComparison.OrdinalIgnoreCase) && !n.StartsWith(file.CanonicalName,
                                             StringComparison.OrdinalIgnoreCase));
 
                                         file.DependencyConfigurationFile = filePath;
@@ -503,27 +503,28 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         }
 
         /// <summary>
-        /// This is used to generate the configuration for the instance
+        /// This read-only property returns an enumerable list of the configuration files that will be loaded to
+        /// create the configuration used to spell check the file.
         /// </summary>
-        /// <returns>The configuration to use or null if the file should not be spell checked (disabled or not a
-        /// type of file that can be spell checked such as a binary file).</returns>
-        public SpellCheckerConfiguration GenerateConfiguration(IEnumerable<string> codeAnalysisFiles)
+        /// <returns>An enumerable list of key/value pairs indicating the configuration file type and the
+        /// configuration filename.</returns>
+        public IEnumerable<KeyValuePair<ConfigurationType, string>> ConfigurationFiles
         {
-            string configFile;
-
-            var config = new SpellCheckerConfiguration();
-
-            try
+            get
             {
+                string configFile;
+
                 // Start with the global configuration and work on down
-                config.Load(SpellingConfigurationFile.GlobalConfigurationFilename);
+                yield return new KeyValuePair<ConfigurationType, string>(ConfigurationType.Global,
+                    SpellingConfigurationFile.GlobalConfigurationFilename);
 
                 if(this.HasSolutionConfigurationFile)
                 {
                     configFile = this.SolutionFile + ".vsspell";
 
                     if(File.Exists(configFile))
-                        config.Load(configFile);
+                        yield return new KeyValuePair<ConfigurationType, string>(ConfigurationType.Solution,
+                            configFile);
                 }
 
                 if(this.HasProjectConfigurationFile)
@@ -531,24 +532,43 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     configFile = this.ProjectFile + ".vsspell";
 
                     if(File.Exists(configFile))
-                        config.Load(configFile);
+                        yield return new KeyValuePair<ConfigurationType, string>(ConfigurationType.Project,
+                            configFile);
                 }
 
                 if(this.FolderConfigurationFiles.Any())
                     foreach(string cf in this.FolderConfigurationFiles)
                         if(File.Exists(cf))
-                            config.Load(cf);
+                            yield return new KeyValuePair<ConfigurationType, string>(ConfigurationType.Folder, cf);
 
                 if(this.DependencyConfigurationFile != null && File.Exists(this.DependencyConfigurationFile))
-                    config.Load(this.DependencyConfigurationFile);
+                    yield return new KeyValuePair<ConfigurationType, string>(ConfigurationType.File,
+                        this.DependencyConfigurationFile);
 
                 if(this.HasRelatedConfigurationFile)
                 {
                     configFile = this.CanonicalName + ".vsspell";
 
                     if(File.Exists(configFile))
-                        config.Load(configFile);
+                        yield return new KeyValuePair<ConfigurationType, string>(ConfigurationType.File,
+                            configFile);
                 }
+            }
+        }
+
+        /// <summary>
+        /// This is used to generate the configuration for the instance
+        /// </summary>
+        /// <returns>The configuration to use or null if the file should not be spell checked (disabled or not a
+        /// type of file that can be spell checked such as a binary file).</returns>
+        public SpellCheckerConfiguration GenerateConfiguration(IEnumerable<string> codeAnalysisFiles)
+        {
+            var config = new SpellCheckerConfiguration();
+
+            try
+            {
+                foreach(var c in this.ConfigurationFiles)
+                    config.Load(c.Value);
 
                 // Merge any code analysis dictionary settings
                 if(codeAnalysisFiles != null)

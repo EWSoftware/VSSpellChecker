@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSmartTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 04/14/2013
-// Note    : Copyright 2010-2013, Microsoft Corporation, All rights reserved
+// Updated : 09/23/2016
+// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to represent a spelling smart tag
@@ -24,6 +24,9 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace VisualStudio.SpellChecker.SmartTags
 {
+    // Stop VS2015 complaining about the obsolete types.  We still need to support VS2013.
+    #pragma warning disable 618
+
     /// <summary>
     /// This class is used to represent a spelling smart tag
     /// </summary>
@@ -38,4 +41,6 @@ namespace VisualStudio.SpellChecker.SmartTags
         {
         }
     }
+
+    #pragma warning restore 618
 }

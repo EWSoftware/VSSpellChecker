@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
-// Updated : 04/29/2016
+// Updated : 09/23/2016
 // Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 
 using Microsoft.VisualStudio.Text;
@@ -81,19 +82,33 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public bool SuggestionsDetermined { get; set; }
 
         /// <summary>
-        /// This is used to get or set the name of the project containing the file
+        /// This is used to get or set the information for the file containing the issue
         /// </summary>
-        public string ProjectName { get; set; }
+        public SpellCheckFileInfo FileInfo { get; set; }
 
         /// <summary>
-        /// This is used to get or set the name of the file containing the issue (no path)
+        /// This read-only property is used to get the name of the project containing the file
         /// </summary>
-        public string Filename { get; set; }
+        public string ProjectName
+        {
+            get { return (this.FileInfo != null) ? Path.GetFileName(this.FileInfo.ProjectFile) : null; }
+        }
 
         /// <summary>
-        /// This is used to get or set the canonical name of the file (full path)
+        /// This read-only property is used to get the name of the file containing the issue (no path)
         /// </summary>
-        public string CanonicalName { get; set; }
+        public string Filename
+        {
+            get { return (this.FileInfo != null) ? this.FileInfo.Filename : null; }
+        }
+
+        /// <summary>
+        /// This read-only property is used to get the canonical name of the file (full path)
+        /// </summary>
+        public string CanonicalName
+        {
+            get { return (this.FileInfo != null) ? this.FileInfo.CanonicalName : null; }
+        }
 
         /// <summary>
         /// This is used to get or set the line number for the issue

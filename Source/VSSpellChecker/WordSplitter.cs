@@ -40,10 +40,6 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        // Word break characters (\u201C \u201D \u201E = Unicode quotes, \u2026 = Ellipsis character).
-        // Specifically excludes: _ . ' @ &
-        private const string wordBreakChars = " \t!\"#$%()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u201E\u2026";
-
         // Regular expressions used to find things that look like XML elements and URLs
         internal static Regex XmlElement = new Regex(@"<[A-Za-z/]+?.*?>");
 
@@ -508,10 +504,25 @@ namespace VisualStudio.SpellChecker
         /// <returns>True if the character is a word break, false if not</returns>
         private bool IsWordBreakCharacter(char c, bool includingMnemonic)
         {
-            return wordBreakChars.Contains(c) || Char.IsWhiteSpace(c) ||
-                (c == '_' && mnemonic != '_' && this.Configuration.TreatUnderscoreAsSeparator) ||
-                (c == mnemonic && (!this.Configuration.IgnoreMnemonics || includingMnemonic)) ||
-                ((c == '.' || c == '@') && !this.Configuration.IgnoreFilenamesAndEMailAddresses);
+            if(c == mnemonic)
+                return (!this.Configuration.IgnoreMnemonics || includingMnemonic);
+
+            switch(c)
+            {
+                case '\'':      // These could be apostrophes
+                    return false;
+
+                case '.':
+                case '@':
+                    return !this.Configuration.IgnoreFilenamesAndEMailAddresses;
+
+                case '_':
+                    return this.Configuration.TreatUnderscoreAsSeparator;
+
+                default:
+                    return (Char.IsWhiteSpace(c) || Char.IsPunctuation(c) || Char.IsSymbol(c) ||
+                        Char.IsControl(c));
+            }
         }
 
         /// <summary>

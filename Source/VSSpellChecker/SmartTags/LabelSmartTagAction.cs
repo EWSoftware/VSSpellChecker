@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : LabelSmartTagAction.cs
 // Authors : Eric Woodruff
-// Updated : 07/28/2014
-// Note    : Copyright 2014, Eric Woodruff, All rights reserved
+// Updated : 09/23/2016
+// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a label smart tag
@@ -24,6 +24,9 @@ using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace VisualStudio.SpellChecker.SmartTags
 {
+    // Stop VS2015 complaining about the obsolete types.  We still need to support VS2013.
+    #pragma warning disable 618
+
     /// <summary>
     /// This smart tag acts as a label (disabled, no invocable action)
     /// </summary>
@@ -82,4 +85,6 @@ namespace VisualStudio.SpellChecker.SmartTags
         }
         #endregion
     }
+
+    #pragma warning restore 618
 }

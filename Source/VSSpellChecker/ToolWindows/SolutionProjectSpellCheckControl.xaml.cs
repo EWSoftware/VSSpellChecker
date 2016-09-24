@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/16/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/23/2016
+// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -41,6 +41,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 
+using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
@@ -582,10 +583,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                                 foreach(var issue in this.GetMisspellingsInSpans(dictionary, classifier.Parse()))
                                 {
+                                    issue.FileInfo = file;
                                     issue.Dictionary = dictionary;
-                                    issue.ProjectName = Path.GetFileName(file.ProjectFile);
-                                    issue.Filename = file.Filename;
-                                    issue.CanonicalName = file.CanonicalName;
                                     issue.LineNumber = classifier.GetLineNumber(issue.Span.Start);
                                     issue.LineText = classifier[issue.LineNumber].Trim();
 
@@ -762,24 +761,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
         //=====================================================================
 
         /// <summary>
-        /// View the project website
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void lnkFeedback_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                System.Diagnostics.Process.Start(lnkFeedback.NavigateUri.AbsoluteUri);
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show("Unable to navigate to website.  Reason: " + ex.Message,
-                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
-        }
-
-        /// <summary>
         /// Start the spell checking process if not underway or cancel it if it is underway
         /// </summary>
         /// <param name="sender">The sender of the event</param>
@@ -917,14 +898,88 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void dgIssues_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
+            MenuItem item;
             e.Handled = (dgIssues.Items.Count == 0);
 
             if(!e.Handled)
             {
-                var issue = ucSpellCheck.CurrentIssue;
+                var issue = (FileMisspelling)ucSpellCheck.CurrentIssue;
 
                 miIgnoreAll.IsEnabled = (issue != null && issue.MisspellingType != MisspellingType.DoubledWord);
                 dgIssues.Focus();
+
+                // Set the Edit Configuration File options (one for each possible configuration file related to
+                // the file containing the current issue).
+                miEditConfig.Items.Clear();
+
+                foreach(var cf in issue.FileInfo.ConfigurationFiles)
+                {
+                    switch(cf.Key)
+                    {
+                        case ConfigurationType.Global:
+                            item = new MenuItem
+                            {
+                                Header = "Global Configuration File",
+                                Tag = SpellingConfigurationFile.GlobalConfigurationFilename
+                            };
+                            break;
+
+                        case ConfigurationType.Solution:
+                            item = new MenuItem
+                            {
+                                Header = "Solution Configuration File",
+                                Tag = cf.Value
+                            };
+                            break;
+
+                        case ConfigurationType.Project:
+                            item = new MenuItem
+                            {
+                                Header = issue.ProjectName + " Configuration File",
+                                Tag = cf.Value
+                            };
+                            break;
+
+                        case ConfigurationType.Folder:
+                            item = new MenuItem { Tag = cf.Value };
+
+                            item.Header = Path.GetFileName(Path.GetDirectoryName(issue.CanonicalName));
+
+                            try
+                            {
+                                // Try to get the directory name with proper casing.  There doesn't seem to be an
+                                // easier way.
+                                string path = Path.GetDirectoryName(Path.GetDirectoryName(issue.CanonicalName));
+
+                                if(path != null)
+                                {
+                                    DirectoryInfo dirInfo = new DirectoryInfo(path);
+                                    DirectoryInfo[] subDirs = dirInfo.GetDirectories((string)item.Header);
+
+                                    if(subDirs.Length > 0)
+                                        item.Header = subDirs[0].Name;
+                                }
+                            }
+                            catch
+                            {
+                                // Ignore errors, just show the name we've got
+                            }
+
+                            item.Header += " Folder Configuration File";
+                            break;
+
+                        default:
+                            item = new MenuItem
+                            {
+                                Header = issue.Filename + " Configuration File",
+                                Tag = cf.Value
+                            };
+                            break;
+                    }
+
+                    item.Click += openConfigFile_Click;
+                    miEditConfig.Items.Add(item);
+                }
             }
         }
 
@@ -1552,6 +1607,29 @@ namespace VisualStudio.SpellChecker.ToolWindows
             else
                 MessageBox.Show("Select an issue for export first", PackageResources.PackageTitle,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
+        }
+
+        /// <summary>
+        /// This is used to open a spell checker configuration file for editing
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void openConfigFile_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem item = sender as MenuItem;
+
+            if(item != null && item.Tag != null && File.Exists((string)item.Tag))
+            {
+                var dte = Utility.GetServiceFromPackage<DTE, SDTE>(true);
+
+                if(dte != null)
+                {
+                    var doc = dte.ItemOperations.OpenFile((string)item.Tag, EnvDTE.Constants.vsViewKindPrimary);
+
+                    if(doc != null)
+                        doc.Activate();
+                }
+            }
         }
         #endregion
     }
