@@ -636,17 +636,17 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 textToSplit = span.Text;
 
                 // Always ignore URLs
-                rangeExclusions = WordSplitter.Url.Matches(textToSplit).OfType<Match>().ToList();
+                rangeExclusions = WordSplitter.Url.Matches(textToSplit).Cast<Match>().ToList();
 
                 // Note the location of all XML elements if needed
                 if(wordSplitter.Configuration.IgnoreXmlElementsInText)
-                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).OfType<Match>());
+                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).Cast<Match>());
 
                 // Add exclusions from the configuration if any
                 foreach(var exclude in wordSplitter.Configuration.ExclusionExpressions)
                     try
                     {
-                        rangeExclusions.AddRange(exclude.Matches(textToSplit).OfType<Match>());
+                        rangeExclusions.AddRange(exclude.Matches(textToSplit).Cast<Match>());
                     }
                     catch(RegexMatchTimeoutException ex)
                     {

@@ -123,7 +123,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             {
                 configuration.StoreProperty(PropertyNames.EnableWpfTextBoxSpellChecking, chkEnableWpfTextBoxSpellChecking.IsChecked);
 
-                var newList = new HashSet<string>(lbExclusionExpressions.Items.OfType<string>(),
+                var newList = new HashSet<string>(lbExclusionExpressions.Items.Cast<string>(),
                     StringComparer.OrdinalIgnoreCase);
 
                 if(newList.SetEquals(SpellCheckerConfiguration.DefaultVisualStudioExclusions))

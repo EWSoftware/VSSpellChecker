@@ -105,7 +105,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbIgnoredFilePatterns.Items.Count != 0 || !chkInheritIgnoredFilePatterns.IsChecked.Value)
             {
-                newList = new HashSet<string>(lbIgnoredFilePatterns.Items.OfType<string>(),
+                newList = new HashSet<string>(lbIgnoredFilePatterns.Items.Cast<string>(),
                     StringComparer.OrdinalIgnoreCase);
 
                 if(configuration.ConfigurationType == ConfigurationType.Global &&

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/12/2016
+// Updated : 10/04/2016
 // Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -31,8 +31,8 @@ using System.Windows.Controls;
 using EnvDTE;
 using EnvDTE80;
 
-using Microsoft.Win32;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.Win32;
 
 using VisualStudio.SpellChecker.Configuration;
 
@@ -158,7 +158,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             isGlobal = configuration.ConfigurationType == ConfigurationType.Global;
 
             if(lbAdditionalFolders.Items.Count != 0)
-                newList = new HashSet<string>(lbAdditionalFolders.Items.OfType<string>(),
+                newList = new HashSet<string>(lbAdditionalFolders.Items.Cast<string>(),
                     StringComparer.OrdinalIgnoreCase);
 
             if(!isGlobal)
@@ -169,7 +169,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 PropertyNames.AdditionalDictionaryFoldersItem, newList);
 
             configuration.StoreValues(PropertyNames.SelectedLanguages, PropertyNames.SelectedLanguagesItem,
-                lbSelectedLanguages.Items.OfType<SpellCheckerDictionary>().Select(d => d.Culture.Name));
+                lbSelectedLanguages.Items.Cast<SpellCheckerDictionary>().Select(d => d.Culture.Name));
         }
 
         /// <inheritdoc />
@@ -202,7 +202,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 defaultLang = ((SpellCheckerDictionary)cboAvailableLanguages.SelectedItem).Culture;
 
                 selectedLanguages.Clear();
-                selectedLanguages.AddRange(lbSelectedLanguages.Items.OfType<SpellCheckerDictionary>().Select(
+                selectedLanguages.AddRange(lbSelectedLanguages.Items.Cast<SpellCheckerDictionary>().Select(
                     d => d.Culture.Name));
             }
 
@@ -224,7 +224,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
 
             // Fully qualify relative paths with the configuration file path
-            foreach(string folder in lbAdditionalFolders.Items.OfType<string>())
+            foreach(string folder in lbAdditionalFolders.Items.Cast<string>())
             {
                 if(folder.IndexOf('%') != -1 || Path.IsPathRooted(folder))
                     additionalFolders.Add(folder);
@@ -723,7 +723,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                   selectedDictionary.DictionaryFilePath, VSSpellCheckerPackage.Instance))
                 {
                     File.WriteAllLines(selectedDictionary.UserDictionaryFilePath,
-                        lbUserDictionary.Items.OfType<string>());
+                        lbUserDictionary.Items.Cast<string>());
 
                     if(!String.IsNullOrWhiteSpace(word))
                         GlobalDictionary.RemoveWord(selectedDictionary.Culture, word);
@@ -743,33 +743,42 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <summary>
-        /// Import words from a text file
+        /// Import words from a user dictionary file
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnImportDictionary_Click(object sender, RoutedEventArgs e)
+        private void btnImport_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (*.txt)|*.txt|All Files (*.*)|*.*";
-            dlg.CheckPathExists = dlg.CheckFileExists = true;
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|" +
+                    "StyleCop Settings Files (*.stylecop)|*.stylecop|Text documents (*.txt)|*.txt|" +
+                    "All Files (*.*)|*.*",
+                CheckFileExists = true
+            };
 
             if((dlg.ShowDialog() ?? false))
             {
                 try
                 {
-                    // Parse words based on the common word break characters and add unique instances to the
-                    // user dictionary if not already there excluding those containing digits and those less than
-                    // three characters in length.
-                    var uniqueWords = File.ReadAllText(dlg.FileName).Split(new[] { ',', '/', '<', '>', '?', ';',
-                        ':', '\"', '[', ']', '\\', '{', '}', '|', '-', '=', '+', '~', '!', '#', '$', '%', '^',
-                        '&', '*', '(', ')', ' ', '_', '.', '\'', '@', '\t', '\r', '\n' },
-                        StringSplitOptions.RemoveEmptyEntries)
-                            .Except(lbUserDictionary.Items.OfType<string>())
-                            .Distinct()
-                            .Where(w => w.Length > 2 && w.IndexOfAny(
-                                new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
+                    var uniqueWords = new HashSet<string>(Utility.LoadUserDictionary(dlg.FileName, true, false),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    if(uniqueWords.Count == 0)
+                    {
+                        MessageBox.Show("Unable to load any words from the selected file", PackageResources.PackageTitle,
+                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        return;
+                    }
+
+                    if(lbUserDictionary.Items.Count != 0 && MessageBox.Show("Do you want to replace the " +
+                      "existing list of words?  Click Yes to replace them or No to merge the new words into " +
+                      "the existing list.", PackageResources.PackageTitle, MessageBoxButton.YesNo,
+                      MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
+                    {
+                        uniqueWords.UnionWith(lbUserDictionary.Items.Cast<string>());
+                    }
 
                     try
                     {
@@ -787,7 +796,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         }
                         else
                             MessageBox.Show("Unable to save user dictionary.  The file could not be added to " +
-                                "the project, could not be checked out, or is read-only",
+                                "the project, could not be checked out, or is read-only.",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     }
                     catch(Exception ex)
@@ -806,24 +815,55 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <summary>
-        /// Export words to a text file
+        /// Export words to a user dictionary file
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnExportDictionary_Click(object sender, RoutedEventArgs e)
+        private void btnExport_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlg.FileName = "UserDictionary.dic";
-            dlg.DefaultExt = ".dic";
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (*.txt)|*.txt|All Files (*.*)|*.*";
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                FileName = "UserDictionary.dic",
+                DefaultExt = ".dic",
+                OverwritePrompt = false,
+                Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|Text documents (*.txt)|*.txt|" +
+                    "All Files (*.*)|*.*"
+            };
 
             if((dlg.ShowDialog() ?? false))
             {
                 try
                 {
-                    File.WriteAllLines(dlg.FileName, lbUserDictionary.Items.OfType<string>());
+                    var uniqueWords = new HashSet<string>(lbUserDictionary.Items.Cast<string>(),
+                        StringComparer.OrdinalIgnoreCase);
+                    bool replaceWords = true;
+
+                    if(File.Exists(dlg.FileName))
+                    {
+                        if(!dlg.FileName.CanWriteToUserWordsFile(null, VSSpellCheckerPackage.Instance))
+                        {
+                            MessageBox.Show("File is read-only or could not be checked out",
+                                PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            return;
+                        }
+
+                        MessageBoxResult result = MessageBox.Show("Do you want to replace the words in the " +
+                          "existing file?  Click Yes to replace them, No to merge the new words into the " +
+                          "existing file, or Cancel to stop and do nothing.", PackageResources.PackageTitle,
+                          MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
+
+                        if(result == MessageBoxResult.Cancel)
+                            return;
+
+                        if(result == MessageBoxResult.No)
+                        {
+                            uniqueWords.UnionWith(Utility.LoadUserDictionary(dlg.FileName, true, true));
+                            replaceWords = false;
+                        }
+                    }
+
+                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, true, uniqueWords.OrderBy(w => w));
                 }
                 catch(Exception ex)
                 {

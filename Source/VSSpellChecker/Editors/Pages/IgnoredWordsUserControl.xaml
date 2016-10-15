@@ -42,8 +42,12 @@ word.  The default set includes common Doxygen tags that fit this category.</Tex
 		<StackPanel Orientation="Horizontal" Grid.Row="4" Margin="3">
 			<Button Name="btnRemoveIgnoredWord" Content="Remove" Width="80" Margin="0, 0, 3, 0"
 				ToolTip="Remove selected ignored word" Click="btnRemoveIgnoredWord_Click" />
-			<Button Name="btnDefaultIgnoredWords" Content="Default" Width="80"
+			<Button Name="btnDefaultIgnoredWords" Content="Default" Width="80" Margin="0, 0, 3, 0"
 				ToolTip="Reset to default list of ignored words" Click="btnDefaultIgnoredWords_Click" />
+			<Button Name="btnImport" Content="Import" Width="80" Margin="0, 0, 3, 0"
+			    ToolTip="Import ignored words from a file" Click="btnImport_Click" />
+			<Button Name="btnExport" Content="Export" Width="80" Margin="0, 0, 3, 0"
+			    ToolTip="Export ignored words to a file" Click="btnExport_Click" />
 		</StackPanel>
 	</Grid>
 </UserControl>

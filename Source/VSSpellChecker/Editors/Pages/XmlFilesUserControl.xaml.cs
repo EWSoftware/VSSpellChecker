@@ -124,7 +124,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbIgnoredXmlElements.Items.Count != 0 || !chkInheritXmlSettings.IsChecked.Value)
             {
-                newElementList = new HashSet<string>(lbIgnoredXmlElements.Items.OfType<string>());
+                newElementList = new HashSet<string>(lbIgnoredXmlElements.Items.Cast<string>());
 
                 if(configuration.ConfigurationType == ConfigurationType.Global &&
                   newElementList.SetEquals(SpellCheckerConfiguration.DefaultIgnoredXmlElements))
@@ -133,7 +133,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbSpellCheckedAttributes.Items.Count != 0 || !chkInheritXmlSettings.IsChecked.Value)
             {
-                newAttributeList = new HashSet<string>(lbSpellCheckedAttributes.Items.OfType<string>());
+                newAttributeList = new HashSet<string>(lbSpellCheckedAttributes.Items.Cast<string>());
 
                 if(configuration.ConfigurationType == ConfigurationType.Global &&
                   newAttributeList.SetEquals(SpellCheckerConfiguration.DefaultSpellCheckedAttributes))

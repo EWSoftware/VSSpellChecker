@@ -121,6 +121,13 @@ related to the file of the current issue).  The selected issues will be exported
 whether or not you want to open the file.</para>
 							</listItem>
 
+							<listItem>
+								<para><ui>Edit Configuration File</ui> - This contains a submenu with an option for each of the
+configuration files associated with the selected issue.  This allows you to open them for editing so that you can
+adjust the options, add ignored files, add ignored words, etc.  The global configuration file is always listed
+first followed by any solution, project, folder, and file related configuration files that were used to create
+the options used to spell check the file for the selected issue.</para>
+							</listItem>
 						</list>
 					</listItem>
 

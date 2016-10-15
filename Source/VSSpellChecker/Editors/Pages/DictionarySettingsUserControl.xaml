@@ -123,9 +123,9 @@ the configuration file.</TextBlock>
 							ToolTip="Remove selected word from user dictionary" HorizontalAlignment="Left"
 							Click="btnRemoveDictionaryWord_Click" />
 						<Button Grid.Column="1" Name="btnImport" Content="Import" Width="80" Margin="3"
-							ToolTip="Import user dictionary words from a file" Click="btnImportDictionary_Click" />
+							ToolTip="Import user dictionary words from a file" Click="btnImport_Click" />
 						<Button Grid.Column="2" Name="btnExport" Content="Export" Width="80" Margin="3"
-							ToolTip="Export user dictionary words to a file" Click="btnExportDictionary_Click" />
+							ToolTip="Export user dictionary words to a file" Click="btnExport_Click" />
 					</Grid>
 				</Grid>
 			</GroupBox>

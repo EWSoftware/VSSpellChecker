@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/27/2016
+// Updated : 10/04/2016
 // Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -24,6 +24,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 using EnvDTE;
 using EnvDTE80;
@@ -338,7 +339,7 @@ namespace VisualStudio.SpellChecker
         /// solution item folders.</returns>
         public static IEnumerable<Project> EnumerateProjects(this Solution solution)
         {
-            return solution.Projects.OfType<Project>().SelectMany(EnumerateProjects);
+            return solution.Projects.Cast<Project>().SelectMany(EnumerateProjects);
         }
 
         /// <summary>
@@ -371,7 +372,7 @@ namespace VisualStudio.SpellChecker
         /// This is used to determine if the given user dictionary words file can be written to
         /// </summary>
         /// <param name="dictionaryWordsFile">The user dictionary words file</param>
-        /// <param name="dictionaryFile">The related dictionary file</param>
+        /// <param name="dictionaryFile">The related dictionary file or null if there isn't one</param>
         /// <param name="serviceProvider">The service provider to use for interacting with the solution/project</param>
         /// <returns>True if it can, false if not</returns>
         public static bool CanWriteToUserWordsFile(this string dictionaryWordsFile, string dictionaryFile,
@@ -380,8 +381,8 @@ namespace VisualStudio.SpellChecker
             if(String.IsNullOrWhiteSpace(dictionaryWordsFile))
                 throw new ArgumentException("Dictionary words file cannot be null or empty", "dictionaryWordsFile");
 
-            if(String.IsNullOrWhiteSpace(dictionaryFile))
-                throw new ArgumentException("Dictionary file cannot be null or empty", "dictionaryFile");
+            if(dictionaryFile != null && dictionaryFile.Trim().Length == 0)
+                throw new ArgumentException("Dictionary file cannot be empty", "dictionaryFile");
 
             // The file must exist
             if(!File.Exists(dictionaryWordsFile))
@@ -401,7 +402,7 @@ namespace VisualStudio.SpellChecker
             // See if the user file or its related dictionary is part of the solution.  If neither are, we can
             // write to it if not read-only.
             var userItem = dte.Solution.FindProjectItemForFile(dictionaryWordsFile);
-            var dictItem = dte.Solution.FindProjectItemForFile(dictionaryFile);
+            var dictItem = (dictionaryFile == null) ? null : dte.Solution.FindProjectItemForFile(dictionaryFile);
 
             if(dictItem == null && userItem == null)
                 return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
@@ -450,6 +451,180 @@ namespace VisualStudio.SpellChecker
                 fieldValue += ",";
 
             return fieldValue;
+        }
+        #endregion
+
+        #region User dictionary import/export methods
+        //=====================================================================
+
+        /// <summary>
+        /// This loads all of the words from the given file based on the determined type (an XML or text user
+        /// dictionary file or a StyleCop settings file).
+        /// </summary>
+        /// <param name="filename">The file to load.</param>
+        /// <param name="onlyAddedWords">True to only load words from an XML user dictionary file where the
+        /// <c>Spelling</c> attribute is set to "Add" or false to only load words where the <c>Spelling</c>
+        /// attribute is set to "Ignore".  Words without a <c>Spelling</c> attribute will be added to the list
+        /// regardless of this setting.</param>
+        /// <param name="allWords">True to return all words including duplicates and those containing digits or
+        /// false to return only unique words without digits.</param>
+        /// <returns>An enumerable list of words from the file or an empty enumeration if the file type is XML
+        /// but is not a recognized format.</returns>
+        public static IEnumerable<string> LoadUserDictionary(string filename, bool onlyAddedWords, bool allWords)
+        {
+            IEnumerable<string> words = Enumerable.Empty<string>();
+            string action = onlyAddedWords ? "Add" : "Ignore";
+
+            try
+            {
+                var doc = XDocument.Load(filename);
+
+                if(doc.Root.Name == "Dictionary")
+                {
+                    var recognizedWords = doc.Descendants("Recognized").FirstOrDefault();
+
+                    if(recognizedWords != null)
+                        words = recognizedWords.Elements("Word").Where(
+                            w => ((string)w.Attribute("Spelling") == action ||
+                                (string)w.Attribute("Spelling") == null) &&
+                                !String.IsNullOrWhiteSpace(w.Value)).Select(w => w.Value.Trim());
+                }
+                else
+                    if(doc.Root.Name == "StyleCopSettings")
+                    {
+                        var recognizedWords = doc.Descendants("CollectionProperty").Where(
+                            c => (string)c.Attribute("Name") == "RecognizedWords").FirstOrDefault();
+
+                        if(recognizedWords != null)
+                            words = recognizedWords.Elements("Value").Where(
+                                w => !String.IsNullOrWhiteSpace(w.Value)).Select(w => w.Value.Trim());
+                    }
+            }
+            catch
+            {
+                // If it doesn't look like an XML file, assume it's text of some sort.  Convert anything that
+                // isn't a letter or a digit to a space and get each word.
+                var wordList = (new String(File.ReadAllText(filename).ToCharArray().Select(
+                    c => (c == '\\' || Char.IsLetterOrDigit(c)) ? c : ' ').ToArray())).Split(new[] { ' ' },
+                    StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                // Handle escaped words and split words containing the escape anywhere other than the start
+                foreach(string w in wordList.Where(wd => wd.IndexOf('\\') != -1).ToArray())
+                {
+                    wordList.Remove(w);
+
+                    if(w.Length > 2)
+                    {
+                        if(w.IndexOf('\\', 1) > 0)
+                            wordList.AddRange(w.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+                        else
+                            if(!onlyAddedWords)
+                                wordList.Add(w);
+                    }
+                }
+
+                words = wordList;
+            }
+
+            if(allWords)
+                return words;
+
+            return words.Distinct().Where(w => w.Length > 2 && w.IndexOfAny(
+                new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
+        }
+
+        /// <summary>
+        /// This is used to save an enumerable list of words to a user dictionary file
+        /// </summary>
+        /// <param name="filename">The user dictionary filename.  This can be a text or XML user dictionary file.</param>
+        /// <param name="replaceWords">True to replace the words in the file with the new list or false to
+        /// merge the words into the existing list.  This only applies to XML user dictionaries.  For text user
+        /// dictionaries, the word list contains all words including those from the current file if wanted so it
+        /// is always overwritten.</param>
+        /// <param name="addedWords">For XML user dictionaries, this indicates the <c>Spelling</c> attribute
+        /// setting (true for added words, false for ignored words).</param>
+        /// <param name="words">The list of words to save to the user dictionary file.</param>
+        public static void SaveCustomDictionary(string filename, bool replaceWords, bool addedWords,
+          IEnumerable<string> words)
+        {
+            XDocument dictionary = null;
+            string action = addedWords ? "Add" : "Ignore";
+
+            try
+            {
+                // For existing files, see if it's XML.  Don't assume the type by the extension.  If creating a
+                // new file, we will only use the XML format if it's got a ".xml" extension though.
+                if(File.Exists(filename))
+                    dictionary = XDocument.Load(filename);
+                else
+                    if(Path.GetExtension(filename).Equals(".xml", StringComparison.OrdinalIgnoreCase))
+                        dictionary = XDocument.Parse("<Dictionary />");
+            }
+            catch(Exception ex)
+            {
+                // Ignore any exceptions and treat the file as plain text
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+
+            if(dictionary == null)
+            {
+                File.WriteAllLines(filename, words);
+                return;
+            }
+
+            // This only supports the code analysis custom dictionary format
+            if(dictionary.Root.Name != "Dictionary")
+                throw new InvalidOperationException("Only code analysis format XML custom dictionaries are supported");
+
+            var wordsElement = dictionary.Root.Element("Words");
+
+            if(wordsElement == null)
+            {
+                wordsElement = new XElement("Words");
+                dictionary.Root.Add(wordsElement);
+            }
+
+            var recognizedElement = wordsElement.Element("Recognized");
+
+            if(recognizedElement == null)
+            {
+                recognizedElement = new XElement("Recognized");
+                wordsElement.Add(recognizedElement);
+            }
+
+            var existingWords = recognizedElement.Elements("Word").Where(
+                w => (string)w.Attribute("Spelling") == action || words.Contains(w.Value)).ToList();
+
+            if(replaceWords && existingWords.Count != 0)
+            {
+                foreach(var word in existingWords)
+                    word.Remove();
+
+                existingWords.Clear();
+            }
+
+            // Escaped words are ignored as they aren't supported in XML user dictionary files
+            foreach(string w in words)
+                if(w.Length > 0 && w[0] != '\\')
+                {
+                    var match = existingWords.FirstOrDefault(m => m.Value.Equals(w, StringComparison.OrdinalIgnoreCase));
+
+                    if(match != null)
+                    {
+                        if(match.Attribute("Spelling") != null)
+                            match.Attribute("Spelling").Value = action;
+                        else
+                            match.Add(new XAttribute("Spelling", action));
+                    }
+                    else
+                    {
+                        var newWord = new XElement("Word", new XAttribute("Spelling", action), w);
+                        existingWords.Add(newWord);
+                        recognizedElement.Add(newWord);
+                    }
+                }
+
+            dictionary.Save(filename);
         }
         #endregion
     }

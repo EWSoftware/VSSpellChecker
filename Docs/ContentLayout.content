@@ -34,7 +34,7 @@
       <HelpKeyword index="K" term="spell check, active document" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fa790577-88c0-4141-b8f4-d8b70f625cfd" visible="True" isExpanded="true" title="Solution/Project Spell Check Tool Window">
+  <Topic id="fa790577-88c0-4141-b8f4-d8b70f625cfd" visible="True" title="Solution/Project Spell Check Tool Window">
     <HelpKeywords>
       <HelpKeyword index="K" term="spell check, solution/project" />
     </HelpKeywords>
@@ -59,7 +59,7 @@
       <HelpKeyword index="K" term="configuration, configuration files" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isExpanded="true" title="Configuration Options">
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
@@ -133,12 +133,17 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="d21e7d61-ad9b-4806-b759-bb82d3ce0333" visible="True" isSelected="true" title="Version 2016.10.15.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2016.10.15.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="849b4568-2e2c-47a0-8a13-cb2b7640314b" visible="True" title="Version 2016.7.28.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2016.7.28.0" />
       </HelpKeywords>
     </Topic>
-    <Topic id="3f7ff8cc-5493-4f6d-a1f4-99f9e245f621" visible="True" isSelected="true" title="Version 2016.5.28.0">
+    <Topic id="3f7ff8cc-5493-4f6d-a1f4-99f9e245f621" visible="True" title="Version 2016.5.28.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2016.5.28.0" />
       </HelpKeywords>

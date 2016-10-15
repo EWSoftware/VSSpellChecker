@@ -665,13 +665,13 @@ namespace VisualStudio.SpellChecker
 
                 // Note the location of all XML elements if needed
                 if(configuration.IgnoreXmlElementsInText)
-                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).OfType<Match>());
+                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).Cast<Match>());
 
                 // Add exclusions from the configuration if any
                 foreach(var exclude in configuration.ExclusionExpressions)
                     try
                     {
-                        rangeExclusions.AddRange(exclude.Matches(textToSplit).OfType<Match>());
+                        rangeExclusions.AddRange(exclude.Matches(textToSplit).Cast<Match>());
                     }
                     catch(RegexMatchTimeoutException ex)
                     {
