@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/29/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 01/08/2017
+// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for source code files of any type
@@ -89,10 +89,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
                 // Markdown has its own tagger
                 if(buffer.ContentType.IsOfType("Markdown"))
-                {
-                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
-                        config.IgnoredXmlElements, config.SpellCheckedXmlAttributes) as ITagger<T>;
-                }
+                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer)) as ITagger<T>;
 
                 // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
                 // configuration options to exclude certain elements from being spell checked if not wanted.

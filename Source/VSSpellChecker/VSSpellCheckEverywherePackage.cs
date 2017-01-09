@@ -50,7 +50,7 @@ namespace VisualStudio.SpellChecker
     // This package loads at startup as it needs to integrate with any editor/tool window regardless of whether
     // or not a solution is open.
     [ProvideAutoLoad(UIContextGuids.NoSolution)]
-    public class VSSpellCheckEverywherePackage : Package, IVsSelectionEvents
+    public sealed class VSSpellCheckEverywherePackage : Package, IVsSelectionEvents
     {
         #region Private data members
         //=====================================================================

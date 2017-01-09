@@ -23,5 +23,6 @@
     <Rule Id="IDE0001" Action="None" />
     <Rule Id="IDE0002" Action="None" />
     <Rule Id="IDE0003" Action="None" />
+    <Rule Id="IDE0011" Action="None" />
   </Rules>
 </RuleSet>

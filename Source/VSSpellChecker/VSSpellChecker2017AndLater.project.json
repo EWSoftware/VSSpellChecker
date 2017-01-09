@@ -1,0 +1,16 @@
+﻿{
+  "dependencies": {
+    "Microsoft.Build": "14.3.0",
+    "Microsoft.Build.Framework": "14.3.0",
+    "Microsoft.VisualStudio.Workspace.VSIntegration": "15.0.171-pre",
+    "System.Collections": "4.0.11",
+    "System.Runtime": "4.1.0",
+    "System.Runtime.InteropServices": "4.1.0"
+  },
+  "frameworks": {
+    "net46": {}
+  },
+  "runtimes": {
+    "win": {}
+  }
+}

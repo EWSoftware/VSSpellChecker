@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!--
+	***************************************************************************************************************
+	NOTE: If changes are made to this file, make the equivalent changes to the VS2017 copy excluding the
+	      package GUID.
+	***************************************************************************************************************
+	-->
+
+	<!-- This is the file that defines the actual layout and type of the commands.  It is divided in different
+			 sections (e.g. command definition, command placement, ...), with each defining a specific set of
+			 properties.  See the comment before each section for more details about how to use it. -->
+
+	<!-- The VSCT compiler (the tool that translates this file into the binary format that VisualStudio will
+			 consume) has the ability to run a preprocessor on the VSCT file; this preprocessor is (usually) the C++
+			 preprocessor, so  it is possible to define includes and macros with the same syntax used in C++ files.
+			 Using this ability of the compiler here, we include some files defining some of the constants that we
+			 will use inside the file. -->
+
+	<!-- This is the file that defines the IDs for all the commands exposed by VisualStudio -->
+	<Extern href="stdidcmd.h"/>
+
+	<!-- This header contains the command ids for the menus provided by the shell -->
+	<Extern href="vsshlids.h"/>
+
+	<Extern href="VSDbgCmd.h" />
+	<Extern href="VsDebugGuids.h"/>
+
+	<!-- The Commands section is where we the commands, menus and menu groups are defined.  This section uses a
+			 GUID to identify the package that provides the command defined inside it. -->
+	<Commands package="guidPackage">
+		<Groups>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0102"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" priority="0xFFF0"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" priority="0x0100"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" priority="0x0101"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerFileGroup" priority="0x07B0"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0x07B0"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="NewItemMenuGroup" priority="0x07B0"/>
+		</Groups>
+
+		<Buttons>
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfiguration" priority="0x0100">
+				<Strings>
+					<CommandName>cmdidSpellCheckerConfiguration</CommandName>
+					<ButtonText>Edit Global Configuration</ButtonText>
+					<MenuText>Edit Global Configuration</MenuText>
+					<ToolTipText>Edit spell checker global configuration</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
+				<Strings>
+					<CommandName>cmdidSpellCheckInteractive</CommandName>
+					<ButtonText>Spell Check Current Document</ButtonText>
+					<MenuText>Spell Check Current Document</MenuText>
+					<ToolTipText>Spell check the current document</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckEntireSolution" priority="0x0100">
+				<Strings>
+					<CommandName>cmdidSpellCheckEntireSolution</CommandName>
+					<ButtonText>Spell Check Entire Solution</ButtonText>
+					<MenuText>Spell Check Entire Solution</MenuText>
+					<ToolTipText>Spell check the entire solution</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckCurrentProject" priority="0x0101">
+				<Strings>
+					<CommandName>cmdidSpellCheckCurrentProject</CommandName>
+					<ButtonText>Spell Check Current Project</ButtonText>
+					<MenuText>Spell Check Current Project</MenuText>
+					<ToolTipText>Spell check the current project</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckSelectedItems" priority="0x0102">
+				<Strings>
+					<CommandName>cmdidSpellCheckSelectedItems</CommandName>
+					<ButtonText>Spell Check Selected Items</ButtonText>
+					<MenuText>Spell Check Selected Items</MenuText>
+					<ToolTipText>Spell check the selected items in Solution Explorer</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+				<Strings>
+					<CommandName>cmdidViewSpellCheckToolWindow</CommandName>
+					<ButtonText>Open the Solution/Project Spell Checker Window</ButtonText>
+					<MenuText>Open the Solution/Project Spell Checker Window</MenuText>
+					<ToolTipText>Open the solution/project spell checker tool window</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="AddSpellCheckerConfigForItem" priority="0x0100">
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<Strings>
+					<CommandName>cmdidAddSpellCheckerConfigForItem</CommandName>
+					<ButtonText>Add Spell Checker Configuration File</ButtonText>
+					<MenuText>Add Spell Checker Configuration File</MenuText>
+					<ToolTipText>Add a spell checker configuration file</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="AddSpellCheckerConfigForSelItem" priority="0x0100">
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<Strings>
+					<CommandName>cmdidAddSpellCheckerConfigForSelItem</CommandName>
+					<ButtonText>Spell Checker Configuration File for Selected Item</ButtonText>
+					<MenuText>Spell Checker Configuration File for Selected Item</MenuText>
+					<ToolTipText>Add spell checker configuration file for the selected item</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="AddSpellCheckerConfigCtx" priority="0x0100">
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<Strings>
+					<CommandName>cmdidAddSpellCheckerConfigCtx</CommandName>
+					<ButtonText>Spell Checker Configuration File</ButtonText>
+					<MenuText>Spell Checker Configuration File</MenuText>
+					<ToolTipText>Add a spell checker configuration file</ToolTipText>
+				</Strings>
+			</Button>
+		</Buttons>
+
+		<Menus>
+			<Menu guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" type="Menu" priority="0x0100">
+				<Strings>
+					<CommandName>Spell Checker</CommandName>
+					<ButtonText>Spell Checker</ButtonText>
+					<MenuText>Spell Checker</MenuText>
+					<ToolTipText>Spell checker options</ToolTipText>
+				</Strings>
+			</Menu>
+		</Menus>
+	</Commands>
+
+	<CommandPlacements>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfiguration" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0102">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" priority="0xFFF0">
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" priority="0x0101">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerGroup" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="AddSpellCheckerConfigForItem" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerFileGroup" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="AddSpellCheckerConfigForSelItem" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="NewItemMenuGroup" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="AddSpellCheckerConfigCtx" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckEntireSolution" priority="0x0100">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckCurrentProject" priority="0x0101">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckSelectedItems" priority="0x0102">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0xFFF0">
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_CSCD_SOLUTION_ADD" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0xFFF0">
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_CSCD_PROJECT_ADD" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerFileGroup" priority="0xFFF0">
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="NewItemMenuGroup" priority="0xFFF0">
+			<Parent guid="guidSHLMainMenu" id="IDM_VS_CSCD_NEW" />
+		</CommandPlacement>
+	</CommandPlacements>
+
+	<Symbols>
+		<!-- This is the package GUID -->
+		<GuidSymbol name="guidPackage" value="{86b8a6ea-6a96-4e31-b31d-943e86581421}" />
+
+		<!-- This is the GUID used to group the menu commands together -->
+		<!--
+		*************************************************************************************************************
+		NOTE: The GUID for guidVSSpellCheckerCommandSet must match the VS2013 package GUID in Guids.cs
+		*************************************************************************************************************
+		-->
+		<GuidSymbol name="guidVSSpellCheckerCommandSet" value="{34482677-bc69-4bd3-8b8b-1ecd347f609d}">
+			<IDSymbol name="SpellCheckerConfig" value="0x0001" />
+			<IDSymbol name="SpellCheckerGroup" value="0x0004" />
+			<IDSymbol name="SpellCheckerActions" value="0x0008" />
+			<IDSymbol name="SpellCheckerConfiguration" value="0x0003" />
+			<IDSymbol name="SpellCheckInteractive" value="0x0007" />
+			<IDSymbol name="SpellCheckerMenu" value="0x0002" />
+			<IDSymbol name="SpellCheckerSolution" value="0x0014" />
+			<IDSymbol name="AddSpellCheckerConfigForItem" value="0x0009" />
+			<IDSymbol name="AddSpellCheckerConfigForSelItem" value="0x000A" />
+			<IDSymbol name="AddSpellCheckerConfigCtx" value="0x000B" />
+			<IDSymbol name="SpellCheckEntireSolution" value="0x0010" />
+			<IDSymbol name="SpellCheckCurrentProject" value="0x0011" />
+			<IDSymbol name="SpellCheckSelectedItems" value="0x0012" />
+			<IDSymbol name="ViewSpellCheckToolWindow" value="0x0013" />
+			<IDSymbol name="SolutionExplorerAddCtx" value="0x000C" />
+			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />
+			<IDSymbol name="NewItemMenuGroup" value="0x000E" />
+		</GuidSymbol>
+	</Symbols>
+
+</CommandTable>

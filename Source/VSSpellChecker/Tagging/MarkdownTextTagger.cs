@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 07/26/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 01/08/2017
+// Note    : Copyright 2016-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for markdown files when the Markdown Editor extension by Mads
@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -40,7 +39,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
         private ITextBuffer buffer;
         private IClassifier classifier;
-        private IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes;
+
         #endregion
 
         #region Constructor
@@ -51,18 +50,12 @@ namespace VisualStudio.SpellChecker.Tagging
         /// </summary>
         /// <param name="buffer">The text buffer</param>
         /// <param name="classifier">The classifier</param>
-        /// <param name="ignoredXmlElements">An optional enumerable list of ignored XML elements</param>
-        /// <param name="spellCheckedXmlAttributes">An optional enumerable list of spell checked XML attributes</param>
-        public MarkdownTextTagger(ITextBuffer buffer, IClassifier classifier, IEnumerable<string> ignoredXmlElements,
-          IEnumerable<string> spellCheckedXmlAttributes)
+        public MarkdownTextTagger(ITextBuffer buffer, IClassifier classifier)
         {
             this.buffer = buffer;
             this.classifier = classifier;
 
             this.classifier.ClassificationChanged += ClassificationChanged;
-
-            this.ignoredXmlElements = (ignoredXmlElements ?? Enumerable.Empty<string>());
-            this.spellCheckedXmlAttributes = (spellCheckedXmlAttributes ?? Enumerable.Empty<string>());
         }
         #endregion
 

@@ -42,6 +42,7 @@ Docs/Help/
 *.nupkg
 # The packages folder can be ignored because of Package Restore
 **/packages/*
+*.lock.json
 
 # Others
 ~$*

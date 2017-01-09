@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/23/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 01/08/2017
+// Note    : Copyright 2016-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
@@ -99,7 +99,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
             if(adornerLayer != null)
             {
-                timer = new Timer(500) { Interval = 500, AutoReset = false };
+                timer = new Timer { Interval = 500, AutoReset = false };
                 timer.Elapsed += timer_Elapsed;
 
                 adorner = new SpellingErrorAdorner(textBox);
@@ -209,6 +209,13 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
             if(adorner != null)
                 adorner.Disconnect();
+
+            if(timer != null)
+            {
+                timer.Stop();
+                timer.Dispose();
+                timer = null;
+            }
 
             wpfSpellCheckers.TryRemove(textBox, out value);
 

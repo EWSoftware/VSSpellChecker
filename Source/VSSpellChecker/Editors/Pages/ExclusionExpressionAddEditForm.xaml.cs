@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ExclusionExpressionAddEditForm.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/06/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 01/08/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a window used to edit exclusion expressions for the configuration file
@@ -19,6 +19,7 @@
 //===============================================================================================================
 
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 
@@ -127,7 +128,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 expr = txtExpression.Text;
 
                 if(txtComment.Text.Trim().Length != 0)
-                    expr += String.Format("(?# {0})", txtComment.Text.Trim());
+                    expr += String.Format(CultureInfo.CurrentCulture, "(?# {0})", txtComment.Text.Trim());
 
                 expression = new Regex(expr, options);
 
@@ -135,9 +136,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
             catch(ArgumentException ex)
             {
-                MessageBox.Show(String.Format("The regular expression is not valid.\r\n\r\nExpression: {0}\r\n" +
-                    "Error: {1}", expr, ex.Message), PackageResources.PackageTitle, MessageBoxButton.OK,
-                    MessageBoxImage.Exclamation);
+                MessageBox.Show(String.Format(CultureInfo.CurrentCulture, "The regular expression is not valid." +
+                    "\r\n\r\nExpression: {0}\r\nError: {1}", expr, ex.Message), PackageResources.PackageTitle,
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
         #endregion

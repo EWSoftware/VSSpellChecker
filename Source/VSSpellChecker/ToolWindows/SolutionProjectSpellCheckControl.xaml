@@ -63,7 +63,7 @@
 							<TextBox Grid.Column="3" Margin="3" Name="txtMaxIssues" MaxLength="5" Width="50" Text="5000"
 								VerticalContentAlignment="Center"/>
 							<Button Grid.Column="4" Margin="3" Name="btnStartCancel" Content="S_tart" Width="50"
-								Click="btnStartCancel_Click" />
+								Click="btnStartCancel_ClickAsync" />
 							<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="10,5,0,0" x:Name="spSpinner"/>
 							<TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Name="lblIssueCount" Text="--"
 								Style="{StaticResource PlainText}" />

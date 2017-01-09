@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker
 // File    : AssemblyInfoShared.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/15/2016
-// Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
+// Updated : 01/08/2017
+// Note    : Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // Visual Studio spell checker common assembly attributes
@@ -77,21 +77,21 @@ internal static partial class AssemblyInfo
     // This is used to set the assembly version in the strong name.  This should remain unchanged to maintain
     // binary compatibility with prior releases.  It should only be changed if a breaking change is made that
     // requires assemblies that reference older versions to be recompiled against the newer version.
-    public const string StrongNameVersion = "2015.9.19.0";
+    public const string StrongNameVersion = "2017.1.8.0";
 
     // Common assembly file version
     //
     // This is used to set the assembly file version.  This will change with each new release.  MSIs only
     // support a Major value between 0 and 255 so we drop the century from the year on this one.
-    public const string FileVersion = "16.10.15.0";
+    public const string FileVersion = "17.1.8.0";
 
     // Common product version
     //
     // This may contain additional text to indicate Alpha or Beta states.  The version number will always match
     // the file version above but includes the century on the year.
-    public const string ProductVersion = "2016.10.15.0";
+    public const string ProductVersion = "2017.1.8.0";
 
     // Assembly copyright information
-    public const string Copyright = "Copyright \xA9 2013-2016, Eric Woodruff, All Rights Reserved.\r\n" +
-        "Portions Copyright \xA9 2010-2016, Microsoft Corporation, All Rights Reserved.";
+    public const string Copyright = "Copyright \xA9 2013-2017, Eric Woodruff, All Rights Reserved.\r\n" +
+        "Portions Copyright \xA9 2010-2017, Microsoft Corporation, All Rights Reserved.";
 }
