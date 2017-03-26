@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/26/2016
-// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
+// Updated : 03/23/2017
+// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that handles splitting spans of text up into individual words for spell checking
@@ -423,12 +423,12 @@ namespace VisualStudio.SpellChecker
                 }
 
                 // Skip leading apostrophes
-                while(i < end && text[i] == '\'')
+                while(i < end && (text[i] == '\'' || text[i] == '\u2019'))
                     i++;
 
                 // Skip trailing apostrophes, periods, at-signs, and mnemonics
-                while(--end > i && (text[end] == '\'' || text[end] == '.' || text[end] == '@' ||
-                  text[end] == mnemonic))
+                while(--end > i && (text[end] == '\'' || text[end] == '\u2019' || text[end] == '.' ||
+                  text[end] == '@' || text[end] == mnemonic))
                     ;
 
                 end++;    // Move back to last match
@@ -510,6 +510,7 @@ namespace VisualStudio.SpellChecker
             switch(c)
             {
                 case '\'':      // These could be apostrophes
+                case '\u2019':
                     return false;
 
                 case '.':

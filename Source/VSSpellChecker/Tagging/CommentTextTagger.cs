@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 01/08/2017
+// Updated : 03/24/2017
 // Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -53,6 +53,8 @@ namespace VisualStudio.SpellChecker.Tagging
         private ITextBuffer buffer;
         private IClassifier classifier;
         private IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes;
+        private bool ignoreStringClass, ignoreHtmlComments, ignoreXmlComments;
+
         #endregion
 
         #region MEF Imports / Exports
@@ -118,7 +120,8 @@ namespace VisualStudio.SpellChecker.Tagging
                 }
 
                 return new CommentTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
-                    config.IgnoredXmlElements, config.SpellCheckedXmlAttributes) as ITagger<T>;
+                    config.IgnoredXmlElements, config.SpellCheckedXmlAttributes,
+                    config.IgnoreHtmlComments, config.IgnoreXmlComments) as ITagger<T>;
             }
         }
         #endregion
@@ -134,7 +137,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="ignoredXmlElements">An optional enumerable list of ignored XML elements</param>
         /// <param name="spellCheckedXmlAttributes">An optional enumerable list of spell checked XML attributes</param>
         public CommentTextTagger(ITextBuffer buffer, IClassifier classifier, IEnumerable<string> ignoredXmlElements,
-          IEnumerable<string> spellCheckedXmlAttributes)
+          IEnumerable<string> spellCheckedXmlAttributes, bool ignoreHtmlComments, bool ignoreXmlComments)
         {
             this.buffer = buffer;
             this.classifier = classifier;
@@ -143,6 +146,13 @@ namespace VisualStudio.SpellChecker.Tagging
 
             this.ignoredXmlElements = (ignoredXmlElements ?? Enumerable.Empty<string>());
             this.spellCheckedXmlAttributes = (spellCheckedXmlAttributes ?? Enumerable.Empty<string>());
+            this.ignoreHtmlComments = ignoreHtmlComments;
+            this.ignoreXmlComments = ignoreXmlComments;
+
+            // Only comments are spell checked in EditorConfig files.  Ignore the string classification used
+            // by the EditorConfig Language Service extension by Mads Kristensen.
+            if(buffer.ContentType.IsOfType("EditorConfig"))
+                ignoreStringClass = true;
         }
         #endregion
 
@@ -200,6 +210,9 @@ namespace VisualStudio.SpellChecker.Tagging
                             if(name == "identifier" || name.StartsWith("xml doc comment - ", StringComparison.Ordinal))
                                 continue;
 
+                            // Ignore the string classification in EditorConfig files
+                            if(ignoreStringClass && name.Equals("string", StringComparison.OrdinalIgnoreCase))
+                                continue;
                             break;
                     }
 
@@ -289,6 +302,9 @@ namespace VisualStudio.SpellChecker.Tagging
                             continue;
 
                         preprocessorKeywordSeen = false;
+
+                        if((ignoreHtmlComments && name == "html comment") || (ignoreXmlComments && name == "xml comment"))
+                            continue;
 
                         yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
                     }

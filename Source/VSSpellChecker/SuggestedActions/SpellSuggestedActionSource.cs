@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedActionSource.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/08/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 03/23/2017
+// Note    : Copyright 2016-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to implement the suggestion source for spelling light bulbs
@@ -75,10 +75,9 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             /// or spell checking as you type is disabled.</returns>
             public ISuggestedActionsSource CreateSuggestedActionsSource(ITextView textView, ITextBuffer textBuffer)
             {
-                // If this view isn't editable, then there isn't a good reason to be showing these.  Also,
-                // make sure we are only tagging the top buffer.
+                // If this view isn't editable, then there isn't a good reason to be showing these
                 if(textView == null || textBuffer == null || spellingService == null ||
-                  textView.TextBuffer != textBuffer || !textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
+                  !textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
                   (!textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument) &&
                   !textView.Roles.Contains(Utility.EmbeddedPeekTextView)))
                 {

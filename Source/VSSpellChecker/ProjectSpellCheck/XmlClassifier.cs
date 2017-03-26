@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/13/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/24/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify XML file content
@@ -102,8 +102,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 
                 try
                 {
-                    reader.MoveToContent();
-
                     while(!reader.EOF)
                     {
                         switch(reader.NodeType)
@@ -167,16 +165,19 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                 break;
 
                             case XmlNodeType.Comment:
-                                // Apply adjustments to the comments if necessary
-                                value = this.AdjustCommentText(reader.Value);
-
-                                spans.Add(new SpellCheckSpan
+                                if(!this.SpellCheckConfiguration.IgnoreXmlComments)
                                 {
-                                    Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
-                                        value.Length),
-                                    Text = value,
-                                    Classification = RangeClassification.XmlFileComment
-                                });
+                                    // Apply adjustments to the comments if necessary
+                                    value = this.AdjustCommentText(reader.Value);
+
+                                    spans.Add(new SpellCheckSpan
+                                    {
+                                        Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
+                                            value.Length),
+                                        Text = value,
+                                        Classification = RangeClassification.XmlFileComment
+                                    });
+                                }
                                 break;
 
                             case XmlNodeType.CDATA:

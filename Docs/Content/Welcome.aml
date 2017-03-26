@@ -152,7 +152,6 @@ information.</para>
 			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
 			<externalLink>
 				<linkText>License Agreement</linkText>
-				<linkAlternateText>License Agreement</linkAlternateText>
 				<linkUri>https://github.com/EWSoftware/VSSpellChecker/blob/master/LICENSE</linkUri>
 				<linkTarget>_blank</linkTarget>
 			</externalLink>

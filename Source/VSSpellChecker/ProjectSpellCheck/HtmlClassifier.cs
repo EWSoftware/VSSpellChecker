@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/13/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/24/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify HTML file content
@@ -86,7 +86,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 case HtmlNodeType.Comment:
                     var commentNode = (HtmlCommentNode)node;
 
-                    if(commentNode.OuterHtml.StartsWith("<!--", StringComparison.Ordinal))
+                    if(commentNode.OuterHtml.StartsWith("<!--", StringComparison.Ordinal) &&
+                      !this.SpellCheckConfiguration.IgnoreHtmlComments)
+                    {
                         spans.Add(new SpellCheckSpan
                         {
                             Span = new Span(this.AdjustedOffset(this.GetOffset(commentNode.Line,
@@ -95,6 +97,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             Text = commentNode.OuterHtml,
                             Classification = RangeClassification.XmlFileComment
                         });
+                    }
                     break;
 
                 case HtmlNodeType.Text:
@@ -111,9 +114,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     break;
 
                 case HtmlNodeType.Element:
-                    // TODO: Ignore PHP script for now.  Need a separate parser for PHP files to return just
-                    // comments and string literals within PHP script blocks.  The agility pack doesn't know
-                    // about them so it doesn't extract them properly.
+                    // Ignore PHP script.  It would need a separate parser for PHP files to return just comments
+                    // and string literals within PHP script blocks.  The agility pack doesn't know about them so
+                    // it doesn't extract them properly.
                     if(node.Name != "<?")
                         foreach(var attribute in node.Attributes)
                             if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(attribute.Name) &&
@@ -127,8 +130,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                     Classification = RangeClassification.AttributeValue
                                 });
 
-                    // TODO: Parse script for comments and literal strings?  May need a separate parser for
-                    // ASP.NET and Razor inline code elements.
+                    // This does not parse script for comments and literal strings.  It would need a separate
+                    // parser for ASP.NET and Razor inline code elements.
                     if(node.Name != "script" && !this.SpellCheckConfiguration.IgnoredXmlElements.Contains(node.Name) &&
                       node.HasChildNodes)
                         foreach(HtmlNode subnode in node.ChildNodes)
@@ -137,6 +140,5 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             }
         }
         #endregion
-
     }
 }

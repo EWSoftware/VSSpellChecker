@@ -8,46 +8,6 @@ checking tool window.</para>
 			<autoOutline lead="none" excludeRelatedTopics="true" />
 		</introduction>
 
-		<section address="Feedback">
-			<title>Request for Feedback</title>
-			<content>
-				<para>This tool window is currently in a beta state.  As such, you may find issues or missing features.
-In such cases, an issue can be opened to report the problem or suggest a new feature.  However, before doing so:</para>
-
-				<list class="bullet">
-					<listItem>
-						<para>Review the common problems sections below to see if your issue is covered there.  If not,
-check the following locations.</para>
-					</listItem>
-
-					<listItem>
-						<para>Check the <externalLink>
-							<linkText>closed issues</linkText>
-							<linkAlternateText>closed issues</linkAlternateText>
-							<linkUri>https://github.com/EWSoftware/VSSpellChecker/issues?q=is%3Aissue+is%3Aclosed</linkUri>
-							<linkTarget>_blank</linkTarget>
-						</externalLink> list to see if the issue or suggestion has already been made and resolved.</para>
-					</listItem>
-
-					<listItem>
-						<para>Check the <externalLink>
-								<linkText>open issues</linkText>
-								<linkAlternateText>open issues</linkAlternateText>
-								<linkUri>https://github.com/EWSoftware/VSSpellChecker/issues</linkUri>
-								<linkTarget>_blank</linkTarget>
-							</externalLink> list to see if the issue or suggestion has already been made but is pending a
-resolution.</para>
-					</listItem>
-
-					<listItem>
-						<para>If you find that your issue is not covered, open a new issue and supply as much detail as you
-can along with any relevant examples if possible.</para>
-					</listItem>
-
-				</list>
-			</content>
-		</section>
-
 		<section address="OpenFiles">
 			<title>Files Open in Editors</title>
 			<content>

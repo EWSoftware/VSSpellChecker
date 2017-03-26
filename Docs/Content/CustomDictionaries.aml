@@ -14,7 +14,7 @@ other languages.  To make them available to the spell checker, do the following:
 					<listItem>
 						<para>Go to the Open Office Extensions <externalLink>
 	<linkText>dictionary page</linkText>
-	<linkAlternateText>dictionary page</linkAlternateText>
+	<linkAlternateText>Search for OpenOffice dictionaries</linkAlternateText>
 	<linkUri>http://extensions.services.openoffice.org/dictionary</linkUri>
 	<linkTarget>_blank</linkTarget>
 </externalLink> and download the dictionaries for the languages you need.  Dictionaries for OpenOffice versions
@@ -123,7 +123,7 @@ list when necessary, if the language does not appear in the configuration editor
 correctly.  If the language is selected but spelling is still occurring in English, there may be a problem with
 one or both of the dictionary files.  Search the <externalLink>
 	<linkText>issues page</linkText>
-	<linkAlternateText>issues page</linkAlternateText>
+	<linkAlternateText>VSSpellChecker Issues</linkAlternateText>
 	<linkUri>https://GitHub.com/EWSoftware/VSSpellChecker/issues</linkUri>
 	<linkTarget>_blank</linkTarget>
 </externalLink> to see if the problem has been reported and solved already.  If you are not able to resolve the

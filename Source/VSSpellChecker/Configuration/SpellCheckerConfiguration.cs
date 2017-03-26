@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/12/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 03/24/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -136,6 +136,20 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <value>This is true by default</value>
         [DefaultValue(true)]
         public bool IgnoreXmlElementsInText { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore HTML comments when spell checking
+        /// </summary>
+        /// <value>This is false by default</value>
+        [DefaultValue(false)]
+        public bool IgnoreHtmlComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore XML comments when spell checking
+        /// </summary>
+        /// <value>This is false by default</value>
+        [DefaultValue(false)]
+        public bool IgnoreXmlComments { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not to ignore words by character class
@@ -436,8 +450,6 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.InheritIgnoredWords = this.InheritExclusionExpressions = this.InheritXmlSettings =
                 this.IgnoreMnemonics = this.EnableWpfTextBoxSpellChecking = true;
 
-            this.TreatUnderscoreAsSeparator = false;
-
             ignoredWords = new HashSet<string>(DefaultIgnoredWords, StringComparer.OrdinalIgnoreCase);
             ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
             spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
@@ -530,6 +542,8 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.IgnoreFilenamesAndEMailAddresses = configuration.ToBoolean(
                     PropertyNames.IgnoreFilenamesAndEMailAddresses);
                 this.IgnoreXmlElementsInText = configuration.ToBoolean(PropertyNames.IgnoreXmlElementsInText);
+                this.IgnoreHtmlComments = configuration.ToBoolean(PropertyNames.IgnoreHtmlComments);
+                this.IgnoreXmlComments = configuration.ToBoolean(PropertyNames.IgnoreXmlComments);
                 this.TreatUnderscoreAsSeparator = configuration.ToBoolean(PropertyNames.TreatUnderscoreAsSeparator);
                 this.IgnoreMnemonics = configuration.ToBoolean(PropertyNames.IgnoreMnemonics);
                 this.IgnoreCharacterClass = configuration.ToEnum<IgnoredCharacterClass>(

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
 	<Metadata>
-		<Identity Id="43EA967E-0DE2-4136-8E52-C6DCFB5C2748" Version="2017.1.8.0" Language="en-US" Publisher="EWSoftware" />
+		<Identity Id="43EA967E-0DE2-4136-8E52-C6DCFB5C2748" Version="2017.3.26.0" Language="en-US" Publisher="EWSoftware" />
 		<DisplayName>Visual Studio Spell Checker (VS2017 and Later)</DisplayName>
 		<Description xml:space="preserve">An editor extension that checks the spelling of comments, strings, and plain text as you type or interactively with a tool window.  It can also spell check an entire solution, project, or selected items.  Options are available to define multiple languages to spell check against, define ignored words, control how elements and attributes in XML and MAML files are spell checked, and much more.</Description>
 		<MoreInfo>https://github.com/EWSoftware/VSSpellChecker/wiki</MoreInfo>

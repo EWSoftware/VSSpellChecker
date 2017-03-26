@@ -33,7 +33,6 @@ generate the definitions assembly NuGet package.</para>
 				<para><localUri>.\Docs</localUri> - The
 <externalLink>
 					<linkText>Sandcastle Help File Builder</linkText>
-					<linkAlternateText>Sandcastle Help File Builder</linkAlternateText>
 					<linkUri>htts://GitHub.com/EWSoftware/SHFB</linkUri>
 					<linkTarget>_blank</linkTarget>
 				</externalLink> project used to manage the spell checker project's wiki content.</para>
@@ -89,7 +88,6 @@ experimental instance settings.</para>
 			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
 			<externalLink>
 				<linkText>License Agreement</linkText>
-				<linkAlternateText>License Agreement</linkAlternateText>
 				<linkUri>https://github.com/EWSoftware/VSSpellChecker/blob/master/LICENSE</linkUri>
 				<linkTarget>_blank</linkTarget>
 			</externalLink>

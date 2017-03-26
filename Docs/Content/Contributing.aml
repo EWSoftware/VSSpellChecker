@@ -10,7 +10,7 @@
 			<content>
 				<para>If you don't feel like working on the code yourself, <externalLink>
 <linkText>filing an issue</linkText>
-<linkAlternateText>filing an issue</linkAlternateText>
+<linkAlternateText>VSSpellChecker Issues</linkAlternateText>
 <linkUri>https://github.com/EWSoftware/VSSpellChecker/issues</linkUri>
 <linkTarget>_blank</linkTarget>
 </externalLink> and letting me handle the change is fine.  You don't need to file an issue for trivial changes
@@ -107,7 +107,6 @@ not <codeInline>string foo</codeInline>).</para>
 			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
 			<externalLink>
 				<linkText>License Agreement</linkText>
-				<linkAlternateText>License Agreement</linkAlternateText>
 				<linkUri>https://github.com/EWSoftware/VSSpellChecker/blob/master/LICENSE</linkUri>
 				<linkTarget>_blank</linkTarget>
 			</externalLink>

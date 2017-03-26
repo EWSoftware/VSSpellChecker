@@ -23,7 +23,7 @@
       <Argument Key="baseSourceCodeUrl" Value="https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/" />
     </TransformComponentArguments>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj" xmlns="" />
+      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions2013.csproj" xmlns="" />
     </DocumentationSources>
     <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
     <HelpFileFormat>Markdown</HelpFileFormat>
@@ -41,7 +41,7 @@
     <NamingMethod>Guid</NamingMethod>
     <HelpTitle>Visual Studio Spell Checker Documentation</HelpTitle>
     <FeedbackEMailAddress>Eric%40EWoodruff.us</FeedbackEMailAddress>
-    <CopyrightText>Copyright \xA9 2013-2016, Eric Woodruff, All rights reserved</CopyrightText>
+    <CopyrightText>Copyright \xA9 2013-2017, Eric Woodruff, All rights reserved</CopyrightText>
     <CopyrightHref>https://GitHub.com/EWSoftware/VSSpellChecker</CopyrightHref>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <NamespaceSummaries>
@@ -49,7 +49,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2016.7.28.0</HelpFileVersion>
+    <HelpFileVersion>2017.3.26.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -118,6 +118,7 @@
     <None Include="Content\VersionHistory\v2016.3.12.0.aml" />
     <None Include="Content\VersionHistory\v2016.5.28.0.aml" />
     <None Include="Content\VersionHistory\v2016.10.15.0.aml" />
+    <None Include="Content\VersionHistory\v2017.3.26.0.aml" />
     <None Include="Content\Welcome.aml" />
     <None Include="VSSpellCheckerWiki.shfbproj.vsspell" />
   </ItemGroup>

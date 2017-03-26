@@ -86,7 +86,7 @@ definitions, override existing ones, and/or add additional recognized file types
 The following sections describe the various elements found in the configuration file.  For an example, see the
 package's <externalLink>
 	<linkText>standard configuration file</linkText>
-	<linkAlternateText>standard configuration file</linkAlternateText>
+	<linkAlternateText>Classifications.config</linkAlternateText>
 	<linkUri>https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/VSSpellChecker/Classifications.config</linkUri>
 	<linkTarget>_blank</linkTarget>
 </externalLink>.  This is also where you can see which file extensions are currently recognized and to which

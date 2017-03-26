@@ -16,8 +16,7 @@
 						<para>Added support for spell checking markdown files within the Visual Studio text editor when using
 the <externalLink>
 							<linkText>Markdown Editor</linkText>
-							<linkAlternateText>Markdown Editor</linkAlternateText>
-							<linkUri>https://visualstudiogallery.msdn.microsoft.com/eaab33c3-437b-4918-8354-872dfe5d1bfe</linkUri>
+							<linkUri>https://marketplace.visualstudio.com/items?itemName=MadsKristensen.MarkdownEditor</linkUri>
 							<linkTarget>_blank</linkTarget>
 						</externalLink> extension created by Mads Kristensen.</para>
 					

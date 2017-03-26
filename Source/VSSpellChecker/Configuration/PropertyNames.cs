@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/10/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 03/24/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class containing the configuration property name constants
@@ -83,6 +83,16 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Ignore XML elements in text
         /// </summary>
         public const string IgnoreXmlElementsInText = "IgnoreXmlElementsInText";
+
+        /// <summary>
+        /// Ignore HTML comments when spell checking
+        /// </summary>
+        public const string IgnoreHtmlComments = "IgnoreHtmlComments";
+
+        /// <summary>
+        /// Ignore XML comments when spell checking
+        /// </summary>
+        public const string IgnoreXmlComments = "IgnoreXmlComments";
 
         /// <summary>
         /// Treat underscore as separator

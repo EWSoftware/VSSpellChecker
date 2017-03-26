@@ -19,7 +19,6 @@ issues and limitations.</para>
 						<para>Added support for spell checking PHP files within the Visual Studio text editor when using the
 <legacyItalic>PHP Tools for Visual Studio</legacyItalic> extension.  Thanks to Miloslav Beňo of <externalLink>
 							<linkText>DevSense</linkText>
-							<linkAlternateText>DevSense</linkAlternateText>
 							<linkUri>http://www.devsense.com/</linkUri>
 							<linkTarget>_blank</linkTarget>
 						</externalLink> for the tagger implementation.</para>

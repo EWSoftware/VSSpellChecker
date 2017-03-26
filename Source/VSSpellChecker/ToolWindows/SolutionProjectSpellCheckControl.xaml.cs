@@ -1027,7 +1027,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             if(idx != -1 && idx < dgIssues.Items.Count)
             {
-                lblIssueCount.Text = String.Format(CultureInfo.CurrentUICulture, "{0} of {1}",
+                lblIssueCount.Text = String.Format(CultureInfo.CurrentCulture, "{0} of {1}",
                     dgIssues.SelectedIndex + 1, dgIssues.Items.Count);
 
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
@@ -1058,7 +1058,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 else
                 {
                     ucSpellCheck.NoCurrentIssueText = "(Select an issue to correct)";
-                    lblIssueCount.Text = String.Format(CultureInfo.CurrentUICulture, "-- of {0}",
+                    lblIssueCount.Text = String.Format(CultureInfo.CurrentCulture, "-- of {0}",
                         dgIssues.Items.Count);
                 }
 
@@ -1270,7 +1270,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     i.Word.Equals(currentIssue.Word, StringComparison.OrdinalIgnoreCase)).GroupBy(
                     i => i.CanonicalName).ToList();
 
-                if(MessageBox.Show(String.Format(CultureInfo.CurrentUICulture, "You about to replace {0} " +
+                if(MessageBox.Show(String.Format(CultureInfo.CurrentCulture, "You about to replace {0} " +
                   "occurrence(s) of the word '{1}' with '{2}' in a total of {3} file(s).  Do you want to continue?",
                   replacements.Sum(r => r.Count()), currentIssue.Word, suggestion.Suggestion, replacements.Count()),
                   PackageResources.PackageTitle, MessageBoxButton.YesNo, MessageBoxImage.Question,
@@ -1312,7 +1312,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             {
                                 replacementWord = suggestion.Suggestion;
 
-                                var language = suggestion.Culture ?? CultureInfo.CurrentUICulture;
+                                var language = suggestion.Culture ?? CultureInfo.CurrentCulture;
 
                                 // Match the case of the first letter if necessary
                                 if(replacementWord.Length > 1 &&

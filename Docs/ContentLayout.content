@@ -133,7 +133,12 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="d21e7d61-ad9b-4806-b759-bb82d3ce0333" visible="True" isSelected="true" title="Version 2016.10.15.0">
+    <Topic id="dfcecbc6-1e86-4076-b8c6-0d6e94aa1629" visible="True" isSelected="true" title="Version 2017.3.26.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.3.26.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="d21e7d61-ad9b-4806-b759-bb82d3ce0333" visible="True" title="Version 2016.10.15.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2016.10.15.0" />
       </HelpKeywords>

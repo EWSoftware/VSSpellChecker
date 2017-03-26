@@ -312,7 +312,7 @@ namespace VisualStudio.SpellChecker
                         string currentWord = misspelling.Span.GetText(snapshot);
                         string replacementWord = e.ReplacementWord;
 
-                        var language = e.Culture ?? CultureInfo.CurrentUICulture;
+                        var language = e.Culture ?? CultureInfo.CurrentCulture;
 
                         // Match the case of the first letter if necessary
                         if(replacementWord.Length > 1 &&

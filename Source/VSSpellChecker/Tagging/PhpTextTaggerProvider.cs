@@ -44,7 +44,7 @@ namespace VisualStudio.SpellChecker.Tagging
 			var classifier = classifierAggregatorService.GetClassifier(buffer);
 
 			// Use existing comment text tagger, it works well with PHP classifier
-			return new CommentTextTagger(buffer, classifier, null, null) as ITagger<T>;
+			return new CommentTextTagger(buffer, classifier, null, null, false, false) as ITagger<T>;
 		}
 	}
 }

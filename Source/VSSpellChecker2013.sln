@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DA5D2B74-541A-41CE-AB16-47E6CC33EC62}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,6 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellCheckerDefinitions20
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E3133345-A230-4CE0-95A5-32077DB5EFF5}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		VSSpellChecker2013.sln.vsspell = VSSpellChecker2013.sln.vsspell
 	EndProjectSection
 EndProject
