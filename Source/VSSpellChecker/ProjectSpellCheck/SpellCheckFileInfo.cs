@@ -396,7 +396,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
           IList<SpellCheckFileInfo> projectFiles)
         {
             int result;
-            IntPtr nestedHiearchyValue = IntPtr.Zero;
+            IntPtr nestedHierarchyValue = IntPtr.Zero;
             uint nestedItemIdValue = 0;
             object value = null;
             uint visibleChildNode;
@@ -405,13 +405,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             // First, guess if the node is actually the root of another hierarchy (a project, for example)
             nestedHierarchyGuid = typeof(IVsHierarchy).GUID;
-            result = hierarchy.GetNestedHierarchy(itemId, ref nestedHierarchyGuid, out nestedHiearchyValue, out nestedItemIdValue);
+            result = hierarchy.GetNestedHierarchy(itemId, ref nestedHierarchyGuid, out nestedHierarchyValue, out nestedItemIdValue);
 
-            if(result == VSConstants.S_OK && nestedHiearchyValue != IntPtr.Zero && nestedItemIdValue == VSConstants.VSITEMID_ROOT)
+            if(result == VSConstants.S_OK && nestedHierarchyValue != IntPtr.Zero && nestedItemIdValue == VSConstants.VSITEMID_ROOT)
             {
                 // Get the new hierarchy
-                nestedHierarchy = System.Runtime.InteropServices.Marshal.GetObjectForIUnknown(nestedHiearchyValue) as IVsHierarchy;
-                System.Runtime.InteropServices.Marshal.Release(nestedHiearchyValue);
+                nestedHierarchy = System.Runtime.InteropServices.Marshal.GetObjectForIUnknown(nestedHierarchyValue) as IVsHierarchy;
+                System.Runtime.InteropServices.Marshal.Release(nestedHierarchyValue);
 
                 if(nestedHierarchy != null)
                     ProcessHierarchyNodeRecursively(nestedHierarchy, VSConstants.VSITEMID_ROOT, projectFiles);
