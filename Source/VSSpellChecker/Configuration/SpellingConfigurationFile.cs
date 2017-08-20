@@ -683,7 +683,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// Store a property in the configuration file or remove it if the value is null
         /// </summary>
-        /// <param name="prpertyName">The property name</param>
+        /// <param name="propertyName">The property name</param>
         /// <param name="value">The property value</param>
         public void StoreProperty(string propertyName, object value)
         {
@@ -706,7 +706,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// Stores an enumerable list of values in the configuration file or removes them if the list is null
         /// </summary>
-        /// <param name="prpertyName">The property name that will contain the items</param>
+        /// <param name="propertyName">The property name that will contain the items</param>
         /// <param name="itemName">The item name for the value elements</param>
         /// <param name="values">The enumerable list of values</param>
         public void StoreValues(string propertyName, string itemName, IEnumerable<string> values)
@@ -735,7 +735,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Stores an enumerable list of regular expressions in the configuration file or removes them if the
         /// list is null.
         /// </summary>
-        /// <param name="prpertyName">The property name that will contain the expressions</param>
+        /// <param name="propertyName">The property name that will contain the expressions</param>
         /// <param name="itemName">The item name for the expression elements</param>
         /// <param name="values">The enumerable list of regular expressions</param>
         /// <remarks>The expressions are stored in the named item element with a <c>Match</c> attribute set to
