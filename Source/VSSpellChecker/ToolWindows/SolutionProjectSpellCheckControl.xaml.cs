@@ -1281,7 +1281,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SetWaitCursor();
 
-                var replacementsPeformed = new List<FileMisspelling>();
+                var replacementsPerformed = new List<FileMisspelling>();
 
                 foreach(var file in replacements)
                 {
@@ -1332,7 +1332,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                   replacementWord.Length) == VSConstants.S_OK)
                                 {
                                     textView.SetSelection(line, column, line, column + replacementWord.Length);
-                                    replacementsPeformed.Add(misspelling);
+                                    replacementsPerformed.Add(misspelling);
 
                                     this.AdjustAffectedIssues(misspelling, replacementWord);
                                 }
@@ -1355,8 +1355,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         break;
                 }
 
-                if(replacementsPeformed.Count != 0)
-                    foreach(var issue in replacementsPeformed)
+                if(replacementsPerformed.Count != 0)
+                    foreach(var issue in replacementsPerformed)
                         issues.Remove(issue);
 
                 if(idx >= dgIssues.Items.Count)
