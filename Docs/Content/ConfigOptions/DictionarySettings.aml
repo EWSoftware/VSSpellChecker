@@ -5,7 +5,7 @@
 			<autoOutline excludeRelatedTopics="true" lead="This category lets you configure the dictionary settings." />
 		</introduction>
 
-		<section address="AdditonalDictionaries">
+		<section address="AdditionalDictionaries">
 			<title>Additional Dictionary Folders</title>
 			<content>
 				<para>This option lets you define a set of additional folders to search for dictionary files, both
