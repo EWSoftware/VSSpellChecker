@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/24/2017
+// Updated : 08/11/2017
 // Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -371,10 +371,10 @@ namespace VisualStudio.SpellChecker.Configuration
         {
             get
             {
-                return new[] { @"\bin\*", "*.min.cs", "*.min.js", "CodeAnalysisLog.xml", "GlobalSuppressions.*",
-                    "Resources.Designer.*", "Settings.Designer.cs", "Settings.settings", "UpgradeLog.htm",
-                    "bootstrap*.css", "bootstrap*.js", "html5shiv.js", "jquery*.d.ts", "jquery*.js", "respond*.js",
-                    "robots.txt" };
+                return new[] { @"\bin\*", "*.min.cs", "*.min.js", "*.rproj", "CodeAnalysisLog.xml",
+                    "GlobalSuppressions.*", "Resources.Designer.*", "Settings.Designer.cs", "Settings.settings",
+                    "UpgradeLog.htm", "bootstrap*.css", "bootstrap*.js", "html5shiv.js", "jquery*.d.ts",
+                    "jquery*.js", "respond*.js", "robots.txt" };
             }
         }
 
@@ -413,7 +413,8 @@ namespace VisualStudio.SpellChecker.Configuration
             {
                 return new[] {
                     @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|filterTextBox|searchTextBox|tboxFilter)(?# Various search text boxes)",
-                    @"Microsoft.VisualStudio.Web.Publish.PublishUI.PublishDialog.*(?# Website publishing dialog box)",
+                    @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
+                    @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
                     @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
                     @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
                     @"1c79180c-bb93-46d2-b4d3-f22e7015a6f1\.txtFindID(?# SHFB resource item editor)",

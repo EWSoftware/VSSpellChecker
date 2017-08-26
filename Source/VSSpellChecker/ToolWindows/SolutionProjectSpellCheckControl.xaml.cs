@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/07/2017
+// Updated : 08/18/2017
 // Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -363,17 +363,18 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(textView != null && position != -1)
                 {
-                    int line, column, topLine;
+                    int startLine, startColumn, endLine, endColumn, topLine;
 
-                    if(textView.GetLineAndColumn(position, out line, out column) == VSConstants.S_OK &&
-                      textView.SetCaretPos(line, column) == VSConstants.S_OK)
+                    if(textView.GetLineAndColumn(position, out startLine, out startColumn) == VSConstants.S_OK &&
+                      textView.GetLineAndColumn(position + selectionLength, out endLine, out endColumn) == VSConstants.S_OK &&
+                      textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
                     {
                         if(selectionLength != -1)
-                            textView.SetSelection(line, column, line, column + selectionLength);
+                            textView.SetSelection(startLine, startColumn, endLine, endColumn);
 
                         // Ensure some surrounding lines are visible so that it's not right at the top
                         // or bottom of the view.
-                        topLine = line - 5;
+                        topLine = startLine - 5;
 
                         if(topLine < 0)
                             topLine = 0;
@@ -381,9 +382,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         textView.EnsureSpanVisible(new TextSpan
                         {
                             iStartLine = topLine,
-                            iStartIndex = column,
-                            iEndLine = line + 5,
-                            iEndIndex = column
+                            iStartIndex = startColumn,
+                            iEndLine = endLine + 5,
+                            iEndIndex = endColumn
                         });
                     }
                     else
@@ -462,9 +463,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             string documentText;
 
-            // Switch to the UI thread to get the document text
-            documentText = ThreadHelper.Generic.Invoke<string>(() =>
+            // Switch to the UI thread to get the document text.  This looks rather odd but it's the recommended
+            // way to switch contexts in Visual Studio now.  Since we aren't asynchronous here, this runs an
+            // asynchronous delegate and waits for it to finish.
+            documentText = ThreadHelper.JoinableTaskFactory.Run<string>(async delegate
             {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
                 IVsHierarchy hierarchy;
                 uint itemid, lockCookie = 0;
                 int endLine, endIndex;
@@ -531,7 +536,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             try
             {
                 if(wordSplitter == null)
-                    wordSplitter = new WordSplitter();
+                    wordSplitter = new WordSplitter { DetectWordsSpanningStringLiterals = true };
 
                 foreach(var file in spellCheckFiles)
                 {
@@ -575,9 +580,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         classifier.SetText(documentText);
                                 }
 
-                                // Switch to the UI thread to update the progress and then switch back to this one
-                                ThreadHelper.Generic.Invoke(() =>
+                                // Switch to the UI thread to update the progress and then switch back to this
+                                // one.  This runs the asynchronous delegate and waits for it to finish.
+                                ThreadHelper.JoinableTaskFactory.Run(async delegate
                                 {
+                                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
                                     lblProgress.Text = "Spell checking " + file.Description;
                                 });
 
@@ -587,6 +595,34 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                     issue.Dictionary = dictionary;
                                     issue.LineNumber = classifier.GetLineNumber(issue.Span.Start);
                                     issue.LineText = classifier[issue.LineNumber].Trim();
+
+                                    // Some files like compressed JavaScript can contain extremely long lines,
+                                    // sometimes several KB in length.  This can cause Visual Studio to lag
+                                    // badly when scrolling through the list if there are a lot of misspellings.
+                                    // As such, trim extremely long lines down to something more reasonable.
+                                    if(issue.LineText.Length > 255)
+                                    {
+                                        // This may not be the right instance but we'll take what we can get
+                                        int start = issue.LineText.IndexOf(issue.Word) - 20;
+
+                                        if(start < 0)
+                                            start = 0;
+
+                                        int length = issue.Word.Length + 100;
+
+                                        if(start + length > issue.LineText.Length)
+                                            length = issue.LineText.Length - start;
+
+                                        string fragment = issue.LineText.Substring(start, length);
+
+                                        if(start > 0)
+                                            fragment = "..." + fragment;
+
+                                        if(start + length < issue.LineText.Length)
+                                            fragment += "...";
+
+                                        issue.LineText = fragment;
+                                    }
 
                                     issues.Add(issue);
 
@@ -660,7 +696,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var word in wordSplitter.GetWordsInText(textToSplit))
                 {
-                    actualWord = textToSplit.Substring(word.Start, word.Length);
+                    actualWord = WordSplitter.ActualWord(textToSplit, word);
                     mnemonicPos = actualWord.IndexOf(wordSplitter.Mnemonic);
 
                     if(mnemonicPos == -1)
@@ -1178,7 +1214,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void cmdReplace_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             string viewWord;
-            int line, column, idx = dgIssues.SelectedIndex;
+            int startLine, startColumn, endLine, endColumn, idx = dgIssues.SelectedIndex;
 
             if(idx != -1)
             {
@@ -1188,24 +1224,24 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(textView != null)
                 {
-                    if(textView.GetLineAndColumn(currentIssue.Span.Start, out line, out column) ==
-                      VSConstants.S_OK && textView.SetCaretPos(line, column) == VSConstants.S_OK)
+                    if(textView.GetLineAndColumn(currentIssue.Span.Start, out startLine, out startColumn) == VSConstants.S_OK &&
+                      textView.GetLineAndColumn(currentIssue.Span.Start + currentIssue.Span.Length, out endLine,
+                      out endColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
                     {
-                        textView.SetSelection(line, column, line, column + currentIssue.Span.Length);
+                        textView.SetSelection(startLine, startColumn, endLine, endColumn);
 
-                        if(textView.GetTextStream(line, column, line, column + currentIssue.Span.Length,
-                          out viewWord) == VSConstants.S_OK && viewWord.Equals(currentIssue.Word,
-                          StringComparison.OrdinalIgnoreCase))
+                        if(textView.GetTextStream(startLine, startColumn, endLine, endColumn, out viewWord) == VSConstants.S_OK &&
+                          viewWord.Equals(currentIssue.Word, StringComparison.OrdinalIgnoreCase))
                         {
                             if(currentIssue.MisspellingType != MisspellingType.DoubledWord)
                             {
                                 var suggestion = ucSpellCheck.SelectedSuggestion;
 
-                                if(suggestion != null && textView.ReplaceTextOnLine(line, column,
+                                if(suggestion != null && textView.ReplaceTextOnLine(startLine, startColumn,
                                   currentIssue.Span.Length, suggestion.Suggestion,
                                   suggestion.Suggestion.Length) == VSConstants.S_OK)
                                 {
-                                    textView.SetSelection(line, column, line, column +
+                                    textView.SetSelection(startLine, startColumn, startLine, startColumn +
                                         suggestion.Suggestion.Length);
                                     issues.RemoveAt(dgIssues.SelectedIndex);
 
@@ -1213,12 +1249,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 }
                             }
                             else
-                                if(textView.GetLineAndColumn(currentIssue.DeleteWordSpan.Start, out line,
-                                  out column) == VSConstants.S_OK && textView.SetCaretPos(line, column) ==
-                                  VSConstants.S_OK)
+                                if(textView.GetLineAndColumn(currentIssue.DeleteWordSpan.Start, out startLine,
+                                  out startColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine,
+                                  startColumn) == VSConstants.S_OK)
                                 {
-                                    if(textView.ReplaceTextOnLine(line, column, currentIssue.DeleteWordSpan.Length,
-                                      String.Empty, 0) == VSConstants.S_OK)
+                                    if(textView.ReplaceTextOnLine(startLine, startColumn,
+                                      currentIssue.DeleteWordSpan.Length, String.Empty, 0) == VSConstants.S_OK)
                                     {
                                         issues.RemoveAt(dgIssues.SelectedIndex);
 
@@ -1256,7 +1292,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdReplaceAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            int line, column, idx = dgIssues.SelectedIndex;
+            int startLine, startColumn, endLine, endColumn, idx = dgIssues.SelectedIndex;
             var suggestion = ucSpellCheck.SelectedSuggestion;
             string viewWord, replacementWord;
             bool cancel = false;
@@ -1281,7 +1317,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SetWaitCursor();
 
-                var replacementsPeformed = new List<FileMisspelling>();
+                var replacementsPerformed = new List<FileMisspelling>();
 
                 foreach(var file in replacements)
                 {
@@ -1301,14 +1337,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     foreach(var misspelling in file)
                     {
-                        if(textView.GetLineAndColumn(misspelling.Span.Start, out line, out column) ==
-                          VSConstants.S_OK && textView.SetCaretPos(line, column) == VSConstants.S_OK)
+                        if(textView.GetLineAndColumn(misspelling.Span.Start, out startLine, out startColumn) == VSConstants.S_OK &&
+                          textView.GetLineAndColumn(misspelling.Span.Start + misspelling.Span.Length, out endLine,
+                          out endColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
                         {
-                            textView.SetSelection(line, column, line, column + misspelling.Span.Length);
+                            textView.SetSelection(startLine, startColumn, endLine, endColumn);
 
-                            if(textView.GetTextStream(line, column, line, column + misspelling.Span.Length,
-                              out viewWord) == VSConstants.S_OK && viewWord.Equals(misspelling.Word,
-                              StringComparison.OrdinalIgnoreCase))
+                            if(textView.GetTextStream(startLine, startColumn, endLine, endColumn, out viewWord) == VSConstants.S_OK &&
+                              viewWord.Equals(misspelling.Word, StringComparison.OrdinalIgnoreCase))
                             {
                                 replacementWord = suggestion.Suggestion;
 
@@ -1328,11 +1364,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                             replacementWord = replacementWord.Substring(0, 1).ToLower(language) +
                                                 replacementWord.Substring(1);
 
-                                if(textView.ReplaceTextOnLine(line, column, viewWord.Length, replacementWord,
+                                if(textView.ReplaceTextOnLine(startLine, startColumn, viewWord.Length, replacementWord,
                                   replacementWord.Length) == VSConstants.S_OK)
                                 {
-                                    textView.SetSelection(line, column, line, column + replacementWord.Length);
-                                    replacementsPeformed.Add(misspelling);
+                                    textView.SetSelection(startLine, startColumn, startLine, startColumn + replacementWord.Length);
+                                    replacementsPerformed.Add(misspelling);
 
                                     this.AdjustAffectedIssues(misspelling, replacementWord);
                                 }
@@ -1355,8 +1391,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         break;
                 }
 
-                if(replacementsPeformed.Count != 0)
-                    foreach(var issue in replacementsPeformed)
+                if(replacementsPerformed.Count != 0)
+                    foreach(var issue in replacementsPerformed)
                         issues.Remove(issue);
 
                 if(idx >= dgIssues.Items.Count)

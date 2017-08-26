@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/24/2017
+// Updated : 08/18/2017
 // Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -81,7 +81,7 @@ namespace VisualStudio.SpellChecker.Tagging
             /// service is unavailable.</returns>
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null || spellingService == null)
+                if(buffer == null || spellingService == null || buffer.ContentType.IsOfType("R Markdown"))
                     return null;
 
                 var config = spellingService.GetConfiguration(buffer);

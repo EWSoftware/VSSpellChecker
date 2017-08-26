@@ -24,5 +24,7 @@
     <Rule Id="IDE0002" Action="None" />
     <Rule Id="IDE0003" Action="None" />
     <Rule Id="IDE0011" Action="None" />
+    <Rule Id="IDE1006" Action="None" />
+    <Rule Id="IDE1006WithoutSuggestion" Action="None" />
   </Rules>
 </RuleSet>

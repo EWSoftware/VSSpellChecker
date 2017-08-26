@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 08/25/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains an abstract base class used to implement text classification for the content of various
@@ -23,6 +23,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+
+using Microsoft.VisualStudio.Text;
 
 using VisualStudio.SpellChecker.Configuration;
 
@@ -89,8 +91,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             get
             {
-                if(line < 1 || line > lineOffsets.Count - 2)
+                if(line < 1 || line > lineOffsets.Count - 1)
                     return String.Empty;
+
+                if(line == lineOffsets.Count - 1)
+                    return this.Text.Substring(lineOffsets[line - 1]);
 
                 line--;
 
@@ -128,7 +133,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <param name="text">The text to use</param>
         /// <remarks>By default, the constructor calls this to set the text to the file content.  It can be
         /// called by other code to set alternate text such as from an open editor.</remarks>
-        public void SetText(string text)
+        public virtual void SetText(string text)
         {
             int length = text.Length;
 
@@ -276,6 +281,82 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             }
 
             return low;
+        }
+
+        /// <summary>
+        /// This is used to split the first span, which completely contains the second, into two or three
+        /// contiguous non-overlapping spans.
+        /// </summary>
+        /// <param name="spans">The span collection</param>
+        /// <param name="firstSpanIdx">The first span containing the second span</param>
+        /// <param name="secondSpanIdx">The second span contained within the first span</param>
+        /// <remarks>This allows the classifier to exclude unwanted spans of text from a larger span that is
+        /// wanted.  For example, code spans within a larger span of plain text.</remarks>
+        protected static void SplitSpan(IList<SpellCheckSpan> spans, int firstSpanIdx, int secondSpanIdx)
+        {
+            SpellCheckSpan firstSpan = spans[firstSpanIdx], secondSpan = spans[secondSpanIdx];
+
+            if(secondSpanIdx < firstSpanIdx)
+            {
+                int i = firstSpanIdx;
+                firstSpanIdx = secondSpanIdx;
+                secondSpanIdx = i;
+            }
+
+            spans.RemoveAt(secondSpanIdx);
+            spans.RemoveAt(firstSpanIdx);
+
+            // Two identical spans were classified under different rules or the containing span is undefined
+            if(firstSpan.Span == secondSpan.Span || firstSpan.Classification == RangeClassification.Undefined)
+            {
+                spans.Insert(firstSpanIdx, firstSpan);
+                return;
+            }
+
+            // The second span is at the start of the first span
+            if(firstSpan.Span.Start == secondSpan.Span.Start)
+            {
+                spans.Insert(firstSpanIdx, secondSpan);
+                spans.Insert(secondSpanIdx, new SpellCheckSpan
+                {
+                    Span = new Span(secondSpan.Span.Start + secondSpan.Span.Length,
+                        firstSpan.Span.Length - secondSpan.Span.Length),
+                    Text = firstSpan.Text.Substring(secondSpan.Span.Length),
+                    Classification = firstSpan.Classification
+                });
+
+                return;
+            }
+
+            // The second span is at the end of the first span
+            if(firstSpan.Span.End == secondSpan.Span.End)
+            {
+                spans.Insert(firstSpanIdx, new SpellCheckSpan
+                {
+                    Span = new Span(firstSpan.Span.Start, firstSpan.Span.Length - secondSpan.Span.Length),
+                    Text = firstSpan.Text.Substring(0, secondSpan.Span.Start - firstSpan.Span.Start),
+                    Classification = firstSpan.Classification
+                });
+                spans.Insert(secondSpanIdx, secondSpan);
+
+                return;
+            }
+
+            // The second span splits the first span into two parts
+            spans.Insert(firstSpanIdx, new SpellCheckSpan
+            {
+                Span = new Span(firstSpan.Span.Start, secondSpan.Span.Start - firstSpan.Span.Start),
+                Text = firstSpan.Text.Substring(0, secondSpan.Span.Start - firstSpan.Span.Start),
+                Classification = firstSpan.Classification
+            });
+            spans.Insert(secondSpanIdx, secondSpan);
+            spans.Insert(secondSpanIdx + 1, new SpellCheckSpan
+            {
+                Span = new Span(secondSpan.Span.Start + secondSpan.Span.Length,
+                    firstSpan.Span.End - secondSpan.Span.End),
+                Text = firstSpan.Text.Substring(secondSpan.Span.Start - firstSpan.Span.Start + secondSpan.Span.Length),
+                Classification = firstSpan.Classification
+            });
         }
         #endregion
 

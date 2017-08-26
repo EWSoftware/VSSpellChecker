@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/10/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 08/24/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
@@ -162,6 +162,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     case "HtmlClassifier":
                         classifier = new HtmlClassifier(filename, spellCheckConfiguration);
+                        break;
+
+                    case "MarkdownClassifier":
+                        classifier = new MarkdownClassifier(filename, spellCheckConfiguration);
                         break;
 
                     case "CodeClassifier":

@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="d050d252-b188-4eca-b7ab-b33f0b1b1b0a" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed the solution/project spell checker tool window so that the line text in the results grid
+is limited in length to prevent it from lagging or hanging Visual Studio when misspellings occur in files such as
+compressed JavaScript where lines can be many kilobytes in length.  Also fixed it so that the line text for
+misspellings on the very last line of the file are shown properly.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the solution/project spell checker regular expression classifier and the word splitter
+to detect words split across string literals which often happens in designer generated code such as in Windows
+Forms projects.  Such split words are now joined before spell checking to reduce false misspelling reports caused
+by the split parts.</para>
+					</listItem>
+
+					<listItem>
+						<para>Modified the markdown text tagger to include <codeInline>md_html</codeInline> spans.  This lets
+it include more text for spell checking when the classifier lumps larger blocks of text together such as in
+paragraphs and list elements.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added a new tagger and solution/project classifier definitions to support R Markdown and Latex
+files in R projects.  Support for these project types is obtained by installing the
+<externalLink>
+	<linkText>R Tools for Visual Studio</linkText>
+	<linkUri>https://docs.microsoft.com/en-us/visualstudio/rtvs/</linkUri>
+	<linkTarget>_blank</linkTarget>
+</externalLink> package which is part of the <legacyItalic>Data Science and Analytical Applications</legacyItalic>
+workload in the Visual Studio installer.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added a new markdown classifier for the solution/project spell checker which excludes inline
+and fenced code elements thus reducing the number of false reports in markdown files.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the code classifier for the solution/project spell checker so that spans can be
+classified as undefined.  Such undefined spans are removed from other classified spans to reduce the number of
+false reports.</para>
+					</listItem>
+
+					<listItem>
+						<para>Merged change from michkot to classify <localUri>.cc</localUri> and <localUri>.hh</localUri>
+files as C-style files.</para>
+					</listItem>
+
+				</list>
+				
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

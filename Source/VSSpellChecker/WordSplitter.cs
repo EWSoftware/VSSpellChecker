@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/23/2017
+// Updated : 08/17/2017
 // Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -85,6 +85,17 @@ namespace VisualStudio.SpellChecker
                 mnemonic = value;
             }
         }
+
+        /// <summary>
+        /// This is used to determine whether or not the word splitter detects words that appear to span
+        /// string literals.
+        /// </summary>
+        /// <value>False by default.  If set to true, the word splitter will try to detect words that appear
+        /// to span string literals (i.e. "A string with a sp" + "lit word").  The span returned will include
+        /// the concatenating text.  The caller is responsible for removing it before spell checking the word.
+        /// This can be done with the <see cref="ActualWord"/> method.</value>
+        public bool DetectWordsSpanningStringLiterals { get; set; }
+
         #endregion
 
         #region Constructor
@@ -433,7 +444,36 @@ namespace VisualStudio.SpellChecker
 
                 end++;    // Move back to last match
 
-                // Ignore anything less than two characters
+                if(this.DetectWordsSpanningStringLiterals && end < text.Length && text[end] == '\"')
+                {
+                    int spanEnd = end + 1;
+
+                    while(spanEnd < text.Length && (text[spanEnd] == '+' || text[spanEnd] == '&' ||
+                      text[spanEnd] == '_' || Char.IsWhiteSpace(text[spanEnd])))
+                    {
+                        spanEnd++;
+                    }
+
+                    if(spanEnd + 1 < text.Length && text[spanEnd] == '\"' &&
+                      !this.IsWordBreakCharacter(text[spanEnd + 1], false))
+                    {
+                        spanEnd++;
+
+                        while(spanEnd < text.Length && !this.IsWordBreakCharacter(text[spanEnd], false))
+                            spanEnd++;
+
+                        if(spanEnd < text.Length)
+                        {
+                            while(--spanEnd > i && (text[spanEnd] == '\'' || text[spanEnd] == '\u2019' ||
+                              text[spanEnd] == '.' || text[spanEnd] == '@' || text[spanEnd] == mnemonic))
+                                ;
+
+                            end = spanEnd + 1;
+                        }
+                    }
+                }
+
+                // Ignore empty strings and single characters
                 if(end - i > 1)
                 {
                     if(this.Configuration.IgnoreWordsInMixedCase)
@@ -594,6 +634,35 @@ namespace VisualStudio.SpellChecker
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// This is used to get the actual word from a span excluding any concatenating text from words that
+        /// span string literals.
+        /// </summary>
+        /// <param name="containingText">The text containing the word span</param>
+        /// <param name="wordSpan">The word span location</param>
+        /// <returns>The word at the given span location without any concatenation text that may be within it</returns>
+        internal static string ActualWord(string containingText, Span wordSpan)
+        {
+            string word = containingText.Substring(wordSpan.Start, wordSpan.Length);
+
+            int concatPos = word.IndexOf('\"');
+
+            if(concatPos != -1)
+            {
+                int end = concatPos + 1;
+
+                while(end < word.Length && word[end] != '\"')
+                    end++;
+
+                if(end < word.Length - 1)
+                    word = word.Substring(0, concatPos) + word.Substring(end + 1);
+                else
+                    word = word.Substring(0, concatPos);
+            }
+
+            return word;
         }
         #endregion
     }

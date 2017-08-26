@@ -113,6 +113,7 @@
     <Compile Include="ProjectSpellCheck\CodeClassifier.cs" />
     <Compile Include="ProjectSpellCheck\FileMisspelling.cs" />
     <Compile Include="ProjectSpellCheck\HtmlClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\MarkdownClassifier.cs" />
     <Compile Include="ProjectSpellCheck\PlainTextClassifier.cs" />
     <Compile Include="ProjectSpellCheck\RangeClassification.cs" />
     <Compile Include="ProjectSpellCheck\RegexClassification.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="SuggestedActions\SuggestedActionSubmenu.cs" />
     <Compile Include="Tagging\MarkdownTextTagger.cs" />
     <Compile Include="Tagging\PhpTextTaggerProvider.cs" />
+    <Compile Include="Tagging\RMarkdownTextTagger.cs" />
     <Compile Include="Theme\ThemeColors.cs" />
     <Compile Include="Theme\ThemeColorId.cs" />
     <Compile Include="Theme\TeamFoundationColors.cs" />
@@ -438,6 +440,7 @@
     <Content Include="Classifications.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <SubType>Designer</SubType>
     </Content>
     <None Include="NHunspell\NHunspell.vsspell" />
     <None Include="VSSpellChecker2017AndLater.project.json" />
@@ -467,10 +470,16 @@
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.15.0.DesignTime, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.15.3.DesignTime, Version=15.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.TextManager.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="Microsoft.VisualStudio.Threading, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.Threading, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Utilities, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

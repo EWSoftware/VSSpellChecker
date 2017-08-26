@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 01/08/2017
+// Updated : 07/28/2017
 // Note    : Copyright 2016-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -86,8 +86,11 @@ namespace VisualStudio.SpellChecker.Tagging
                         case "comment":
                         case "md_bold":
                         case "md_header":
+                        case "md_html":
                         case "md_quote":
                         case "natural language":
+                            // Note that "md_html" can contain a mix of HTML elements and text.  The tagger will
+                            // do its best to ignore the HTML elements and their attributes and pick out the text.
                             yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
                             break;
 
@@ -140,8 +143,8 @@ namespace VisualStudio.SpellChecker.Tagging
                             break;
 
                         default:
-                            // All other classifications such as code and HTML are ignored.  While there may be
-                            // text within such spans that needs spell checking, it could prove rather difficult
+                            // All other classifications such as code are ignored.  While there may be text
+                            // within such spans that needs spell checking, it could prove rather difficult
                             // to extract so we'll ignore it.
                             break;
                     }

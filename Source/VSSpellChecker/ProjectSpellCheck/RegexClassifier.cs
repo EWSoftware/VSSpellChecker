@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 08/24/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify text file content using a set of regular expressions
@@ -140,7 +140,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             spans = spans.OrderBy(s => s.Span.Start).ToList();
 
-            // Merge intersecting spans and remove entirely overlapped spans
+            // Merge intersecting spans and either remove or split entirely overlapped spans
             for(int idx = 0; idx < spans.Count - 1; idx++)
             {
                 current = spans[idx];
@@ -148,20 +148,35 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                 if(current.Span.IntersectsWith(next.Span))
                 {
-                    // The spans overlap.  If overlapped entirely, remove one or the other.  If partially
-                    // overlapping, combine them and account for the overlap if they are of the same type.
-                    // If overlapped but of a different type, leave them alone except the noted special case.
+                    // The spans overlap.  If overlapped entirely, remove one or the other or split the
+                    // containing span accordingly.  If partially overlapping, combine them and account for the
+                    // overlap if they are of the same type.  If overlapped but of a different type, leave them
+                    // alone except the noted special case.
                     if(current.Span.OverlapsWith(next.Span))
                     {
                         if(current.Span.Contains(next.Span))
                         {
-                            spans.Remove(next);
+                            if(current.Classification == RangeClassification.Undefined ||
+                              next.Classification == RangeClassification.Undefined)
+                            {
+                                SplitSpan(spans, idx, idx + 1);
+                            }
+                            else
+                                spans.Remove(next);
+
                             idx--;
                         }
                         else
                             if(next.Span.Contains(current.Span))
                             {
-                                spans.Remove(current);
+                                if(current.Classification == RangeClassification.Undefined ||
+                                  next.Classification == RangeClassification.Undefined)
+                                {
+                                    SplitSpan(spans, idx + 1, idx);
+                                }
+                                else
+                                    spans.Remove(current);
+
                                 idx--;
                             }
                             else
@@ -203,6 +218,33 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             idx--;
                         }
                 }
+                else
+                    if(current.Classification == RangeClassification.NormalStringLiteral &&
+                      next.Classification == RangeClassification.NormalStringLiteral)
+                    {
+                        // See if two normal string literals are being concatenated that contain what looks like
+                        // a word spanning both.  This happens a lot in Windows Forms designer code.  For
+                        // example: "A string of text that gets separ" + "ated by the designer"
+                        // This can result in a lot of false reports.  The word splitter will attempt to
+                        // join such words for the purposes of spell checking them.
+                        int pos = current.Span.Start + current.Span.Length, end = next.Span.Start;
+
+                        while(pos < end && (this.Text[pos] == '+' || this.Text[pos] == '&' ||
+                          this.Text[pos] == '_' || Char.IsWhiteSpace(this.Text[pos])))
+                        {
+                            pos++;
+                        }
+
+                        if(pos == end)
+                        {
+                            current.Span = new Span(current.Span.Start, next.Span.Start + next.Span.Length -
+                                current.Span.Start);
+                            current.Text = this.Text.Substring(current.Span.Start, current.Span.Length);
+
+                            spans.Remove(next);
+                            idx--;
+                        }
+                    }
             }
 
             return spans;

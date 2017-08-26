@@ -74,9 +74,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         /// <inheritdoc />
-        /// <remarks>This classifier will ignore elements excluded by the C# options in C# files and, if wanted,
-        /// all C-style code.  It will also classify XML documentation comments to eliminated things that
-        /// shouldn't be spell checked within them.</remarks>
+        /// <remarks>This classifier will ignore elements classified as undefined and those excluded by the C#
+        /// options in C# files and, if wanted, all C-style code.  It will also classify XML documentation
+        /// comments to eliminated things that shouldn't be spell checked within them.</remarks>
         public override IEnumerable<SpellCheckSpan> Parse()
         {
             int line, column;
@@ -85,6 +85,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             foreach(var span in spans)
             {
+                if(span.Classification == RangeClassification.Undefined)
+                    continue;
+
                 // Apply the C# options to C# code and, if wanted, all C-style code
                 if(isCSharp || isCStyleCode)
                 {

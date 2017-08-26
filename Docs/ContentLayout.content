@@ -129,11 +129,16 @@
       <HelpKeyword index="K" term="known issues" />
     </HelpKeywords>
   </Topic>
-  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isExpanded="true" title="Version History">
+  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isSelected="true" title="Version History">
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="dfcecbc6-1e86-4076-b8c6-0d6e94aa1629" visible="True" isSelected="true" title="Version 2017.3.26.0">
+    <Topic id="d050d252-b188-4eca-b7ab-b33f0b1b1b0a" visible="True" title="Version 2017.8.26.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.8.26.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="dfcecbc6-1e86-4076-b8c6-0d6e94aa1629" visible="True" title="Version 2017.3.26.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2017.3.26.0" />
       </HelpKeywords>
