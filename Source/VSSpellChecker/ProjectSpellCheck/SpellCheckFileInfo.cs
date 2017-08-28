@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/27/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 08/27/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to hold information about a file that will be spell checked
@@ -98,7 +98,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                 if(projectPath.Length == 0 || !filePath.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    projectPath = Path.GetDirectoryName(this.SolutionFile);
+                    projectPath = Path.GetDirectoryName(this.SolutionFile ?? ".");
 
                     if(projectPath.Length == 0 || !filePath.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
                         return Path.GetFileName(this.ProjectFile) + " / " + this.Filename;

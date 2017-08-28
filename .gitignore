@@ -7,6 +7,9 @@
 *.userosscache
 *.sln.docstates
 StyleCop.Cache
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
 
 # Build results
 [Dd]ebug/
