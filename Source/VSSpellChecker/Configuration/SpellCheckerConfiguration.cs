@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/11/2017
+// Updated : 12/07/2017
 // Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -412,7 +412,7 @@ namespace VisualStudio.SpellChecker.Configuration
             get
             {
                 return new[] {
-                    @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|filterTextBox|searchTextBox|tboxFilter)(?# Various search text boxes)",
+                    @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
                     @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
                     @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
                     @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
@@ -424,7 +424,8 @@ namespace VisualStudio.SpellChecker.Configuration
                     @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
                     @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
                     @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
-                    @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression(?# Spell checker exclusion expression editor)"
+                    @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression(?# Spell checker exclusion expression editor)",
+                    @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)"
                 };
             }
         }

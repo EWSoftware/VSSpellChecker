@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/04/2016
-// Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
+// Updated : 12/07/2017
+// Note    : Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a utility class with extension and utility methods.
@@ -36,6 +36,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Editors;
+using VisualStudio.SpellChecker.ProjectSpellCheck;
 using VisualStudio.SpellChecker.Properties;
 
 namespace VisualStudio.SpellChecker
@@ -625,6 +626,37 @@ namespace VisualStudio.SpellChecker
                 }
 
             dictionary.Save(filename);
+        }
+        #endregion
+
+        #region Range classification helpers
+        //=====================================================================
+
+        /// <summary>
+        /// This is used to see if a range classification is one of the string literal types and is followed by
+        /// another of the same type.
+        /// </summary>
+        /// <param name="classification">The classification to check</param>
+        /// <returns>True if the classification is an interpolated, normal, or verbatim string literal followed
+        /// by another of the same type, false if not.</returns>
+        internal static bool ConsecutiveStringLiterals(this RangeClassification classification, RangeClassification nextClassification)
+        {
+            return ((classification == RangeClassification.InterpolatedStringLiteral ||
+                classification == RangeClassification.NormalStringLiteral ||
+                classification == RangeClassification.VerbatimStringLiteral) && classification == nextClassification);
+        }
+
+        /// <summary>
+        /// This is used to see if a range classification is one of the string literal types
+        /// </summary>
+        /// <param name="classification">The classification to check</param>
+        /// <returns>True if the classification is an interpolated, normal, or verbatim string literal, false
+        /// if not.</returns>
+        internal static bool IsStringLiteral(this RangeClassification classification)
+        {
+            return (classification == RangeClassification.InterpolatedStringLiteral ||
+                classification == RangeClassification.NormalStringLiteral ||
+                classification == RangeClassification.VerbatimStringLiteral);
         }
         #endregion
     }

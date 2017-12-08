@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/18/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+// Updated : 12/07/2017
+// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -397,14 +397,28 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     p.State = State.Character;
                     ScanCharacter(p);
                 }
-                else if(p.Char() == '#')    // Possible preprocessor keyword, check for #region
+                else if(p.Char() == '#') // Possible preprocessor keyword, check for a region
                 {
                     p.Advance(1);
 
+                    int segmentLength = 0;
+
                     // If found, treat it like a single line comment
                     if(p.NextSegment(6) == "region")
+                        segmentLength = 6;
+                    else
+                        if(p.NextSegment(9) == "endregion")
+                            segmentLength = 9;
+                        else
+                            if(p.NextSegment(13) == "pragma region")
+                                segmentLength = 13;
+                            else
+                                if(p.NextSegment(16) == "pragma endregion")
+                                    segmentLength = 16;
+
+                    if(segmentLength != 0)
                     {
-                        p.Advance(6);
+                        p.Advance(segmentLength);
                         p.StartNaturalText();
                         p.AdvanceToEndOfLine();
                         p.EndNaturalText();

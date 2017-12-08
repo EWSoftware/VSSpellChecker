@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/17/2017
+// Updated : 08/31/2017
 // Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -444,17 +444,29 @@ namespace VisualStudio.SpellChecker
 
                 end++;    // Move back to last match
 
-                if(this.DetectWordsSpanningStringLiterals && end < text.Length && text[end] == '\"')
+                if(this.DetectWordsSpanningStringLiterals && end < text.Length && text[end] == '\"' &&
+                  this.Classification.IsStringLiteral())
                 {
                     int spanEnd = end + 1;
+                    bool concatSeen = false;
 
                     while(spanEnd < text.Length && (text[spanEnd] == '+' || text[spanEnd] == '&' ||
+                      text[spanEnd] == '@' || text[spanEnd] == '$' ||
                       text[spanEnd] == '_' || Char.IsWhiteSpace(text[spanEnd])))
                     {
+                        if((text[spanEnd] == '@' || text[spanEnd] == '$') && (spanEnd + 1 >= text.Length ||
+                          (text[spanEnd + 1] != '\"' && text[spanEnd + 1] != '@' && text[spanEnd + 1] != '$')))
+                        {
+                            break;
+                        }
+
+                        if(text[spanEnd] == '+' || text[spanEnd] == '&')
+                            concatSeen = true;
+
                         spanEnd++;
                     }
 
-                    if(spanEnd + 1 < text.Length && text[spanEnd] == '\"' &&
+                    if(concatSeen && spanEnd + 1 < text.Length && text[spanEnd] == '\"' &&
                       !this.IsWordBreakCharacter(text[spanEnd + 1], false))
                     {
                         spanEnd++;

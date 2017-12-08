@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/24/2017
+// Updated : 12/07/2017
 // Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -219,23 +219,37 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         }
                 }
                 else
-                    if(current.Classification == RangeClassification.NormalStringLiteral &&
-                      next.Classification == RangeClassification.NormalStringLiteral)
+                    if(current.Classification.ConsecutiveStringLiterals(next.Classification))
                     {
-                        // See if two normal string literals are being concatenated that contain what looks like
-                        // a word spanning both.  This happens a lot in Windows Forms designer code.  For
-                        // example: "A string of text that gets separ" + "ated by the designer"
+                        // See if two string literals of the same type are being concatenated that contain what
+                        // looks like a word spanning both.  This happens a lot in Windows Forms designer code.
+                        // For example: "A string of text that gets separ" + "ated by the designer"
                         // This can result in a lot of false reports.  The word splitter will attempt to
                         // join such words for the purposes of spell checking them.
+                        //
+                        // The classifications must match.  You can't for example combine a normal string literal
+                        // with a verbatim string literal or it may generate false reports on things like
+                        // escape sequences in the verbatim string literal.
                         int pos = current.Span.Start + current.Span.Length, end = next.Span.Start;
+                        bool concatSeen = false;
 
                         while(pos < end && (this.Text[pos] == '+' || this.Text[pos] == '&' ||
+                          this.Text[pos] == '@' || this.Text[pos] == '$' ||
                           this.Text[pos] == '_' || Char.IsWhiteSpace(this.Text[pos])))
                         {
+                            if((this.Text[pos] == '@' || this.Text[pos] == '$') && (pos + 1 >= end ||
+                              (this.Text[pos + 1] != '\"' && this.Text[pos + 1] != '@' && this.Text[pos + 1] != '$')))
+                            {
+                                break;
+                            }
+
+                            if(this.Text[pos] == '+' || this.Text[pos] == '&')
+                                concatSeen = true;
+
                             pos++;
                         }
 
-                        if(pos == end)
+                        if(concatSeen && pos == end)
                         {
                             current.Span = new Span(current.Span.Start, next.Span.Start + next.Span.Length -
                                 current.Span.Start);

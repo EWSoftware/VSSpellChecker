@@ -763,15 +763,18 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 // Sometimes it flags a word as misspelled if it ends with "'s".  Try checking the
                                 // word without the "'s".  If ignored or correct without it, don't flag it.  This
                                 // appears to be caused by the definitions in the dictionary rather than Hunspell.
-                                if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase))
+                                if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase) ||
+                                  textToCheck.EndsWith("\u2019s", StringComparison.OrdinalIgnoreCase))
                                 {
+                                    string aposEss = textToCheck.Substring(textToCheck.Length - 2);
+
                                     textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
                                     if(dictionary.ShouldIgnoreWord(textToCheck) ||
                                       dictionary.IsSpelledCorrectly(textToCheck))
                                         continue;
 
-                                    textToCheck += "'s";
+                                    textToCheck += aposEss;
                                 }
 
                                 // Some dictionaries include a trailing period on certain words such as "etc." which

@@ -64,7 +64,8 @@
 								VerticalContentAlignment="Center"/>
 							<Button Grid.Column="4" Margin="3" Name="btnStartCancel" Content="S_tart" Width="50"
 								Click="btnStartCancel_ClickAsync" />
-							<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="10,5,0,0" x:Name="spSpinner"/>
+							<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="10,5,0,0" x:Name="spSpinner"
+                HorizontalAlignment="Left"/>
 							<TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Name="lblIssueCount" Text="--"
 								Style="{StaticResource PlainText}" />
 							<TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Padding="3" Margin="3"
