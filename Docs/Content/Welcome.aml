@@ -134,9 +134,14 @@ can be inherited or overridden.</para>
 clicking on the PayPal donation button below. If you would prefer to donate via check or money order (USD),
 please send me an e-mail at Eric@EWoodruff.us and I will reply with my mailing address.</para>
 
-				<markup>
-[![Make donations with PayPal - It's fast, free and secure!](https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/Docs/media/PayPal.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=29KUXTJR48CRE)
-				</markup>
+				<para>
+					<markup>
+						<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=29KUXTJR48CRE"
+							 target="_blank" title="Make a donation">
+							<img border="0" src="../media/PayPal.gif" alt="Make donations with PayPal - It's fast, free and secure!"/>
+						</a>
+					</markup>
+				</para>
 
 				<para>The above method of donating is secure. PayPal guarantees your privacy and security. I never
 receive details of your payment other than the amount, your name, e-mail address, and any optionally entered

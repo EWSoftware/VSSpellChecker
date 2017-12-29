@@ -15,7 +15,7 @@ configuration file's location.  For the global configuration, the paths should a
 solution, project, folder, and file-specific settings files, the folders should typically be relative so that if
 the solution or project moves, the dictionary files can still be found.  You are prompted when adding a folder if
 you would like to make it relative to the current configuration file.  Environment variable references such as
-<environmentVariable> %USERPROFILE%\OneDrive\Dictionaries</environmentVariable> are supported.</para>
+<environmentVariable>%USERPROFILE%\OneDrive\Dictionaries</environmentVariable> are supported.</para>
 
 				<para>Once a folder has been added, the <ui>Language(s)</ui> combo box will be updated to contain any
 additional languages for dictionaries found in the new folder.  Any user dictionaries found will replace the
@@ -119,7 +119,7 @@ and location of the language dictionary and the user dictionary.  Hover over eit
 containing the location of the dictionary.  By default, user dictionary files are stored in the same folder as
 the dictionaries with which they are associated.  Typically this will be the local application data folder for
 custom dictionaries and those supplied with the package.  They are named after the associated language with an
-<localUri>\_User</localUri> suffix and a <localUri>.dic</localUri> extension (i.e.
+<localUri>_User</localUri> suffix and a <localUri>.dic</localUri> extension (i.e.
 <localUri>en-US_User.dic</localUri>).</para>
 
 				<para>If you would prefer to store the user dictionaries in an alternate location, create an empty

@@ -9,7 +9,7 @@ ECHO * VS2013/VS2015 package
 ECHO *
 
 REM Use the earliest version of MSBuild available
-IF EXIST "%ProgramFiles(x86)%\MSBuild\14.0" SET "MSBUILD=%ProgramFiles(x86)%\MSBuild\12.0\bin\MSBuild.exe"
+IF EXIST "%ProgramFiles(x86)%\MSBuild\14.0" SET "MSBUILD=%ProgramFiles(x86)%\MSBuild\14.0\bin\MSBuild.exe"
 IF EXIST "%ProgramFiles(x86)%\MSBuild\12.0" SET "MSBUILD=%ProgramFiles(x86)%\MSBuild\12.0\bin\MSBuild.exe"
 
 ..\Source\.nuget\NuGet restore "VSSpellChecker2013.sln"
@@ -35,9 +35,13 @@ IF NOT EXIST "%MSBUILD%" GOTO End
 
 IF ERRORLEVEL 1 GOTO End
 
-:NuGet
+CD ..\
 
-CD ..\NuGet
+IF NOT "%SHFBROOT%"=="" "%MSBUILD%" /nologo /v:m "Docs\VSSpellCheckerDocs.sln" /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+
+IF "%SHFBROOT%"=="" ECHO **** Sandcastle help file builder not installed.  Skipping help build. ****
+
+CD NuGet
 
 ..\Source\.nuget\NuGet Pack VSSpellChecker.nuspec -NoDefaultExcludes -NoPackageAnalysis -OutputDirectory ..\Deployment
 

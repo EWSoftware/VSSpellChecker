@@ -286,7 +286,7 @@ namespace VisualStudio.SpellChecker.Editors
 
                 try
                 {
-                    string targetUrl = lnkProjectSite.NavigateUri.AbsoluteUri + "/wiki/" + page.HelpUrl;
+                    string targetUrl = "https://ewsoftware.github.io/VSSpellChecker/html/" + page.HelpUrl + ".htm";
 
                     Process.Start(targetUrl);
                 }

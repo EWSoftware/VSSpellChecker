@@ -1199,8 +1199,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/EWSoftware/VSSpellChecker/wiki/" +
-                    "fa790577-88c0-4141-b8f4-d8b70f625cfd");
+                System.Diagnostics.Process.Start(
+                    "https://ewsoftware.github.io/VSSpellChecker/html/fa790577-88c0-4141-b8f4-d8b70f625cfd.htm");
             }
             catch(Exception ex)
             {

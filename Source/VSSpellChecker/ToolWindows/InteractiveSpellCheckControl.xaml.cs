@@ -327,8 +327,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/EWSoftware/VSSpellChecker/wiki/" +
-                    "53ffc5b7-b7dc-4f03-9a51-ed4176bff504");
+                System.Diagnostics.Process.Start(
+                    "https://ewsoftware.github.io/VSSpellChecker/html/53ffc5b7-b7dc-4f03-9a51-ed4176bff504.htm");
             }
             catch(Exception ex)
             {

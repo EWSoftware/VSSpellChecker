@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/07/2017
+// Updated : 12/22/2017
 // Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -412,7 +412,8 @@ namespace VisualStudio.SpellChecker.Configuration
             get
             {
                 return new[] {
-                    @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
+                    @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|" +
+                        "filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
                     @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
                     @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
                     @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
@@ -421,11 +422,17 @@ namespace VisualStudio.SpellChecker.Configuration
                     @"581e89c0-e423-4453-bde3-a0403d5f380d\.ucEntityReferences\.txtFindName(?# SHFB entity references)",
                     @"7aad2922-72a2-42c1-a077-85f5097a8fa7\.txtFindID(?# SHFB content layout editor)",
                     @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
+                    @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|" +
+                        "txtWebsiteAdContent|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|" +
+                        "pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)",
+                    @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
+                        "(?# SHFB build component and plug-in configuration forms)",
                     @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
-                    @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
+                    @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
+                        "txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
                     @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
-                    @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression(?# Spell checker exclusion expression editor)",
-                    @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)"
+                    @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
+                        "(?# Spell checker exclusion expression editor)"
                 };
             }
         }
