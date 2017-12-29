@@ -1,4 +1,4 @@
-Welcome to the **Visual Studio Spell Checker** project.
+ Welcome to the **Visual Studio Spell Checker** project.
 
 * [Get the current release](https://github.com/EWSoftware/VSSpellChecker/releases)
 * [Ask a question or open an issue](https://github.com/EWSoftware/VSSpellChecker/issues)
@@ -10,5 +10,4 @@ created by Noah Richards, Roman Golovin, and Michael Lehenbauer.  This version h
 include many new features all of which are configurable.
 
 See the [Project Wiki](https://github.com/EWSoftware/VSSpellChecker/wiki) for information on requirements for
-building the code, contributing to the project, and using and configuring the spell checker extension in Visual
-Studio.
+building the code and contributing to the project.
