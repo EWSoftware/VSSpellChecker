@@ -33,7 +33,7 @@ generate the definitions assembly NuGet package.</para>
 				<para><localUri>.\Docs</localUri> - The
 <externalLink>
 					<linkText>Sandcastle Help File Builder</linkText>
-					<linkUri>htts://GitHub.com/EWSoftware/SHFB</linkUri>
+					<linkUri>https://GitHub.com/EWSoftware/SHFB</linkUri>
 					<linkTarget>_blank</linkTarget>
 				</externalLink> project used to manage the spell checker project's documentation.</para>
 
