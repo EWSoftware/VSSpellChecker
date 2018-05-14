@@ -72,7 +72,7 @@
 </WebsiteAdContent>
     <AppendMarkdownFileExtensionsToUrls>False</AppendMarkdownFileExtensionsToUrls>
     <ProjectSummary>Visual Studio Spell Checker.  Written by Eric Woodruff %28&amp;lt%3ba href=&amp;quot%3bmailto:Eric%40EWoodruff.us%3fSubject=Visual Studio Spell Checker&amp;quot%3b&amp;gt%3bEric%40EWoodruff.us&amp;lt%3b/a&amp;gt%3b%29.  For the latest version visit &amp;lt%3ba href=&amp;quot%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;lt%3b/a&amp;gt%3b.</ProjectSummary>
-    <VisibleItems>InheritedMembers, InheritedFrameworkMembers, Protected, ProtectedInternalAsProtected</VisibleItems>
+    <VisibleItems>InheritedMembers, InheritedFrameworkMembers, Protected, ProtectedInternalAsProtected, NonBrowsable</VisibleItems>
     <PlugInConfigurations>
       <PlugInConfig id="Output Deployment" enabled="True" xmlns="">
         <configuration deleteAfterDeploy="true" verboseLogging="false">
