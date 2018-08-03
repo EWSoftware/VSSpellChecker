@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/07/2017
-// Note    : Copyright 2013-2017, Eric Woodruff, All rights reserved
+// Updated : 05/17/2018
+// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a utility class with extension and utility methods.
@@ -56,7 +56,8 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public const string EmbeddedPeekTextView = "EMBEDDED_PEEK_TEXT_VIEW";
 
-        private static Regex reUppercase = new Regex("([A-Z])");
+        private static Regex reUppercase = new Regex("([A-Z])"); 
+        private static Regex reAutoGenCodeFilename = new Regex("(#ExternalSource\\(|#line\\s\\d*\\s)\"(?<Filename>.*?)\"");
 
         #endregion
 
@@ -153,10 +154,21 @@ namespace VisualStudio.SpellChecker
                                 // ignore these.  They are typically used for inline CSS, script, etc. and can be
                                 // safely ignored as they're part of a primary buffer that does have a filename.
                                 System.Diagnostics.Debug.WriteLine("Unable to obtain filename, probably a secondary buffer");
+
+                                return null;
                             }
                         }
                     }
                 }
+
+                // See if the text in the buffer contains a filename reference from a code generator by looking
+                // for some common patterns (stuff like Razor HTML).
+                string content = buffer.CurrentSnapshot.GetText(0, Math.Min(buffer.CurrentSnapshot.Length, 4096));
+
+                var m = reAutoGenCodeFilename.Match(content);
+
+                if(m.Success)
+                    return m.Groups["Filename"].Value;
             }
 
             return null;

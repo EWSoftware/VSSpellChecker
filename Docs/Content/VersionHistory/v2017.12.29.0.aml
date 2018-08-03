@@ -6,7 +6,6 @@
 		</introduction>
 
 		<section>
-			<title>Changes in This Release</title>
 			<content>
 
 				<list class="bullet">
@@ -33,7 +32,7 @@ and form controls.</para>
 		</section>
 
 		<relatedTopics>
-
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
 		</relatedTopics>
 
 	</developerConceptualDocument>

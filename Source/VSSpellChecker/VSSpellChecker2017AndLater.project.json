@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
-    "Microsoft.Build": "15.5.180",
-    "Microsoft.Build.Framework": "15.5.180",
+    "Microsoft.Build": "15.7.179",
+    "Microsoft.Build.Framework": "15.7.179",
     "Microsoft.VisualStudio.Workspace.VSIntegration": "15.0.401"
   },
   "frameworks": {

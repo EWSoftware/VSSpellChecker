@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 08/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -59,6 +59,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private List<string> projectNames;
         private CancellationTokenSource cancellationTokenSource;
         private WordSplitter wordSplitter;
+        private bool unescapeApostrophes;
 
         #endregion
 
@@ -570,6 +571,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             {
                                 wordSplitter.Mnemonic = ClassifierFactory.GetMnemonic(file.Filename);
                                 wordSplitter.IsCStyleCode = ClassifierFactory.IsCStyleCode(file.Filename);
+                                unescapeApostrophes = ClassifierFactory.EscapesApostrophes(file.Filename);
 
                                 // If open in an editor, use the current text from it if possible
                                 if(openDocuments.Contains(file.CanonicalName))
@@ -704,6 +706,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     else
                         textToCheck = actualWord.Substring(0, mnemonicPos) + actualWord.Substring(mnemonicPos + 1);
 
+                    if(unescapeApostrophes && textToCheck.IndexOf("''", StringComparison.Ordinal) != -1)
+                        textToCheck = textToCheck.Replace("''", "'");
+
                     // Spell check the word if it looks like one and is not ignored
                     if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||
                       !rangeExclusions.Any(match => word.Start >= match.Index &&
@@ -787,7 +792,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         continue;
                                 }
 
-                                yield return new FileMisspelling(errorSpan, actualWord);
+                                yield return new FileMisspelling(errorSpan, actualWord) { EscapeApostrophes = unescapeApostrophes };
                             }
                         }
                     }
@@ -1239,16 +1244,19 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             if(currentIssue.MisspellingType != MisspellingType.DoubledWord)
                             {
                                 var suggestion = ucSpellCheck.SelectedSuggestion;
+                                string replaceWith = suggestion.Suggestion;
+
+                                if(currentIssue.EscapeApostrophes)
+                                    replaceWith = replaceWith.Replace("'", "''");
 
                                 if(suggestion != null && textView.ReplaceTextOnLine(startLine, startColumn,
-                                  currentIssue.Span.Length, suggestion.Suggestion,
-                                  suggestion.Suggestion.Length) == VSConstants.S_OK)
+                                  currentIssue.Span.Length, replaceWith, replaceWith.Length) == VSConstants.S_OK)
                                 {
                                     textView.SetSelection(startLine, startColumn, startLine, startColumn +
-                                        suggestion.Suggestion.Length);
+                                        replaceWith.Length);
                                     issues.RemoveAt(dgIssues.SelectedIndex);
 
-                                    this.AdjustAffectedIssues(currentIssue, suggestion.Suggestion);
+                                    this.AdjustAffectedIssues(currentIssue, replaceWith);
                                 }
                             }
                             else
@@ -1350,6 +1358,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                               viewWord.Equals(misspelling.Word, StringComparison.OrdinalIgnoreCase))
                             {
                                 replacementWord = suggestion.Suggestion;
+
+                                if(misspelling.EscapeApostrophes)
+                                    replacementWord = replacementWord.Replace("'", "''");
 
                                 var language = suggestion.Culture ?? CultureInfo.CurrentCulture;
 

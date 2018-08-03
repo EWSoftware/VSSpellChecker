@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 05/23/2016
-// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
+// Updated : 08/02/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the spelling tagger
@@ -109,14 +109,14 @@ namespace VisualStudio.SpellChecker
 
         private List<SnapshotSpan> _dirtySpans;
 
-        private object _dirtySpanLock = new object();
+        private readonly object _dirtySpanLock = new object();
         private volatile List<MisspellingTag> _misspellings;
         private volatile List<IgnoredWord> wordsIgnoredOnce;
 
         private Thread _updateThread;
         private DispatcherTimer _timer;
 
-        private bool _isClosed;
+        private bool _isClosed, unescapeApostrophes;
 
         #endregion
 
@@ -190,6 +190,10 @@ namespace VisualStudio.SpellChecker
             _dictionary.IgnoreOnce += IgnoreOnce;
 
             view.Closed += ViewClosed;
+
+            // Strings in SQL script can contain escaped single quotes which are apostrophes.  Unescape them
+            // so that they are spell checked correctly.
+            unescapeApostrophes = buffer.ContentType.IsOfType("SQL Server Tools");
 
             // To start with, the entire buffer is dirty.  Split this into chunks so we update pieces at a time.
             ITextSnapshot snapshot = _buffer.CurrentSnapshot;
@@ -694,6 +698,9 @@ namespace VisualStudio.SpellChecker
                     else
                         textToCheck = actualWord.Substring(0, mnemonicPos) + actualWord.Substring(mnemonicPos + 1);
 
+                    if(unescapeApostrophes && textToCheck.IndexOf("''", StringComparison.Ordinal) != -1)
+                        textToCheck = textToCheck.Replace("''", "'");
+
                     // Spell check the word if it looks like one and is not ignored
                     if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||
                       !rangeExclusions.Any(match => word.Start >= match.Index &&
@@ -785,7 +792,7 @@ namespace VisualStudio.SpellChecker
                                         continue;
                                 }
 
-                                yield return new MisspellingTag(errorSpan);
+                                yield return new MisspellingTag(errorSpan) { EscapeApostrophes = unescapeApostrophes };
                             }
                         }
                     }

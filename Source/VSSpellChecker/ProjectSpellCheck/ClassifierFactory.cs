@@ -90,6 +90,26 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         }
 
         /// <summary>
+        /// This is used to determine if apostrophes are escaped such as in SQL literal strings
+        /// </summary>
+        /// <param name="filename">The filename to check</param>
+        public static bool EscapesApostrophes(string filename)
+        {
+            if(filename == null)
+                return false;
+
+            string id, extension = Path.GetExtension(filename);
+
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            if(!String.IsNullOrWhiteSpace(extension))
+                extension = extension.Substring(1);
+
+            return (extensionMap.TryGetValue(extension, out id) && id == "SQL");
+        }
+
+        /// <summary>
         /// This is used to get the mnemonic character used by the file based on its extension
         /// </summary>
         /// <param name="filename">The filename for which to get the mnemonic character</param>

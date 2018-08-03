@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/07/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 08/02/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a suggested action for inserting spelling suggestions
@@ -40,6 +40,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 
         private ISpellingSuggestion replaceWith;
         private SpellingDictionary dictionary;
+        private bool escapeApostrophes;
 
         #endregion
 
@@ -51,11 +52,13 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         /// </summary>
         /// <param name="span">The word span to replace</param>
         /// <param name="replaceWith">The suggestion to replace the misspelled word</param>
+        /// <param name="escapeApostrophes">True to escape apostrophes in the suggestion, false if not</param>
         /// <param name="dictionary">The dictionary used to perform the Replace All action</param>
-        public SpellSuggestedAction(ITrackingSpan span, ISpellingSuggestion replaceWith,
+        public SpellSuggestedAction(ITrackingSpan span, ISpellingSuggestion replaceWith, bool escapeApostrophes,
           SpellingDictionary dictionary) : base(replaceWith.Suggestion.Replace("_", "__"), span)
         {
             this.replaceWith = replaceWith;
+            this.escapeApostrophes = escapeApostrophes;
             this.dictionary = dictionary;
 
             // The preview is used to remind users that they can hold Ctrl when selecting this suggestion to
@@ -70,10 +73,15 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         /// <inheritdoc />
         public override void Invoke(CancellationToken cancellationToken)
         {
+            var replacement = replaceWith;
+
+            if(escapeApostrophes)
+                replacement = new SpellingSuggestion(replacement.Culture, replacement.Suggestion.Replace("'", "''"));
+
             if(dictionary != null && Keyboard.Modifiers == ModifierKeys.Control)
-                dictionary.ReplaceAllOccurrences(this.Span.GetText(this.Span.TextBuffer.CurrentSnapshot), replaceWith);
+                dictionary.ReplaceAllOccurrences(this.Span.GetText(this.Span.TextBuffer.CurrentSnapshot), replacement);
             else
-                this.Span.TextBuffer.Replace(this.Span.GetSpan(this.Span.TextBuffer.CurrentSnapshot), replaceWith.Suggestion);
+                this.Span.TextBuffer.Replace(this.Span.GetSpan(this.Span.TextBuffer.CurrentSnapshot), replacement.Suggestion);
         }
         #endregion
     }

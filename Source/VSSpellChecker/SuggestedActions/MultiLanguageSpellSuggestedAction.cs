@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/07/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 08/02/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a suggested action for inserting multi-language spelling
@@ -43,10 +43,12 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         /// </summary>
         /// <param name="trackingSpan">The tracking span</param>
         /// <param name="replaceWith">The suggestion to replace the misspelled word</param>
+        /// <param name="escapeApostrophes">True to escape apostrophes in the suggestion, false if not</param>
         /// <param name="cultures">The cultures from which the suggested word was chosen</param>
         /// <param name="dictionary">The dictionary used to perform the Replace All action</param>
         public MultiLanguageSpellSuggestedAction(ITrackingSpan trackingSpan, ISpellingSuggestion replaceWith,
-          IEnumerable<CultureInfo> cultures, SpellingDictionary dictionary) : base(trackingSpan, replaceWith, dictionary)
+          bool escapeApostrophes, IEnumerable<CultureInfo> cultures, SpellingDictionary dictionary) :
+          base(trackingSpan, replaceWith, escapeApostrophes, dictionary)
         {
             this.DisplayTextSuffix = String.Join(" | ", cultures.Select(c => c.Name));
         }

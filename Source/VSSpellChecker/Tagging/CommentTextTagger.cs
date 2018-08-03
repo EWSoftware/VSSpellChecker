@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/18/2017
-// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
+// Updated : 08/02/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for source code files of any type
@@ -182,6 +182,16 @@ namespace VisualStudio.SpellChecker.Tagging
                     // Do some conversion to make things simpler below
                     switch(name)
                     {
+                        case "sql string":
+                            // Skip the leading Unicode indicator if present
+                            var span = classificationSpan.Span;
+
+                            if(span.Length > 2 && span.GetText()[0] == 'N')
+                                span = new SnapshotSpan(span.Snapshot, span.Start + 1, span.Length - 1);
+
+                            yield return new TagSpan<NaturalTextTag>(span, new NaturalTextTag());
+                            continue;
+
                         case "vb xml doc attribute":
                             name = "attribute value";
                             break;

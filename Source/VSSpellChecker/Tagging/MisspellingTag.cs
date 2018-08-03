@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MisspellingTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/25/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 08/02/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that represents a misspelling tag
@@ -68,6 +68,13 @@ namespace VisualStudio.SpellChecker.Tagging
         {
             get { return this.Span.GetText(this.Span.TextBuffer.CurrentSnapshot); }
         }
+
+        /// <summary>
+        /// This is used to indicate whether or not to escape apostrophes when replacing words
+        /// </summary>
+        /// <remarks>This will be true for language types such as SQL, false for all others</remarks>
+        public bool EscapeApostrophes { get; set; }
+
         #endregion
 
         #region Constructors

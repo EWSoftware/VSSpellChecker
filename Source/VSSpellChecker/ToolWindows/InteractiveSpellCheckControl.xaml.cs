@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 09/05/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 08/02/2018
+// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -225,8 +225,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     if(suggestion != null)
                     {
+                        string replaceWith = suggestion.Suggestion;
+
+                        if(currentIssue.EscapeApostrophes)
+                            replaceWith = replaceWith.Replace("'", "''");
+
                         span = currentIssue.Span;
-                        span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), suggestion.Suggestion);
+                        span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), replaceWith);
                     }
                 }
                 else
@@ -252,7 +257,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 var suggestion = ucSpellCheck.SelectedSuggestion;
 
                 if(suggestion != null)
-                    currentTagger.Dictionary.ReplaceAllOccurrences(currentIssue.Word, suggestion);
+                {
+                    var replacement = suggestion;
+
+                    if(currentIssue.EscapeApostrophes)
+                        replacement = new SpellingSuggestion(replacement.Culture, replacement.Suggestion.Replace("'", "''"));
+
+                    currentTagger.Dictionary.ReplaceAllOccurrences(currentIssue.Word, replacement);
+                }
             }
         }
 

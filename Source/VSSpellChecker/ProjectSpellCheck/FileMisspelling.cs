@@ -68,6 +68,12 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public string Word { get; private set; }
 
         /// <summary>
+        /// This is used to indicate whether or not to escape apostrophes when replacing words
+        /// </summary>
+        /// <remarks>This will be true for language types such as SQL, false for all others</remarks>
+        public bool EscapeApostrophes { get; set; }
+
+        /// <summary>
         /// This is used to get or set the spelling dictionary for the issue
         /// </summary>
         /// <remarks>Suggestions on normal misspelled words are deferred until the issue is selected for
