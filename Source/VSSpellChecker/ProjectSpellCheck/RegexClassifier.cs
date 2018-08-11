@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/07/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 08/09/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify text file content using a set of regular expressions
@@ -234,11 +234,12 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         bool concatSeen = false;
 
                         while(pos < end && (this.Text[pos] == '+' || this.Text[pos] == '&' ||
-                          this.Text[pos] == '@' || this.Text[pos] == '$' ||
+                          this.Text[pos] == '@' || this.Text[pos] == '$' || this.Text[pos] == 'R' ||
                           this.Text[pos] == '_' || Char.IsWhiteSpace(this.Text[pos])))
                         {
-                            if((this.Text[pos] == '@' || this.Text[pos] == '$') && (pos + 1 >= end ||
-                              (this.Text[pos + 1] != '\"' && this.Text[pos + 1] != '@' && this.Text[pos + 1] != '$')))
+                            if((this.Text[pos] == '@' || this.Text[pos] == '$' || this.Text[pos] == 'R') &&
+                              (pos + 1 >= end || (this.Text[pos + 1] != '\"' && this.Text[pos + 1] != '@' &&
+                              this.Text[pos + 1] != '$')))
                             {
                                 break;
                             }

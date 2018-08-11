@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/02/2018
+// Updated : 08/11/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -278,7 +278,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
                     // As long as the attribute value appears on the same line as the attribute name, we can
                     // spell check attribute values if wanted.
-                    if(name == "xml attribute" || name == "xaml attribute" || name.Contains("attribute name"))
+                    if(name.EndsWith(" attribute", StringComparison.Ordinal) || name.Contains("attribute name"))
                     {
                         // XAML attribute names may include leading and trailing white space
                         attributeName = classificationSpan.Span.GetText().Trim();

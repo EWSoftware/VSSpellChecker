@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/29/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 08/09/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify source code file content using a set of regular expressions
@@ -147,7 +147,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 switch(span.Classification)
                 {
                     case RangeClassification.NormalStringLiteral:
-                        if(span.Text[0] == '@')
+                        if(span.Text[0] == '@' || span.Text[0] == 'R')
                             span.Classification = RangeClassification.VerbatimStringLiteral;
                         else
                             if(span.Text[0] == '$')

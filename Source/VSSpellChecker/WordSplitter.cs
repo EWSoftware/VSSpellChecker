@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/31/2017
-// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
+// Updated : 08/09/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that handles splitting spans of text up into individual words for spell checking
@@ -186,6 +186,10 @@ namespace VisualStudio.SpellChecker
                                 if(!this.IsCStyleCode)
                                     continue;
 
+                                // If it looks like an verbatim string, skip it too
+                                if((text.Length > 2 && (text[0] == '@' || text[0] == 'R') && text[1] == '"') ||
+                                  (text.Length > 3 && text[0] == '$' && text[1] == '@' && text[2] == '"'))
+                                    continue;
                                 break;
                         }
 
@@ -275,9 +279,11 @@ namespace VisualStudio.SpellChecker
                 {
                     end = i + 1;
 
-                    if(i > 0 && text.Length > 2 && text[0] == '$' && text[1] == '"')
+                    if(i > 0 && ((text.Length > 2 && text[0] == '$' && text[1] == '"') ||
+                      (text.Length > 3 && text[0] == '$' && text[1] == '@' && text[2] == '"')))
                     {
-                        // C# 6 string format: $"{Property}".  Find the end accounting for escaped braces
+                        // Interpolated string: $"{Property}" or $@"\{Property}\".  Find the end accounting for
+                        // escaped braces.
                         while(++end < text.Length)
                             if(text[end] == '}')
                             {
@@ -451,11 +457,12 @@ namespace VisualStudio.SpellChecker
                     bool concatSeen = false;
 
                     while(spanEnd < text.Length && (text[spanEnd] == '+' || text[spanEnd] == '&' ||
-                      text[spanEnd] == '@' || text[spanEnd] == '$' ||
+                      text[spanEnd] == '@' || text[spanEnd] == '$' || text[spanEnd] == 'R' ||
                       text[spanEnd] == '_' || Char.IsWhiteSpace(text[spanEnd])))
                     {
-                        if((text[spanEnd] == '@' || text[spanEnd] == '$') && (spanEnd + 1 >= text.Length ||
-                          (text[spanEnd + 1] != '\"' && text[spanEnd + 1] != '@' && text[spanEnd + 1] != '$')))
+                        if((text[spanEnd] == '@' || text[spanEnd] == '$' || text[spanEnd] == 'R') &&
+                          (spanEnd + 1 >= text.Length || (text[spanEnd + 1] != '\"' && text[spanEnd + 1] != '@' &&
+                          text[spanEnd + 1] != '$')))
                         {
                             break;
                         }

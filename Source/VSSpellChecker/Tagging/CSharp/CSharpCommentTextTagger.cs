@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 12/07/2017
-// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 08/09/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for C# code
@@ -288,7 +288,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         break;
 
                     case State.MultiLineString:
-                        ScanMultiLineString(p);
+                        ScanMultiLineString(p, false);
                         break;
 
                     case State.DocComment:
@@ -373,11 +373,11 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         ScanMultiLineDocComment(p);
                     }
                 }
-                else if(p.Char() == '@' && p.NextChar() == '"') // Verbatim string
+                else if((p.Char() == '@' || p.Char() == 'R') && p.NextChar() == '"') // Verbatim/raw string
                 {
-                    p.Advance(2);
+                    // Keep the leading text so that we can handle escape sequences properly
                     p.State = State.MultiLineString;
-                    ScanMultiLineString(p);
+                    ScanMultiLineString(p, true);
                 }
                 else if(p.Char() == '"') // Single-line string
                 {
@@ -385,7 +385,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     p.State = State.String;
                     ScanString(p, false);
                 }
-                else if(p.Char() == '$' && p.NextChar() == '"') // Interpolated string
+                else if((p.Char() == '$' && p.NextChar() == '"') ||
+                  (p.Char() == '$' && p.NextChar() == '@' && p.NextNextChar() == '"')) // Interpolated or interpolated verbatim string
                 {
                     // Keep the leading text so that we can handle the format specifiers properly
                     p.State = State.String;
@@ -594,12 +595,17 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             Debug.Assert(p.State == State.MultiLineDocComment);
         }
 
-        private void ScanMultiLineString(LineProgress p)
+        private void ScanMultiLineString(LineProgress p, bool isVerbatimString)
         {
             bool markText = !this.IgnoreVerbatimStrings;
 
             if(markText)
                 p.StartNaturalText();
+
+            // For verbatim strings, skip the leading format identifier.  We keep it so that we can skip escape
+            // sequence checking in it.
+            if(isVerbatimString)
+                p.Advance(2);
 
             while(!p.EndOfLine)
             {
@@ -638,7 +644,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             // For interpolated strings, skip the leading format identifier.  We keep it so that we can skip the
             // properties in it.
             if(isInterpolatedString)
-                p.Advance(2);
+                p.Advance((p.NextChar() == '@') ? 3 : 2);
 
             while(!p.EndOfLine)
             {
