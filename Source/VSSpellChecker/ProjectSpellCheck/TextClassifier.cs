@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/25/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 08/11/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains an abstract base class used to implement text classification for the content of various
@@ -117,10 +117,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Filename = filename;
             this.SpellCheckConfiguration = spellCheckConfiguration;
 
-            using(StreamReader sr = new StreamReader(filename, Encoding.Default, true))
-            {
-                this.SetText(sr.ReadToEnd());
-            }
+            if(!File.Exists(filename))
+                this.SetText(String.Empty);
+            else
+                using(StreamReader sr = new StreamReader(filename, Encoding.Default, true))
+                {
+                    this.SetText(sr.ReadToEnd());
+                }
         }
         #endregion
 
@@ -139,9 +142,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             this.Text = text;
 
-            lineOffsets = new List<int>(length / 10 + 1);
-
-            lineOffsets.Add(0);
+            lineOffsets = new List<int>(length / 10 + 1) { 0 };
 
             for(int i = 0; i < length; i++)
                 switch(text[i])

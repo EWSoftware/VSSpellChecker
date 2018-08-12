@@ -569,9 +569,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             // If null, the file type is ignored
                             if(classifier != null)
                             {
-                                wordSplitter.Mnemonic = ClassifierFactory.GetMnemonic(file.Filename);
-                                wordSplitter.IsCStyleCode = ClassifierFactory.IsCStyleCode(file.Filename);
-                                unescapeApostrophes = ClassifierFactory.EscapesApostrophes(file.Filename);
+                                wordSplitter.Mnemonic = ClassifierFactory.GetMnemonic(file.CanonicalName);
+                                wordSplitter.IsCStyleCode = ClassifierFactory.IsCStyleCode(file.CanonicalName);
+                                unescapeApostrophes = ClassifierFactory.EscapesApostrophes(file.CanonicalName);
 
                                 // If open in an editor, use the current text from it if possible
                                 if(openDocuments.Contains(file.CanonicalName))
