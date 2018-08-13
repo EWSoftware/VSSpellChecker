@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2018
+// Updated : 08/12/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -486,11 +486,22 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         if(rdt.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_ReadLock, filename, out hierarchy,
                           out itemid, out docDataUnk, out lockCookie) == VSConstants.S_OK)
                         {
-                            var textLines = Marshal.GetUniqueObjectForIUnknown(docDataUnk) as IVsTextLines;
+                            object docDataObj = Marshal.GetObjectForIUnknown(docDataUnk);
+                            IVsTextLines buffer = null;
 
-                            if(textLines == null || textLines.GetLastLineIndex(out endLine,
-                              out endIndex) != VSConstants.S_OK || textLines.GetLineText(0, 0, endLine, endIndex,
-                              out text) != VSConstants.S_OK)
+                            if(docDataObj is IVsTextLines)
+                                buffer = (IVsTextLines)docDataObj;
+                            else
+                                if(docDataObj is IVsTextBufferProvider)
+                                {
+                                    IVsTextBufferProvider tp = (IVsTextBufferProvider)docDataObj;
+
+                                    if(tp.GetTextBuffer(out buffer) != VSConstants.S_OK)
+                                        buffer = null;
+                                }
+
+                            if(buffer == null || buffer.GetLastLineIndex(out endLine, out endIndex) != VSConstants.S_OK ||
+                              buffer.GetLineText(0, 0, endLine, endIndex, out text) != VSConstants.S_OK)
                             {
                                 text = null;
                             }
@@ -1634,12 +1645,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             if(issues.Count != 0)
             {
-                SaveFileDialog dlg = new SaveFileDialog();
-
-                dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                dlg.FileName = "SpellingIssues.csv";
-                dlg.DefaultExt = ".csv";
-                dlg.Filter = "Spelling Issues Files (*.csv)|*.csv|All Files (*.*)|*.*";
+                SaveFileDialog dlg = new SaveFileDialog
+                {
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    FileName = "SpellingIssues.csv",
+                    DefaultExt = ".csv",
+                    Filter = "Spelling Issues Files (*.csv)|*.csv|All Files (*.*)|*.*"
+                };
 
                 if((dlg.ShowDialog() ?? false))
                 {
