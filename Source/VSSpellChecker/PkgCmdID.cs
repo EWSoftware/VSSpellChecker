@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PkgCmdID.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/23/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 08/12/2018
+// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains various command IDs for the package
@@ -34,6 +34,14 @@ namespace VisualStudio.SpellChecker
         /// Open the interactive spell checker tool window
         /// </summary>
         public const uint SpellCheckInteractive = 0x0007;
+        /// <summary>
+        /// Move to the next spelling issue in the current document
+        /// </summary>
+        public const uint SpellCheckNextIssue = 0x0015;
+        /// <summary>
+        /// Move to the prior spelling issue in the current document
+        /// </summary>
+        public const uint SpellCheckPriorIssue = 0x0016;
         /// <summary>
         /// Add a spell checker configuration file to the solution/project based for the file item selected in
         /// the Solution Explorer.

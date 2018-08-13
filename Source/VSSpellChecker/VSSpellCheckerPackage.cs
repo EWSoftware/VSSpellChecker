@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/10/2016
-// Note    : Copyright 2013-2016, Eric Woodruff, All rights reserved
+// Updated : 08/12/2018
+// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
@@ -29,10 +29,13 @@ using System.Runtime.InteropServices;
 
 using EnvDTE;
 using EnvDTE80;
-
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Outlining;
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Editors;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
@@ -148,6 +151,14 @@ namespace VisualStudio.SpellChecker
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckInteractive);
                 menuItem = new OleMenuCommand(SpellCheckInteractiveExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckNextIssue);
+                menuItem = new OleMenuCommand(SpellCheckNextPriorIssueExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckPriorIssue);
+                menuItem = new OleMenuCommand(SpellCheckNextPriorIssueExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
@@ -268,6 +279,111 @@ namespace VisualStudio.SpellChecker
 
             var windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+        }
+
+        /// <summary>
+        /// Move to the next/prior spelling issue within the current document
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void SpellCheckNextPriorIssueExecuteHandler(object sender, EventArgs e)
+        {
+            var command = sender as OleMenuCommand;
+
+            if(command == null)
+                return;
+
+            IWpfTextView wpfTextView = null;
+            object value;
+
+            IVsMonitorSelection ms = (IVsMonitorSelection)GetService(typeof(SVsShellMonitorSelection));
+            ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out value);
+
+            IVsWindowFrame frame = value as IVsWindowFrame;
+
+            if(frame != null && frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK &&
+              ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))
+            {
+                var textView = VsShellUtilities.GetTextView(frame);
+
+                if(textView != null)
+                {
+                    var componentModel = Utility.GetServiceFromPackage<IComponentModel, SComponentModel>(true);
+
+                    if(componentModel != null)
+                    {
+                        var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+
+                        if(editorAdapterFactoryService != null)
+                            try
+                            {
+                                wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
+                                SpellingTagger tagger;
+
+                                if(wpfTextView.Properties.TryGetProperty(typeof(SpellingTagger), out tagger) &&
+                                  tagger.CurrentMisspellings.Any())
+                                {
+                                    var caretPoint = wpfTextView.Caret.Position.BufferPosition;
+                                    var allIssues = tagger.CurrentMisspellings.OrderBy(
+                                        i => i.Span.GetSpan(i.Span.TextBuffer.CurrentSnapshot).Start.Position).ToList();
+                                    var issue = allIssues.FirstOrDefault(i => i.Span.GetSpan(
+                                        i.Span.TextBuffer.CurrentSnapshot).Contains(caretPoint));
+                                    int offset = (command.CommandID.ID == PkgCmdIDList.SpellCheckNextIssue) ? 1 : -1;
+
+                                    if(issue == null)
+                                    {
+                                        issue = allIssues.FirstOrDefault(i => i.Span.GetSpan(
+                                            i.Span.TextBuffer.CurrentSnapshot).Start.Position > caretPoint.Position);
+
+                                        if(issue == null)
+                                        {
+                                            issue = tagger.CurrentMisspellings.Last();
+                                            offset = (command.CommandID.ID == PkgCmdIDList.SpellCheckNextIssue) ? 1 : 0;
+                                        }
+                                        else
+                                            offset = (command.CommandID.ID == PkgCmdIDList.SpellCheckNextIssue) ? 0 : -1;
+                                    }
+
+                                    if(issue != null)
+                                    {
+                                        int idx = allIssues.IndexOf(issue) + offset;
+
+                                        if(idx < 0)
+                                            idx = allIssues.Count - 1;
+                                        else
+                                            if(idx >= allIssues.Count)
+                                                idx = 0;
+
+                                        issue = allIssues[idx];
+
+                                        var span = issue.Span.GetSpan(issue.Span.TextBuffer.CurrentSnapshot);
+
+                                        // If in a collapsed region, expand the region
+                                        var outliningManagerService = componentModel.GetService<IOutliningManagerService>();
+
+                                        if(outliningManagerService != null)
+                                        {
+                                            var outliningManager = outliningManagerService.GetOutliningManager(wpfTextView);
+
+                                            if(outliningManager != null)
+                                                foreach(var region in outliningManager.GetCollapsedRegions(span, false))
+                                                    if(region.IsCollapsed)
+                                                        outliningManager.Expand(region);
+                                        }
+
+                                        wpfTextView.Caret.MoveTo(span.Start);
+                                        wpfTextView.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.AlwaysCenter);
+                                        wpfTextView.Selection.Select(span, false);
+                                    }
+                                }
+                            }
+                            catch(ArgumentException)
+                            {
+                                // Not an IWpfTextView so ignore it
+                            }
+                    }
+                }
+            }
         }
 
         /// <summary>
