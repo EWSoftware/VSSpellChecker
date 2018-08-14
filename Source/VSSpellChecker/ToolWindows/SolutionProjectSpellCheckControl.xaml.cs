@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/12/2018
+// Updated : 08/13/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -45,6 +45,8 @@ using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -460,17 +462,16 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="filename">The filename of the document for which to get the content</param>
         /// <returns>The document content if the file is still open or null if it could not be found</returns>
         /// <remarks>This runs on the UI thread as it has to access the running document table</remarks>
-        private static string GetDocumentText(string filename)
+        private static string GetDocumentText(string filename, out IEnumerable<Span> ignoredWordSpans)
         {
-            string documentText;
-
             // Switch to the UI thread to get the document text.  This looks rather odd but it's the recommended
             // way to switch contexts in Visual Studio now.  Since we aren't asynchronous here, this runs an
             // asynchronous delegate and waits for it to finish.
-            documentText = ThreadHelper.JoinableTaskFactory.Run<string>(async delegate
+            var result = ThreadHelper.JoinableTaskFactory.Run<Tuple<string, IEnumerable<Span>>>(async delegate
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
+                IEnumerable<Span> ignoredSpans = Enumerable.Empty<Span>();
                 IVsHierarchy hierarchy;
                 uint itemid, lockCookie = 0;
                 int endLine, endIndex;
@@ -505,6 +506,52 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             {
                                 text = null;
                             }
+                            else
+                            {
+                                // Ignore Once spans are stored in the tagger.  To get to it, we need to get the
+                                // window frame.  From there, we can get the view, then the editor adapter, and
+                                // then the tagger.
+                                IVsUIHierarchy docHierarchy;
+                                IVsWindowFrame frame;
+                                Guid logicalView = VSConstants.LOGVIEWID_Primary;
+                                uint[] id = new uint[1] { itemid };
+                                int pfOpen;
+                                object value;
+
+                                var shellOpenDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, IVsUIShellOpenDocument>(false);
+
+                                if(shellOpenDoc.IsDocumentOpen((IVsUIHierarchy)hierarchy, id[0], filename,
+                                  ref logicalView, 0, out docHierarchy, id, out frame, out pfOpen) == VSConstants.S_OK &&
+                                  frame != null && frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK &&
+                                  ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))
+                                {
+                                    var textView = VsShellUtilities.GetTextView(frame);
+
+                                    if(textView != null)
+                                    {
+                                        var componentModel = Utility.GetServiceFromPackage<IComponentModel, SComponentModel>(true);
+
+                                        if(componentModel != null)
+                                        {
+                                            var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
+
+                                            if(editorAdapterFactoryService != null)
+                                                try
+                                                {
+                                                    var wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
+                                                    SpellingTagger tagger;
+
+                                                    if(wpfTextView.Properties.TryGetProperty(typeof(SpellingTagger), out tagger))
+                                                        ignoredSpans = tagger.IgnoredOnceSpans;
+                                                }
+                                                catch(ArgumentException)
+                                                {
+                                                    // Not an IWpfTextView so ignore it
+                                                }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     finally
@@ -517,10 +564,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
                 }
 
-                return text;
+                return Tuple.Create<string, IEnumerable<Span>>(text, ignoredSpans);
             });
 
-            return documentText;
+            ignoredWordSpans = result.Item2;
+            return result.Item1;
         }
         #endregion
 
@@ -544,6 +592,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             TextClassifier classifier;
             List<string> cadFiles;
             string documentText;
+            IEnumerable<Span> ignoredWordSpans = null;
 
             try
             {
@@ -587,11 +636,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 // If open in an editor, use the current text from it if possible
                                 if(openDocuments.Contains(file.CanonicalName))
                                 {
-                                    documentText = GetDocumentText(file.CanonicalName);
+                                    documentText = GetDocumentText(file.CanonicalName, out ignoredWordSpans);
 
                                     if(documentText != null)
                                         classifier.SetText(documentText);
                                 }
+                                else
+                                    ignoredWordSpans = null;
 
                                 // Switch to the UI thread to update the progress and then switch back to this
                                 // one.  This runs the asynchronous delegate and waits for it to finish.
@@ -604,6 +655,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                                 foreach(var issue in this.GetMisspellingsInSpans(dictionary, classifier.Parse()))
                                 {
+                                    // Skip Ignore Once words from the editor
+                                    if(ignoredWordSpans != null && ignoredWordSpans.Any(s => s.IntersectsWith(issue.Span)))
+                                        continue;
+
                                     issue.FileInfo = file;
                                     issue.Dictionary = dictionary;
                                     issue.LineNumber = classifier.GetLineNumber(issue.Span.Start);

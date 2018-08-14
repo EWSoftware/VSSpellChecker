@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/02/2018
+// Updated : 08/13/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -142,6 +142,22 @@ namespace VisualStudio.SpellChecker
         public SpellingDictionary Dictionary
         {
             get { return _dictionary; }
+        }
+
+        /// <summary>
+        /// This is used to get an enumerable list of ignore once word spans
+        /// </summary>
+        public IEnumerable<Span> IgnoredOnceSpans
+        {
+            get
+            {
+                List<Span> spans = new List<Span>();
+
+                foreach(var w in wordsIgnoredOnce)
+                    spans.Add(w.Span.GetSpan(w.Span.TextBuffer.CurrentSnapshot));
+
+                return spans;
+            }
         }
         #endregion
 
@@ -362,10 +378,7 @@ namespace VisualStudio.SpellChecker
         {
             if(!_isClosed)
             {
-                var newIgnoredWords = new List<IgnoredWord>(wordsIgnoredOnce);
-
-                newIgnoredWords.Add(new IgnoredWord(e.Span));
-
+                var newIgnoredWords = new List<IgnoredWord>(wordsIgnoredOnce) { new IgnoredWord(e.Span) };
                 var currentMisspellings = _misspellings;
 
                 // Raise the TagsChanged event to get rid of the tags on the ignored word
