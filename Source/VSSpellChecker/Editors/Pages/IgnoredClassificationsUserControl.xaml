@@ -1,0 +1,140 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.Editors.Pages.IgnoredClassificationsUserControl"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	mc:Ignorable="d" d:DesignHeight="375" d:DesignWidth="500"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+		<TextBlock TextWrapping="Wrap" Margin="3" Grid.Row="0">This category lets you exclude specific
+classifications of text from being spell checked by content/file type.  This is more generic than the C#/C-Style
+language category options and can be applied to any language or file type for which Visual Studio can classify
+text.  See the help topic for this page for more information.</TextBlock>
+		<CheckBox Name="chkInheritIgnoredClassifications" Grid.Row="1" Margin="3" Checked="Property_Changed"
+			Unchecked="Property_Changed">
+			<TextBlock TextWrapping="Wrap">
+				Inherit ignored classifications.  Any classifications below will be added to the inherited ignored
+classifications.
+			</TextBlock>
+		</CheckBox>
+		<TabControl Grid.Row="2" Margin="3">
+			<TabItem Header="Visual Studio Classifications">
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition />
+					</Grid.RowDefinitions>
+					<TextBlock TextWrapping="Wrap" Margin="3" Grid.Row="0">For this option, you will need to open some
+files with the content you are trying to exclude so that the spell checker can determine the classifications to
+show below.  Wait a few seconds after opening the files to allow it to gather the necessary information, return
+here, and click the Refresh Content Types button to see the updated content types and classifications.</TextBlock>
+					<Grid Grid.Row="1">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+						<Grid Grid.Column="0">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition Height="Auto" />
+							</Grid.RowDefinitions>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="Auto"/>
+							</Grid.ColumnDefinitions>
+							<Label Margin="3" Content="_Content Type" Grid.Row="0" Grid.Column="0" />
+							<ComboBox Name="cboContentType" MinWidth="150" Margin="3" Grid.Row="0" Grid.Column="1"
+								SelectionChanged="cboContentType_SelectionChanged" />
+							<Button Name="btnRefresh" Content="_Refresh Content Types" Margin="3" Padding="10,3"
+								Grid.Row="1" Grid.Column="1" MinWidth="150" Click="btnRefresh_Click" HorizontalAlignment="Left"
+								ToolTip="Refresh the available content types" />
+						</Grid>
+						<Grid Grid.Column="1">
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto" />
+								<RowDefinition />
+							</Grid.RowDefinitions>
+							<Label Grid.Row="0" Content="Se_lect the classifications to ignore" Margin="3,0" />
+							<ListBox Grid.Row="1" Name="lbClassifications" Margin="3,0" MinHeight="100" MaxHeight="500"
+								VerticalAlignment="Top">
+								<ListBox.ItemTemplate>
+									<HierarchicalDataTemplate>
+										<CheckBox IsChecked="{Binding IsSelected}">
+											<TextBlock Text="{Binding Classification}" />
+										</CheckBox>
+									</HierarchicalDataTemplate>
+								</ListBox.ItemTemplate>
+							</ListBox>
+						</Grid>
+					</Grid>
+				</Grid>
+			</TabItem>
+			<TabItem Header="Solution/Project Spell Check Classifications">
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+						<RowDefinition />
+					</Grid.RowDefinitions>
+					<TextBlock TextWrapping="Wrap" Margin="3" Grid.Row="0">For this option, you can exclude classifications
+by file type or by extension when performing solution/project spell checking.  Extension settings will override
+their corresponding file type settings if both are present.  Note that not all classifiers use the full set of
+classifications.</TextBlock>
+					<Grid Grid.Row="1">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+						<Label Margin="3" Content="_File Type" Grid.Column="0" />
+						<ComboBox Name="cboFileType" MinWidth="100" Margin="3" Grid.Column="1"
+							SelectionChanged="cboFileType_SelectionChanged" />
+						<Label Margin="3" Content="_Extension" Grid.Column="2" />
+						<ComboBox Name="cboExtension" MinWidth="100" Margin="3"  Grid.Column="3" />
+						<Button Name="btnAddExclusion" Content="_Add" Margin="3" Padding="10,3" Grid.Column="4"
+								ToolTip="Add a file type/extension exclusion" Grid.Row="2" Click="btnAddExclusion_Click" />
+					</Grid>
+					<Grid Grid.Row="2">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition />
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+						<Label Grid.Row="0" Grid.Column="0" Content="Select the f_ile type/extension to modify" Margin="3,0" />
+						<ListBox Grid.Row="1" Grid.Column="0" Name="lbFileTypeExt" Margin="3,0" MinHeight="100"
+							MaxHeight="500" VerticalAlignment="Top" SelectionChanged="lbFileTypeExt_SelectionChanged" />
+						<Label Grid.Row="0" Grid.Column="1" Content="Select the c_lassifications to ignore" Margin="3,0" />
+						<ListBox Grid.Row="1" Grid.Column="1" Name="lbExtClassifications" Margin="3,0" MinHeight="100"
+							MaxHeight="500" VerticalAlignment="Top">
+							<ListBox.ItemTemplate>
+								<HierarchicalDataTemplate>
+									<CheckBox IsChecked="{Binding IsSelected}">
+										<TextBlock Text="{Binding Classification}" />
+									</CheckBox>
+								</HierarchicalDataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</Grid>
+				</Grid>
+			</TabItem>
+		</TabControl>
+	</Grid>
+</UserControl>

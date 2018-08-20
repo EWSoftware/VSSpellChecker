@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 07/28/2017
-// Note    : Copyright 2016-2017, Eric Woodruff, All rights reserved
+// Updated : 08/17/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for markdown files when the Markdown Editor extension by Mads
@@ -17,11 +17,13 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 07/26/2016  EFW  Created the code
+// 08/17/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -37,7 +39,9 @@ namespace VisualStudio.SpellChecker.Tagging
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer buffer;
+        private readonly ITextBuffer buffer;
+        private readonly IEnumerable<string> ignoredClassifications;
+        private readonly ClassificationCache classificationCache;
         private IClassifier classifier;
 
         #endregion
@@ -50,10 +54,15 @@ namespace VisualStudio.SpellChecker.Tagging
         /// </summary>
         /// <param name="buffer">The text buffer</param>
         /// <param name="classifier">The classifier</param>
-        public MarkdownTextTagger(ITextBuffer buffer, IClassifier classifier)
+        /// <param name="ignoredClassifications">An optional enumerable list of ignored classifications for
+        /// the buffer's content type</param>
+        public MarkdownTextTagger(ITextBuffer buffer, IClassifier classifier, IEnumerable<string> ignoredClassifications)
         {
+            classificationCache = ClassificationCache.CacheFor(buffer.ContentType.TypeName);
+
             this.buffer = buffer;
             this.classifier = classifier;
+            this.ignoredClassifications = (ignoredClassifications ?? Enumerable.Empty<string>());
 
             this.classifier.ClassificationChanged += ClassificationChanged;
         }
@@ -91,7 +100,10 @@ namespace VisualStudio.SpellChecker.Tagging
                         case "natural language":
                             // Note that "md_html" can contain a mix of HTML elements and text.  The tagger will
                             // do its best to ignore the HTML elements and their attributes and pick out the text.
-                            yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
+                            classificationCache.Add(name);
+
+                            if(!ignoredClassifications.Contains(name))
+                                yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
                             break;
 
                         case "md_italic":
@@ -112,8 +124,13 @@ namespace VisualStudio.SpellChecker.Tagging
                             end++;
 
                             if(end - start > 1)
-                                yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
-                                    classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
+                            {
+                                classificationCache.Add(name);
+
+                                if(!ignoredClassifications.Contains(name))
+                                    yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
+                                        classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
+                            }
                             break;
 
                         case "keyword":
@@ -125,8 +142,13 @@ namespace VisualStudio.SpellChecker.Tagging
                             end = text.IndexOf(']');
 
                             if(start != -1 && end != -1 && end > start)
-                                yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
-                                    classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
+                            {
+                                classificationCache.Add(name);
+
+                                if(!ignoredClassifications.Contains(name))
+                                    yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
+                                        classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
+                            }
 
                             start = text.IndexOf('"');
                             end = text.IndexOf('"', start + 1);
@@ -138,8 +160,13 @@ namespace VisualStudio.SpellChecker.Tagging
                             }
 
                             if(start != -1 && end != -1 && end > start)
-                                yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
-                                    classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
+                            {
+                                classificationCache.Add(name);
+
+                                if(!ignoredClassifications.Contains(name))
+                                    yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
+                                        classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
+                            }
                             break;
 
                         default:

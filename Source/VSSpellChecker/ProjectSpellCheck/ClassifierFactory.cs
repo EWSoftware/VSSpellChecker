@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/24/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 08/18/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
@@ -66,8 +67,60 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         #endregion
 
+        #region Properties
+        //=====================================================================
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of classifier IDs
+        /// </summary>
+        public static IEnumerable<string> ClassifierIds
+        {
+            get
+            {
+                if(extensionMap == null)
+                    LoadClassifierConfiguration();
+
+                return definitions.Keys.OrderBy(k => k);
+            }
+        }
+        #endregion
+
         #region Helper methods
         //=====================================================================
+
+        /// <summary>
+        /// This is used to return an enumerable list of file extensions for the given classifier ID
+        /// </summary>
+        /// <param name="classifierId">The classifier ID for which to get file extensions</param>
+        /// <returns>An enumerable list of file extensions that use the given classifier ID</returns>
+        public static IEnumerable<string> ExtensionsFor(string classifierId)
+        {
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            return extensionMap.Where(kv => kv.Value == classifierId).Select(kv => kv.Key).OrderBy(v => v); ;
+        }
+
+        /// <summary>
+        /// This is used to get a classifier ID for the given filename extension
+        /// </summary>
+        /// <param name="extension">The filename for which to get a classifier ID</param>
+        /// <returns>The classifier ID for the given filename's extension</returns>
+        public static string ClassifierIdFor(string filename)
+        {
+            string id, extension = Path.GetExtension(filename);
+
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            if(!String.IsNullOrWhiteSpace(extension))
+                extension = extension.Substring(1);
+
+            if(!extensionMap.TryGetValue(extension, out id))
+                id = FileIsXml(filename) ? "XML" : "PlainText";
+
+            return id;
+        }
 
         /// <summary>
         /// This is used to determine if the file contains C-style code based on its extension
@@ -255,6 +308,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             try
             {
+                // If it doesn't exist, it won't matter as there won't be any content to classify
+                if(!File.Exists(filename))
+                    return false;
+
                 XDocument.Load(filename);
             }
             catch(Exception ex)

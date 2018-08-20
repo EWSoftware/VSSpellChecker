@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/12/2018
+// Updated : 08/18/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -81,7 +81,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             this.ParseNode(doc.DocumentNode, spans);
 
-            return spans;
+            return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
         }
         #endregion
 
@@ -105,8 +105,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 case HtmlNodeType.Comment:
                     var commentNode = (HtmlCommentNode)node;
 
-                    if(commentNode.OuterHtml.StartsWith("<!--", StringComparison.Ordinal) &&
-                      !this.SpellCheckConfiguration.IgnoreHtmlComments)
+                    // Only spell check actual comments.  Stuff like "<!DOCTYPE>" is also classified as a comment
+                    // by the node parser but we don't want to include them.
+                    if(commentNode.OuterHtml.StartsWith("<!--", StringComparison.Ordinal))
                     {
                         spans.Add(new SpellCheckSpan
                         {

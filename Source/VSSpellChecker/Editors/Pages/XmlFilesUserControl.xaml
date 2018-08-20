@@ -17,7 +17,6 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition />
-			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition />
@@ -71,15 +70,5 @@
 				</StackPanel>
 			</Grid>
 		</GroupBox>
-		<StackPanel Grid.ColumnSpan="2" Grid.Row="2">
-			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreXmlComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
-				<Label Margin="3" Content="Ignore comments in XML files" />
-			</StackPanel>
-			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreHtmlComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
-				<Label Margin="3" Content="Ignore comments in HTML files" />
-			</StackPanel>
-		</StackPanel>
 	</Grid>
 </UserControl>

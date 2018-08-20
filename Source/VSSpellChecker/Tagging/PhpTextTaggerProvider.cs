@@ -2,11 +2,11 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PhpTextTaggerProvider.cs
 // Authors : Miloslav Beňo (DevSense - http://www.devsense.com/)
-// Updated : 04/28/2016
-// Note    : Copyright 2016, DevSense, All rights reserved
+// Updated : 08/15/2018
+// Note    : Copyright 2016-2018, DevSense, All rights reserved
 // Compiler: Microsoft Visual C#
 //
-// This file contains a class used to provide tags for PHP files
+// This file contains a class used to provide tags for PHP files when PHP Tools for Visual Studio are installed
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -16,6 +16,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 04/14/2016  MB   Added support for PHP files in the editor
+// 08/17/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
 using System.ComponentModel.Composition;
@@ -31,20 +32,28 @@ namespace VisualStudio.SpellChecker.Tagging
     /// This class provides tags for PHP files when PHP Tools for Visual Studio are installed
     /// </summary>
     [Export(typeof(ITaggerProvider))]
-	[ContentType("Phalanger")] // Because of legacy reasons ContentType is Phalanger, not PHP
-	[TagType(typeof(NaturalTextTag))]
-	class PhpTextTaggerProvider : ITaggerProvider
-	{
-		[Import]
-		private IClassifierAggregatorService classifierAggregatorService = null;
+    [ContentType("Phalanger")] // Because of legacy reasons ContentType is Phalanger, not PHP
+    [TagType(typeof(NaturalTextTag))]
+    class PhpTextTaggerProvider : ITaggerProvider
+    {
+        [Import]
+        private IClassifierAggregatorService classifierAggregatorService = null;
 
-		/// <inheritdoc />
-		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
-		{
-			var classifier = classifierAggregatorService.GetClassifier(buffer);
+        [Import]
+        private SpellingServiceFactory spellingService = null;
 
-			// Use existing comment text tagger, it works well with PHP classifier
-			return new CommentTextTagger(buffer, classifier, null, null, false, false) as ITagger<T>;
-		}
-	}
+        /// <inheritdoc />
+        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+        {
+            var classifier = classifierAggregatorService.GetClassifier(buffer);
+            var config = spellingService.GetConfiguration(buffer);
+
+            // Use existing comment text tagger, it works well with PHP classifier
+            if(config == null)
+                return new CommentTextTagger(buffer, classifier, null, null, null) as ITagger<T>;
+
+            return new CommentTextTagger(buffer, classifier, null, null,
+                config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
+        }
+    }
 }

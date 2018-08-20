@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PlainTextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/28/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 08/18/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify plain text file content
@@ -19,6 +19,7 @@
 //===============================================================================================================
 
 using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 
@@ -45,6 +46,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <inheritdoc />
         public override IEnumerable<SpellCheckSpan> Parse()
         {
+            // This would be odd but it is possible to do
+            if(this.IgnoredClassifications.Contains(RangeClassification.PlainText))
+                return Enumerable.Empty<SpellCheckSpan>();
+
             return new[] {
                 new SpellCheckSpan
                 {

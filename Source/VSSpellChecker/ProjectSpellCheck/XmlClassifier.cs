@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/24/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 08/18/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify XML file content
@@ -165,19 +165,16 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                 break;
 
                             case XmlNodeType.Comment:
-                                if(!this.SpellCheckConfiguration.IgnoreXmlComments)
-                                {
-                                    // Apply adjustments to the comments if necessary
-                                    value = this.AdjustCommentText(reader.Value);
+                                // Apply adjustments to the comments if necessary
+                                value = this.AdjustCommentText(reader.Value);
 
-                                    spans.Add(new SpellCheckSpan
-                                    {
-                                        Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
-                                            value.Length),
-                                        Text = value,
-                                        Classification = RangeClassification.XmlFileComment
-                                    });
-                                }
+                                spans.Add(new SpellCheckSpan
+                                {
+                                    Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
+                                        value.Length),
+                                    Text = value,
+                                    Classification = RangeClassification.XmlFileComment
+                                });
                                 break;
 
                             case XmlNodeType.CDATA:
@@ -218,7 +215,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     System.Diagnostics.Debug.WriteLine(ex);
                 }
 
-                return spans;
+                return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
             }
         }
 

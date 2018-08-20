@@ -41,7 +41,7 @@
     <NamingMethod>Guid</NamingMethod>
     <HelpTitle>Visual Studio Spell Checker Documentation</HelpTitle>
     <FeedbackEMailAddress>Eric%40EWoodruff.us</FeedbackEMailAddress>
-    <CopyrightText>Copyright \xA9 2013-2017, Eric Woodruff, All rights reserved</CopyrightText>
+    <CopyrightText>Copyright \xA9 2013-2018, Eric Woodruff, All rights reserved</CopyrightText>
     <CopyrightHref>https://GitHub.com/EWSoftware/VSSpellChecker</CopyrightHref>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <NamespaceSummaries>
@@ -49,7 +49,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2017.12.29.0</HelpFileVersion>
+    <HelpFileVersion>2018.8.3.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -141,6 +141,7 @@
     <None Include="Content\ConfigOptions\ConfigOptions.aml" />
     <None Include="Content\ConfigOptions\CSharpOptions.aml" />
     <None Include="Content\ConfigOptions\DictionarySettings.aml" />
+    <None Include="Content\ConfigOptions\IgnoredClassifications.aml" />
     <None Include="Content\ConfigOptions\IgnoredFilePatterns.aml" />
     <None Include="Content\ConfigOptions\ExclusionExpressions.aml" />
     <None Include="Content\ConfigOptions\GeneralSettings.aml" />
@@ -153,6 +154,7 @@
     <None Include="Content\CustomDictionaries.aml" />
     <None Include="Content\Installation.aml" />
     <None Include="Content\KnownIssues.aml" />
+    <None Include="Content\ShortcutKeys.aml" />
     <None Include="Content\SolutionProjectSpellCheck.aml" />
     <None Include="Content\SpellCheckAsYouType.aml" />
     <None Include="Content\SpellCheckCurrentDoc.aml" />

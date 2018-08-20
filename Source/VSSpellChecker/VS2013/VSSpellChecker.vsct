@@ -58,6 +58,24 @@
 				</Strings>
 			</Button>
 
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0101">
+				<Strings>
+					<CommandName>cmdidSpellCheckNextIssue</CommandName>
+					<ButtonText>Move to Next Spelling Issue</ButtonText>
+					<MenuText>Move to Next Spelling Issue</MenuText>
+					<ToolTipText>Move to the next spelling issue in the current document</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
+				<Strings>
+					<CommandName>cmdidSpellCheckPriorIssue</CommandName>
+					<ButtonText>Move to Prior Spelling Issue</ButtonText>
+					<MenuText>Move to Prior Spelling Issue</MenuText>
+					<ToolTipText>Move to the prior spelling issue in the current document</ToolTipText>
+				</Strings>
+			</Button>
+
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckEntireSolution" priority="0x0100">
 				<Strings>
 					<CommandName>cmdidSpellCheckEntireSolution</CommandName>
@@ -144,6 +162,12 @@
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
 		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0101">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
+		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0102">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
 		</CommandPlacement>
@@ -210,6 +234,8 @@
 			<IDSymbol name="SpellCheckerActions" value="0x0008" />
 			<IDSymbol name="SpellCheckerConfiguration" value="0x0003" />
 			<IDSymbol name="SpellCheckInteractive" value="0x0007" />
+			<IDSymbol name="SpellCheckNextIssue" value="0x0015" />
+			<IDSymbol name="SpellCheckPriorIssue" value="0x0016" />
 			<IDSymbol name="SpellCheckerMenu" value="0x0002" />
 			<IDSymbol name="SpellCheckerSolution" value="0x0014" />
 			<IDSymbol name="AddSpellCheckerConfigForItem" value="0x0009" />

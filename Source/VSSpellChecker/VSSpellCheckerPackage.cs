@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/12/2018
+// Updated : 08/18/2018
 // Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -469,10 +469,20 @@ namespace VisualStudio.SpellChecker
 
                         if(existingItem != null)
                         {
-                            var window = existingItem.Open();
+                            try
+                            {
+                                var window = existingItem.Open();
 
-                            if(window != null)
-                                window.Activate();
+                                if(window != null)
+                                    window.Activate();
+                            }
+                            catch(Exception ex)
+                            {
+                                // Sometimes this isn't implemented for some reason.  The file does get added and
+                                // can be opened manually.
+                                if(ex.HResult != VSConstants.E_NOTIMPL)
+                                    throw;
+                            }
                         }
                     }
                 }
@@ -599,7 +609,25 @@ namespace VisualStudio.SpellChecker
               item.Project.Kind != EnvDTE.Constants.vsProjectKindMisc)
             {
                 // Looks like a project
-                Property fullPath = item.Project.Properties.Item("FullPath");
+                Property fullPath;
+
+                try
+                {
+                    fullPath = item.Project.Properties.Item("FullPath");
+                }
+                catch
+                {
+                    // C++ projects use a different property name and throw an exception above
+                    try
+                    {
+                        fullPath = item.Project.Properties.Item("ProjectFile");
+                    }
+                    catch
+                    {
+                        // If that fails, give up
+                        fullPath = null;
+                    }
+                }
 
                 if(fullPath != null && fullPath.Value != null)
                 {
@@ -635,7 +663,16 @@ namespace VisualStudio.SpellChecker
                     if(item.ProjectItem.Properties != null)
                     {
                         // Looks like a folder or file item
-                        Property fullPath = item.ProjectItem.Properties.Item("FullPath");
+                        Property fullPath;
+
+                        try
+                        {
+                            fullPath = item.ProjectItem.Properties.Item("FullPath");
+                        }
+                        catch
+                        {
+                            fullPath = null;
+                        }
 
                         if(fullPath != null && fullPath.Value != null)
                         {

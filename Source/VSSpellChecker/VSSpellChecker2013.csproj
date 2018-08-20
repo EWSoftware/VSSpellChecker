@@ -76,6 +76,9 @@
     <Compile Include="Editors\Pages\CodeAnalysisUserControl.xaml.cs">
       <DependentUpon>CodeAnalysisUserControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\Pages\IgnoredClassificationsUserControl.xaml.cs">
+      <DependentUpon>IgnoredClassificationsUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\Pages\IgnoredFilePatternsUserControl.xaml.cs">
       <DependentUpon>IgnoredFilePatternsUserControl.xaml</DependentUpon>
     </Compile>
@@ -131,6 +134,7 @@
     <Compile Include="SpellingEventArgs.cs" />
     <Compile Include="SpellingServiceProxy.cs" />
     <Compile Include="SpellingSuggestion.cs" />
+    <Compile Include="Tagging\ClassificationCache.cs" />
     <Compile Include="Tagging\MarkdownTextTagger.cs" />
     <Compile Include="Tagging\PhpTextTaggerProvider.cs" />
     <Compile Include="Tagging\RMarkdownTextTagger.cs" />
@@ -524,6 +528,10 @@
   </Choose>
   <ItemGroup>
     <Page Include="Editors\Pages\CodeAnalysisUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Editors\Pages\IgnoredClassificationsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

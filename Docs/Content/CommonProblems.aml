@@ -118,13 +118,13 @@ included in a future release.</para>
 		<section address="HtmlContent">
 			<title>HTML File Content Issues</title>
 			<content>
-				<para>The current HTML classifier should handle most HTML content without issue.  However, it currently
-skips <codeInline>script</codeInline> element content and may not handle specialized script content such as
-that found in ASP.NET or Razor files.  If you find that it is not reporting issues in some content or is not
-handling certain sections of a file appropriately, please open an issue and provide as much detail as possible
-along with example content.  An attempt will be made to handle issues as they occur and include fixes in
-subsequent releases.  Please bear in mind that web development is not my area of expertise so help may be
-required in resolving some issues.</para>
+				<para>The current HTML classifier should handle most HTML content without issue.  In addition, it
+attempts to parse server-side script elements (i.e. PHP code, ASP.NET and Razor script blocks, etc.) as well as
+client-side inline script elements using the appropriate language classifier.  If you find that it is not
+reporting issues in some content or is not handling certain sections of a file appropriately, please open an
+issue and provide as much detail as possible along with example content.  An attempt will be made to handle
+issues as they occur and include fixes in subsequent releases.  Please bear in mind that web development is not
+my area of expertise so help may be required in resolving some issues.</para>
 			</content>
 		</section>
 		

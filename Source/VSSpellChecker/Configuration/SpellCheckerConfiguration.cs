@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/22/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 08/16/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -17,6 +17,7 @@
 // ==============================================================================================================
 // 02/01/2015  EFW  Refactored the configuration settings to allow for solution and project specific settings
 // 07/22/2015  EFW  Added support for selecting multiple languages
+// 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
 using System;
@@ -41,15 +42,18 @@ namespace VisualStudio.SpellChecker.Configuration
         #region Private data members
         //=====================================================================
 
-        private CSharpOptions csharpOptions;
-        private CodeAnalysisDictionaryOptions cadOptions;
+        private readonly CSharpOptions csharpOptions;
+        private readonly CodeAnalysisDictionaryOptions cadOptions;
 
         private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords;
         private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
         private List<Regex> exclusionExpressions, ignoredFilePatterns, visualStudioExclusions;
-        private Dictionary<string, string> deprecatedTerms, compoundTerms;
-        private Dictionary<string, IList<string>> unrecognizedWords;
+
+        private readonly Dictionary<string, HashSet<string>> ignoredClassifications;
+        private readonly Dictionary<string, string> deprecatedTerms, compoundTerms;
+        private readonly Dictionary<string, IList<string>> unrecognizedWords;
+
         #endregion
 
         #region Properties
@@ -136,20 +140,6 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <value>This is true by default</value>
         [DefaultValue(true)]
         public bool IgnoreXmlElementsInText { get; set; }
-
-        /// <summary>
-        /// This is used to get or set whether or not to ignore HTML comments when spell checking
-        /// </summary>
-        /// <value>This is false by default</value>
-        [DefaultValue(false)]
-        public bool IgnoreHtmlComments { get; set; }
-
-        /// <summary>
-        /// This is used to get or set whether or not to ignore XML comments when spell checking
-        /// </summary>
-        /// <value>This is false by default</value>
-        [DefaultValue(false)]
-        public bool IgnoreXmlComments { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not to ignore words by character class
@@ -295,6 +285,14 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This is used to indicate whether or not ignored classifications are inherited by other configurations
+        /// </summary>
+        /// <value>The default is true so that sub-configurations inherit all ignored classifications from higher
+        /// level configurations.</value>
+        [DefaultValue(true)]
+        public bool InheritIgnoredClassifications { get; set; }
+
+        /// <summary>
         /// This read-only property returns the recognized words loaded from code analysis dictionaries
         /// </summary>
         public IEnumerable<string> RecognizedWords
@@ -361,6 +359,21 @@ namespace VisualStudio.SpellChecker.Configuration
                     "\\relatesalso", "\\remark", "\\remarks", "\\result", "\\return", "\\returns", "\\retval",
                     "\\rtfonly", "\\tableofcontents", "\\test", "\\throw", "\\throws", "\\todo", "\\tparam",
                     "\\typedef", "\\var", "\\verbatim", "\\verbinclude", "\\version", "\\vhdlflow"};
+            }
+        }
+
+        /// <summary>
+        /// This read-only property returns the default list of ignored classifications
+        /// </summary>
+        public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> DefaultIgnoredClassifications
+        {
+            get
+            {
+                return new[] {
+                    // Only comments are spell checked in EditorConfig files.  Ignore the string classification
+                    // use by the EditorConfig Language Service extension by Mads Kristensen.
+                    new KeyValuePair<string, IEnumerable<string>>("EditorConfig", new[] { "string" })
+                };
             }
         }
 
@@ -457,7 +470,8 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.IgnoreXmlElementsInText = this.DetermineResourceFileLanguageFromName =
                 this.InheritIgnoredFilePatterns = this.InheritAdditionalDictionaryFolders =
                 this.InheritIgnoredWords = this.InheritExclusionExpressions = this.InheritXmlSettings =
-                this.IgnoreMnemonics = this.EnableWpfTextBoxSpellChecking = true;
+                this.InheritIgnoredClassifications =  this.IgnoreMnemonics =
+                this.EnableWpfTextBoxSpellChecking = true;
 
             ignoredWords = new HashSet<string>(DefaultIgnoredWords, StringComparer.OrdinalIgnoreCase);
             ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
@@ -473,6 +487,11 @@ namespace VisualStudio.SpellChecker.Configuration
             deprecatedTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             compoundTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             unrecognizedWords = new Dictionary<string, IList<string>>(StringComparer.OrdinalIgnoreCase);
+
+            ignoredClassifications = new Dictionary<string, HashSet<string>>();
+
+            foreach(var kv in DefaultIgnoredClassifications)
+                ignoredClassifications.Add(kv.Key, new HashSet<string>(kv.Value));
         }
         #endregion
 
@@ -500,6 +519,21 @@ namespace VisualStudio.SpellChecker.Configuration
                 return true;
 
             return ignoredWords.Contains(word);
+        }
+
+        /// <summary>
+        /// This is used to get a set of ignored classifications for the given content type
+        /// </summary>
+        /// <param name="contentType">The content type for which to get ignored classifications</param>
+        /// <returns>An enumerable list of ignored classifications or an empty set if there are none</returns>
+        public IEnumerable<string> IgnoredClassificationsFor(string contentType)
+        {
+            HashSet<string> classifications;
+
+            if(!ignoredClassifications.TryGetValue(contentType, out classifications))
+                classifications = new HashSet<string>();
+
+            return classifications;
         }
         #endregion
 
@@ -551,8 +585,6 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.IgnoreFilenamesAndEMailAddresses = configuration.ToBoolean(
                     PropertyNames.IgnoreFilenamesAndEMailAddresses);
                 this.IgnoreXmlElementsInText = configuration.ToBoolean(PropertyNames.IgnoreXmlElementsInText);
-                this.IgnoreHtmlComments = configuration.ToBoolean(PropertyNames.IgnoreHtmlComments);
-                this.IgnoreXmlComments = configuration.ToBoolean(PropertyNames.IgnoreXmlComments);
                 this.TreatUnderscoreAsSeparator = configuration.ToBoolean(PropertyNames.TreatUnderscoreAsSeparator);
                 this.IgnoreMnemonics = configuration.ToBoolean(PropertyNames.IgnoreMnemonics);
                 this.IgnoreCharacterClass = configuration.ToEnum<IgnoredCharacterClass>(
@@ -720,6 +752,31 @@ namespace VisualStudio.SpellChecker.Configuration
                     }
                     else
                         spellCheckedXmlAttributes = tempHashSet;
+                }
+
+                this.InheritIgnoredClassifications = configuration.ToBoolean(PropertyNames.InheritIgnoredClassifications);
+
+                if(configuration.HasProperty(PropertyNames.IgnoredClassifications))
+                {
+                    // For global configurations, we always want to replace the default set
+                    if(!this.InheritIgnoredClassifications || configuration.ConfigurationType == ConfigurationType.Global)
+                        ignoredClassifications.Clear();
+
+                    foreach(var type in configuration.Element(PropertyNames.IgnoredClassifications).Elements(
+                      PropertyNames.ContentType))
+                    {
+                        HashSet<string> classifications;
+                        string typeName = type.Attribute(PropertyNames.ContentTypeName).Value;
+
+                        if(!ignoredClassifications.TryGetValue(typeName, out classifications))
+                        {
+                            classifications = new HashSet<string>();
+                            ignoredClassifications.Add(typeName, classifications);
+                        }
+
+                        foreach(var c in type.Elements(PropertyNames.Classification))
+                            classifications.Add(c.Value);
+                    }
                 }
 
                 // Load the dictionary languages and, if merging settings, handle inheritance

@@ -39,7 +39,7 @@
     <StartAction>Program</StartAction>
     <StartProgram>$(DevEnvDir)\devenv.exe</StartProgram>
     <StartArguments>/rootSuffix Exp</StartArguments>
-  </PropertyGroup>
+	</PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -75,6 +75,9 @@
     <Compile Include="Editors\ICommonCommandSupport.cs" />
     <Compile Include="Editors\Pages\CodeAnalysisUserControl.xaml.cs">
       <DependentUpon>CodeAnalysisUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Editors\Pages\IgnoredClassificationsUserControl.xaml.cs">
+      <DependentUpon>IgnoredClassificationsUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editors\Pages\IgnoredFilePatternsUserControl.xaml.cs">
       <DependentUpon>IgnoredFilePatternsUserControl.xaml</DependentUpon>
@@ -135,6 +138,7 @@
     <Compile Include="SuggestedActions\SpellSuggestedActionSource.cs" />
     <Compile Include="SuggestedActions\SuggestedActionBase.cs" />
     <Compile Include="SuggestedActions\SuggestedActionSubmenu.cs" />
+    <Compile Include="Tagging\ClassificationCache.cs" />
     <Compile Include="Tagging\MarkdownTextTagger.cs" />
     <Compile Include="Tagging\PhpTextTaggerProvider.cs" />
     <Compile Include="Tagging\RMarkdownTextTagger.cs" />
@@ -519,6 +523,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Editors\Pages\CodeAnalysisUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Editors\Pages\IgnoredClassificationsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

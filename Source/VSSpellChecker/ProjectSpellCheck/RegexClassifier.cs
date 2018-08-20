@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/09/2018
+// Updated : 08/18/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -262,7 +262,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     }
             }
 
-            return spans;
+            return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
         }
 
         /// <summary>

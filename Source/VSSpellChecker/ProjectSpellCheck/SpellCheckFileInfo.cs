@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/27/2017
+// Updated : 08/19/2018
 // Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -38,7 +38,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         #region Private data members
         //=====================================================================
 
-        private static SpellCheckFileInfo IgnoredHierarchyItem = new SpellCheckFileInfo();
+        private static readonly SpellCheckFileInfo IgnoredHierarchyItem = new SpellCheckFileInfo();
 
         #endregion
 
@@ -268,7 +268,25 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     // Looks like a project.  Not all of them implement properties though.
                     if(item.Project.Properties != null)
                     {
-                        Property fullPath = item.Project.Properties.Item("FullPath");
+                        Property fullPath;
+
+                        try
+                        {
+                            fullPath = item.Project.Properties.Item("FullPath");
+                        }
+                        catch
+                        {
+                            // C++ projects use a different property name and throw an exception above
+                            try
+                            {
+                                fullPath = item.Project.Properties.Item("ProjectFile");
+                            }
+                            catch
+                            {
+                                // If that fails, give up
+                                fullPath = null;
+                            }
+                        }
 
                         if(fullPath != null && fullPath.Value != null)
                             path = (string)fullPath.Value;

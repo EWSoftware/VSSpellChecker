@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RMarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 08/18/2017
-// Note    : Copyright 2017, Eric Woodruff, All rights reserved
+// Updated : 08/17/2018
+// Note    : Copyright 2017-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for R markdown files when the R Tools for Visual Studio
@@ -17,6 +17,7 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 08/11/2017  EFW  Created the code
+// 08/17/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
 using System;
@@ -41,7 +42,9 @@ namespace VisualStudio.SpellChecker.Tagging
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer buffer;
+        private readonly ITextBuffer buffer;
+        private readonly IEnumerable<string> ignoredClassifications;
+        private readonly ClassificationCache classificationCache;
         private IClassifier classifier;
 
         #endregion
@@ -58,12 +61,20 @@ namespace VisualStudio.SpellChecker.Tagging
             [Import]
             private IClassifierAggregatorService classifierAggregatorService = null;
 
+            [Import]
+            private SpellingServiceFactory spellingService = null;
+
             /// <inheritdoc />
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
                 var classifier = classifierAggregatorService.GetClassifier(buffer);
+                var config = spellingService.GetConfiguration(buffer);
 
-                return new RMarkdownTextTagger(buffer, classifier) as ITagger<T>;
+                if(config == null)
+                    return new RMarkdownTextTagger(buffer, classifier, null) as ITagger<T>;
+
+                return new RMarkdownTextTagger(buffer, classifier,
+                    config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
             }
         }
         #endregion
@@ -76,12 +87,18 @@ namespace VisualStudio.SpellChecker.Tagging
         /// </summary>
         /// <param name="buffer">The text buffer</param>
         /// <param name="classifier">The classifier</param>
-        public RMarkdownTextTagger(ITextBuffer buffer, IClassifier classifier)
+        /// <param name="ignoredClassifications">An optional enumerable list of ignored classifications for
+        /// the buffer's content type</param>
+        public RMarkdownTextTagger(ITextBuffer buffer, IClassifier classifier,
+          IEnumerable<string> ignoredClassifications)
         {
+            classificationCache = ClassificationCache.CacheFor(buffer.ContentType.TypeName);
+
             this.buffer = buffer;
             this.classifier = classifier;
-
             this.classifier.ClassificationChanged += this.ClassificationChanged;
+
+            this.ignoredClassifications = (ignoredClassifications ?? Enumerable.Empty<string>());
         }
         #endregion
 
@@ -144,11 +161,18 @@ namespace VisualStudio.SpellChecker.Tagging
                                 SnapshotSpan s = new SnapshotSpan(classificationSpan.Span.Start + start, end - start);
                                 ignoredSpans.Add(s);
 
-                                yield return new TagSpan<NaturalTextTag>(s, new NaturalTextTag());
+                                classificationCache.Add(name);
+
+                                if(!ignoredClassifications.Contains(name))
+                                    yield return new TagSpan<NaturalTextTag>(s, new NaturalTextTag());
                             }
                             break;
 
                         default:
+                            classificationCache.Add(name);
+
+                            if(ignoredClassifications.Contains(name))
+                                ignoredSpans.Add(classificationSpan.Span);
                             break;
                     }
                 }

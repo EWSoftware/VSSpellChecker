@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/11/2018
+// Updated : 08/17/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -24,6 +24,7 @@
 //                  support for disabling spell checking as you type.
 // 05/23/2013  EFW  Added conditions to exclude XAML elements and include XAML attributes
 // 06/06/2014  EFW  Added support for excluding from spell checking by filename extension
+// 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
 using System;
@@ -50,10 +51,10 @@ namespace VisualStudio.SpellChecker.Tagging
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer buffer;
+        private readonly ITextBuffer buffer;
         private IClassifier classifier;
-        private IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes;
-        private bool ignoreStringClass, ignoreHtmlComments, ignoreXmlComments;
+        private IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes, ignoredClassifications;
+        private readonly ClassificationCache classificationCache;
 
         #endregion
 
@@ -91,7 +92,8 @@ namespace VisualStudio.SpellChecker.Tagging
 
                 // Markdown has its own tagger
                 if(buffer.ContentType.IsOfType("Markdown"))
-                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer)) as ITagger<T>;
+                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
+                        config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
 
                 // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
                 // configuration options to exclude certain elements from being spell checked if not wanted.
@@ -121,7 +123,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
                 return new CommentTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
                     config.IgnoredXmlElements, config.SpellCheckedXmlAttributes,
-                    config.IgnoreHtmlComments, config.IgnoreXmlComments) as ITagger<T>;
+                    config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
             }
         }
         #endregion
@@ -136,23 +138,20 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="classifier">The classifier</param>
         /// <param name="ignoredXmlElements">An optional enumerable list of ignored XML elements</param>
         /// <param name="spellCheckedXmlAttributes">An optional enumerable list of spell checked XML attributes</param>
+        /// <param name="ignoredClassifications">An optional enumerable list of ignored classifications for
+        /// the buffer's content type</param>
         public CommentTextTagger(ITextBuffer buffer, IClassifier classifier, IEnumerable<string> ignoredXmlElements,
-          IEnumerable<string> spellCheckedXmlAttributes, bool ignoreHtmlComments, bool ignoreXmlComments)
+          IEnumerable<string> spellCheckedXmlAttributes, IEnumerable<string> ignoredClassifications)
         {
+            classificationCache = ClassificationCache.CacheFor(buffer.ContentType.TypeName);
+
             this.buffer = buffer;
             this.classifier = classifier;
-
             this.classifier.ClassificationChanged += ClassificationChanged;
 
             this.ignoredXmlElements = (ignoredXmlElements ?? Enumerable.Empty<string>());
             this.spellCheckedXmlAttributes = (spellCheckedXmlAttributes ?? Enumerable.Empty<string>());
-            this.ignoreHtmlComments = ignoreHtmlComments;
-            this.ignoreXmlComments = ignoreXmlComments;
-
-            // Only comments are spell checked in EditorConfig files.  Ignore the string classification used
-            // by the EditorConfig Language Service extension by Mads Kristensen.
-            if(buffer.ContentType.IsOfType("EditorConfig"))
-                ignoreStringClass = true;
+            this.ignoredClassifications = (ignoredClassifications ?? Enumerable.Empty<string>());
         }
         #endregion
 
@@ -177,7 +176,8 @@ namespace VisualStudio.SpellChecker.Tagging
 
                 foreach(ClassificationSpan classificationSpan in classifier.GetClassificationSpans(snapshotSpan))
                 {
-                    string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant();
+                    string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant(),
+                        originalName = name;
 
                     // Do some conversion to make things simpler below
                     switch(name)
@@ -189,7 +189,10 @@ namespace VisualStudio.SpellChecker.Tagging
                             if(span.Length > 2 && span.GetText()[0] == 'N')
                                 span = new SnapshotSpan(span.Snapshot, span.Start + 1, span.Length - 1);
 
-                            yield return new TagSpan<NaturalTextTag>(span, new NaturalTextTag());
+                            classificationCache.Add(name);
+
+                            if(!ignoredClassifications.Contains(name))
+                                yield return new TagSpan<NaturalTextTag>(span, new NaturalTextTag());
                             continue;
 
                         case "vb xml doc attribute":
@@ -218,10 +221,6 @@ namespace VisualStudio.SpellChecker.Tagging
 
                         default:
                             if(name == "identifier" || name.StartsWith("xml doc comment - ", StringComparison.Ordinal))
-                                continue;
-
-                            // Ignore the string classification in EditorConfig files
-                            if(ignoreStringClass && name.Equals("string", StringComparison.OrdinalIgnoreCase))
                                 continue;
                             break;
                     }
@@ -313,7 +312,11 @@ namespace VisualStudio.SpellChecker.Tagging
 
                         preprocessorKeywordSeen = false;
 
-                        if((ignoreHtmlComments && name == "html comment") || (ignoreXmlComments && name == "xml comment"))
+                        // Track and ignore classifications by original name to allow the user to be more
+                        // selective if necessary.
+                        classificationCache.Add(originalName);
+
+                        if(ignoredClassifications.Contains(originalName))
                             continue;
 
                         yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());

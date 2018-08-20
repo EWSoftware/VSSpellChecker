@@ -86,6 +86,13 @@ global spell checker settings.</para>
 					</listItem>
 
 				</list>
+
+				<para>There are two additional options on the submenu: <ui>Move to Next Spelling Issue</ui> and <ui>Move
+to Prior Spelling Issue</ui>.  These can be used in text editors to move to the next/prior spelling issue in the
+file.  If these are bound to shortcut keys and used in conjunction with the Quick Actions shortcut key
+(<ui>Ctrl+.</ui>), it can be a quick and convenient way to find and resolve spelling issues without using the
+interactive spell checking tool window.  See the <link xlink:href="63d5096c-6695-441d-886a-01a120f2894a" /> topic
+for more information.</para>
 			</content>
 		</section>
 

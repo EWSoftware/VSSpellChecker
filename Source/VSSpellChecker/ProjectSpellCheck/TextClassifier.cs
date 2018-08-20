@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/11/2018
+// Updated : 08/18/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -17,11 +17,13 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 08/26/2015  EFW  Created the code
+// 08/18/2018  EFW  Added support for excluding by range classification
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 using Microsoft.VisualStudio.Text;
@@ -39,6 +41,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         private List<int> lineOffsets;
+        private List<RangeClassification> ignoredClassifications;
 
         #endregion
 
@@ -54,6 +57,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// This read-only property returns the spell checker configuration for the file
         /// </summary>
         public SpellCheckerConfiguration SpellCheckConfiguration { get; private set; }
+
+        /// <summary>
+        /// This is used to get an enumerable list of ignored range classifications that should not be spell checked
+        /// </summary>
+        public IEnumerable<RangeClassification> IgnoredClassifications
+        {
+            get { return ignoredClassifications; }
+        }
 
         /// <summary>
         /// This read-only property returns the text contained in the file
@@ -116,6 +127,27 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             this.Filename = filename;
             this.SpellCheckConfiguration = spellCheckConfiguration;
+
+            ignoredClassifications = new List<RangeClassification>();
+
+            // Get the ignored classifications based on the extension.  If there are none, check for the
+            // file type.
+            string ext = Path.GetExtension(filename);
+
+            if(!String.IsNullOrWhiteSpace(ext))
+                ext = ext.Substring(1);
+
+            var exclusions = spellCheckConfiguration.IgnoredClassificationsFor(PropertyNames.Extension + ext);
+
+            if(!exclusions.Any())
+                exclusions = spellCheckConfiguration.IgnoredClassificationsFor(PropertyNames.FileType +
+                    ClassifierFactory.ClassifierIdFor(filename));
+
+            RangeClassification rangeType;
+
+            foreach(string exclusion in exclusions)
+                if(Enum.TryParse<RangeClassification>(exclusion, out rangeType))
+                    ignoredClassifications.Add(rangeType);
 
             if(!File.Exists(filename))
                 this.SetText(String.Empty);

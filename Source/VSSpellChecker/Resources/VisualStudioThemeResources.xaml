@@ -1,7 +1,6 @@
 <ResourceDictionary x:Uid="VisualStudioThemeResources"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:s="clr-namespace:System;assembly=mscorlib"
 	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
 	xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
 
@@ -354,7 +353,7 @@
 
 	<!-- Group box control -->
 	<BorderGapMaskConverter x:Key="BorderGapMaskConverter"/>
-	
+
 	<Style x:Key="{x:Type GroupBox}" TargetType="{x:Type GroupBox}">
 		<Setter Property="BorderBrush" Value="{StaticResource ToolWindowBorderBrushKey}"/>
 		<Setter Property="BorderThickness" Value="1"/>
@@ -1277,6 +1276,50 @@
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
+	</Style>
+
+	<!-- Tab control -->
+	<Style TargetType="TabControl">
+		<Setter Property="Background" Value="{StaticResource ToolWindowBackgroundBrushKey}" />
+		<Setter Property="BorderBrush" Value="{StaticResource LightBorderBrushKey}" />
+	</Style>
+
+	<Style TargetType="TabItem">
+		<Setter Property="Foreground" Value="{StaticResource ButtonForegroundBrushKey}" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="TabItem">
+					<Border Name="Border" BorderThickness="1,1,1,0" BorderBrush="{StaticResource LightBorderBrushKey}" CornerRadius="4,4,0,0">
+						<ContentPresenter Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center"
+							ContentSource="Header" Margin="10,2"/>
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsSelected" Value="True">
+							<Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonPressedBackgroundBrushKey}" />
+							<Setter TargetName="ContentSite" Property="Control.Foreground" Value="{StaticResource ButtonPressedForegroundBrushKey}" />
+						</Trigger>
+						<Trigger Property="IsSelected" Value="False">
+							<Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonBackgroundBrushKey}" />
+						</Trigger>
+						<MultiTrigger>
+							<MultiTrigger.Conditions>
+								<Condition Property="IsEnabled" Value="True" />
+								<Condition Property="IsSelected" Value="False" />
+								<Condition Property="IsMouseOver" Value="True" />
+							</MultiTrigger.Conditions>
+							<Setter TargetName="Border" Property="Background" Value="{StaticResource ButtonHoverBackgroundBrushKey}" />
+						</MultiTrigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+		<Style.Triggers>
+			<Trigger Property="UIElement.IsEnabled" Value="False">
+				<Setter Property="Control.Background" Value="{StaticResource ButtonDisabledBackgroundBrushKey}" />
+				<Setter Property="Control.Foreground" Value="{StaticResource ButtonDisabledForegroundBrushKey}" />
+				<Setter Property="Control.BorderBrush" Value="{StaticResource ButtonDisabledBorderBrushKey}" />
+			</Trigger>
+		</Style.Triggers>
 	</Style>
 
 </ResourceDictionary>

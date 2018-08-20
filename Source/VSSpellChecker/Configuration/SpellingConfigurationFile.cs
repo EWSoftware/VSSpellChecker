@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/11/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 08/18/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to load and save spell checker configuration files
@@ -208,8 +208,13 @@ namespace VisualStudio.SpellChecker.Configuration
                 // editing the configuration file.
                 if(fileFormat < currentVersion)
                 {
-                    this.ConvertDefaultLanguage();
-                    this.ConvertExcludedExtensionsToIgnoredFilePatterns();
+                    if(fileFormat < new Version(2016, 3, 10))
+                    {
+                        this.ConvertDefaultLanguage();
+                        this.ConvertExcludedExtensionsToIgnoredFilePatterns();
+                    }
+
+                    this.ConvertCommentExclusions();
                 }
 
                 format.Value = AssemblyInfo.ConfigSchemaVersion;
@@ -415,6 +420,63 @@ namespace VisualStudio.SpellChecker.Configuration
                 foreach(var ext in excludeExts.Descendants("Exclude"))
                     if(ext.Value != ".")
                         ignoredPatterns.Add(new XElement(PropertyNames.IgnoredFilePatternItem, "*" + ext.Value));
+            }
+        }
+
+        /// <summary>
+        /// Convert ExcludedExtensions which got replaced by IgnoredFilePatterns in schema version 2016.3.10.0
+        /// </summary>
+        private void ConvertCommentExclusions()
+        {
+            var ignoredClassifications = new XElement(PropertyNames.IgnoredClassifications);
+            var ignoreComments = root.Element("IgnoreHtmlComments");
+
+            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value))
+            {
+                ignoreComments.Remove();
+
+                ignoredClassifications.Add(
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, "HTML"),
+                        new XElement(PropertyNames.Classification, "html comment")),
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, "htmlx"),
+                        new XElement(PropertyNames.Classification, "html comment")),
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, PropertyNames.FileType + "HTML"),
+                        new XElement(PropertyNames.Classification, "XmlFileComment")));
+            }
+
+            ignoreComments = root.Element("IgnoreXmlComments");
+
+            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value))
+            {
+                ignoreComments.Remove();
+
+                ignoredClassifications.Add(
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, "XML"),
+                        new XElement(PropertyNames.Classification, "xml comment")),
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, PropertyNames.FileType + "XML"),
+                        new XElement(PropertyNames.Classification, "XmlFileComment")));
+            }
+
+            if(ignoredClassifications.HasElements)
+            {
+                // If downgraded and then upgraded, the element may already exist
+                var existing = root.Element(PropertyNames.IgnoredClassifications);
+
+                if(existing != null)
+                    existing.Remove();
+
+                foreach(var kv in SpellCheckerConfiguration.DefaultIgnoredClassifications)
+                    ignoredClassifications.Add(
+                        new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, kv.Key),
+                        kv.Value.Select(v => new XElement(PropertyNames.Classification, v))));
+
+                root.Add(ignoredClassifications);
             }
         }
 
@@ -681,6 +743,16 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This returns the XML element from the configuration file that has the given name
+        /// </summary>
+        /// <param name="elementName">The element name to get</param>
+        /// <returns>The element to get or null if not found</returns>
+        public XElement Element(string elementName)
+        {
+            return root.Element(elementName);
+        }
+
+        /// <summary>
         /// Store a property in the configuration file or remove it if the value is null
         /// </summary>
         /// <param name="propertyName">The property name</param>
@@ -764,6 +836,20 @@ namespace VisualStudio.SpellChecker.Configuration
                 if(property != null)
                     property.Remove();
             }
+        }
+
+        /// <summary>
+        /// Stores an XML element replacing it if it exists, adding it if it does not
+        /// </summary>
+        /// <param name="element">The XML element to store</param>
+        public void StoreElement(XElement element)
+        {
+            var existing = root.Element(element.Name);
+
+            if(existing != null)
+                existing.ReplaceWith(element);
+            else
+                root.Add(element);
         }
 
         /// <summary>

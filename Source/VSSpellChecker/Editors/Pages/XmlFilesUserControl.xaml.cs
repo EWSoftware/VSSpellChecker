@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlFilesUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/24/2017
-// Note    : Copyright 2014-2017, Eric Woodruff, All rights reserved
+// Updated : 08/16/2018
+// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the XML files spell checker configuration settings
@@ -115,18 +115,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             lbIgnoredXmlElements.Items.SortDescriptions.Add(sd);
             lbSpellCheckedAttributes.Items.SortDescriptions.Add(sd);
-
-            var dataSource = new List<PropertyState>();
-
-            if(configuration.ConfigurationType != ConfigurationType.Global)
-                dataSource.AddRange(new[] { PropertyState.Inherited, PropertyState.Yes, PropertyState.No });
-            else
-                dataSource.AddRange(new[] { PropertyState.Yes, PropertyState.No });
-
-            cboIgnoreHtmlComments.ItemsSource = cboIgnoreXmlComments.ItemsSource = dataSource;
-
-            cboIgnoreHtmlComments.SelectedValue = configuration.ToPropertyState(PropertyNames.IgnoreHtmlComments);
-            cboIgnoreXmlComments.SelectedValue = configuration.ToPropertyState(PropertyNames.IgnoreXmlComments);
         }
 
         /// <inheritdoc />
@@ -159,11 +147,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 newElementList);
             configuration.StoreValues(PropertyNames.SpellCheckedXmlAttributes,
                 PropertyNames.SpellCheckedXmlAttributesItem, newAttributeList);
-
-            configuration.StoreProperty(PropertyNames.IgnoreHtmlComments,
-                ((PropertyState)cboIgnoreHtmlComments.SelectedValue).ToPropertyValue());
-            configuration.StoreProperty(PropertyNames.IgnoreXmlComments,
-                ((PropertyState)cboIgnoreXmlComments.SelectedValue).ToPropertyValue());
         }
 
         /// <inheritdoc />

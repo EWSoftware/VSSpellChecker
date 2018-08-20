@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/24/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 08/16/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class containing the configuration property name constants
@@ -17,6 +17,7 @@
 // ==============================================================================================================
 // 02/01/2015  EFW  Refactored configuration settings
 // 07/22/2015  EFW  Added support for selecting multiple languages
+// 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
 namespace VisualStudio.SpellChecker.Configuration
@@ -83,16 +84,6 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Ignore XML elements in text
         /// </summary>
         public const string IgnoreXmlElementsInText = "IgnoreXmlElementsInText";
-
-        /// <summary>
-        /// Ignore HTML comments when spell checking
-        /// </summary>
-        public const string IgnoreHtmlComments = "IgnoreHtmlComments";
-
-        /// <summary>
-        /// Ignore XML comments when spell checking
-        /// </summary>
-        public const string IgnoreXmlComments = "IgnoreXmlComments";
 
         /// <summary>
         /// Treat underscore as separator
@@ -238,6 +229,41 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Spell checked XML attributes item
         /// </summary>
         public const string SpellCheckedXmlAttributesItem = "SpellCheck";
+
+        /// <summary>
+        /// Inherit ignored classifications
+        /// </summary>
+        public const string InheritIgnoredClassifications = "InheritIgnoredClassifications";
+
+        /// <summary>
+        /// Ignored classifications
+        /// </summary>
+        public const string IgnoredClassifications = "IgnoredClassifications";
+
+        /// <summary>
+        /// Content type item
+        /// </summary>
+        public const string ContentType = "ContentType";
+
+        /// <summary>
+        /// Content type name attribute
+        /// </summary>
+        public const string ContentTypeName = "Name";
+
+        /// <summary>
+        /// Ignored classification item
+        /// </summary>
+        public const string Classification = "Classification";
+
+        /// <summary>
+        /// File type classification prefix
+        /// </summary>
+        public const string FileType = "File Type: ";
+
+        /// <summary>
+        /// Extension classification prefix
+        /// </summary>
+        public const string Extension = "Extension: ";
 
         /// <summary>
         /// Enable WPF text box spell checking

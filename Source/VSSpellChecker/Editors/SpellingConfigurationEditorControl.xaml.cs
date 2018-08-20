@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/12/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 08/16/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit spell checker configuration settings files
@@ -109,6 +109,7 @@ namespace VisualStudio.SpellChecker.Editors
                 typeof(DictionarySettingsUserControl),
                 typeof(GeneralSettingsUserControl),
                 typeof(CSharpOptionsUserControl),
+                typeof(IgnoredClassificationsUserControl),
                 typeof(IgnoredWordsUserControl),
                 typeof(ExclusionExpressionsUserControl),
                 typeof(IgnoredFilePatternsUserControl),
@@ -129,10 +130,12 @@ namespace VisualStudio.SpellChecker.Editors
                     page.Control.Visibility = Visibility.Collapsed;
                     page.ConfigurationChanged += this.OnConfigurationChanged;
 
-                    node = new TreeViewItem();
-                    node.Header = page.Title;
-                    node.Name = pageType.Name;
-                    node.Tag = page;
+                    node = new TreeViewItem
+                    {
+                        Header = page.Title,
+                        Name = pageType.Name,
+                        Tag = page
+                    };
 
                     tvPages.Items.Add(node);
                     pnlPages.Children.Add(page.Control);
@@ -316,8 +319,10 @@ namespace VisualStudio.SpellChecker.Editors
 
             // Pass a dummy filename to create a new configuration and then set the filename so that the pages
             // know the type of configuration file in use.
-            var newConfigFile = new SpellingConfigurationFile("__ResetTemp__", new SpellCheckerConfiguration());
-            newConfigFile.Filename = configFile.Filename;
+            var newConfigFile = new SpellingConfigurationFile("__ResetTemp__", new SpellCheckerConfiguration())
+            {
+                Filename = configFile.Filename
+            };
 
             if(result == MessageBoxResult.Yes)
             {
