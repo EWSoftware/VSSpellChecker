@@ -18,6 +18,8 @@
 // 08/26/2015  EFW  Created the code
 //===============================================================================================================
 
+// Ignore spelling: separ ated
+
 using System;
 using System.Collections.Generic;
 using System.Linq;

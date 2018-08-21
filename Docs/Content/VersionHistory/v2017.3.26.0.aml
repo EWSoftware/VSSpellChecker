@@ -24,6 +24,7 @@ for contractions to prevent false misspelling reports.</para>
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: Kristensen -->
 						<para>Added support for <localUri>.editorconfig</localUri> files when using the
 <externalLink>
 	<linkText>EditorConfig Language Service</linkText>

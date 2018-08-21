@@ -85,6 +85,7 @@ the <link xlink:href="6216eedb-6434-4cad-be06-576814e0b735" /> topic for more in
 		<section address="SplitWords">
 			<title>Words Split Across String Literals</title>
 			<content>
+				<!-- Ignore spelling: separ ated -->
 				<para>A common occurrence in designer code, especially in Windows Forms projects, is words that get split
 across string literals (i.e. "A string of text that gets separ" + "ated by the designer").  When spell checking
 the solution or a project, such occurrences are joined to form a proper word before spell checking to reduce the

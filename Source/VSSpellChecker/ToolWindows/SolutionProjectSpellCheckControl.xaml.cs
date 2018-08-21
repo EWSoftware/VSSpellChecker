@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/13/2018
+// Updated : 08/20/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -16,6 +16,7 @@
 //    Date     Who   Comments
 // ==============================================================================================================
 // 08/23/2015  EFW   Created the code
+// 08/20/2018  EFW  Added support for the inline ignore spelling directive
 //===============================================================================================================
 
 using System;
@@ -62,6 +63,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private CancellationTokenSource cancellationTokenSource;
         private WordSplitter wordSplitter;
         private bool unescapeApostrophes;
+
+        private readonly static Regex reIgnoreSpelling = new Regex(
+            @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -589,6 +593,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
           HashSet<string> openDocuments)
         {
             BindingList<FileMisspelling> issues = new BindingList<FileMisspelling>();
+            List<InlineIgnoredWord> inlineIgnored = new List<InlineIgnoredWord>();
             TextClassifier classifier;
             List<string> cadFiles;
             string documentText;
@@ -644,6 +649,24 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 else
                                     ignoredWordSpans = null;
 
+                                // Note exclusions indicated inline within the text
+                                inlineIgnored.Clear();
+
+                                foreach(Match m in reIgnoreSpelling.Matches(classifier.Text))
+                                {
+                                    string ignored = m.Groups["IgnoredWords"].Value;
+                                    bool caseSensitive = !String.IsNullOrWhiteSpace(m.Groups["CaseSensitive"].Value);
+
+                                    foreach(var span in wordSplitter.GetWordsInText(ignored))
+                                    {
+                                        inlineIgnored.Add(new InlineIgnoredWord
+                                        {
+                                            Word = ignored.Substring(span.Start, span.Length),
+                                            CaseSensitive = caseSensitive
+                                        });
+                                    }
+                                }
+
                                 // Switch to the UI thread to update the progress and then switch back to this
                                 // one.  This runs the asynchronous delegate and waits for it to finish.
                                 ThreadHelper.JoinableTaskFactory.Run(async delegate
@@ -657,6 +680,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 {
                                     // Skip Ignore Once words from the editor
                                     if(ignoredWordSpans != null && ignoredWordSpans.Any(s => s.IntersectsWith(issue.Span)))
+                                        continue;
+
+                                    // Skip words marked inline to be ignored
+                                    if(inlineIgnored.Any(w => w.IsMatch(issue.Word)))
                                         continue;
 
                                     issue.FileInfo = file;

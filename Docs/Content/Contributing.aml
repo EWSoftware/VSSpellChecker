@@ -80,6 +80,7 @@ Remove any unused namespaces to avoid unnecessary clutter.</para>
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: Allman -->
 						<para>Use Allman style braces where each brace begins on a new line. A single line statement block
 can go without braces but the block must be properly indented on its own line.</para>
 					</listItem>

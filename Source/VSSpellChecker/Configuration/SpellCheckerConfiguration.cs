@@ -20,6 +20,8 @@
 // 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
+// Ignore spelling: lt
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

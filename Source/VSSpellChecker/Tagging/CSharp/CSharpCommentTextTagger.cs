@@ -24,6 +24,8 @@
 //                  checking XML doc comment attributes and ignoring unwanted XML doc comment elements.
 //===============================================================================================================
 
+// Ignore spelling: endregion pragma
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

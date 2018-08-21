@@ -20,6 +20,8 @@
 // 10/27/2015  EFW  Added support for ignoring mnemonics
 //===============================================================================================================
 
+// Ignore spelling: Za tp sp nis ta ttest ransform xh uhhhh Uhhhhhhhh xh hh
+
 using System;
 using System.Collections.Generic;
 using System.Linq;

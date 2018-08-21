@@ -13,6 +13,7 @@
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: Kristensen -->
 						<para>Added support for spell checking markdown files within the Visual Studio text editor when using
 the <externalLink>
 							<linkText>Markdown Editor</linkText>

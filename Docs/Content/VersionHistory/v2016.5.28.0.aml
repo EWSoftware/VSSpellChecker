@@ -16,6 +16,7 @@ issues and limitations.</para>
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: Miloslav Beňo -->
 						<para>Added support for spell checking PHP files within the Visual Studio text editor when using the
 <legacyItalic>PHP Tools for Visual Studio</legacyItalic> extension.  Thanks to Miloslav Beňo of <externalLink>
 							<linkText>DevSense</linkText>

@@ -80,6 +80,7 @@ selected languages is empty.</para>
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: Gaisie Essilfie -->
 						<para>Merged changes from Franz Alex Gaisie-Essilfie to group suggestions by word when using multiple
 dictionaries rather than by language.  This presents a more concise list of suggestions.  The language(s) for
 each word are shown after the word in the list.</para>

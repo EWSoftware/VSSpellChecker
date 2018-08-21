@@ -51,6 +51,7 @@ false reports.</para>
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: michkot -->
 						<para>Merged change from michkot to classify <localUri>.cc</localUri> and <localUri>.hh</localUri>
 files as C-style files.</para>
 					</listItem>

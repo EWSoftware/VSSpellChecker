@@ -18,6 +18,8 @@
 // 08/26/2015  EFW  Created the code
 //===============================================================================================================
 
+// Ignore spelling: proj
+
 using System;
 using System.Collections.Generic;
 using System.IO;

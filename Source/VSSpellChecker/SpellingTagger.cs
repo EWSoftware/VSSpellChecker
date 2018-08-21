@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/13/2018
+// Updated : 08/20/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -30,6 +30,7 @@
 //                  Added code to ignore .NET and C-style format string specifiers.
 // 02/28/2015  EFW  Added support for code analysis dictionary options
 // 07/28/2015  EFW  Added support for culture information in the spelling suggestions
+// 08/20/2018  EFW  Added support for the inline ignore spelling directive
 //===============================================================================================================
 
 using System;
@@ -63,7 +64,7 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This represents a word ignored once within the document
         /// </summary>
-        private class IgnoredWord
+        private class IgnoredOnceWord
         {
             /// <summary>
             /// The span containing the word's location
@@ -87,7 +88,7 @@ namespace VisualStudio.SpellChecker
             /// Constructor
             /// </summary>
             /// <param name="span">The span containing the word's location</param>
-            public IgnoredWord(ITrackingSpan span)
+            public IgnoredOnceWord(ITrackingSpan span)
             {
                 this.Span = span;
                 this.Word = span.GetText(span.TextBuffer.CurrentSnapshot);
@@ -111,12 +112,16 @@ namespace VisualStudio.SpellChecker
 
         private readonly object _dirtySpanLock = new object();
         private volatile List<MisspellingTag> _misspellings;
-        private volatile List<IgnoredWord> wordsIgnoredOnce;
+        private volatile List<IgnoredOnceWord> wordsIgnoredOnce;
+        private readonly List<InlineIgnoredWord> inlineIgnoredWords;
 
         private Thread _updateThread;
         private DispatcherTimer _timer;
 
         private bool _isClosed, unescapeApostrophes;
+
+        private readonly static Regex reIgnoreSpelling = new Regex(
+            @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -187,7 +192,8 @@ namespace VisualStudio.SpellChecker
 
             _dirtySpans = new List<SnapshotSpan>();
             _misspellings = new List<MisspellingTag>();
-            wordsIgnoredOnce = new List<IgnoredWord>();
+            wordsIgnoredOnce = new List<IgnoredOnceWord>();
+            inlineIgnoredWords = new List<InlineIgnoredWord>();
 
             string filename = buffer.GetFilename();
 
@@ -378,7 +384,7 @@ namespace VisualStudio.SpellChecker
         {
             if(!_isClosed)
             {
-                var newIgnoredWords = new List<IgnoredWord>(wordsIgnoredOnce) { new IgnoredWord(e.Span) };
+                var newIgnoredWords = new List<IgnoredOnceWord>(wordsIgnoredOnce) { new IgnoredOnceWord(e.Span) };
                 var currentMisspellings = _misspellings;
 
                 // Raise the TagsChanged event to get rid of the tags on the ignored word
@@ -650,8 +656,30 @@ namespace VisualStudio.SpellChecker
 
             lock(_dirtySpanLock)
             {
-                if(!_isClosed && _dirtySpans.Count != 0)
-                    _dispatcher.BeginInvoke(new Action(() => ScheduleUpdate()));
+                if(!_isClosed)
+                {
+                    // Clear out any inline ignored word spans that don't exist anymore (i.e. the containing line
+                    // was deleted).
+                    int removed = inlineIgnoredWords.RemoveAll(s => s.Span.GetSpan(snapshot).IsEmpty);
+
+                    // If any new inline ignored words were seen or removed, rescan the whole file
+                    var newInlineIgnored = inlineIgnoredWords.Where(i => i.IsNew);
+
+                    if(newInlineIgnored.Any() || removed != 0)
+                    {
+                        foreach(var i in newInlineIgnored)
+                            i.IsNew = false;
+
+                        _dirtySpans.Clear();
+
+                        foreach(var line in snapshot.Lines)
+                            if(!line.Extent.IsEmpty)
+                                _dirtySpans.Add(line.Extent);
+                    }
+
+                    if(_dirtySpans.Count != 0)
+                        _dispatcher.BeginInvoke(new Action(() => ScheduleUpdate()));
+                }
             }
         }
 
@@ -696,6 +724,41 @@ namespace VisualStudio.SpellChecker
                         Debug.WriteLine(ex);
                     }
 
+                // Get any ignored words specified inline within the span
+                foreach(Match m in reIgnoreSpelling.Matches(textToSplit))
+                {
+                    string ignored = m.Groups["IgnoredWords"].Value;
+                    bool caseSensitive = !String.IsNullOrWhiteSpace(m.Groups["CaseSensitive"].Value);
+                    int start = m.Groups["IgnoredWords"].Index;
+
+                    foreach(var ignoreSpan in wordSplitter.GetWordsInText(ignored))
+                    {
+                        var ss = new SnapshotSpan(span.Snapshot, span.Start + start + ignoreSpan.Start,
+                            ignoreSpan.Length);
+                        var match = inlineIgnoredWords.FirstOrDefault(i => i.Span.GetSpan(span.Snapshot).IntersectsWith(ss));
+
+                        if(match != null)
+                        {
+                            // If the span is already there, ignore it
+                            if(match.Word == ss.GetText() && match.CaseSensitive == caseSensitive)
+                                continue;
+
+                            // If different, replace it
+                            inlineIgnoredWords.Remove(match);
+                        }
+
+                        var ts = span.Snapshot.CreateTrackingSpan(ss, SpanTrackingMode.EdgeExclusive);
+
+                        inlineIgnoredWords.Add(new InlineIgnoredWord
+                        {
+                            Word = ignored.Substring(ignoreSpan.Start, ignoreSpan.Length),
+                            CaseSensitive = caseSensitive,
+                            Span = ts,
+                            IsNew = true
+                        });
+                    }
+                }
+
                 lastWord = new Microsoft.VisualStudio.Text.Span();
 
                 foreach(var word in wordSplitter.GetWordsInText(textToSplit))
@@ -713,6 +776,9 @@ namespace VisualStudio.SpellChecker
 
                     if(unescapeApostrophes && textToCheck.IndexOf("''", StringComparison.Ordinal) != -1)
                         textToCheck = textToCheck.Replace("''", "'");
+
+                    if(inlineIgnoredWords.Any(w => w.IsMatch(textToCheck)))
+                        continue;
 
                     // Spell check the word if it looks like one and is not ignored
                     if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||

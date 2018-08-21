@@ -112,6 +112,7 @@ the interactive spell checking tool window.</para>
 							</listItem>
 
 							<listItem>
+								<!-- Ignore spelling: sr -->
 								<para>Serbian (sr)</para>
 							</listItem>
 

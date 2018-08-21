@@ -7,6 +7,7 @@
 
 		<section>
 			<content>
+				<!-- Ignore spelling: Golovin, Lehenbauer -->
 				<para>This project is a Visual Studio editor extension that checks the spelling of comments, strings, and
 plain text as you type or interactively with a tool window.  It can also spell check an entire solution, project,
 or selected items.  It is based largely on the spell checker extension originally created by Noah Richards, Roman

@@ -27,6 +27,8 @@
 // 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
+// Ignore spelling: sql
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

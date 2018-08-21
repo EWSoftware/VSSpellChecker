@@ -19,6 +19,8 @@
 // 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
 
+// Ignore spelling: proj
+
 using System;
 using System.ComponentModel;
 using System.Collections.Generic;

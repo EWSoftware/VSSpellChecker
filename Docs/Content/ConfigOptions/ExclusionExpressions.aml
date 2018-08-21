@@ -20,7 +20,7 @@ configurations above the current one.  If enabled, any additional expressions in
 added to those.  If disabled, the settings in the current configuration will replace the inherited list of
 exclusion expressions.  If not inherited and the list is left empty, it effectively clears the list of exclusion
 expressions.</para>
-
+				<!-- Ignore spelling: dd -->
 				<para>The following are some common date/time format specifiers that may appear in designer code.  In
 designer code, the format specifiers are typically not contained with braces and are thus included in the spell
 checking process.  This can result in a large number of misspelling reports for non-words such as "dd" and "yyyy"

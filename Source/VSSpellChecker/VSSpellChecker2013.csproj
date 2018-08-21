@@ -116,6 +116,7 @@
     <Compile Include="ProjectSpellCheck\CodeClassifier.cs" />
     <Compile Include="ProjectSpellCheck\FileMisspelling.cs" />
     <Compile Include="ProjectSpellCheck\HtmlClassifier.cs" />
+    <Compile Include="ProjectSpellCheck\InlineIgnoredWord.cs" />
     <Compile Include="ProjectSpellCheck\MarkdownClassifier.cs" />
     <Compile Include="ProjectSpellCheck\PlainTextClassifier.cs" />
     <Compile Include="ProjectSpellCheck\RangeClassification.cs" />
