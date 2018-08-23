@@ -26,6 +26,7 @@
 		<CommandBinding Command="vssc:SpellCheckCommands.ExportAllIssues" Executed="cmdExportIssues_Executed" />
 		<CommandBinding Command="vssc:SpellCheckCommands.ExportProjectIssues" Executed="cmdExportIssues_Executed" />
 		<CommandBinding Command="vssc:SpellCheckCommands.ExportFileIssues" Executed="cmdExportIssues_Executed" />
+		<CommandBinding Command="vssc:SpellCheckCommands.CopyAsDirective" Executed="cmdCopyAsDirective_Executed" />
 		<CommandBinding Command="ApplicationCommands.Help" Executed="cmdHelp_Executed" />
 	</UserControl.CommandBindings>
 	<Grid>
@@ -102,14 +103,15 @@
 							<Separator />
 							<MenuItem Command="vssc:SpellCheckCommands.GoToIssue" />
 							<MenuItem Command="ApplicationCommands.Copy" Header="Copy Word to Clipboard" />
-                            <Separator />
-                            <MenuItem Header="Export">
+							<MenuItem Command="vssc:SpellCheckCommands.CopyAsDirective" />
+							<Separator />
+							<MenuItem Header="Export">
 								<MenuItem Command="vssc:SpellCheckCommands.ExportAllIssues" />
 								<MenuItem Command="vssc:SpellCheckCommands.ExportProjectIssues" />
 								<MenuItem Command="vssc:SpellCheckCommands.ExportFileIssues" />
 							</MenuItem>
-                            <MenuItem Header="Edit Configuration File" Name="miEditConfig" />
-                        </ContextMenu>
+							<MenuItem Header="Edit Configuration File" Name="miEditConfig" />
+						</ContextMenu>
 					</DataGrid.ContextMenu>
 				</DataGrid>
 			</Grid>

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MarkdownClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/24/2017
-// Note    : Copyright 2017, Eric Woodruff, All rights reserved
+// Updated : 08/22/2018
+// Note    : Copyright 2017-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify markdown file content
@@ -35,11 +35,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         #region Private data members
         //=====================================================================
 
-        private static Regex reInlineCode = new Regex(@"`[^`\r\n]+?`");
-        private static Regex reFencedCode = new Regex("^```.+?^```", RegexOptions.Singleline | RegexOptions.Multiline);
-        private static Regex reLatexCode = new Regex(@"^\$\$.+?^\$\$", RegexOptions.Singleline | RegexOptions.Multiline);
-
-        private static MatchEvaluator matchReplacement = new MatchEvaluator(m => new String(' ', m.Length));
+        private static Regex reCode = new Regex(@"(`[^`\r\n]+?`)|(^```.+?^```)|(^\$\$.+?^\$\$)",
+            RegexOptions.Singleline | RegexOptions.Multiline);
+        private static readonly MatchEvaluator matchReplacement = new MatchEvaluator(ReplaceAngleBrackets);
 
         #endregion
 
@@ -61,16 +59,32 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         /// <inheritdoc />
-        /// <remarks>This is overridden to replace code elements with blank spaces.  This works around an issue
-        /// where angle brackets in code spans mess up the HTML parser.  We want to ignore such spans anyway as
-        /// we don't want to spell check code which can generate a lot of false reports.</remarks>
+        /// <remarks>This is overridden to replace angle brackets in code elements with blank spaces as needed</remarks>
         public override void SetText(string text)
         {
-            text = reInlineCode.Replace(text, matchReplacement);
-            text = reFencedCode.Replace(text, matchReplacement);
-            text = reLatexCode.Replace(text, matchReplacement);
+            base.SetText(reCode.Replace(text, matchReplacement));
+        }
 
-            base.SetText(text);
+        /// <summary>
+        /// This match evaluator handles replacing angle brackets in the text as needed
+        /// </summary>
+        /// <param name="m">The match to evaluate</param>
+        /// <returns>The modified text</returns>
+        /// <remarks>This works around an issue where angle brackets in code spans mess up the HTML parser</remarks>
+        private static string ReplaceAngleBrackets(Match m)
+        {
+            int lt = m.Value.IndexOf('<'), gt = m.Value.IndexOf('>');
+
+            // If one but not the other is present or if both are present but it doesn't look like any closing
+            // elements are present, replace them with spaces.
+            if((lt != -1 && gt == -1) || (lt == -1 && gt != -1) || (lt != -1 && gt != -1 &&
+              m.Value.IndexOf("/>", StringComparison.Ordinal) == -1 &&
+              m.Value.IndexOf("</", StringComparison.Ordinal) == -1))
+            {
+                return m.Value.Replace('<', ' ').Replace('>', ' ');
+            }
+
+            return m.Value;
         }
         #endregion
     }

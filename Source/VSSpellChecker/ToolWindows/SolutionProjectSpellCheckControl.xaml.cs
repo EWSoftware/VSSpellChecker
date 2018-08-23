@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/20/2018
+// Updated : 08/22/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -1771,6 +1771,22 @@ namespace VisualStudio.SpellChecker.ToolWindows
             else
                 MessageBox.Show("Select an issue for export first", PackageResources.PackageTitle,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
+        }
+
+        /// <summary>
+        /// Copy the selected word to the clipboard as an Ignore Spelling directive
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void cmdCopyAsDirective_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if(dgIssues.SelectedIndex != -1)
+            {
+                var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
+                var issue = issues[dgIssues.SelectedIndex];
+
+                Clipboard.SetText(String.Format("Ignore Spelling: {0}", issue.Word));
+            }
         }
 
         /// <summary>

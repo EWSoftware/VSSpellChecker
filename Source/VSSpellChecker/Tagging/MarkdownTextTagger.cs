@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 08/17/2018
+// Updated : 08/21/2018
 // Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -74,9 +74,6 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <inheritdoc />
         public IEnumerable<ITagSpan<NaturalTextTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            string text;
-            int start, end;
-
             if(classifier == null || spans == null || spans.Count == 0)
                 yield break;
 
@@ -92,87 +89,22 @@ namespace VisualStudio.SpellChecker.Tagging
 
                     switch(name)
                     {
-                        case "comment":
-                        case "md_bold":
+                        case "md_bold":     // Markers only, these contain nothing that can be spell checked
                         case "md_header":
                         case "md_html":
+                        case "md_italic":
                         case "md_quote":
-                        case "natural language":
-                            // Note that "md_html" can contain a mix of HTML elements and text.  The tagger will
-                            // do its best to ignore the HTML elements and their attributes and pick out the text.
+                        case "keyword":
+                            break;
+
+                        default:
+                            // "md_code" will most likely contain a fair number of false reports but the
+                            // classification can be excluded if necessary through the configuration or
+                            // specific unwanted words through the Ignore Spelling directive.
                             classificationCache.Add(name);
 
                             if(!ignoredClassifications.Contains(name))
                                 yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
-                            break;
-
-                        case "md_italic":
-                            // Italics may be denoted with underscores so we'll need to trim them off of the
-                            // span or it will not spell check the text if the "treat underscore as separator"
-                            // option is turned off.
-                            text = classificationSpan.Span.GetText();
-                            start = 0;
-
-                            while(start < text.Length && text[start] == '_')
-                                start++;
-
-                            end = text.Length - 1;
-
-                            while(end > start && text[end] == '_')
-                                end--;
-
-                            end++;
-
-                            if(end - start > 1)
-                            {
-                                classificationCache.Add(name);
-
-                                if(!ignoredClassifications.Contains(name))
-                                    yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
-                                        classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
-                            }
-                            break;
-
-                        case "keyword":
-                            // An image in the form: ![Alternate text](URL "Title")
-                            // A URL link in the form: [Inner text](URL "Title)
-                            text = classificationSpan.Span.GetText();
-
-                            start = text.IndexOf('[');
-                            end = text.IndexOf(']');
-
-                            if(start != -1 && end != -1 && end > start)
-                            {
-                                classificationCache.Add(name);
-
-                                if(!ignoredClassifications.Contains(name))
-                                    yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
-                                        classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
-                            }
-
-                            start = text.IndexOf('"');
-                            end = text.IndexOf('"', start + 1);
-
-                            if(start == -1 || end == -1)
-                            {
-                                start = text.IndexOf('\'');
-                                end = text.IndexOf('\'', start + 1);
-                            }
-
-                            if(start != -1 && end != -1 && end > start)
-                            {
-                                classificationCache.Add(name);
-
-                                if(!ignoredClassifications.Contains(name))
-                                    yield return new TagSpan<NaturalTextTag>(new SnapshotSpan(
-                                        classificationSpan.Span.Start + start, end - start), new NaturalTextTag());
-                            }
-                            break;
-
-                        default:
-                            // All other classifications such as code are ignored.  While there may be text
-                            // within such spans that needs spell checking, it could prove rather difficult
-                            // to extract so we'll ignore it.
                             break;
                     }
                 }
