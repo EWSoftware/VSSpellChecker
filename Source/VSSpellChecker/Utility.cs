@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/17/2018
+// Updated : 08/22/2018
 // Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -542,7 +542,7 @@ namespace VisualStudio.SpellChecker
             if(allWords)
                 return words;
 
-            return words.Distinct().Where(w => w.Length > 2 && w.IndexOfAny(
+            return words.Distinct().Where(w => w.Length > 1 && w.IndexOfAny(
                 new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
         }
 

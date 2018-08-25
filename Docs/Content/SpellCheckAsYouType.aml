@@ -44,6 +44,10 @@ for each available language.  Choosing an option will add the word to that langu
 					</listItem>
 
 				</list>
+
+				<para>You can add Ignore Spelling directives to a comment within a file to inform the spell checker about
+words that you do not want spell checked in it.  See the <link xlink:href="3094ee74-88ae-4355-b702-23dcd55b4197" />
+help topic form more information.</para>
 			</content>
 		</section>
 

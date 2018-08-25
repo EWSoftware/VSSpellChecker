@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/16/2018
+// Updated : 08/23/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -693,6 +693,14 @@ namespace VisualStudio.SpellChecker.Configuration
                     else
                         exclusionExpressions = tempList;
                 }
+
+                // Always add the Ignore Spelling directive expression as we don't want the directive words
+                // included when spell checking with non-English dictionaries.
+                string directiveExp = ProjectSpellCheck.InlineIgnoredWord.reIgnoreSpelling.ToString();
+
+                if(!exclusionExpressions.Any(e => e.ToString().Equals(directiveExp, StringComparison.Ordinal)))
+                    exclusionExpressions.Add(new Regex(directiveExp,
+                        ProjectSpellCheck.InlineIgnoredWord.reIgnoreSpelling.Options));
 
                 this.InheritIgnoredFilePatterns = configuration.ToBoolean(PropertyNames.InheritIgnoredFilePatterns);
 

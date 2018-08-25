@@ -27,25 +27,32 @@ checking process.  This can result in a large number of misspelling reports for 
 in format specifiers such as "MM/dd/yyyy".  By using one or more exclusion expressions to ignore such spans,
 they can be removed and not reported.</para>
 
-<code language="none" title="Example Date Format Specifier Exclusion Expressions">
-d{1,2}, yyyy
-d{3,4} MM/dd
-d{3,4}, MMM
-dd MMM
-dd/yyyy
-ddd dd
-hh:mm tt
-M{3,4} yyyy
-MMM.d{1,2}
-</code>
+				<!-- Ignore Spelling: nn ss tt -->
+				<code language="none" title="Example Exclusion Expressions">
+					Various Date/Time Formats
+
+					(d{1,2}, )?yyyy
+					d{2,4},?\s{0,3}M{2,3}(/dd)?
+					(d{1,2}[/\- ])?yy(yy)?
+					d{3,4}( dd)?
+					h{1,2}:(mm|nn)(:ss)?(.f{1,4})?( tt| AM/?PM)?  Options: Ignore Case
+					M{2,4}[/\- ]d{1,2}
+					M{2,4} yyyy
+					yyyy-MM-dd
+
+					GUIDs
+
+					[{(]?[0-9A-F]{8}[-]?([0-9A-F]{4}[-]?){3}[0-9A-F]{12}[)}]?  Options: Ignore Case
+				</code>
 
 				<para>Another example is CSS class name or control ID patterns.  For example, adding the expression
 <codeInline>btn[a-z\-]*?</codeInline> would prevent the ID and class names from being reported in the following
 line of Razor code in an HTML file.</para>
 
-<code language="html" title=" ">
-@Html.MyButton("Save", id: "btn-save", classes: "btn btn-default my-btn-class")
-</code>
+				<!-- Ignore Spelling: btn -->
+				<code language="html" title=" ">
+					@Html.MyButton("Save", id: "btn-save", classes: "btn btn-default my-btn-class")
+				</code>
 
 				<alert class="tip">
 					<para>It is possible that a large number of exclusion expressions may slow down the overall spell

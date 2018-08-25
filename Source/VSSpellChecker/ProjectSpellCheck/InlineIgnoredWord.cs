@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InlineIgnoredWord.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/20/2018
+// Updated : 08/23/2018
 // Note    : Copyright 2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -19,6 +19,8 @@
 //===============================================================================================================
 
 using System;
+using System.Text.RegularExpressions;
+
 using Microsoft.VisualStudio.Text;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
@@ -32,6 +34,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
     /// Typically, the directives will be placed in comments.  All file types are supported.</remarks>
     internal class InlineIgnoredWord
     {
+        internal readonly static Regex reIgnoreSpelling = new Regex(
+            @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
+
         /// <summary>
         /// The word to ignore
         /// </summary>

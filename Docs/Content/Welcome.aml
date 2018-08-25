@@ -50,6 +50,11 @@ solution, a single project, or any combination of items selected in the Solution
 					</listItem>
 
 					<listItem>
+						<para>An "Ignore Spelling" directive can be added in file comments to ignore specific words within
+it.</para>
+					</listItem>
+
+					<listItem>
 						<para>An option is available to spell check any WPF text box within Visual Studio.</para>
 					</listItem>
 
@@ -97,6 +102,11 @@ folders, and/or files are included in solution/project spell checking operations
 checked.</para>
 							</listItem>
 
+							<listItem>
+								<para>Ignore specific classifications of text based on the Visual Studio content type or file
+type.</para>
+							</listItem>
+							
 							<listItem>
 								<para>Exclude files from spell checking by filename wildcard pattern.</para>
 							</listItem>

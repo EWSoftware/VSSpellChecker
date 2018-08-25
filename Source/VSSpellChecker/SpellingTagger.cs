@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/20/2018
+// Updated : 08/22/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -119,9 +119,6 @@ namespace VisualStudio.SpellChecker
         private DispatcherTimer _timer;
 
         private bool _isClosed, unescapeApostrophes;
-
-        private readonly static Regex reIgnoreSpelling = new Regex(
-            @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -725,7 +722,7 @@ namespace VisualStudio.SpellChecker
                     }
 
                 // Get any ignored words specified inline within the span
-                foreach(Match m in reIgnoreSpelling.Matches(textToSplit))
+                foreach(Match m in InlineIgnoredWord.reIgnoreSpelling.Matches(textToSplit))
                 {
                     string ignored = m.Groups["IgnoredWords"].Value;
                     bool caseSensitive = !String.IsNullOrWhiteSpace(m.Groups["CaseSensitive"].Value);
@@ -735,7 +732,7 @@ namespace VisualStudio.SpellChecker
                     {
                         var ss = new SnapshotSpan(span.Snapshot, span.Start + start + ignoreSpan.Start,
                             ignoreSpan.Length);
-                        var match = inlineIgnoredWords.FirstOrDefault(i => i.Span.GetSpan(span.Snapshot).IntersectsWith(ss));
+                        var match = inlineIgnoredWords.FirstOrDefault(i => i.Span.GetSpan(span.Snapshot).OverlapsWith(ss));
 
                         if(match != null)
                         {
@@ -767,6 +764,10 @@ namespace VisualStudio.SpellChecker
                         yield break;
 
                     actualWord = textToSplit.Substring(word.Start, word.Length);
+
+                    if(inlineIgnoredWords.Any(w => w.IsMatch(actualWord)))
+                        continue;
+
                     mnemonicPos = actualWord.IndexOf(wordSplitter.Mnemonic);
 
                     if(mnemonicPos == -1)
@@ -776,9 +777,6 @@ namespace VisualStudio.SpellChecker
 
                     if(unescapeApostrophes && textToCheck.IndexOf("''", StringComparison.Ordinal) != -1)
                         textToCheck = textToCheck.Replace("''", "'");
-
-                    if(inlineIgnoredWords.Any(w => w.IsMatch(textToCheck)))
-                        continue;
 
                     // Spell check the word if it looks like one and is not ignored
                     if(wordSplitter.IsProbablyARealWord(textToCheck) && (rangeExclusions.Count == 0 ||

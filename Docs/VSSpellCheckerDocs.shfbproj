@@ -49,7 +49,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2018.8.3.0</HelpFileVersion>
+    <HelpFileVersion>2018.8.25.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -152,6 +152,7 @@
     <None Include="Content\Contributing.aml" />
     <None Include="Content\CorrectingIssues.aml" />
     <None Include="Content\CustomDictionaries.aml" />
+    <None Include="Content\IgnoreSpellingDirective.aml" />
     <None Include="Content\Installation.aml" />
     <None Include="Content\KnownIssues.aml" />
     <None Include="Content\ShortcutKeys.aml" />
@@ -180,6 +181,7 @@
     <None Include="Content\VersionHistory\v2016.5.28.0.aml" />
     <None Include="Content\VersionHistory\v2016.10.15.0.aml" />
     <None Include="Content\VersionHistory\v2017.3.26.0.aml" />
+    <None Include="Content\VersionHistory\v2018.8.25.0.aml" />
     <None Include="Content\Welcome.aml" />
     <None Include="VSSpellCheckerDocs.shfbproj.vsspell" />
   </ItemGroup>

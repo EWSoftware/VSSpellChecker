@@ -52,9 +52,10 @@ namespace VisualStudio.SpellChecker.Tagging
         /// HTML text tagger provider
         /// </summary>
         /// <remarks>The content types for this provider are "html" which covers regular HTML, "htmlx" which
-        /// covers derived types such as HTML files in Razor projects, and "code++.PHP" which covers PHP files.</remarks>
+        /// covers derived types such as HTML files in Razor projects, and "code++.PHP" and "code++.Markdown"
+        /// which cover PHP and markdown files when no extension is present that handles them.</remarks>
         [Export(typeof(ITaggerProvider)), ContentType("html"), ContentType("htmlx"), ContentType("code++.PHP"),
-          TagType(typeof(NaturalTextTag))]
+          ContentType("code++.Markdown"), TagType(typeof(NaturalTextTag))]
         internal class HtmlTextTaggerProvider : ITaggerProvider
         {
             [Import]

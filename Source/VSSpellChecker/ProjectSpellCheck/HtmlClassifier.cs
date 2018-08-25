@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 08/25/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -41,13 +41,16 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         private string pageLanguage;
 
-        private static readonly Regex rePageLanguage = new Regex("<%@.*Language=\"(?<Language>.*?)\".*?%>",
+        private static readonly Regex reAspPhpScript = new Regex(@"<(%|\?).*?(\1)>", RegexOptions.Singleline);
+        private static readonly Regex rePageLanguage = new Regex("\xFE%@.*Language=\"(?<Language>.*?)\".*?%\xFF",
             RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        private static readonly Regex reScript = new Regex(@"<(%|\?).*?(\1)>", RegexOptions.Singleline);
+        private static readonly Regex reScript = new Regex(@"\xFE(%|\?).*?(\1)\xFF", RegexOptions.Singleline);
         private static readonly Regex reScriptElement = new Regex(@"<script.*?(?<!(%|\?))>",
             RegexOptions.IgnoreCase | RegexOptions.Singleline);
         private static readonly Regex reScriptLanguage = new Regex(@"type=(?<Language>[^\s]*)",
             RegexOptions.IgnoreCase);
+
+        private static readonly MatchEvaluator matchReplacement = new MatchEvaluator(ReplaceAngleBrackets);
 
         private Dictionary<string, TextClassifier> classifiers;
 
@@ -72,6 +75,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         /// <inheritdoc />
+        /// <remarks>This is overridden to replace angle brackets in ASP.NET/PHP code blocks with markers
+        /// as needed.</remarks>
+        public override void SetText(string text)
+        {
+            base.SetText(reAspPhpScript.Replace(text, matchReplacement));
+        }
+
+        /// <inheritdoc />
         public override IEnumerable<SpellCheckSpan> Parse()
         {
             List<SpellCheckSpan> spans = new List<SpellCheckSpan>();
@@ -87,6 +98,18 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         #region Helper methods
         //=====================================================================
+
+        /// <summary>
+        /// This match evaluator handles replacing angle brackets in the text as needed
+        /// </summary>
+        /// <param name="m">The match to evaluate</param>
+        /// <returns>The modified text</returns>
+        /// <remarks>This works around an issue where angle brackets in inline ASP.NET/PHP code blocks that mess
+        /// up the HTML parser</remarks>
+        private static string ReplaceAngleBrackets(Match m)
+        {
+            return m.Value.Replace('<', '\xFE').Replace('>', '\xFF');
+        }
 
         /// <summary>
         /// This is used to parse HTML nodes
@@ -214,18 +237,20 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 }
 
                 // Ignore ASP.NET directives
-                if(!m.Value.StartsWith("<%@", StringComparison.Ordinal))
+                if(!m.Value.StartsWith("\xFE%@", StringComparison.Ordinal))
                 {
                     var classifier = this.GetClassifier(pageLanguage);
 
-                    classifier.SetText(m.Value);
+                    // Convert the markers back to angle brackets for the code classifier
+                    classifier.SetText(m.Value.Replace('\xFE', '<').Replace('\xFF', '>'));
 
                     foreach(var s in classifier.Parse())
                     {
                         // Adjust the span to set the position relative to the start of the block within this file
                         s.Span = new Span(s.Span.Start + offset, s.Span.Length);
 
-                        System.Diagnostics.Debug.Assert(this.Text.Substring(s.Span.Start, s.Span.Length) == s.Text);
+                        System.Diagnostics.Debug.Assert(this.Text.Substring(s.Span.Start, s.Span.Length) ==
+                            s.Text.Replace('<', '\xFE').Replace('>', '\xFF'));
 
                         spans.Add(s);
                     }

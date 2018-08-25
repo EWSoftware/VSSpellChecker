@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/22/2018
+// Updated : 08/23/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -63,9 +63,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private CancellationTokenSource cancellationTokenSource;
         private WordSplitter wordSplitter;
         private bool unescapeApostrophes;
-
-        private readonly static Regex reIgnoreSpelling = new Regex(
-            @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -652,7 +649,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 // Note exclusions indicated inline within the text
                                 inlineIgnored.Clear();
 
-                                foreach(Match m in reIgnoreSpelling.Matches(classifier.Text))
+                                foreach(Match m in InlineIgnoredWord.reIgnoreSpelling.Matches(classifier.Text))
                                 {
                                     string ignored = m.Groups["IgnoredWords"].Value;
                                     bool caseSensitive = !String.IsNullOrWhiteSpace(m.Groups["CaseSensitive"].Value);

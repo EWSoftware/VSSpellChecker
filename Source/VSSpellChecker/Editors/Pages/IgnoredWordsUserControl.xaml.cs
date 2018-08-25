@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/07/2016
-// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
+// Updated : 08/22/2018
+// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the ignored words spell checker configuration settings
@@ -161,7 +161,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         if(addWord.Length > 1 && addWord[0] == '\\' && !escapedLetters.Contains(addWord[1]))
                             addWord = addWord.Substring(1);
 
-                    if(addWord.Length > 2)
+                    if(addWord.Length > 1)
                     {
                         idx = lbIgnoredWords.Items.IndexOf(addWord);
 

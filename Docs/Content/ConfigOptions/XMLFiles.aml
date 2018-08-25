@@ -39,21 +39,6 @@ the list of elements or attributes.</para>
 				<para>When the inherited option is enabled, the <ui>Default</ui> buttons clear the list of elements or
 attributes.  If not inherited, they will set the list to the same one used in the global configuration.</para>
 
-				<para>The following options are also available on this page:</para>
-
-				<list class="bullet">
-					<listItem>
-						<para><ui>Ignore comments in XML files</ui> - This option is disabled by default.  If enabled,
-comments will be ignored when spell checking XML files.</para>
-					</listItem>
-
-					<listItem>
-						<para><ui>Ignore comments in HTML files</ui> - This option is disabled by default.  If enabled,
-comments will be ignored when spell checking HTML files.</para>
-					</listItem>
-
-				</list>
-				
 			</content>
 		</section>
 

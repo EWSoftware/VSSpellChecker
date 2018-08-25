@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Topics>
-  <Topic id="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" visible="True" isDefault="true" isSelected="true" title="Welcome">
+  <Topic id="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" visible="True" isDefault="true" title="Welcome">
     <HelpKeywords>
       <HelpKeyword index="K" term="Welcome" />
     </HelpKeywords>
@@ -46,12 +46,17 @@
       </HelpKeywords>
     </Topic>
   </Topic>
+  <Topic id="3094ee74-88ae-4355-b702-23dcd55b4197" visible="True" title="Using the Ignore Spelling Directive">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="spell check, ignore spelling directive" />
+    </HelpKeywords>
+  </Topic>
   <Topic id="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" visible="True" title="Configuration Files">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration, configuration files" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isExpanded="true" title="Configuration Options">
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
@@ -139,10 +144,15 @@
       <HelpKeyword index="K" term="submitting changes" />
     </HelpKeywords>
   </Topic>
-  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" title="Version History">
+  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isExpanded="true" title="Version History">
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="67af1ab3-1e2b-43ee-81a0-588b0cb0d336" visible="True" isSelected="true" title="Version 2018.8.25.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2018.8.25.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="5c8fdba1-adda-4aeb-9dc0-d5fb696c38c6" visible="True" title="Version 2018.8.3.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2018.8.3.0" />

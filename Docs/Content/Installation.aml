@@ -58,6 +58,14 @@ following options:</para>
 					</listItem>
 
 					<listItem>
+						<para><ui>Move to Next Spelling Issue</ui> and <ui>Move to Prior Spelling Issue</ui> - These move to
+the next and previous spelling issue within the current text editor.  These can be
+<link xlink:href="63d5096c-6695-441d-886a-01a120f2894a">bound to keyboard shortcuts</link> to make navigating
+between issues easier if you don't want to open the interactive spell checking tool window.
+					</para>
+					</listItem>
+
+					<listItem>
 						<para><ui>Spell Check Entire Solution</ui> - This opens the
 <link xlink:href="fa790577-88c0-4141-b8f4-d8b70f625cfd">solution/project spell check tool window</link> and
 immediately spell checks the entire solution.</para>
