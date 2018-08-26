@@ -186,11 +186,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <summary>
         /// Update the list of solutions/projects when a solution is opened or closed
         /// </summary>
-#if VS2017
-        private async void solutionEvents_OpenedClosedAsync()
-#else
         private void solutionEvents_OpenedClosedAsync()
-#endif
         {
             var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(false);
 
@@ -207,13 +203,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     List<string> names = new List<string>();
 
-#if VS2017
-                    if(LightweightSolutionApi.IsSolutionLoadDeferred)
-                        names.AddRange(await LightweightSolutionApi.AllProjectsAsync());
-                    else
-#endif
-                        foreach(Project p in solution.EnumerateProjects())
-                            names.Add(p.FullName);
+                    foreach(Project p in solution.EnumerateProjects())
+                        names.Add(p.FullName);
 
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 

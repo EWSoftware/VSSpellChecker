@@ -931,31 +931,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // Get the files to spell check.  This must be done on the UI thread as it interacts with the
             // project system.  It should be fast even for large projects.
             if(cboSpellCheckTarget.SelectedIndex == 0)
-            {
-                LightweightSolutionApi.LoadDeferredProjects(LightweightSolutionApi.DeferredProjects);
-
                 spellCheckFiles = SpellCheckFileInfo.AllProjectFiles(null).ToList();
-            }
             else
                 if(cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 1)
-                {
-                    var selectedProjects = LightweightSolutionApi.SelectedProjects();
-                    
-                    if(selectedProjects.Count != 0)
-                        if(selectedProjects.Contains("~~Solution~~"))
-                            LightweightSolutionApi.LoadDeferredProjects(LightweightSolutionApi.DeferredProjects);
-                        else
-                            LightweightSolutionApi.LoadDeferredProjects(LightweightSolutionApi.DeferredProjects.Where(
-                                kv => selectedProjects.Contains(Path.GetFileNameWithoutExtension(kv.Value))));
-
                     spellCheckFiles = SpellCheckFileInfo.SelectedProjectFiles().ToList();
-                }
                 else
                 {
                     string selectedProjectName = projectNames[cboSpellCheckTarget.SelectedIndex - 1];
-                    LightweightSolutionApi.LoadDeferredProjects(LightweightSolutionApi.DeferredProjects.Where(
-                        kv => kv.Value.EndsWith(selectedProjectName, StringComparison.OrdinalIgnoreCase)));
-
                     spellCheckFiles = SpellCheckFileInfo.AllProjectFiles(selectedProjectName).ToList();
                 }
 

@@ -35,17 +35,10 @@ namespace VisualStudio.SpellChecker
         /// VSSpellCheckEverywhere Package GUID (string form)
         /// </summary>
         public const string guidVSSpellCheckEverywherePkgString = "A447DC7A-A901-442C-B183-87DCBF015C1E";
-#if VS2017
-        /// <summary>
-        /// Command set GUID (string form) - VS2017 and later package
-        /// </summary>
-        public const string guidVSSpellCheckerCmdSetString = "43EA967E-0DE2-4136-8E52-C6DCFB5C2748";
-#else
         /// <summary>
         /// Command set GUID (string form) - VS2013/VS2015 package
         /// </summary>
         public const string guidVSSpellCheckerCmdSetString = "34482677-bc69-4bd3-8b8b-1ecd347f609d";
-#endif
         /// <summary>
         /// Command set GUID
         /// </summary>

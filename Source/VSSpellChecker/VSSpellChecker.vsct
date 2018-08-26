@@ -1,12 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-	<!--
-	***************************************************************************************************************
-	NOTE: If changes are made to this file, make the equivalent changes to the VS2017 copy excluding the
-	      package GUID.
-	***************************************************************************************************************
-	-->
-
 	<!-- This is the file that defines the actual layout and type of the commands.  It is divided in different
 			 sections (e.g. command definition, command placement, ...), with each defining a specific set of
 			 properties.  See the comment before each section for more details about how to use it. -->

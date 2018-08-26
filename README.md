@@ -1,4 +1,7 @@
- Welcome to the **Visual Studio Spell Checker** project.
+_**NOTE: This branch is for Visual Studio 2013/2015 legacy support.  For Visual Studio 2017 and later, use the
+master branch.**_
+
+Welcome to the **Visual Studio Spell Checker** project.
 
 * [Get the current release](https://github.com/EWSoftware/VSSpellChecker/releases)
 * [Ask a question or open an issue](https://github.com/EWSoftware/VSSpellChecker/issues)
