@@ -61,7 +61,7 @@ incoming changes from the origin.</para>
 			<title>Coding Style</title>
 			<content>
 				<para>In general, use the Visual Studio defaults.  Take a look at the existing code to see the styles in
-use.</para>
+use. The <localUri>.editorconfig</localUri> file defines the preferred style defaults.</para>
 
 				<list class="ordered">
 					<listItem>

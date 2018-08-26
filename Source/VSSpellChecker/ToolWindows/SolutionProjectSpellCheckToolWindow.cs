@@ -88,14 +88,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(solutionEvents != null)
                 {
-                    solutionEvents.Opened += solutionEvents_OpenedClosedAsync;
+                    solutionEvents.Opened += solutionEvents_OpenedClosed;
                     solutionEvents.BeforeClosing += solutionEvents_BeforeClosing;
-                    solutionEvents.AfterClosing += solutionEvents_OpenedClosedAsync;
+                    solutionEvents.AfterClosing += solutionEvents_OpenedClosed;
                     solutionEvents.ProjectAdded += solutionEvents_ProjectAdded;
                     solutionEvents.ProjectRemoved += solutionEvents_ProjectRemoved;
                     solutionEvents.ProjectRenamed += solutionEvents_ProjectRenamed;
 
-                    this.solutionEvents_OpenedClosedAsync();
+                    this.solutionEvents_OpenedClosed();
                 }
             }
         }
@@ -108,8 +108,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             if(solutionEvents != null)
             {
-                solutionEvents.Opened -= solutionEvents_OpenedClosedAsync;
-                solutionEvents.AfterClosing -= solutionEvents_OpenedClosedAsync;
+                solutionEvents.Opened -= solutionEvents_OpenedClosed;
+                solutionEvents.AfterClosing -= solutionEvents_OpenedClosed;
                 solutionEvents.ProjectRemoved -= solutionEvents_ProjectRemoved;
                 solutionEvents.ProjectRenamed -= solutionEvents_ProjectRenamed;
 
@@ -186,11 +186,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <summary>
         /// Update the list of solutions/projects when a solution is opened or closed
         /// </summary>
-#if VS2017
-        private async void solutionEvents_OpenedClosedAsync()
-#else
-        private void solutionEvents_OpenedClosedAsync()
-#endif
+        private void solutionEvents_OpenedClosed()
         {
             var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(false);
 
@@ -207,13 +203,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     List<string> names = new List<string>();
 
-#if VS2017
-                    if(LightweightSolutionApi.IsSolutionLoadDeferred)
-                        names.AddRange(await LightweightSolutionApi.AllProjectsAsync());
-                    else
-#endif
-                        foreach(Project p in solution.EnumerateProjects())
-                            names.Add(p.FullName);
+                    foreach(Project p in solution.EnumerateProjects())
+                        names.Add(p.FullName);
 
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 

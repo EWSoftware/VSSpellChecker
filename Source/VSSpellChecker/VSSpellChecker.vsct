@@ -1,12 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-	<!--
-	***************************************************************************************************************
-	NOTE: If changes are made to this file, make the equivalent changes to the VS2017 copy excluding the
-	      package GUID.
-	***************************************************************************************************************
-	-->
-
 	<!-- This is the file that defines the actual layout and type of the commands.  It is divided in different
 			 sections (e.g. command definition, command placement, ...), with each defining a specific set of
 			 properties.  See the comment before each section for more details about how to use it. -->
@@ -225,10 +218,10 @@
 		<!-- This is the GUID used to group the menu commands together -->
 		<!--
 		*************************************************************************************************************
-		NOTE: The GUID for guidVSSpellCheckerCommandSet must match the VS2013 package GUID in Guids.cs
+		NOTE: The GUID for guidVSSpellCheckerCommandSet must match the VS2017 package GUID in Guids.cs
 		*************************************************************************************************************
 		-->
-		<GuidSymbol name="guidVSSpellCheckerCommandSet" value="{34482677-bc69-4bd3-8b8b-1ecd347f609d}">
+		<GuidSymbol name="guidVSSpellCheckerCommandSet" value="{43EA967E-0DE2-4136-8E52-C6DCFB5C2748}">
 			<IDSymbol name="SpellCheckerConfig" value="0x0001" />
 			<IDSymbol name="SpellCheckerGroup" value="0x0004" />
 			<IDSymbol name="SpellCheckerActions" value="0x0008" />

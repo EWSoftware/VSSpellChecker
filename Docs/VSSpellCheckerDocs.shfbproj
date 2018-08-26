@@ -13,7 +13,7 @@
     <RootNamespace>VSSpellCheckerWiki</RootNamespace>
     <Name>VSSpellCheckerDocs</Name>
     <!-- SHFB properties -->
-    <FrameworkVersion>.NET Framework 4.5</FrameworkVersion>
+    <FrameworkVersion>.NET Framework 4.6</FrameworkVersion>
     <OutputPath>Help\</OutputPath>
     <HtmlHelpName>VSSpellChecker</HtmlHelpName>
     <Language>en-US</Language>
@@ -23,7 +23,7 @@
       <Argument Key="baseSourceCodeUrl" Value="https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/" />
     </TransformComponentArguments>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions2013.csproj" xmlns="" />
+      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions2017AndLater.csproj" xmlns="" />
     </DocumentationSources>
     <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
     <HelpFileFormat>Website</HelpFileFormat>

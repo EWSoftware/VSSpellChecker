@@ -31,23 +31,23 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\2017\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;VS2017</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\SpellChecker.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
-    <DocumentationFile>bin\2017\Debug\VisualStudio.SpellChecker.Definitions.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\VisualStudio.SpellChecker.Definitions.xml</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\2017\Release\</OutputPath>
-    <DefineConstants>TRACE;VS2017</DefineConstants>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\2017\Release\VisualStudio.SpellChecker.Definitions.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\VisualStudio.SpellChecker.Definitions.xml</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>

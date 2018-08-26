@@ -5,20 +5,6 @@ SETLOCAL
 CD Source
 
 ECHO *
-ECHO * VS2013/VS2015 package
-ECHO *
-
-REM Use the earliest version of MSBuild available
-IF EXIST "%ProgramFiles(x86)%\MSBuild\14.0" SET "MSBUILD=%ProgramFiles(x86)%\MSBuild\14.0\bin\MSBuild.exe"
-IF EXIST "%ProgramFiles(x86)%\MSBuild\12.0" SET "MSBUILD=%ProgramFiles(x86)%\MSBuild\12.0\bin\MSBuild.exe"
-
-..\Source\.nuget\NuGet restore "VSSpellChecker2013.sln"
-
-"%MSBUILD%" "VSSpellChecker2013.sln" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
-
-IF ERRORLEVEL 1 GOTO End
-
-ECHO *
 ECHO * VS2017 and later package
 ECHO *
 
@@ -29,9 +15,9 @@ IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15
 
 IF NOT EXIST "%MSBUILD%" GOTO End
 
-..\Source\.nuget\NuGet restore "VSSpellChecker2017AndLater.sln"
+packages\NuGet.CommandLine.4.7.1\tools\NuGet.exe restore VSSpellChecker2017AndLater.sln
 
-"%MSBUILD%" "VSSpellChecker2017AndLater.sln" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+"%MSBUILD%" VSSpellChecker2017AndLater.sln /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
 
 IF ERRORLEVEL 1 GOTO End
 
@@ -43,7 +29,7 @@ IF "%SHFBROOT%"=="" ECHO **** Sandcastle help file builder not installed.  Skipp
 
 CD NuGet
 
-..\Source\.nuget\NuGet Pack VSSpellChecker.nuspec -NoDefaultExcludes -NoPackageAnalysis -OutputDirectory ..\Deployment
+..\Source\packages\NuGet.CommandLine.4.7.1\tools\NuGet.exe Pack VSSpellChecker.nuspec -NoDefaultExcludes -NoPackageAnalysis -OutputDirectory ..\Deployment
 
 CD ..\
 
