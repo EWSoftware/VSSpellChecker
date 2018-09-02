@@ -78,10 +78,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         public bool HasActionSets => false;
 
         /// <inheritdoc />
-        public bool HasPreview
-        {
-            get { return (this.Preview != null); }
-        }
+        public bool HasPreview => (this.Preview != null);
 
         /// <inheritdoc />
         /// <returns>This suggested action does not have any icon automation text and always returns null</returns>

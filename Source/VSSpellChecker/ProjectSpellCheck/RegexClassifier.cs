@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -41,6 +41,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         private List<RegexClassification> expressions;
+
         #endregion
 
         #region Properties
@@ -49,10 +50,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the classification expressions
         /// </summary>
-        protected IEnumerable<RegexClassification> Expressions
-        {
-            get { return expressions; }
-        }
+        protected IEnumerable<RegexClassification> Expressions => expressions;
+
         #endregion
 
         #region Constructor
@@ -70,8 +69,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
           XElement classifierConfiguration) : base(filename, spellCheckConfiguration)
         {
             string expression, options;
-            RangeClassification classification;
-            RegexOptions regexOptions;
 
             expressions = new List<RegexClassification>();
 
@@ -85,11 +82,16 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         options = (string)match.Attribute("Options");
 
                         if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options, true,
-                          out regexOptions))
+                          out RegexOptions regexOptions))
+                        {
                             regexOptions = RegexOptions.None;
+                        }
 
-                        if(!Enum.TryParse<RangeClassification>((string)match.Attribute("Classification"), out classification))
+                        if(!Enum.TryParse<RangeClassification>((string)match.Attribute("Classification"),
+                          out RangeClassification classification))
+                        {
                             classification = RangeClassification.PlainText;
+                        }
 
                         try
                         {

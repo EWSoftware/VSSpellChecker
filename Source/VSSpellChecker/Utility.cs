@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/22/2018
+// Updated : 08/30/2018
 // Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -20,7 +20,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -29,7 +28,7 @@ using System.Xml.Linq;
 using EnvDTE;
 using EnvDTE80;
 
-using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -76,39 +75,12 @@ namespace VisualStudio.SpellChecker
             where TInterface : class
             where TService : class
         {
-            IServiceProvider provider = VSSpellCheckerPackage.Instance;
-
-            if(provider == null)
-                provider = VSSpellCheckEverywherePackage.Instance;
-
-            TInterface service = (provider == null) ? null : provider.GetService(typeof(TService)) as TInterface;
+            TInterface service = Package.GetGlobalService(typeof(TService)) as TInterface;
 
             if(service == null && throwOnError)
                 throw new InvalidOperationException("Unable to obtain service of type " + typeof(TService).Name);
 
             return service;
-        }
-
-        /// <summary>
-        /// This displays a formatted message using the <see cref="IVsUIShell"/> service
-        /// </summary>
-        /// <param name="icon">The icon to show in the message box</param>
-        /// <param name="message">The message format string</param>
-        /// <param name="parameters">An optional list of parameters for the message format string</param>
-        public static void ShowMessageBox(OLEMSGICON icon, string message, params object[] parameters)
-        {
-            Guid clsid = Guid.Empty;
-            int result;
-
-            if(message == null)
-                throw new ArgumentNullException("message");
-
-            IVsUIShell uiShell = GetServiceFromPackage<IVsUIShell, SVsUIShell>(true);
-
-            ErrorHandler.ThrowOnFailure(uiShell.ShowMessageBox(0, ref clsid,
-                Resources.PackageTitle, String.Format(CultureInfo.CurrentCulture, message, parameters),
-                String.Empty, 0, OLEMSGBUTTON.OLEMSGBUTTON_OK, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST, icon, 0,
-                out result));
         }
 
         /// <summary>
@@ -118,32 +90,27 @@ namespace VisualStudio.SpellChecker
         /// <returns>The filename or null if it could not be obtained</returns>
         public static string GetFilename(this ITextBuffer buffer)
         {
-            ITextDocument textDoc;
-            IVsTextBuffer vsTextBuffer;
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             if(buffer != null)
             {
                 // Most files have an ITextDocument property
-                if(buffer.Properties.TryGetProperty(typeof(ITextDocument), out textDoc))
+                if(buffer.Properties.TryGetProperty(typeof(ITextDocument), out ITextDocument textDoc))
                 {
                     if(textDoc != null && !String.IsNullOrEmpty(textDoc.FilePath))
                         return textDoc.FilePath;
                 }
 
-                if(buffer.Properties.TryGetProperty(typeof(IVsTextBuffer), out vsTextBuffer))
+                if(buffer.Properties.TryGetProperty(typeof(IVsTextBuffer), out IVsTextBuffer vsTextBuffer))
                 {
                     // Some, like HTML files, don't so we go through the IVsTextBuffer to get it
                     if(vsTextBuffer != null)
                     {
-                        var persistFileFormat = vsTextBuffer as IPersistFileFormat;
-                        string ppzsFilename;
-                        uint pnFormatIndex;
-
-                        if(persistFileFormat != null)
+                        if(vsTextBuffer is IPersistFileFormat persistFileFormat)
                         {
                             try
                             {
-                                persistFileFormat.GetCurFile(out ppzsFilename, out pnFormatIndex);
+                                persistFileFormat.GetCurFile(out string ppzsFilename, out uint pnFormatIndex);
 
                                 if(!String.IsNullOrEmpty(ppzsFilename))
                                     return ppzsFilename;
@@ -181,7 +148,9 @@ namespace VisualStudio.SpellChecker
         /// <returns>The filename extension or null if it could not be obtained</returns>
         public static string GetFilenameExtension(this ITextBuffer buffer)
         {
+#pragma warning disable VSTHRD010
             string path = GetFilename(buffer);
+#pragma warning restore VSTHRD010
 
             return String.IsNullOrEmpty(path) ? null : Path.GetExtension(path);
         }
@@ -336,9 +305,23 @@ namespace VisualStudio.SpellChecker
         /// <returns>The project item of the configuration file if found or null if not found</returns>
         public static ProjectItem FindProjectItemForFile(this Solution solution, string filename)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            if(String.IsNullOrWhiteSpace(filename))
+                return null;
+
+            if(!Path.IsPathRooted(filename))
+            {
+                // We're making an assumption that the path is in or just below the solution folder.  This may
+                // not be the case if the project has a folder too.  In such cases, we'll never find the file.
+                System.Diagnostics.Debug.WriteLine("**** FindProjectItemForFile called with a relative path.  " +
+                    "Assuming the file is in or below the solution folder.  This may not be correct.");
+                filename = Path.Combine(Path.GetDirectoryName(solution.FullName), filename);
+            }
+
             // If the file doesn't exist, we don't need to look any further.  This saves searching the solution
             // which can be slow for extremely large projects.
-            if(String.IsNullOrWhiteSpace(filename) || !File.Exists(filename))
+            if(!File.Exists(filename))
                 return null;
 
             return solution.FindProjectItem(filename);
@@ -352,6 +335,8 @@ namespace VisualStudio.SpellChecker
         /// solution item folders.</returns>
         public static IEnumerable<Project> EnumerateProjects(this Solution solution)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             return solution.Projects.Cast<Project>().SelectMany(EnumerateProjects);
         }
 
@@ -362,6 +347,8 @@ namespace VisualStudio.SpellChecker
         /// <returns>An enumerable list of zero or more projects based on the kind of project passed in</returns>
         public static IEnumerable<Project> EnumerateProjects(this Project project)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             switch(project.Kind)
             {
                 case EnvDTE.Constants.vsProjectKindSolutionItems:
@@ -388,9 +375,10 @@ namespace VisualStudio.SpellChecker
         /// <param name="dictionaryFile">The related dictionary file or null if there isn't one</param>
         /// <param name="serviceProvider">The service provider to use for interacting with the solution/project</param>
         /// <returns>True if it can, false if not</returns>
-        public static bool CanWriteToUserWordsFile(this string dictionaryWordsFile, string dictionaryFile,
-          IServiceProvider serviceProvider)
+        public static bool CanWriteToUserWordsFile(this string dictionaryWordsFile, string dictionaryFile)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             if(String.IsNullOrWhiteSpace(dictionaryWordsFile))
                 throw new ArgumentException("Dictionary words file cannot be null or empty", "dictionaryWordsFile");
 
@@ -401,16 +389,19 @@ namespace VisualStudio.SpellChecker
             if(!File.Exists(dictionaryWordsFile))
                 File.WriteAllText(dictionaryWordsFile, String.Empty);
 
-            // If no service provider or it's in the global folder, we can write to it if not read-only
-            if(serviceProvider == null || Path.GetDirectoryName(dictionaryWordsFile).StartsWith(
+            // If it's in the global configuration folder, we can write to it if not read-only
+            if(Path.GetDirectoryName(dictionaryWordsFile).StartsWith(
               SpellingConfigurationFile.GlobalConfigurationFilePath, StringComparison.OrdinalIgnoreCase))
+            {
                 return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
-
-            var dte = serviceProvider.GetService(typeof(SDTE)) as DTE2;
+            }
 
             // If not part of an active solution, we can write to it if not read-only
-            if(dte == null || dte.Solution == null || String.IsNullOrWhiteSpace(dte.Solution.FullName))
+            if(!(Package.GetGlobalService(typeof(SDTE)) is DTE2 dte) || dte.Solution == null ||
+              String.IsNullOrWhiteSpace(dte.Solution.FullName))
+            {
                 return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+            }
 
             // See if the user file or its related dictionary is part of the solution.  If neither are, we can
             // write to it if not read-only.

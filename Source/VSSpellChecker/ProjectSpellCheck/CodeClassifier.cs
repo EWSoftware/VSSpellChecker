@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/09/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -43,7 +43,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         private string xmlDocCommentDelimiter, quadSlashDelimiter, oldStyleDocCommentDelimiter;
-        private bool isCSharp, isCStyleCode;
+        private readonly bool isCSharp, isCStyleCode;
 
         #endregion
 
@@ -79,8 +79,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// comments to eliminated things that shouldn't be spell checked within them.</remarks>
         public override IEnumerable<SpellCheckSpan> Parse()
         {
-            int line, column;
-
             var spans = base.Parse();
 
             foreach(var span in spans)
@@ -120,7 +118,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     var docSpans = new List<SpellCheckSpan>();
 
-                    this.GetPosition(span.Span.Start, out line, out column);
+                    this.GetPosition(span.Span.Start, out int line, out int column);
 
                     this.LineOffset = line;
                     this.ColumnOffset = column;

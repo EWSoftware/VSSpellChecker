@@ -309,10 +309,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>A classifier based on the script language</returns>
         private TextClassifier GetClassifier(string language)
         {
-            TextClassifier c;
-
             // Cache the script classifiers as there may be more than one script block on the page
-            if(!classifiers.TryGetValue(language ?? String.Empty, out c))
+            if(!classifiers.TryGetValue(language ?? String.Empty, out TextClassifier c))
             {
                 if(!String.IsNullOrWhiteSpace(language) && language.ToLowerInvariant().IndexOf("vb",
                   StringComparison.OrdinalIgnoreCase) != -1)

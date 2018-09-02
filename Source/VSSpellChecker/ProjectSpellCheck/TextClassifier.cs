@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -51,20 +51,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the filename
         /// </summary>
-        public string Filename { get; private set; }
+        public string Filename { get; }
 
         /// <summary>
         /// This read-only property returns the spell checker configuration for the file
         /// </summary>
-        public SpellCheckerConfiguration SpellCheckConfiguration { get; private set; }
+        public SpellCheckerConfiguration SpellCheckConfiguration { get; }
 
         /// <summary>
         /// This is used to get an enumerable list of ignored range classifications that should not be spell checked
         /// </summary>
-        public IEnumerable<RangeClassification> IgnoredClassifications
-        {
-            get { return ignoredClassifications; }
-        }
+        public IEnumerable<RangeClassification> IgnoredClassifications => ignoredClassifications;
 
         /// <summary>
         /// This read-only property returns the text contained in the file
@@ -85,13 +82,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the line count
         /// </summary>
-        public int LineCount
-        {
-            get
-            {
-                return lineOffsets.Count - 1;
-            }
-        }
+        public int LineCount => lineOffsets.Count - 1;
 
         /// <summary>
         /// This read-only property is used to get the given line from the text
@@ -143,10 +134,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 exclusions = spellCheckConfiguration.IgnoredClassificationsFor(PropertyNames.FileType +
                     ClassifierFactory.ClassifierIdFor(filename));
 
-            RangeClassification rangeType;
-
             foreach(string exclusion in exclusions)
-                if(Enum.TryParse<RangeClassification>(exclusion, out rangeType))
+                if(Enum.TryParse<RangeClassification>(exclusion, out RangeClassification rangeType))
                     ignoredClassifications.Add(rangeType);
 
             if(!File.Exists(filename))
@@ -231,9 +220,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>The line number containing the offset</returns>
         public int GetLineNumber(int offset)
         {
-            int line, column;
-
-            this.GetPosition(offset, out line, out column);
+            this.GetPosition(offset, out int line, out int column);
 
             return line;
         }

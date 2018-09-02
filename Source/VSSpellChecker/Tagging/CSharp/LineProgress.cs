@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : LineProgress.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/18/2015
-// Note    : Copyright 2010-2014, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2014, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to track line progress while parsing C# code for natural text regions
@@ -39,11 +39,12 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         #region Private data members
         //=====================================================================
 
-        private ITextSnapshotLine _snapshotLine;
-        private List<SnapshotSpan> _naturalTextSpans;
+        private ITextSnapshotLine snapshotLine;
+        private List<SnapshotSpan> naturalTextSpans;
 
-        private string _lineText;
-        private int _linePosition, _naturalTextStart = -1;
+        private string lineText;
+        private int linePosition, naturalTextStart = -1;
+
         #endregion
 
         #region Properties
@@ -57,10 +58,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <summary>
         /// This read-only property returns true if at the end of the line, false if not
         /// </summary>
-        public bool EndOfLine
-        {
-            get { return _linePosition >= _snapshotLine.Length; }
-        }
+        public bool EndOfLine => linePosition >= snapshotLine.Length;
+
         #endregion
 
         #region Constructor
@@ -69,16 +68,14 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="line">The line snapshot</param>
+        /// <param name="snapshotLine">The line snapshot</param>
         /// <param name="state">The starting state</param>
         /// <param name="naturalTextSpans">The collection of natural text spans</param>
-        public LineProgress(ITextSnapshotLine line, State state, List<SnapshotSpan> naturalTextSpans)
+        public LineProgress(ITextSnapshotLine snapshotLine, State state, List<SnapshotSpan> naturalTextSpans)
         {
-            _snapshotLine = line;
-            _lineText = line.GetText();
-            _linePosition = 0;
-            _naturalTextSpans = naturalTextSpans;
-
+            this.snapshotLine = snapshotLine;
+            this.lineText = snapshotLine.GetText();
+            this.naturalTextSpans = naturalTextSpans;
             this.State = state;
         }
         #endregion
@@ -92,7 +89,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <returns>The character at the current line position</returns>
         public char Char()
         {
-            return _lineText[_linePosition];
+            return lineText[linePosition];
         }
 
         /// <summary>
@@ -102,7 +99,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// end of the line.</returns>
         public char NextChar()
         {
-            return _linePosition < _snapshotLine.Length - 1 ? _lineText[_linePosition + 1] : (char)0;
+            return linePosition < snapshotLine.Length - 1 ? lineText[linePosition + 1] : (char)0;
         }
 
         /// <summary>
@@ -112,7 +109,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// past the end of the line.</returns>
         public char NextNextChar()
         {
-            return _linePosition < _snapshotLine.Length - 2 ? _lineText[_linePosition + 2] : (char)0;
+            return linePosition < snapshotLine.Length - 2 ? lineText[linePosition + 2] : (char)0;
         }
 
         /// <summary>
@@ -126,10 +123,10 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             if(length < 1)
                 return String.Empty;
 
-            if(_linePosition < _snapshotLine.Length - length)
-                return _lineText.Substring(_linePosition, length);
+            if(linePosition < snapshotLine.Length - length)
+                return lineText.Substring(linePosition, length);
 
-            return _lineText.Substring(_linePosition);
+            return lineText.Substring(linePosition);
         }
 
         /// <summary>
@@ -138,7 +135,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <param name="count">The number of characters to advance</param>
         public void Advance(int count = 1)
         {
-            _linePosition += count;
+            linePosition += count;
         }
 
         /// <summary>
@@ -146,7 +143,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// </summary>
         public void AdvanceToEndOfLine()
         {
-            _linePosition = _snapshotLine.Length;
+            linePosition = snapshotLine.Length;
         }
 
         /// <summary>
@@ -154,8 +151,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// </summary>
         public void StartNaturalText()
         {
-            Debug.Assert(_naturalTextStart == -1, "Called StartNaturalText() twice without call to EndNaturalText()?");
-            _naturalTextStart = _linePosition;
+            Debug.Assert(naturalTextStart == -1, "Called StartNaturalText() twice without call to EndNaturalText()?");
+            naturalTextStart = linePosition;
         }
 
         /// <summary>
@@ -163,13 +160,13 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// </summary>
         public void EndNaturalText()
         {
-            Debug.Assert(_naturalTextStart != -1, "Called EndNaturalText() without StartNaturalText()?");
+            Debug.Assert(naturalTextStart != -1, "Called EndNaturalText() without StartNaturalText()?");
 
-            if(_naturalTextSpans != null && _linePosition > _naturalTextStart)
-                _naturalTextSpans.Add(new SnapshotSpan(_snapshotLine.Start + _naturalTextStart,
-                    _linePosition - _naturalTextStart));
+            if(naturalTextSpans != null && linePosition > naturalTextStart)
+                naturalTextSpans.Add(new SnapshotSpan(snapshotLine.Start + naturalTextStart,
+                    linePosition - naturalTextStart));
 
-            _naturalTextStart = -1;
+            naturalTextStart = -1;
         }
 
         /// <summary>
@@ -177,7 +174,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// </summary>
         public void IgnoreSpan()
         {
-            _naturalTextStart = -1;
+            naturalTextStart = -1;
         }
 
         /// <summary>
@@ -187,23 +184,23 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <returns>The element name if possible or an empty string if not</returns>
         public string DetermineElementName()
         {
-            int start, pos = _naturalTextStart;
+            int start, pos = naturalTextStart;
 
-            while(pos > 0 && _lineText[pos] != '<' && _lineText[pos] != '/')
+            while(pos > 0 && lineText[pos] != '<' && lineText[pos] != '/')
                 pos--;
 
-            if(pos < 1 || _lineText[pos] == '/')
+            if(pos < 1 || lineText[pos] == '/')
                 return String.Empty;
 
             start = ++pos;
 
-            while(pos < _naturalTextStart && _lineText[pos] != '>' && !System.Char.IsWhiteSpace(_lineText[pos]))
+            while(pos < naturalTextStart && lineText[pos] != '>' && !System.Char.IsWhiteSpace(lineText[pos]))
                 pos++;
 
-            if(pos >= _naturalTextStart)
+            if(pos >= naturalTextStart)
                 return String.Empty;
 
-            return _lineText.Substring(start, pos - start);
+            return lineText.Substring(start, pos - start);
         }
 
         /// <summary>
@@ -213,9 +210,9 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <returns>The attribute name if possible or an empty string if not</returns>
         public string DetermineAttributeName()
         {
-            int end, pos = _naturalTextStart;
+            int end, pos = naturalTextStart;
 
-            while(pos > 0 && _lineText[pos] != '=')
+            while(pos > 0 && lineText[pos] != '=')
                 pos--;
 
             if(pos < 1)
@@ -223,13 +220,13 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
             end = pos--;
 
-            while(pos > 0 && _lineText[pos] != '<' && !System.Char.IsWhiteSpace(_lineText[pos]))
+            while(pos > 0 && lineText[pos] != '<' && !System.Char.IsWhiteSpace(lineText[pos]))
                 pos--;
 
             if(pos < 1)
                 return String.Empty;
 
-            return _lineText.Substring(pos + 1, end - pos - 1);
+            return lineText.Substring(pos + 1, end - pos - 1);
         }
         #endregion
     }

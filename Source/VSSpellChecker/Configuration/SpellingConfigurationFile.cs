@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -42,8 +42,8 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         private Dictionary<string, PropertyInfo> propertyCache;
-        private PropertyDescriptorCollection configCache, csoCache, cadCache;
-        private SpellCheckerConfiguration defaultConfig;
+        private readonly PropertyDescriptorCollection configCache, csoCache, cadCache;
+        private readonly SpellCheckerConfiguration defaultConfig;
 
         private XDocument document;
         private XElement root;
@@ -529,9 +529,9 @@ namespace VisualStudio.SpellChecker.Configuration
                         }
                     }
 
-                    var defValue = prop.Attributes[typeof(DefaultValueAttribute)] as DefaultValueAttribute;
 
-                    return (defValue != null) ? defValue.Value : null;
+                    return (prop.Attributes[typeof(DefaultValueAttribute)] is DefaultValueAttribute defValue) ?
+                        defValue.Value : null;
                 }
                 catch
                 {
@@ -627,11 +627,10 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <returns>The requested <c>Boolean</c> value or the default if not found</returns>
         public bool ToBoolean(string propertyName)
         {
-            bool value;
             var property = this.GetPropertyElement(propertyName);
 
             if(property == null || String.IsNullOrWhiteSpace(property.Value) ||
-              !Boolean.TryParse(property.Value, out value))
+              !Boolean.TryParse(property.Value, out bool value))
             {
                 object defaultValue = this.DefaultValueFor(propertyName);
                 return (defaultValue != null) ? (bool)defaultValue : false;
@@ -668,11 +667,10 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <returns></returns>
         public TEnum ToEnum<TEnum>(string propertyName) where TEnum : struct
         {
-            TEnum value;
             var property = this.GetPropertyElement(propertyName);
 
             if(property == null || String.IsNullOrWhiteSpace(property.Value) ||
-              !Enum.TryParse<TEnum>(property.Value, true, out value))
+              !Enum.TryParse<TEnum>(property.Value, true, out TEnum value))
             {
                 object defaultValue = this.DefaultValueFor(propertyName);
                 value = (defaultValue != null) ? (TEnum)defaultValue : default(TEnum);
@@ -713,7 +711,6 @@ namespace VisualStudio.SpellChecker.Configuration
         {
             string match, options;
             Regex regex;
-            RegexOptions regexOpts;
 
             var property = this.GetPropertyElement(propertyName);
 
@@ -727,8 +724,11 @@ namespace VisualStudio.SpellChecker.Configuration
                         match = (string)value.Attribute("Match");
                         options = (string)value.Attribute("Options");
 
-                        if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options, out regexOpts))
+                        if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options,
+                          out RegexOptions regexOpts))
+                        {
                             regexOpts = RegexOptions.None;
+                        }
 
                         if(!String.IsNullOrWhiteSpace(match))
                             regex = new Regex(match, regexOpts, TimeSpan.FromMilliseconds(100));

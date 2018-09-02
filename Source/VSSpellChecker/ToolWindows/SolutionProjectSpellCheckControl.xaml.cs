@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/23/2018
+// Updated : 09/01/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -93,6 +93,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="target">The target to select and spell check</param>
         public void SpellCheck(SpellCheckTarget target)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             bool startSpellCheck = true;
 
             if(cancellationTokenSource != null)
@@ -145,8 +147,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         {
                                             currentProject = (string)startupProjects.GetValue(0);
 
+#pragma warning disable VSTHRD010
                                             var item = dte2.Solution.EnumerateProjects().FirstOrDefault(
                                                 p => p.UniqueName == currentProject);
+#pragma warning restore VSTHRD010
 
                                             if(item != null)
                                                 currentProject = item.FullName;
@@ -327,15 +331,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <returns>The window frame reference if successful, null if not</returns>
         private static IVsWindowFrame OpenTextEditorForFile(string filename)
         {
-            Microsoft.VisualStudio.OLE.Interop.IServiceProvider ppSP;
-            IVsUIHierarchy ppHier;
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             IVsWindowFrame ppWindowFrame = null;
-            uint pitemid;
 
             var openDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, SVsUIShellOpenDocument>(false);
 
             if(openDoc != null && openDoc.OpenDocumentViaProject(filename, VSConstants.LOGVIEWID_TextView,
-              out ppSP, out ppHier, out pitemid, out ppWindowFrame) == VSConstants.S_OK)
+              out Microsoft.VisualStudio.OLE.Interop.IServiceProvider ppSP, out IVsUIHierarchy ppHier,
+              out uint pitemid, out ppWindowFrame) == VSConstants.S_OK)
             {
                 // On occasion, the call above is successful but we get a null frame for some reason
                 if(ppWindowFrame != null)
@@ -359,7 +363,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private static IVsTextView GetTextViewForDocument(string filename, int position, int selectionLength)
         {
             IVsTextView textView = null;
+#pragma warning disable VSTHRD010
             var frame = OpenTextEditorForFile(filename);
+#pragma warning restore VSTHRD010
 
             if(frame != null)
             {
@@ -367,10 +373,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(textView != null && position != -1)
                 {
-                    int startLine, startColumn, endLine, endColumn, topLine;
+                    int topLine;
 
-                    if(textView.GetLineAndColumn(position, out startLine, out startColumn) == VSConstants.S_OK &&
-                      textView.GetLineAndColumn(position + selectionLength, out endLine, out endColumn) == VSConstants.S_OK &&
+                    if(textView.GetLineAndColumn(position, out int startLine, out int startColumn) == VSConstants.S_OK &&
+                      textView.GetLineAndColumn(position + selectionLength, out int endLine, out int endColumn) == VSConstants.S_OK &&
                       textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
                     {
                         if(selectionLength != -1)
@@ -434,23 +440,21 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// switch to the UI thread repeatedly while doing the spell checking to see if the document is open.</remarks>
         private IEnumerable<string> GetOpenDocumentNames()
         {
-            IEnumRunningDocuments documents;
-            IVsHierarchy docHierarchy;
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             IntPtr docData = IntPtr.Zero;
             uint[] docCookie = new uint[1];
-            uint flags, editLocks, readLocks, docId, fetched;
-            string moniker;
 
             var rdt = Utility.GetServiceFromPackage<IVsRunningDocumentTable, SVsRunningDocumentTable>(false);
 
             if(rdt != null)
             {
-                rdt.GetRunningDocumentsEnum(out documents);
+                rdt.GetRunningDocumentsEnum(out IEnumRunningDocuments documents);
 
-                while(documents.Next(1, docCookie, out fetched) == VSConstants.S_OK && fetched == 1)
+                while(documents.Next(1, docCookie, out uint fetched) == VSConstants.S_OK && fetched == 1)
                 {
-                    rdt.GetDocumentInfo(docCookie[0], out flags, out readLocks, out editLocks, out moniker,
-                        out docHierarchy, out docId, out docData);
+                    rdt.GetDocumentInfo(docCookie[0], out uint flags, out uint readLocks, out uint editLocks, out string moniker,
+                        out IVsHierarchy docHierarchy, out uint docId, out docData);
 
                     yield return moniker;
                 }
@@ -468,14 +472,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // Switch to the UI thread to get the document text.  This looks rather odd but it's the recommended
             // way to switch contexts in Visual Studio now.  Since we aren't asynchronous here, this runs an
             // asynchronous delegate and waits for it to finish.
+#pragma warning disable VSTHRD102
             var result = ThreadHelper.JoinableTaskFactory.Run<Tuple<string, IEnumerable<Span>>>(async delegate
+#pragma warning restore VSTHRD102
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
                 IEnumerable<Span> ignoredSpans = Enumerable.Empty<Span>();
-                IVsHierarchy hierarchy;
-                uint itemid, lockCookie = 0;
-                int endLine, endIndex;
+                uint lockCookie = 0;
                 string text = null;
                 IntPtr docDataUnk = IntPtr.Zero;
 
@@ -485,8 +489,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 {
                     try
                     {
-                        if(rdt.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_ReadLock, filename, out hierarchy,
-                          out itemid, out docDataUnk, out lockCookie) == VSConstants.S_OK)
+                        if(rdt.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_ReadLock, filename, out IVsHierarchy hierarchy,
+                          out uint itemid, out docDataUnk, out lockCookie) == VSConstants.S_OK)
                         {
                             object docDataObj = Marshal.GetObjectForIUnknown(docDataUnk);
                             IVsTextLines buffer = null;
@@ -494,15 +498,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             if(docDataObj is IVsTextLines)
                                 buffer = (IVsTextLines)docDataObj;
                             else
-                                if(docDataObj is IVsTextBufferProvider)
+                                if(docDataObj is IVsTextBufferProvider tp)
                                 {
-                                    IVsTextBufferProvider tp = (IVsTextBufferProvider)docDataObj;
-
                                     if(tp.GetTextBuffer(out buffer) != VSConstants.S_OK)
                                         buffer = null;
                                 }
 
-                            if(buffer == null || buffer.GetLastLineIndex(out endLine, out endIndex) != VSConstants.S_OK ||
+                            if(buffer == null || buffer.GetLastLineIndex(out int endLine, out int endIndex) != VSConstants.S_OK ||
                               buffer.GetLineText(0, 0, endLine, endIndex, out text) != VSConstants.S_OK)
                             {
                                 text = null;
@@ -512,18 +514,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 // Ignore Once spans are stored in the tagger.  To get to it, we need to get the
                                 // window frame.  From there, we can get the view, then the editor adapter, and
                                 // then the tagger.
-                                IVsUIHierarchy docHierarchy;
-                                IVsWindowFrame frame;
                                 Guid logicalView = VSConstants.LOGVIEWID_Primary;
                                 uint[] id = new uint[1] { itemid };
-                                int pfOpen;
-                                object value;
 
                                 var shellOpenDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, IVsUIShellOpenDocument>(false);
 
-                                if(shellOpenDoc.IsDocumentOpen((IVsUIHierarchy)hierarchy, id[0], filename,
-                                  ref logicalView, 0, out docHierarchy, id, out frame, out pfOpen) == VSConstants.S_OK &&
-                                  frame != null && frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK &&
+                                if(shellOpenDoc.IsDocumentOpen((IVsUIHierarchy)hierarchy, id[0], filename, ref logicalView, 0,
+                                  out IVsUIHierarchy docHierarchy, id, out IVsWindowFrame frame, out int pfOpen) == VSConstants.S_OK &&
+                                  frame != null && frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out object value) == VSConstants.S_OK &&
                                   ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))
                                 {
                                     var textView = VsShellUtilities.GetTextView(frame);
@@ -540,10 +538,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                                 try
                                                 {
                                                     var wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
-                                                    SpellingTagger tagger;
 
-                                                    if(wpfTextView.Properties.TryGetProperty(typeof(SpellingTagger), out tagger))
+                                                    if(wpfTextView.Properties.TryGetProperty(typeof(SpellingTagger),
+                                                      out SpellingTagger tagger))
+                                                    {
                                                         ignoredSpans = tagger.IgnoredOnceSpans;
+                                                    }
                                                 }
                                                 catch(ArgumentException)
                                                 {
@@ -592,7 +592,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
             BindingList<FileMisspelling> issues = new BindingList<FileMisspelling>();
             List<InlineIgnoredWord> inlineIgnored = new List<InlineIgnoredWord>();
             TextClassifier classifier;
-            List<string> cadFiles;
             string documentText;
             IEnumerable<Span> ignoredWordSpans = null;
 
@@ -607,7 +606,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     // Get the code analysis files for the related project.  These may be used to generate the
                     // spell checking configuration.
-                    if(!codeAnalysisFiles.TryGetValue(file.ProjectFile, out cadFiles))
+                    if(!codeAnalysisFiles.TryGetValue(file.ProjectFile, out List<string> cadFiles))
                         cadFiles = null;
 
                     wordSplitter.Configuration = file.GenerateConfiguration(cadFiles);
@@ -617,8 +616,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         // Create a dictionary for each configuration dictionary language ignoring any that are
                         // invalid and duplicates caused by missing languages which return the en-US dictionary.
                         var globalDictionaries = wordSplitter.Configuration.DictionaryLanguages.Select(l =>
-                            GlobalDictionary.CreateGlobalDictionary(l, null,
-                            wordSplitter.Configuration.AdditionalDictionaryFolders,
+                            GlobalDictionary.CreateGlobalDictionary(l, wordSplitter.Configuration.AdditionalDictionaryFolders,
                             wordSplitter.Configuration.RecognizedWords)).Where(d => d != null).Distinct().ToList();
 
                         if(globalDictionaries.Any())
@@ -664,6 +662,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                     }
                                 }
 
+                                // TODO: Use a progress reporter here instead?
                                 // Switch to the UI thread to update the progress and then switch back to this
                                 // one.  This runs the asynchronous delegate and waits for it to finish.
                                 ThreadHelper.JoinableTaskFactory.Run(async delegate
@@ -748,9 +747,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
           IEnumerable<SpellCheckSpan> spans)
         {
             List<Match> rangeExclusions = null;
-            IList<string> spellingAlternates;
             Span errorSpan, deleteWordSpan, lastWord;
-            string textToSplit, actualWord, textToCheck, preferredTerm;
+            string textToSplit, actualWord, textToCheck;
             int mnemonicPos;
 
             // **************************************************************************************************
@@ -830,7 +828,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             // Handle code analysis dictionary checks first as they may be not be recognized as
                             // correctly spelled words but have alternate handling.
                             if(wordSplitter.Configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
-                              wordSplitter.Configuration.DeprecatedTerms.TryGetValue(textToCheck, out preferredTerm))
+                              wordSplitter.Configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
                             {
                                 yield return new FileMisspelling(MisspellingType.DeprecatedTerm, errorSpan,
                                     actualWord, new[] { new SpellingSuggestion(null, preferredTerm) });
@@ -846,7 +844,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             }
 
                             if(wordSplitter.Configuration.CadOptions.TreatUnrecognizedWordsAsMisspelled &&
-                              wordSplitter.Configuration.UnrecognizedWords.TryGetValue(textToCheck, out spellingAlternates))
+                              wordSplitter.Configuration.UnrecognizedWords.TryGetValue(textToCheck, out IList<string> spellingAlternates))
                             {
                                 yield return new FileMisspelling(MisspellingType.UnrecognizedWord, errorSpan,
                                     actualWord, spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
@@ -911,9 +909,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
             Dictionary<string, List<string>> codeAnalysisFiles = new Dictionary<string, List<string>>(
                 StringComparer.OrdinalIgnoreCase);
             List<SpellCheckFileInfo> spellCheckFiles;
-            int maxIssues;
 
-            if(!Int32.TryParse(txtMaxIssues.Text, out maxIssues))
+            if(!Int32.TryParse(txtMaxIssues.Text, out int maxIssues))
             {
                 txtMaxIssues.Text = "5000";
                 maxIssues = 5000;
@@ -925,6 +922,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
             btnStartCancel.Content = "Cancel";
             spSpinner.Visibility = Visibility.Visible;
             dgIssues.ItemsSource = null;
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SetWaitCursor();
 
@@ -1189,11 +1188,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void dgIssues_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            DataGridRow row = ItemsControl.ContainerFromElement((DataGrid)sender,
-              e.OriginalSource as DependencyObject) as DataGridRow;
-
-            if(row != null)
+#pragma warning disable VSTHRD010
+            if(ItemsControl.ContainerFromElement((DataGrid)sender, e.OriginalSource as DependencyObject) is DataGridRow row)
                 cmdGoToIssue_Executed(sender, null);
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -1293,24 +1291,25 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void cmdReplace_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            string viewWord;
-            int startLine, startColumn, endLine, endColumn, idx = dgIssues.SelectedIndex;
+            int idx = dgIssues.SelectedIndex;
 
             if(idx != -1)
             {
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
                 var currentIssue = issues[dgIssues.SelectedIndex];
+#pragma warning disable VSTHRD010
                 var textView = GetTextViewForDocument(currentIssue.CanonicalName, currentIssue.Span.Start, -1);
+#pragma warning restore VSTHRD010
 
                 if(textView != null)
                 {
-                    if(textView.GetLineAndColumn(currentIssue.Span.Start, out startLine, out startColumn) == VSConstants.S_OK &&
-                      textView.GetLineAndColumn(currentIssue.Span.Start + currentIssue.Span.Length, out endLine,
-                      out endColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
+                    if(textView.GetLineAndColumn(currentIssue.Span.Start, out int startLine, out int startColumn) == VSConstants.S_OK &&
+                      textView.GetLineAndColumn(currentIssue.Span.Start + currentIssue.Span.Length, out int endLine,
+                      out int endColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
                     {
                         textView.SetSelection(startLine, startColumn, endLine, endColumn);
 
-                        if(textView.GetTextStream(startLine, startColumn, endLine, endColumn, out viewWord) == VSConstants.S_OK &&
+                        if(textView.GetTextStream(startLine, startColumn, endLine, endColumn, out string viewWord) == VSConstants.S_OK &&
                           viewWord.Equals(currentIssue.Word, StringComparison.OrdinalIgnoreCase))
                         {
                             if(currentIssue.MisspellingType != MisspellingType.DoubledWord)
@@ -1375,9 +1374,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdReplaceAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            int startLine, startColumn, endLine, endColumn, idx = dgIssues.SelectedIndex;
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            int idx = dgIssues.SelectedIndex;
             var suggestion = ucSpellCheck.SelectedSuggestion;
-            string viewWord, replacementWord;
+            string replacementWord;
             bool cancel = false;
 
             if(idx != -1 && suggestion != null)
@@ -1420,13 +1421,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     foreach(var misspelling in file)
                     {
-                        if(textView.GetLineAndColumn(misspelling.Span.Start, out startLine, out startColumn) == VSConstants.S_OK &&
-                          textView.GetLineAndColumn(misspelling.Span.Start + misspelling.Span.Length, out endLine,
-                          out endColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
+                        if(textView.GetLineAndColumn(misspelling.Span.Start, out int startLine, out int startColumn) == VSConstants.S_OK &&
+                          textView.GetLineAndColumn(misspelling.Span.Start + misspelling.Span.Length, out int endLine,
+                          out int endColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine, startColumn) == VSConstants.S_OK)
                         {
                             textView.SetSelection(startLine, startColumn, endLine, endColumn);
 
-                            if(textView.GetTextStream(startLine, startColumn, endLine, endColumn, out viewWord) == VSConstants.S_OK &&
+                            if(textView.GetTextStream(startLine, startColumn, endLine, endColumn,
+                              out string viewWord) == VSConstants.S_OK &&
                               viewWord.Equals(misspelling.Word, StringComparison.OrdinalIgnoreCase))
                             {
                                 replacementWord = suggestion.Suggestion;
@@ -1620,16 +1622,16 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void cmdGoToIssue_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            var currentIssue = ucSpellCheck.CurrentIssue as FileMisspelling;
-
-            if(currentIssue != null)
+            if(ucSpellCheck.CurrentIssue is FileMisspelling currentIssue)
             {
+#pragma warning disable VSTHRD010
                 if(GetTextViewForDocument(currentIssue.CanonicalName, currentIssue.Span.Start,
                   currentIssue.Span.Length) == null)
                 {
                     MessageBox.Show("Unable to open a text editor window for " + currentIssue.Filename,
                         PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
+#pragma warning restore VSTHRD010
             }
         }
 
@@ -1657,6 +1659,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     // that culture.  If null, it's added to the first available dictionary.
                     currentIssue.Dictionary.AddWordToDictionary(word, e.Parameter as CultureInfo);
 
+#pragma warning disable VSTHRD010
                     // If adding a modified word, replace the word in the file too and remove only this issue
                     if(!word.Equals(currentIssue.Word, StringComparison.OrdinalIgnoreCase))
                         cmdReplace_Executed(sender, e);
@@ -1667,6 +1670,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                           StringComparison.OrdinalIgnoreCase)).ToList())
                             issues.Remove(issue);
                     }
+#pragma warning restore VSTHRD010
 
                     if(idx >= dgIssues.Items.Count)
                         idx = dgIssues.Items.Count - 1;
@@ -1775,9 +1779,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void openConfigFile_Click(object sender, RoutedEventArgs e)
         {
-            MenuItem item = sender as MenuItem;
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            if(item != null && item.Tag != null && File.Exists((string)item.Tag))
+            if(sender is MenuItem item && item.Tag != null && File.Exists((string)item.Tag))
             {
                 var dte = Utility.GetServiceFromPackage<DTE, SDTE>(true);
 

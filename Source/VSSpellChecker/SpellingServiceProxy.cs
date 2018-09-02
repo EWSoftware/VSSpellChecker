@@ -47,8 +47,10 @@ namespace VisualStudio.SpellChecker
         /// <inheritdoc />
         public bool IsEnabled(ITextBuffer buffer)
         {
+#pragma warning disable VSTHRD010
             // Getting the configuration determines if spell checking is enabled for this file
             return (buffer != null && spellingService != null && spellingService.GetConfiguration(buffer) != null);
+#pragma warning restore VSTHRD010
         }
         #endregion
     }

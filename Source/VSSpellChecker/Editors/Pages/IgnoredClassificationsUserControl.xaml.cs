@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredClassificationsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -70,13 +70,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             /// </summary>
             public bool IsSelected
             {
-                get { return isSelected; }
+                get => isSelected;
                 set
                 {
                     if(value != isSelected)
                     {
                         isSelected = value;
-                        this.OnNotifyPropertyChanged("IsSelected");
+                        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
                     }
                 }
             }
@@ -87,13 +87,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             public event PropertyChangedEventHandler PropertyChanged;
 
-            private void OnNotifyPropertyChanged(string propertyName)
-            {
-                var handler = PropertyChanged;
-
-                if(handler != null)
-                    handler(this, new PropertyChangedEventArgs(propertyName));
-            }
             #endregion
         }
         #endregion
@@ -125,22 +118,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "Ignored Classifications"; }
-        }
+        public string Title => "Ignored Classifications";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "6a987caf-5ad9-4dab-a17c-c887881fec7a"; }
-        }
+        public string HelpUrl => "6a987caf-5ad9-4dab-a17c-c887881fec7a";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -248,10 +232,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
 

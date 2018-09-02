@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="Spell Checker Rule Set" Description="This is the common set of code analysis rules for Spell Checker projects" ToolsVersion="14.0">
+<RuleSet Name="Spell Checker Rule Set" Description="This is the common set of code analysis rules for Spell Checker projects" ToolsVersion="15.0">
   <Include Path="basiccorrectnessrules.ruleset" Action="Default" />
   <Include Path="basicdesignguidelinerules.ruleset" Action="Default" />
   <Include Path="extendedcorrectnessrules.ruleset" Action="Default" />

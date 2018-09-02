@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -38,9 +38,9 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         #region Private data members
         //=====================================================================
 
-        private ISpellingSuggestion replaceWith;
-        private SpellingDictionary dictionary;
-        private bool escapeApostrophes;
+        private readonly ISpellingSuggestion replaceWith;
+        private readonly SpellingDictionary dictionary;
+        private readonly bool escapeApostrophes;
 
         #endregion
 

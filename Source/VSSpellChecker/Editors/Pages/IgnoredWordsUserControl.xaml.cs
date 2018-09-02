@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/22/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -56,22 +56,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "Ignored Words"; }
-        }
+        public string Title => "Ignored Words";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "c592c4d8-7387-47fe-9b79-28bf0168f447"; }
-        }
+        public string HelpUrl => "c592c4d8-7387-47fe-9b79-28bf0168f447";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -310,7 +301,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     if(File.Exists(dlg.FileName))
                     {
-                        if(!dlg.FileName.CanWriteToUserWordsFile(null, VSSpellCheckerPackage.Instance))
+                        if(!dlg.FileName.CanWriteToUserWordsFile(null))
                         {
                             MessageBox.Show("File is read-only or could not be checked out",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -350,10 +341,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

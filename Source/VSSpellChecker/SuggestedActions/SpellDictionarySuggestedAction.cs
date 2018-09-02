@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellDictionarySuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/08/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide suggested actions for ignoring words or adding new words to the
@@ -39,9 +39,9 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         #region Private data members
         //=====================================================================
 
-        private SpellingDictionary dictionary;
-        private DictionaryAction action;
-        private CultureInfo culture;
+        private readonly SpellingDictionary dictionary;
+        private readonly DictionaryAction action;
+        private readonly CultureInfo culture;
 
         #endregion
 
@@ -65,8 +65,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             this.culture = culture;
 
             if(culture != null)
-                this.DisplayTextSuffix = String.Format(CultureInfo.InvariantCulture, "{0} ({1})",
-                    culture.EnglishName, culture.Name);
+                this.DisplayTextSuffix = $"{culture.EnglishName} ({culture.Name})";
 
             if(String.IsNullOrEmpty(this.DisplayText))
             {

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingSuggestion.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/28/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to represents a spelling suggestion that can be used to replace a misspelled
@@ -37,7 +37,7 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This read-only property returns the culture information for the suggestion
         /// </summary>
-        public CultureInfo Culture { get; private set; }
+        public CultureInfo Culture { get; }
 
         /// <summary>
         /// This read-only property returns the suggested replacement word
@@ -72,10 +72,10 @@ namespace VisualStudio.SpellChecker
         /// <returns>Returns true if the suggestions are equal, false if they are not</returns>
         public static bool Equals(SpellingSuggestion s1, SpellingSuggestion s2)
         {
-            if((object)s1 == null && (object)s2 == null)
+            if(s1 == null && s2 == null)
                 return true;
 
-            if((object)s1 == null)
+            if(s1 == null)
                 return false;
 
             return s1.Equals(s2);
@@ -88,9 +88,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>Returns true if the object equals this instance, false if it does not</returns>
         public override bool Equals(object obj)
         {
-            SpellingSuggestion s = obj as SpellingSuggestion;
-
-            return (s != null && ((this.Culture == null && s.Culture == null) ||
+            return (obj is SpellingSuggestion s && ((this.Culture == null && s.Culture == null) ||
                 (this.Culture != null && s.Culture != null && this.Culture.Name == s.Culture.Name)) &&
                 this.Suggestion == s.Suggestion);
         }
@@ -144,6 +142,5 @@ namespace VisualStudio.SpellChecker
             this.Suggestion = suggestion.Substring(0, pos) + mnemonic.ToString() + suggestion.Substring(pos);
         }
         #endregion
-
     }
 }

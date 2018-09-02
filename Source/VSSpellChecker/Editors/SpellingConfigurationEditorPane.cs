@@ -22,8 +22,6 @@ using System;
 
 using Microsoft.VisualStudio.Shell.Interop;
 
-using VisualStudio.SpellChecker.Configuration;
-
 namespace VisualStudio.SpellChecker.Editors
 {
     /// <summary>
@@ -62,12 +60,18 @@ namespace VisualStudio.SpellChecker.Editors
         /// <inheritdoc />
         protected override void LoadFile(string fileName)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
+#pragma warning disable VSTHRD010
             this.UIControl.LoadConfiguration(fileName);
+#pragma warning restore VSTHRD010
         }
 
         /// <inheritdoc />
         protected override void SaveFile(string fileName)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SetWaitCursor();
 
             if(this.IsDirty || !fileName.Equals(this.UIControl.Filename, StringComparison.OrdinalIgnoreCase))

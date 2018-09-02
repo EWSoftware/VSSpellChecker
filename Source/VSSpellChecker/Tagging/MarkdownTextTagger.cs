@@ -121,10 +121,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="e">The event arguments</param>
         private void ClassificationChanged(object sender, ClassificationChangedEventArgs e)
         {
-            var handler = TagsChanged;
-
-            if(handler != null)
-                handler(this, new SnapshotSpanEventArgs(e.ChangeSpan));
+            this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(e.ChangeSpan));
         }
         #endregion
 

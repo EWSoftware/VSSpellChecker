@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/04/2016
-// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
+// Updated : 08/30/2018
+// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the spell checker dictionary settings
@@ -71,22 +71,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "Dictionary Settings"; }
-        }
+        public string Title => "Dictionary Settings";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "af34b863-6a1c-41ed-bcf2-48a714686519"; }
-        }
+        public string HelpUrl => "af34b863-6a1c-41ed-bcf2-48a714686519";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -142,7 +133,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             selectedLanguages.AddRange(configuration.ToValues(PropertyNames.SelectedLanguages,
               PropertyNames.SelectedLanguagesItem, true).Distinct(StringComparer.OrdinalIgnoreCase));
 
+#pragma warning disable VSTHRD010
             this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
 
         /// <inheritdoc />
@@ -218,7 +211,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             // user dictionary content across all configuration files within a solution and/or project
             if(chkInheritAdditionalFolders.IsChecked.Value)
             {
+#pragma warning disable VSTHRD010
                 var parentConfig = this.GenerateParentConfiguration();
+#pragma warning restore VSTHRD010
 
                 additionalFolders.AddRange(parentConfig.AdditionalDictionaryFolders);
             }
@@ -296,6 +291,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// inherited additional dictionary folders to use.</remarks>
         private SpellCheckerConfiguration GenerateParentConfiguration()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             ProjectItem projectItem, fileItem;
             string filename, projectPath;
 
@@ -330,10 +327,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     // Find the project item for the file we are opening
                     if(configType != ConfigurationType.Folder)
-                        projectItem = solution.FindProjectItemForFile(relatedFilename);
+                        projectItem = solution.FindProjectItemForFile(Path.Combine(configFilePath, relatedFilename));
                     else
-                        projectItem = solution.FindProjectItemForFile(Path.Combine(relatedFilename,
-                            relatedFilename + ".vsspell"));
+                        projectItem = solution.FindProjectItemForFile(Path.Combine(configFilePath, relatedFilename + ".vsspell"));
 
                     if(projectItem != null)
                     {
@@ -425,7 +421,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 if(dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     txtAdditionalFolder.Text = dlg.SelectedPath;
+#pragma warning disable VSTHRD010
                     btnAddFolder_Click(sender, e);
+#pragma warning restore VSTHRD010
                 }
             }
         }
@@ -463,9 +461,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 {
                     lbAdditionalFolders.Items.Add(txtAdditionalFolder.Text);
                     txtAdditionalFolder.Text = null;
+
+#pragma warning disable VSTHRD010
                     Property_Changed(sender, e);
 
                     this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
                 }
                 else
                     MessageBox.Show("The specified folder does not appear to exist", PackageResources.PackageTitle,
@@ -496,9 +497,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 lbAdditionalFolders.SelectedIndex = idx;
             }
 
+#pragma warning disable VSTHRD010
             Property_Changed(sender, e);
 
             this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -513,9 +516,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             var sd = new SortDescription { Direction = ListSortDirection.Ascending };
             lbAdditionalFolders.Items.SortDescriptions.Add(sd);
 
+#pragma warning disable VSTHRD010
             Property_Changed(sender, e);
 
             this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -616,7 +621,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             {
                 lbSelectedLanguages.SelectedIndex = lbSelectedLanguages.Items.Add(cboAvailableLanguages.SelectedItem);
                 lbSelectedLanguages.ScrollIntoView(lbSelectedLanguages.SelectedItem);
+#pragma warning disable VSTHRD010
                 Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
             }
         }
 
@@ -638,7 +645,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                 lbSelectedLanguages.SelectedIndex = idx;
 
+#pragma warning disable VSTHRD010
                 Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
             }
         }
 
@@ -660,7 +669,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     lbSelectedLanguages.Items.Insert(idx - 1, item);
                     lbSelectedLanguages.SelectedIndex = idx - 1;
 
+#pragma warning disable VSTHRD010
                     Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
                 }
             }
         }
@@ -683,7 +694,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     lbSelectedLanguages.Items.Insert(idx + 1, item);
                     lbSelectedLanguages.SelectedIndex = idx + 1;
 
+#pragma warning disable VSTHRD010
                     Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
                 }
             }
         }
@@ -720,7 +733,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
                 if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
-                  selectedDictionary.DictionaryFilePath, VSSpellCheckerPackage.Instance))
+                  selectedDictionary.DictionaryFilePath))
                 {
                     File.WriteAllLines(selectedDictionary.UserDictionaryFilePath,
                         lbUserDictionary.Items.Cast<string>());
@@ -785,7 +798,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
                         if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
-                          selectedDictionary.DictionaryFilePath, VSSpellCheckerPackage.Instance))
+                          selectedDictionary.DictionaryFilePath))
                         {
                             File.WriteAllLines(selectedDictionary.UserDictionaryFilePath, uniqueWords);
 
@@ -841,7 +854,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     if(File.Exists(dlg.FileName))
                     {
-                        if(!dlg.FileName.CanWriteToUserWordsFile(null, VSSpellCheckerPackage.Instance))
+                        if(!dlg.FileName.CanWriteToUserWordsFile(null))
                         {
                             MessageBox.Show("File is read-only or could not be checked out",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -881,13 +894,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
 
-            if(handler != null)
-                handler(this, EventArgs.Empty);
-
+#pragma warning disable VSTHRD010
             if(sender == chkInheritAdditionalFolders && cboAvailableLanguages.Items.Count != 0)
                 this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
         #endregion
     }

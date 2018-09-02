@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/28/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 08/30/2018
+// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the global dictionary
@@ -43,12 +43,10 @@ namespace VisualStudio.SpellChecker
         private static Dictionary<string, GlobalDictionary> globalDictionaries;
         private static SpellEngine spellEngine;
 
-        private IServiceProvider serviceProvider;
         private List<WeakReference> registeredServices;
         private HashSet<string> dictionaryWords, ignoredWords, recognizedWords;
-        private CultureInfo culture;
         private SpellFactory spellFactory;
-        private string dictionaryFile, dictionaryWordsFile;
+        private readonly string dictionaryFile, dictionaryWordsFile;
 
         #endregion
 
@@ -58,10 +56,8 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This read-only property returns the dictionary's culture
         /// </summary>
-        public CultureInfo Culture
-        {
-            get { return culture; }
-        }
+        public CultureInfo Culture { get; }
+
         #endregion
 
         #region Constructor
@@ -74,14 +70,12 @@ namespace VisualStudio.SpellChecker
         /// <param name="spellFactory">The spell factory to use when checking words</param>
         /// <param name="dictionaryFile">The dictionary file</param>
         /// <param name="userWordsFile">The user dictionary words file</param>
-        /// <param name="serviceProvider">A service provider for interacting with the solution/project</param>
         private GlobalDictionary(CultureInfo culture, SpellFactory spellFactory, string dictionaryFile,
-          string userWordsFile, IServiceProvider serviceProvider)
+          string userWordsFile)
         {
-            this.culture = culture;
+            this.Culture = culture;
             this.spellFactory = spellFactory;
             this.dictionaryFile = dictionaryFile;
-            this.serviceProvider = serviceProvider;
 
             if(String.IsNullOrWhiteSpace(dictionaryFile))
                 throw new ArgumentException("Dictionary filename cannot be null or empty", "dictionaryFile");
@@ -153,7 +147,7 @@ namespace VisualStudio.SpellChecker
             try
             {
                 if(spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
-                    return spellFactory.Suggest(word).Select(w => new SpellingSuggestion(culture, w));
+                    return spellFactory.Suggest(word).Select(w => new SpellingSuggestion(this.Culture, w));
             }
             catch(Exception ex)
             {
@@ -184,7 +178,7 @@ namespace VisualStudio.SpellChecker
             if(this.ShouldIgnoreWord(word) || this.IsSpelledCorrectly(word))
                 return true;
 
-            if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile, serviceProvider))
+            if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile))
                 return false;
 
             lock(dictionaryWords)
@@ -247,13 +241,12 @@ namespace VisualStudio.SpellChecker
         /// Create a global dictionary for the specified culture
         /// </summary>
         /// <param name="culture">The language to use for the dictionary.</param>
-        /// <param name="serviceProvider">A service provider used to interact with the solution/project</param>
         /// <param name="additionalDictionaryFolders">An enumerable list of additional folders to search for
         /// other dictionaries.</param>
         /// <param name="recognizedWords">An optional list of recognized words that will be added to the
         /// dictionary (i.e. from a code analysis dictionary).</param>
         /// <returns>The global dictionary to use or null if one could not be created.</returns>
-        public static GlobalDictionary CreateGlobalDictionary(CultureInfo culture, IServiceProvider serviceProvider,
+        public static GlobalDictionary CreateGlobalDictionary(CultureInfo culture,
           IEnumerable<string> additionalDictionaryFolders, IEnumerable<string> recognizedWords)
         {
             GlobalDictionary globalDictionary = null;
@@ -285,9 +278,8 @@ namespace VisualStudio.SpellChecker
 
                     // Look for all available dictionaries and get the one for the requested culture
                     var dictionaries = SpellCheckerDictionary.AvailableDictionaries(additionalDictionaryFolders);
-                    SpellCheckerDictionary userDictionary;
 
-                    if(dictionaries.TryGetValue(culture.Name, out userDictionary))
+                    if(dictionaries.TryGetValue(culture.Name, out SpellCheckerDictionary userDictionary))
                     {
                         affixFile = userDictionary.AffixFilePath;
                         dictionaryFile = userDictionary.DictionaryFilePath;
@@ -316,7 +308,7 @@ namespace VisualStudio.SpellChecker
                     });
 
                     globalDictionaries.Add(culture.Name, new GlobalDictionary(culture, spellEngine[culture.Name],
-                        dictionaryFile, userWordsFile, serviceProvider));
+                        dictionaryFile, userWordsFile));
                 }
 
                 globalDictionary = globalDictionaries[culture.Name];
@@ -387,9 +379,7 @@ namespace VisualStudio.SpellChecker
 
             foreach(var service in registeredServices)
             {
-                var target = service.Target as SpellingDictionary;
-
-                if(target != null)
+                if(service.Target is SpellingDictionary target)
                     target.GlobalDictionaryUpdated(word);
             }
         }
@@ -399,9 +389,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public static void LoadUserDictionaryFile(CultureInfo language)
         {
-            GlobalDictionary g;
-
-            if(globalDictionaries != null && globalDictionaries.TryGetValue(language.Name, out g))
+            if(globalDictionaries != null && globalDictionaries.TryGetValue(language.Name, out GlobalDictionary g))
             {
                 g.LoadUserDictionaryFile();
                 g.NotifySpellingServicesOfChange(null);
@@ -516,7 +504,7 @@ namespace VisualStudio.SpellChecker
                     if(releaseCount == processors)
                         foreach(var hs in hunspells.ToArray())
                             if(!hs.Spell(word))
-                                hs.Add(word.ToLower(culture));
+                                hs.Add(word.ToLower(this.Culture));
                 }
                 catch(Exception ex)
                 {
@@ -569,7 +557,7 @@ namespace VisualStudio.SpellChecker
                         foreach(var hs in hunspells.ToArray())
                             foreach(string word in dictionaryWords.Concat(recognizedWords))
                                 if(!hs.Spell(word))
-                                    hs.Add(word.ToLower(culture));
+                                    hs.Add(word.ToLower(this.Culture));
                 }
                 catch(Exception ex)
                 {
@@ -589,11 +577,11 @@ namespace VisualStudio.SpellChecker
         /// <param name="word">The word to remove</param>
         public static void RemoveWord(CultureInfo language, string word)
         {
-            GlobalDictionary g;
-
             if(!String.IsNullOrWhiteSpace(word) && globalDictionaries != null &&
-              globalDictionaries.TryGetValue(language.Name, out g))
+              globalDictionaries.TryGetValue(language.Name, out GlobalDictionary g))
+            {
                 g.RemoveWord(word);
+            }
         }
 
         /// <summary>
@@ -635,7 +623,7 @@ namespace VisualStudio.SpellChecker
                     if(releaseCount == processors)
                         foreach(var hs in hunspells.ToArray())
                             if(hs.Spell(word))
-                                hs.Remove(word.ToLower(culture));
+                                hs.Remove(word.ToLower(this.Culture));
                 }
                 catch(Exception ex)
                 {

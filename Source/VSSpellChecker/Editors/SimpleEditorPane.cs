@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SimpleEditorPane.cs
 // Author  : Istvan Novak
-// Updated : 02/07/2015
+// Updated : 09/02/2018
 // Source  : http://learnvsxnow.codeplex.com/
-// Note    : Copyright 2008-2015, Istvan Novak, All rights reserved
+// Note    : Copyright 2008-2018, Istvan Novak, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the core functionality for an editor pane
@@ -59,36 +59,28 @@ namespace VisualStudio.SpellChecker.Editors
 
         #region Private fields
 
-        // --- UI control bound to this editor pane.
-        private TUIControl _UIControl;
-
-        // --- File extension used for this editor.
-        private readonly string _FileExtensionUsed;
-
         // --- Guid of the command set belonging to this editor
-        private readonly Guid _CommandSetGuid;
+        private readonly Guid commandSetGuid;
 
         // --- Full path to the file.
-        private string _FileName;
+        private string filename;
 
-        // --- Determines whether an object has changed since being saved to its current file.
-        private bool _IsDirty;
-
-        // --- Flag true when we are loading the file. It is used to avoid to change the
-        // --- _IsDirty flag when the changes are related to the load operation.
-        private bool _Loading;
+        // --- Flag true when we are loading the file. It is used to avoid to changing the
+        // --- IsDirty flag when the changes are related to the load operation.
+        private bool isLoading;
 
         // --- This flag is true when we are asking the QueryEditQuerySave service if we can
         // --- edit the file. It is used to avoid to have more than one request queued.
-        private bool _GettingCheckoutStatus;
+        private bool gettingCheckoutStatus;
 
         // --- Indicate that object is in NoScribble mode or in Normal mode. Object enter
         // --- into the NoScribble mode when IPersistFileFormat.Save() call is occurred.
         // --- This flag using to indicate SaveCompleted state (entering into the Normal mode).
-        private bool _NoScribbleMode;
+        private bool noScribbleMode;
 
         // Accelerator key scope
         private object scope;
+
         #endregion
 
         #region Lifecycle methods
@@ -101,9 +93,9 @@ namespace VisualStudio.SpellChecker.Editors
         /// </remarks>
         protected SimpleEditorPane() : base(null)
         {
-            _FileExtensionUsed = GetFileExtension();
-            _CommandSetGuid = GetCommandSetGuid();
-            base.Content = _UIControl = new TUIControl();
+            this.FileExtensionUsed = GetFileExtension();
+            this.commandSetGuid = GetCommandSetGuid();
+            base.Content = this.UIControl = new TUIControl();
         }
 
         #endregion
@@ -251,12 +243,13 @@ namespace VisualStudio.SpellChecker.Editors
         {
             // --- During the load operation the text of the control will change, but
             // --- this change must not be stored in the status of the document.
-            if(!_Loading)
+            if(!isLoading)
             {
                 // --- The only interesting case is when we are changing the document
                 // --- for the first time
-                if(!_IsDirty)
+                if(!this.IsDirty)
                 {
+#pragma warning disable VSTHRD010
                     // Check if the QueryEditQuerySave service allow us to change the file
                     if(!CanEditFile())
                     {
@@ -269,9 +262,10 @@ namespace VisualStudio.SpellChecker.Editors
 
                         return;
                     }
+#pragma warning restore VSTHRD010
 
                     // --- It is possible to change the file, so update the status.
-                    _IsDirty = true;
+                    this.IsDirty = true;
                 }
             }
         }
@@ -295,7 +289,7 @@ namespace VisualStudio.SpellChecker.Editors
         {
             // --- We only support 1 format so return its index
             pnFormatIndex = FileFormatIndex;
-            ppszFilename = _FileName;
+            ppszFilename = filename;
             return VSConstants.S_OK;
         }
 
@@ -320,10 +314,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the method succeeds.</returns>
         protected virtual int OnGetFormatList(out string ppszFormatList)
         {
-            string formatList =
-              string.Format(CultureInfo.CurrentCulture,
-              "Editor Files (*{0}){1}*{0}{1}{1}",
-              FileExtensionUsed, EndLineChar);
+            string formatList = String.Format(CultureInfo.CurrentCulture, "Editor Files (*{0}){1}*{0}{1}{1}",
+              this.FileExtensionUsed, EndLineChar);
             ppszFormatList = formatList;
             return VSConstants.S_OK;
         }
@@ -335,7 +327,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the function succeeds.</returns>
         protected virtual int OnSaveCompleted(string pszFilename)
         {
-            return _NoScribbleMode ? VSConstants.S_FALSE : VSConstants.S_OK;
+            return noScribbleMode ? VSConstants.S_FALSE : VSConstants.S_OK;
         }
 
         /// <summary>
@@ -354,7 +346,7 @@ namespace VisualStudio.SpellChecker.Editors
             }
             // --- Until someone change the file, we can consider it not dirty as
             // --- the user would be annoyed if we prompt him to save an empty file
-            _IsDirty = false;
+            this.IsDirty = false;
             return VSConstants.S_OK;
         }
 
@@ -365,7 +357,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the method succeeds.</returns>
         protected virtual int OnIsDirty(out int pfIsDirty)
         {
-            pfIsDirty = _IsDirty ? 1 : 0;
+            pfIsDirty = this.IsDirty ? 1 : 0;
             return VSConstants.S_OK;
         }
 
@@ -385,26 +377,17 @@ namespace VisualStudio.SpellChecker.Editors
         /// <summary>
         /// Gets the ID of the editor factory creating instances of this editor pane.
         /// </summary>
-        public Guid FactoryGuid
-        {
-            get { return typeof(TFactory).GUID; }
-        }
+        public Guid FactoryGuid => typeof(TFactory).GUID;
 
         /// <summary>
         /// Gets the file extension used by the editor.
         /// </summary>
-        public string FileExtensionUsed
-        {
-            get { return _FileExtensionUsed; }
-        }
+        public string FileExtensionUsed { get; }
 
         /// <summary>
         /// Gets the UI control associated with the editor.
         /// </summary>
-        public TUIControl UIControl
-        {
-            get { return _UIControl; }
-        }
+        public TUIControl UIControl { get; }
 
         /// <summary>
         /// This is used to get the <see cref="ICommonCommandSupport"/> interface
@@ -415,9 +398,7 @@ namespace VisualStudio.SpellChecker.Editors
         {
             get
             {
-                var commandSupport = _UIControl as ICommonCommandSupport;
-
-                if(commandSupport == null)
+                if(!(this.UIControl is ICommonCommandSupport commandSupport))
                     commandSupport = this as ICommonCommandSupport;
 
                 return commandSupport;
@@ -427,10 +408,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// <summary>
         /// This read-only property returns the dirty state of the file
         /// </summary>
-        public bool IsDirty
-        {
-            get { return _IsDirty; }
-        }
+        public bool IsDirty { get; private set; }
+
         #endregion
 
         #region IOleCommandTarget Members
@@ -449,18 +428,19 @@ namespace VisualStudio.SpellChecker.Editors
         /// <param name="prgCmds">Information for each command.</param>
         /// <param name="pCmdText">Used to dynamically change the command text.</param>
         /// <returns>S_OK if the method succeeds.</returns>
-        public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds,
-          IntPtr pCmdText)
+        public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
             // --- Validate parameters
             if(prgCmds == null || cCmds != 1)
                 return VSConstants.E_INVALIDARG;
 
             // --- Wrap parameters into argument type instance
-            QueryStatusArgs statusArgs = new QueryStatusArgs(pguidCmdGroup);
-            statusArgs.CommandCount = cCmds;
-            statusArgs.Commands = prgCmds;
-            statusArgs.PCmdText = pCmdText;
+            QueryStatusArgs statusArgs = new QueryStatusArgs(pguidCmdGroup)
+            {
+                CommandCount = cCmds,
+                Commands = prgCmds,
+                PCmdText = pCmdText
+            };
 
             // --- By default all commands are supported
             OLECMDF cmdf = OLECMDF.OLECMDF_SUPPORTED;
@@ -513,17 +493,13 @@ namespace VisualStudio.SpellChecker.Editors
             }
 
             // --- Check for commands owned by the editor
-            else if(pguidCmdGroup == _CommandSetGuid)
+            else if(pguidCmdGroup == commandSetGuid)
             {
-                return SupportsOwnedCommand(statusArgs)
-                         ? VSConstants.S_OK
-                         : (int)(Constants.OLECMDERR_E_NOTSUPPORTED);
+                return SupportsOwnedCommand(statusArgs) ? VSConstants.S_OK : (int)(Constants.OLECMDERR_E_NOTSUPPORTED);
             }
 
             // --- Check for any other commands
-            return SupportsCommand(statusArgs)
-                     ? VSConstants.S_OK
-                     : (int)(Constants.OLECMDERR_E_NOTSUPPORTED);
+            return SupportsCommand(statusArgs) ? VSConstants.S_OK : (int)(Constants.OLECMDERR_E_NOTSUPPORTED);
         }
 
         /// <summary>
@@ -547,10 +523,12 @@ namespace VisualStudio.SpellChecker.Editors
           IntPtr pvaIn, IntPtr pvaOut)
         {
             // --- Wrap parameters into argument type instance
-            ExecArgs execArgs = new ExecArgs(pguidCmdGroup, nCmdID);
-            execArgs.CommandExecOpt = nCmdexecopt;
-            execArgs.PvaIn = pvaIn;
-            execArgs.PvaOut = pvaOut;
+            ExecArgs execArgs = new ExecArgs(pguidCmdGroup, nCmdID)
+            {
+                CommandExecOpt = nCmdexecopt,
+                PvaIn = pvaIn,
+                PvaOut = pvaOut
+            };
 
             var commandSupport = this.CommonCommandSupport;
 
@@ -597,7 +575,7 @@ namespace VisualStudio.SpellChecker.Editors
             }
 
             // --- Execute commands owned by the editor
-            else if(pguidCmdGroup == _CommandSetGuid)
+            else if(pguidCmdGroup == commandSetGuid)
             {
                 return ExecuteOwnedCommand(execArgs)
                   ? VSConstants.S_OK
@@ -686,11 +664,13 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the method succeeds.</returns>
         int IPersistFileFormat.Load(string pszFilename, uint grfMode, int fReadOnly)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             // --- A valid file name is required.
-            if((pszFilename == null) && ((_FileName == null) || (_FileName.Length == 0)))
+            if((pszFilename == null) && ((filename == null) || (filename.Length == 0)))
                 throw new ArgumentNullException("pszFilename");
 
-            _Loading = true;
+            isLoading = true;
             int hr = VSConstants.S_OK;
             try
             {
@@ -708,18 +688,18 @@ namespace VisualStudio.SpellChecker.Editors
                 if(!isReload)
                 {
                     // --- Unsubscribe from the notification of the changes in the previous file.
-                    _FileName = pszFilename;
+                    filename = pszFilename;
                 }
                 // --- Load the file
-                LoadFile(_FileName);
-                _IsDirty = false;
+                LoadFile(filename);
+                this.IsDirty = false;
 
                 // --- Notify the load or reload
                 NotifyDocChanged();
             }
             finally
             {
-                _Loading = false;
+                isLoading = false;
             }
             return hr;
         }
@@ -750,23 +730,23 @@ namespace VisualStudio.SpellChecker.Editors
         int IPersistFileFormat.Save(string pszFilename, int fRemember, uint nFormatIndex)
         {
             // --- switch into the NoScribble mode
-            _NoScribbleMode = true;
+            noScribbleMode = true;
             try
             {
                 // --- If file is null or same --> SAVE
-                if(pszFilename == null || pszFilename == _FileName)
+                if(pszFilename == null || pszFilename == filename)
                 {
-                    SaveFile(_FileName);
-                    _IsDirty = false;
+                    SaveFile(filename);
+                    this.IsDirty = false;
                 }
                 else
                 {
                     // --- If remember --> SaveAs
                     if(fRemember != 0)
                     {
-                        _FileName = pszFilename;
-                        SaveFile(_FileName);
-                        _IsDirty = false;
+                        filename = pszFilename;
+                        SaveFile(filename);
+                        this.IsDirty = false;
                     }
                     else // --- Else, Save a Copy As
                     {
@@ -777,7 +757,7 @@ namespace VisualStudio.SpellChecker.Editors
             finally
             {
                 // --- Switch into the Normal mode
-                _NoScribbleMode = false;
+                noScribbleMode = false;
             }
             return VSConstants.S_OK;
         }
@@ -856,6 +836,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the function succeeds.</returns>
         int IVsPersistDocData.IsDocDataDirty(out int pfDirty)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             return ((IPersistFileFormat)this).IsDirty(out pfDirty);
         }
 
@@ -868,6 +849,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the method succeeds.</returns>
         int IVsPersistDocData.SetUntitledDocPath(string pszDocDataPath)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             return ((IPersistFileFormat)this).InitNew(FileFormatIndex);
         }
 
@@ -880,6 +862,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the method succeeds.</returns>
         int IVsPersistDocData.LoadDocData(string pszMkDocument)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             return ((IPersistFileFormat)this).Load(pszMkDocument, 0, 0);
         }
 
@@ -916,6 +899,8 @@ namespace VisualStudio.SpellChecker.Editors
         [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")]
         int IVsPersistDocData.SaveDocData(VSSAVEFLAGS dwSave, out string pbstrMkDocumentNew, out int pfSaveCanceled)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             pbstrMkDocumentNew = null;
             pfSaveCanceled = 0;
             int hr;
@@ -929,12 +914,11 @@ namespace VisualStudio.SpellChecker.Editors
                           (IVsQueryEditQuerySave2)GetService(typeof(SVsQueryEditQuerySave));
 
                         // Call QueryEditQuerySave
-                        uint result;
                         hr = queryEditQuerySave.QuerySaveFile(
-                          _FileName, // filename
+                          filename, // filename
                           0, // flags
                           null, // file attributes
-                          out result); // result
+                          out uint result); // result
 
                         if(ErrorHandler.Failed(hr))
                         {
@@ -954,7 +938,7 @@ namespace VisualStudio.SpellChecker.Editors
                                 {
                                     // Call the shell to do the save for us
                                     hr = Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SaveDocDataToFile(
-                                        dwSave, this, _FileName, out pbstrMkDocumentNew, out pfSaveCanceled);
+                                        dwSave, this, filename, out pbstrMkDocumentNew, out pfSaveCanceled);
                                     if(ErrorHandler.Failed(hr))
                                         return hr;
                                 }
@@ -964,7 +948,7 @@ namespace VisualStudio.SpellChecker.Editors
                                 {
                                     // Call the shell to do the SaveAS for us
                                     hr = Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SaveDocDataToFile(
-                                        VSSAVEFLAGS.VSSAVE_SaveAs, this, _FileName, out pbstrMkDocumentNew,
+                                        VSSAVEFLAGS.VSSAVE_SaveAs, this, filename, out pbstrMkDocumentNew,
                                         out pfSaveCanceled);
                                     if(ErrorHandler.Failed(hr))
                                         return hr;
@@ -984,13 +968,13 @@ namespace VisualStudio.SpellChecker.Editors
                 case VSSAVEFLAGS.VSSAVE_SaveCopyAs:
                     {
                         // Make sure the file name as the right extension
-                        if(String.Compare(FileExtensionUsed, Path.GetExtension(_FileName), true, CultureInfo.CurrentCulture) != 0)
+                        if(String.Compare(this.FileExtensionUsed, Path.GetExtension(filename), true, CultureInfo.CurrentCulture) != 0)
                         {
-                            _FileName += FileExtensionUsed;
+                            filename += this.FileExtensionUsed;
                         }
                         // Call the shell to do the save for us
                         hr = Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SaveDocDataToFile(dwSave,
-                            this, _FileName, out pbstrMkDocumentNew, out pfSaveCanceled);
+                            this, filename, out pbstrMkDocumentNew, out pfSaveCanceled);
                         if(ErrorHandler.Failed(hr))
                             return hr;
                         break;
@@ -1073,6 +1057,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the method succeeds.</returns>
         int IVsPersistDocData.ReloadDocData(uint grfFlags)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             return ((IPersistFileFormat)this).Load(null, grfFlags, 0);
         }
 
@@ -1089,8 +1074,10 @@ namespace VisualStudio.SpellChecker.Editors
         /// </returns>
         private bool CanEditFile()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             // --- Check the status of the recursion guard
-            if(_GettingCheckoutStatus)
+            if(gettingCheckoutStatus)
             {
                 return false;
             }
@@ -1098,15 +1085,13 @@ namespace VisualStudio.SpellChecker.Editors
             try
             {
                 // Set the recursion guard
-                _GettingCheckoutStatus = true;
+                gettingCheckoutStatus = true;
 
                 // Get the QueryEditQuerySave service
                 IVsQueryEditQuerySave2 queryEditQuerySave = (IVsQueryEditQuerySave2)GetService(typeof(SVsQueryEditQuerySave));
 
                 // Now call the QueryEdit method to find the edit status of this file
-                string[] documents = { _FileName };
-                uint result;
-                uint outFlags;
+                string[] documents = { filename };
 
                 // This function can pop up a dialog to ask the user to checkout the file.
                 // When this dialog is visible, it is possible to receive other request to change
@@ -1117,8 +1102,8 @@ namespace VisualStudio.SpellChecker.Editors
                   documents, // Files to edit
                   null, // Input flags
                   null, // Input array of VSQEQS_FILE_ATTRIBUTE_DATA
-                  out result, // result of the checkout
-                  out outFlags // Additional flags
+                  out uint result, // result of the checkout
+                  out uint outFlags // Additional flags
                   );
                 if(ErrorHandler.Succeeded(hr) && (result == (uint)tagVSQueryEditResult.QER_EditOK))
                 {
@@ -1128,7 +1113,7 @@ namespace VisualStudio.SpellChecker.Editors
             }
             finally
             {
-                _GettingCheckoutStatus = false;
+                gettingCheckoutStatus = false;
             }
             return false;
         }
@@ -1140,13 +1125,12 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         private void NotifyDocChanged()
         {
-            IVsHierarchy hierarchy;
-            uint itemID;
-            IntPtr docData;
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             uint docCookie = 0;
 
             // --- Make sure that we have a file name
-            if(_FileName.Length == 0)
+            if(filename.Length == 0)
                 return;
 
             // --- Get a reference to the Running Document Table
@@ -1157,7 +1141,7 @@ namespace VisualStudio.SpellChecker.Editors
             {
                 // --- Lock the document
                 ErrorHandler.ThrowOnFailure(runningDocTable.FindAndLockDocument((uint)_VSRDTFLAGS.RDT_ReadLock,
-                    _FileName, out hierarchy,out itemID, out docData, out docCookie));
+                    filename, out IVsHierarchy hierarchy,out uint itemID, out IntPtr docData, out docCookie));
 
                 // --- Send the notification
                 ErrorHandler.ThrowOnFailure(runningDocTable.NotifyDocumentChanged(docCookie,

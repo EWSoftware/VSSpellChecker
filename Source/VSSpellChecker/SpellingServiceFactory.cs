@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceFactory.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/10/2016
-// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
+// Updated : 08/30/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the spelling dictionary service factory
@@ -34,7 +34,6 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 
 using VisualStudio.SpellChecker.Configuration;
-using VisualStudio.SpellChecker.ProjectSpellCheck;
 
 namespace VisualStudio.SpellChecker
 {
@@ -50,9 +49,6 @@ namespace VisualStudio.SpellChecker
         // This serves as a flag indicating that a file is not to be spell checked.  It saves storing the
         // entire configuration as a property when spell checking is not wanted.
         private const string SpellCheckerDisabledKey = "@@VisualStudio.SpellChecker.Disabled";
-
-        [Import]
-        private SVsServiceProvider globalServiceProvider = null;
 
         #endregion
 
@@ -79,14 +75,15 @@ namespace VisualStudio.SpellChecker
         public SpellCheckerConfiguration GetConfiguration(ITextBuffer buffer)
         {
             SpellCheckerConfiguration config = null;
-            bool isDisabled = false;
 
             // If not given a buffer or already checked for and found to be disabled, don't go any further
-            if(buffer != null && !buffer.Properties.TryGetProperty(SpellCheckerDisabledKey, out isDisabled) &&
+            if(buffer != null && !buffer.Properties.TryGetProperty(SpellCheckerDisabledKey, out bool isDisabled) &&
               !buffer.Properties.TryGetProperty(typeof(SpellCheckerConfiguration), out config))
             {
+#pragma warning disable VSTHRD010
                 // Generate the configuration settings unique to the file
                 config = this.GenerateConfiguration(buffer);
+#pragma warning restore VSTHRD010
 
                 if(config == null || !config.SpellCheckAsYouType || config.ShouldExcludeFile(buffer.GetFilename()))
                 {
@@ -112,17 +109,18 @@ namespace VisualStudio.SpellChecker
 
             if(buffer != null && !buffer.Properties.TryGetProperty(typeof(SpellingDictionary), out service))
             {
+#pragma warning disable VSTHRD010
                 // Get the configuration and create the dictionary based on the configuration
                 var config = this.GetConfiguration(buffer);
+#pragma warning restore VSTHRD010
 
                 if(config != null)
                 {
                     // Create a dictionary for each configuration dictionary language ignoring any that are
                     // invalid and duplicates caused by missing languages which return the en-US dictionary.
                     var globalDictionaries = config.DictionaryLanguages.Select(l =>
-                        GlobalDictionary.CreateGlobalDictionary(l, globalServiceProvider,
-                        config.AdditionalDictionaryFolders, config.RecognizedWords)).Where(
-                        d => d != null).Distinct().ToList();
+                        GlobalDictionary.CreateGlobalDictionary(l, config.AdditionalDictionaryFolders,
+                        config.RecognizedWords)).Where(d => d != null).Distinct().ToList();
 
                     if(globalDictionaries.Any())
                     {
@@ -148,6 +146,8 @@ namespace VisualStudio.SpellChecker
         /// file settings related to the text buffer.</remarks>
         private SpellCheckerConfiguration GenerateConfiguration(ITextBuffer buffer)
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             ProjectItem projectItem, fileItem;
             string bufferFilename, filename, projectPath, projectFilename = null;
 
@@ -158,10 +158,8 @@ namespace VisualStudio.SpellChecker
             {
                 config.Load(SpellingConfigurationFile.GlobalConfigurationFilename);
 
-                var dte2 = (globalServiceProvider == null) ? null :
-                    globalServiceProvider.GetService(typeof(SDTE)) as DTE2;
-
-                if(dte2 != null && dte2.Solution != null && !String.IsNullOrWhiteSpace(dte2.Solution.FullName))
+                if(Package.GetGlobalService(typeof(SDTE)) is DTE2 dte2 && dte2.Solution != null &&
+                  !String.IsNullOrWhiteSpace(dte2.Solution.FullName))
                 {
                     var solution = dte2.Solution;
 
@@ -303,10 +301,9 @@ namespace VisualStudio.SpellChecker
                         {
                             bufferFilename = bufferFilename.Substring(1);
 
-                            SpellCheckerDictionary match;
-
                             if(SpellCheckerDictionary.AvailableDictionaries(
-                              config.AdditionalDictionaryFolders).TryGetValue(bufferFilename, out match))
+                              config.AdditionalDictionaryFolders).TryGetValue(bufferFilename,
+                              out SpellCheckerDictionary match))
                             {
                                 // Clear any existing dictionary languages and use just the one that matches the
                                 // file's language.

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ExclusionExpressionAddEditForm.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/08/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a window used to edit exclusion expressions for the configuration file
@@ -46,7 +46,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
         public Regex Expression
         {
-            get { return expression; }
+            get => expression;
             set
             {
                 expression = value;
@@ -84,7 +84,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
         #region Constructor
         //=====================================================================
-        
+
         /// <summary>
         /// Constructor
         /// </summary>

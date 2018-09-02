@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -108,7 +108,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>The classifier ID for the given filename's extension</returns>
         public static string ClassifierIdFor(string filename)
         {
-            string id, extension = Path.GetExtension(filename);
+            string extension = Path.GetExtension(filename);
 
             if(extensionMap == null)
                 LoadClassifierConfiguration();
@@ -116,7 +116,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(extension))
                 extension = extension.Substring(1);
 
-            if(!extensionMap.TryGetValue(extension, out id))
+            if(!extensionMap.TryGetValue(extension, out string id))
                 id = FileIsXml(filename) ? "XML" : "PlainText";
 
             return id;
@@ -131,7 +131,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(filename == null)
                 return false;
 
-            string id, extension = Path.GetExtension(filename);
+            string extension = Path.GetExtension(filename);
 
             if(extensionMap == null)
                 LoadClassifierConfiguration();
@@ -139,7 +139,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(extension))
                 extension = extension.Substring(1);
 
-            return (extensionMap.TryGetValue(extension, out id) && id == "CStyle");
+            return (extensionMap.TryGetValue(extension, out string id) && id == "CStyle");
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(filename == null)
                 return false;
 
-            string id, extension = Path.GetExtension(filename);
+            string extension = Path.GetExtension(filename);
 
             if(extensionMap == null)
                 LoadClassifierConfiguration();
@@ -159,7 +159,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(extension))
                 extension = extension.Substring(1);
 
-            return (extensionMap.TryGetValue(extension, out id) && id == "SQL");
+            return (extensionMap.TryGetValue(extension, out string id) && id == "SQL");
         }
 
         /// <summary>
@@ -172,8 +172,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             if(filename != null)
             {
-                ClassifierDefinition definition;
-                string id, extension = Path.GetExtension(filename);
+                string extension = Path.GetExtension(filename);
 
                 if(extensionMap == null)
                     LoadClassifierConfiguration();
@@ -181,10 +180,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 if(!String.IsNullOrWhiteSpace(extension))
                     extension = extension.Substring(1);
 
-                if(!extensionMap.TryGetValue(extension, out id))
+                if(!extensionMap.TryGetValue(extension, out string id))
                     id = FileIsXml(filename) ? "XML" : "PlainText";
 
-                if(id != "None" && definitions.TryGetValue(id, out definition) && (definition.Mnemonic == '&' ||
+                if(id != "None" && definitions.TryGetValue(id, out ClassifierDefinition definition) && (definition.Mnemonic == '&' ||
                   definition.Mnemonic == '_'))
                     return definition.Mnemonic;
             }
@@ -201,9 +200,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>The classifier to use or null if the file should not be processed</returns>
         public static TextClassifier GetClassifier(string filename, SpellCheckerConfiguration spellCheckConfiguration)
         {
-            ClassifierDefinition definition;
             TextClassifier classifier = null;
-            string id, extension = Path.GetExtension(filename);
+            string extension = Path.GetExtension(filename);
 
             if(extensionMap == null)
                 LoadClassifierConfiguration();
@@ -211,10 +209,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(extension))
                 extension = extension.Substring(1);
 
-            if(!extensionMap.TryGetValue(extension, out id))
+            if(!extensionMap.TryGetValue(extension, out string id))
                 id = FileIsXml(filename) ? "XML" : "PlainText";
 
-            if(id != "None" && definitions.TryGetValue(id, out definition))
+            if(id != "None" && definitions.TryGetValue(id, out ClassifierDefinition definition))
                 switch(definition.ClassifierType)
                 {
                     case "PlainTextClassifier":
