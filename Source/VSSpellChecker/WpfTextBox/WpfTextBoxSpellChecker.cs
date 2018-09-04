@@ -37,6 +37,7 @@ using TextSpan = Microsoft.VisualStudio.Text.Span;
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
+using Microsoft.VisualStudio.Threading;
 
 namespace VisualStudio.SpellChecker.WpfTextBox
 {
@@ -186,11 +187,11 @@ namespace VisualStudio.SpellChecker.WpfTextBox
             if(!Microsoft.VisualStudio.Shell.ThreadHelper.CheckAccess())
             {
                 // Fire and forget
-                var t = Task.Run(async () =>
+                Task.Run(async () =>
                 {
                     await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                     this.Disconnect();
-                });
+                }).Forget();
 
                 return;
             }

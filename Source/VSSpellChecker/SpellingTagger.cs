@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/02/2018
+// Updated : 09/03/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -34,19 +34,19 @@
 //===============================================================================================================
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Threading;
 
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-
+using Microsoft.VisualStudio.Threading;
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
@@ -100,22 +100,17 @@ namespace VisualStudio.SpellChecker
         private ITextBuffer buffer;
         private ITagAggregator<INaturalTextTag> naturalTextAggregator;
         private ITagAggregator<IUrlTag> urlAggregator;
-        private readonly Dispatcher dispatcher;
 
         private SpellCheckerConfiguration configuration;
         private WordSplitter wordSplitter;
 
-        private List<SnapshotSpan> dirtySpans;
-
-        private readonly object dirtySpanLock = new object();
-
-        // TODO: Would concurrent collections be more appropriate than using volatile on these?
         private volatile List<MisspellingTag> misspellings;
-        private volatile List<IgnoredOnceWord> wordsIgnoredOnce;
 
+        private readonly ConcurrentQueue<SnapshotSpan> dirtySpans;
+        private readonly ConcurrentQueue<IgnoredOnceWord> wordsIgnoredOnce;
         private readonly List<InlineIgnoredWord> inlineIgnoredWords;
 
-        private Thread updateThread;
+        private bool spellCheckInProgress;
         private DispatcherTimer timer;
 
         private bool isClosed, unescapeApostrophes;
@@ -146,18 +141,9 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This is used to get an enumerable list of ignore once word spans
         /// </summary>
-        public IEnumerable<Span> IgnoredOnceSpans
-        {
-            get
-            {
-                List<Span> spans = new List<Span>();
+        public IEnumerable<Span> IgnoredOnceSpans => wordsIgnoredOnce.Select(
+            s => (Span)s.Span.GetSpan(s.Span.TextBuffer.CurrentSnapshot)).ToList();
 
-                foreach(var w in wordsIgnoredOnce)
-                    spans.Add(w.Span.GetSpan(w.Span.TextBuffer.CurrentSnapshot));
-
-                return spans;
-            }
-        }
         #endregion
 
         #region Constructor
@@ -179,13 +165,12 @@ namespace VisualStudio.SpellChecker
             this.buffer = buffer;
             this.naturalTextAggregator = naturalTextAggregator;
             this.urlAggregator = urlAggregator;
-            this.dispatcher = Dispatcher.CurrentDispatcher;
             this.configuration = configuration;
             this.Dictionary = dictionary;
 
-            dirtySpans = new List<SnapshotSpan>();
+            dirtySpans = new ConcurrentQueue<SnapshotSpan>();
+            wordsIgnoredOnce = new ConcurrentQueue<IgnoredOnceWord>();
             misspellings = new List<MisspellingTag>();
-            wordsIgnoredOnce = new List<IgnoredOnceWord>();
             inlineIgnoredWords = new List<InlineIgnoredWord>();
 
             string filename = buffer.GetFilename();
@@ -213,8 +198,7 @@ namespace VisualStudio.SpellChecker
             // To start with, the entire buffer is dirty.  Split this into chunks so we update pieces at a time.
             ITextSnapshot snapshot = this.buffer.CurrentSnapshot;
 
-            foreach(var line in snapshot.Lines)
-                AddDirtySpan(line.Extent);
+            this.AddDirtySpans(snapshot.Lines.Where(l => !l.Extent.IsEmpty).Select(l => l.Extent));
         }
         #endregion
 
@@ -257,14 +241,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void AggregatorTagsChanged(object sender, TagsChangedEventArgs e)
         {
-            if(isClosed)
-                return;
-
-            NormalizedSnapshotSpanCollection dirty = e.Span.GetSpans(buffer.CurrentSnapshot);
-
-            if(dirty.Count != 0)
-                foreach(var span in dirty)
-                    this.AddDirtySpan(span);
+            if(!isClosed)
+                this.AddDirtySpans(e.Span.GetSpans(buffer.CurrentSnapshot));
         }
 
         /// <summary>
@@ -283,9 +261,7 @@ namespace VisualStudio.SpellChecker
             // file.
             if(e.Word == null)
             {
-                foreach(var line in snapshot.Lines)
-                    AddDirtySpan(line.Extent);
-
+                this.AddDirtySpans(snapshot.Lines.Where(l => !l.Extent.IsEmpty).Select(l => l.Extent));
                 return;
             }
 
@@ -296,7 +272,7 @@ namespace VisualStudio.SpellChecker
                 SnapshotSpan span = misspelling.Span.GetSpan(snapshot);
 
                 if(span.GetText().Equals(e.Word, StringComparison.OrdinalIgnoreCase))
-                    AddDirtySpan(span);
+                    this.AddDirtySpan(span);
             }
         }
 
@@ -375,7 +351,7 @@ namespace VisualStudio.SpellChecker
         {
             if(!isClosed)
             {
-                var newIgnoredWords = new List<IgnoredOnceWord>(wordsIgnoredOnce) { new IgnoredOnceWord(e.Span) };
+                wordsIgnoredOnce.Enqueue(new IgnoredOnceWord(e.Span));
                 var currentMisspellings = misspellings;
 
                 // Raise the TagsChanged event to get rid of the tags on the ignored word
@@ -390,8 +366,6 @@ namespace VisualStudio.SpellChecker
 
                         break;
                     }
-
-                wordsIgnoredOnce = newIgnoredWords;
             }
         }
 
@@ -415,7 +389,7 @@ namespace VisualStudio.SpellChecker
                 var endLine = (startLine.EndIncludingLineBreak < changedSpan.End) ?
                     changedSpan.End.GetContainingLine() : startLine;
 
-                AddDirtySpan(new SnapshotSpan(startLine.Start, endLine.End));
+                this.AddDirtySpan(new SnapshotSpan(startLine.Start, endLine.End));
             }
         }
         #endregion
@@ -455,14 +429,23 @@ namespace VisualStudio.SpellChecker
         /// <param name="span">The span to add</param>
         private void AddDirtySpan(SnapshotSpan span)
         {
-            if(span.IsEmpty)
-                return;
-
-            lock(dirtySpanLock)
+            if(!span.IsEmpty)
             {
-                dirtySpans.Add(span);
-                ScheduleUpdate();
+                dirtySpans.Enqueue(span);
+                this.ScheduleUpdate();
             }
+        }
+
+        /// <summary>
+        /// Add a range of dirty span that needs to be checked
+        /// </summary>
+        /// <param name="spans">The spans to add</param>
+        private void AddDirtySpans(IEnumerable<SnapshotSpan> spans)
+        {
+            foreach(var span in spans.Where(s => !s.IsEmpty))
+                dirtySpans.Enqueue(span);
+
+            this.ScheduleUpdate();
         }
 
         /// <summary>
@@ -470,189 +453,123 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         private void ScheduleUpdate()
         {
-            if(isClosed)
-                return;
-
-            if(timer == null)
+            if(!isClosed && !dirtySpans.IsEmpty)
             {
-                timer = new DispatcherTimer(DispatcherPriority.ApplicationIdle, dispatcher)
+                if(timer == null)
                 {
-                    Interval = TimeSpan.FromMilliseconds(500)
-                };
-
-                timer.Tick += GuardedStartUpdateThread;
-            }
-
-            timer.Stop();
-            timer.Start();
-        }
-
-        /// <summary>
-        /// Start the update thread with exception checking
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void GuardedStartUpdateThread(object sender, EventArgs e)
-        {
-            try
-            {
-                StartUpdateThread(sender, e);
-            }
-            catch(Exception ex)
-            {
-                // If anything fails during the handling of a dispatcher tick, just ignore it.  If we don't guard
-                // against those exceptions, the user will see a crash.
-                Debug.WriteLine(ex);
-
-                Debug.Fail("Exception!" + ex.Message);
-            }
-        }
-
-        // TODO: This should probably be rewritten as an sync task so that we can use async throughout and get
-        // rid of the calls to ThreadHelper.JoinableTaskFactory.Run.
-        // TODO: Would a concurrent bag be better for _dirtySpans  than List<T>?  It would probably simplify usage
-        // and would not require the dirtySpanLock anymore.
-        /// <summary>
-        /// Start the update thread
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void StartUpdateThread(object sender, EventArgs e)
-        {
-            // If an update is currently running, wait until the next timer tick
-            if(isClosed || updateThread != null && updateThread.IsAlive)
-                return;
-
-            timer.Stop();
-
-            List<SnapshotSpan> dirty;
-            lock(dirtySpanLock)
-            {
-                dirty = new List<SnapshotSpan>(dirtySpans);
-                dirtySpans = new List<SnapshotSpan>();
-
-                if(dirty.Count == 0)
-                    return;
-            }
-
-            // Normalize the dirty spans
-            ITextSnapshot snapshot = buffer.CurrentSnapshot;
-
-            var normalizedSpans = new NormalizedSnapshotSpanCollection(dirty.Select(
-                s => s.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive)));
-
-            updateThread = new Thread(GuardedCheckSpellings)
-            {
-                Name = "Spell Check",
-                Priority = ThreadPriority.BelowNormal
-            };
-
-            // TODO: I don't think this is true anymore.  I'm not using the WPF text box to spell check and it
-            // switches to the main UI thread when necessary.
-            if(!updateThread.TrySetApartmentState(ApartmentState.STA))
-                Debug.Fail("Unable to set thread apartment state to STA, things *will* break.");
-
-            updateThread.Start(normalizedSpans);
-        }
-
-        /// <summary>
-        /// Check for spelling mistakes with exception checking
-        /// </summary>
-        /// <param name="dirtySpansObject"></param>
-        private void GuardedCheckSpellings(object dirtySpansObject)
-        {
-            if(isClosed)
-                return;
-
-            try
-            {
-                if(!(dirtySpansObject is IEnumerable<SnapshotSpan> dirty))
-                {
-                    Debug.Fail("Being asked to check a null list of dirty spans.  What gives?");
-                    return;
+                    timer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.ApplicationIdle,
+                        StartUpdateTask, Dispatcher.CurrentDispatcher);
                 }
 
-                CheckSpellings(dirty);
+                timer.Stop();
+                timer.Start();
             }
-            catch(Exception ex)
-            {
-                // If anything fails in the background thread, just ignore it.  It's possible that the background
-                // thread will run on VS shutdown, at which point calls into WPF throw exceptions.  If we don't
-                // guard against those exceptions, the user will see a crash on exit.
-                Debug.WriteLine(ex);
+        }
 
-                Debug.Fail("Exception!" + ex.Message);
+        /// <summary>
+        /// Start the spell checking task
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void StartUpdateTask(object sender, EventArgs e)
+        {
+            if(!isClosed && !spellCheckInProgress)
+            {
+                timer.Stop();
+
+                if(!dirtySpans.IsEmpty)
+                {
+                    // Empty the queue and normalize the dirty spans
+                    ITextSnapshot snapshot = buffer.CurrentSnapshot;
+                    List<SnapshotSpan> spans = new List<SnapshotSpan>();
+
+                    while(dirtySpans.TryDequeue(out SnapshotSpan s))
+                        spans.Add(s.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive));
+
+                    var normalizedSpans = new NormalizedSnapshotSpanCollection(spans);
+
+                    spellCheckInProgress = true;
+
+                    // Fire and forget
+                    System.Threading.Tasks.Task.Run(() => this.CheckSpellings(normalizedSpans)).Forget();
+                }
             }
         }
 
         /// <summary>
         /// Check for misspellings in the given set of dirty spans
         /// </summary>
-        /// <param name="dirtySpansToCheck">The enumerable list of dirty spans to check for misspellings</param>
-        private void CheckSpellings(IEnumerable<SnapshotSpan> dirtySpansToCheck)
+        /// <param name="snapshot">The current snapshot of the buffer</param>
+        /// <param name="spansToCheck">The enumerable list of spans to check for misspellings</param>
+#pragma warning disable VSTHRD100
+        private async void CheckSpellings(IEnumerable<SnapshotSpan> spansToCheck)
+#pragma warning restore VSTHRD100
         {
-            ITextSnapshot snapshot = buffer.CurrentSnapshot;
-
-            foreach(var dirtySpan in dirtySpansToCheck)
+            try
             {
-                if(isClosed)
-                    return;
-
-                var dirty = dirtySpan.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive);
-
-                // We have to go back to the UI thread to get natural text spans
-                var naturalTextSpans = ThreadHelper.JoinableTaskFactory.Run<IEnumerable<SnapshotSpan>> (async delegate
+                foreach(var dirtySpan in spansToCheck)
                 {
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    if(isClosed)
+                        return;
 
-                    return GetNaturalLanguageSpansForDirtySpan(dirty);
-                });
+                    var snapshot = dirtySpan.Snapshot;
+                    var dirty = dirtySpan;
 
-                var naturalText = new NormalizedSnapshotSpanCollection(
-                    naturalTextSpans.Select(span => span.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive)));
-
-                List<MisspellingTag> currentMisspellings = new List<MisspellingTag>(misspellings);
-                List<MisspellingTag> newMisspellings = new List<MisspellingTag>();
-
-                int removed = currentMisspellings.RemoveAll(tag => tag.ToTagSpan(snapshot).Span.OverlapsWith(dirty));
-
-                newMisspellings.AddRange(GetMisspellingsInSpans(naturalText));
-
-                // Also remove empties
-                removed += currentMisspellings.RemoveAll(tag => tag.ToTagSpan(snapshot).Span.IsEmpty);
-
-                // If anything has been updated, we need to send out a change event
-                if(newMisspellings.Count != 0 || removed != 0)
-                {
-                    foreach(var g in newMisspellings.Where(
-                      w => w.MisspellingType == MisspellingType.MisspelledWord).GroupBy(w => w.Word))
-                    {
-                        var suggestions = this.Dictionary.SuggestCorrections(g.Key);
-
-                        foreach(var m in g)
-                            m.Suggestions = suggestions;
-                    }
-
-                    currentMisspellings.AddRange(newMisspellings);
-
-                    // We have to go back to the UI thread to update the misspellings
-                    ThreadHelper.JoinableTaskFactory.Run(async delegate
+                    // We have to go back to the UI thread to get natural text spans
+                    var naturalTextSpans = await System.Threading.Tasks.Task.Run(async () =>
                     {
                         await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                        if(!isClosed)
-                        {
-                            misspellings = currentMisspellings;
-                            this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(dirty));
-                        }
-                    });
-                }
-            }
+                        // Get the current snapshot and translate the dirty span to it as the text may have
+                        // changed.
+                        snapshot = buffer.CurrentSnapshot;
+                        dirty = dirty.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive);
 
-            lock(dirtySpanLock)
-            {
+                        return GetNaturalLanguageSpansForDirtySpan(dirty);
+                    });
+
+                    var currentMisspellings = new List<MisspellingTag>(misspellings);
+                    var newMisspellings = new List<MisspellingTag>();
+
+                    int removed = currentMisspellings.RemoveAll(tag => tag.ToTagSpan(snapshot).Span.OverlapsWith(dirty));
+
+                    newMisspellings.AddRange(GetMisspellingsInSpans(naturalTextSpans));
+
+                    // Also remove empties
+                    removed += currentMisspellings.RemoveAll(tag => tag.ToTagSpan(snapshot).Span.IsEmpty);
+
+                    // If anything has been updated, we need to send out a change event
+                    if(removed != 0 || newMisspellings.Count != 0)
+                    {
+                        foreach(var g in newMisspellings.Where(
+                          w => w.MisspellingType == MisspellingType.MisspelledWord).GroupBy(w => w.Word))
+                        {
+                            var suggestions = this.Dictionary.SuggestCorrections(g.Key);
+
+                            foreach(var m in g)
+                                m.Suggestions = suggestions;
+                        }
+
+                        currentMisspellings.AddRange(newMisspellings);
+
+                        // We have to go back to the UI thread to update the misspellings
+                        await System.Threading.Tasks.Task.Run(async () =>
+                        {
+                            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                            if(!isClosed)
+                            {
+                                misspellings = currentMisspellings;
+                                this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(dirty));
+                            }
+                        });
+                    }
+                }
+
                 if(!isClosed)
                 {
+                    var snapshot = buffer.CurrentSnapshot;
+
                     // Clear out any inline ignored word spans that don't exist anymore (i.e. the containing line
                     // was deleted).
                     int removed = inlineIgnoredWords.RemoveAll(s => s.Span.GetSpan(snapshot).IsEmpty);
@@ -660,30 +577,33 @@ namespace VisualStudio.SpellChecker
                     // If any new inline ignored words were seen or removed, rescan the whole file
                     var newInlineIgnored = inlineIgnoredWords.Where(i => i.IsNew);
 
-                    if(newInlineIgnored.Any() || removed != 0)
+                    if(removed != 0 || newInlineIgnored.Any())
                     {
                         foreach(var i in newInlineIgnored)
                             i.IsNew = false;
 
-                        dirtySpans.Clear();
+                        foreach(var line in snapshot.Lines.Where(l => !l.Extent.IsEmpty))
+                            dirtySpans.Enqueue(line.Extent);
 
-                        foreach(var line in snapshot.Lines)
-                            if(!line.Extent.IsEmpty)
-                                dirtySpans.Add(line.Extent);
-                    }
-
-                    if(dirtySpans.Count != 0)
-                    {
                         // We have to go back to the UI thread to schedule another update
-                        ThreadHelper.JoinableTaskFactory.Run(async delegate
+                        await System.Threading.Tasks.Task.Run(async () =>
                         {
                             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                            if(!isClosed)
-                                this.ScheduleUpdate();
+                            this.ScheduleUpdate();
                         });
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                // Ignore exceptions that occur during spell checking except when debugging
+                Debug.WriteLine(ex);
+                Debugger.Break();
+            }
+            finally
+            {
+                spellCheckInProgress = false;
             }
         }
 
@@ -699,7 +619,6 @@ namespace VisualStudio.SpellChecker
             Microsoft.VisualStudio.Text.Span lastWord;
             string textToSplit, actualWord, textToCheck;
             int mnemonicPos;
-            var ignoredWords = wordsIgnoredOnce;
 
             // **************************************************************************************************
             // NOTE: If anything changes here, update the related solution/project spell checking code in
@@ -799,7 +718,7 @@ namespace VisualStudio.SpellChecker
                           lastWord.Start + lastWord.Length, word.Start - lastWord.Start - lastWord.Length)))
                         {
                             // If the doubled word is not being ignored at the current location, return it
-                            if(!ignoredWords.Any(w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
+                            if(!wordsIgnoredOnce.Any(w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
                               StringComparison.OrdinalIgnoreCase)))
                             {
                                 // Delete the whitespace ahead of it too
@@ -816,7 +735,7 @@ namespace VisualStudio.SpellChecker
                         lastWord = word;
 
                         // If the word is not being ignored, perform the other checks
-                        if(!this.Dictionary.ShouldIgnoreWord(textToCheck) && !ignoredWords.Any(
+                        if(!this.Dictionary.ShouldIgnoreWord(textToCheck) && !wordsIgnoredOnce.Any(
                           w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
                           StringComparison.OrdinalIgnoreCase)))
                         {

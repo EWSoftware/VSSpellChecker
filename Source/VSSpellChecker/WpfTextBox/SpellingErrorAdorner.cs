@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using TextSpan = Microsoft.VisualStudio.Text.Span;
 
 using VisualStudio.SpellChecker.ProjectSpellCheck;
+using Microsoft.VisualStudio.Threading;
 
 namespace VisualStudio.SpellChecker.WpfTextBox
 {
@@ -154,11 +155,11 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                 misspelledWords.ForEach(m => m.ActualBounds = Rect.Empty);
 
             // Fire and forget
-            var t = Task.Run(async () =>
+            Task.Run(async () =>
             {
                 await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 this.InvalidateVisual();
-            });
+            }).Forget();
         }
 
         /// <summary>

@@ -61,6 +61,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
         private List<string> projectNames;
         private CancellationTokenSource cancellationTokenSource;
+        private IProgress<string> spellCheckProgress;
         private WordSplitter wordSplitter;
         private bool unescapeApostrophes;
 
@@ -77,6 +78,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
             projectNames = new List<string>();
 
             InitializeComponent();
+
+            spellCheckProgress = new Progress<string>(spellCheckProgress_ReportProgress);
 
             ucSpellCheck.UpdateState(false, false, null);
 
@@ -577,6 +580,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
         //=====================================================================
 
         /// <summary>
+        /// This is used to report progress while performing the spell check process
+        /// </summary>
+        /// <param name="message">The progress message to report</param>
+        private void spellCheckProgress_ReportProgress(string message)
+        {
+            lblProgress.Text = message;
+        }
+
+        /// <summary>
         /// This is used to handle spell checking the given set of files in the background
         /// </summary>
         /// <param name="maxIssues">The maximum number of issues to report.</param>
@@ -662,15 +674,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                     }
                                 }
 
-                                // TODO: Use a progress reporter here instead?
-                                // Switch to the UI thread to update the progress and then switch back to this
-                                // one.  This runs the asynchronous delegate and waits for it to finish.
-                                ThreadHelper.JoinableTaskFactory.Run(async delegate
-                                {
-                                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-                                    lblProgress.Text = "Spell checking " + file.Description;
-                                });
+                                spellCheckProgress.Report("Spell checking " + file.Description);
 
                                 foreach(var issue in this.GetMisspellingsInSpans(dictionary, classifier.Parse()))
                                 {
