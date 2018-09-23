@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/31/2018
+// Updated : 09/05/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -187,15 +187,21 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                                 if(idx != -1)
                                 {
-                                    idx = file.CanonicalName.IndexOf('.', idx);
+                                    // Look for the first period, not the last, as we want to look for parent
+                                    // filenames (i.e. Form.cs for Form.Designer.cs).  Add one to the index as
+                                    // we don't want to match one for another file such as Form2.cs.
+                                    int extIdx = file.CanonicalName.IndexOf('.', idx) + 1;
 
-                                    if(idx != -1)
+                                    // Ignore it if not found or the filename starts with a period like .editorconfig
+                                    if(extIdx > idx + 2 && extIdx < file.CanonicalName.Length)
                                     {
-                                        projectPath = file.CanonicalName.Substring(0, idx);
+                                        projectPath = file.CanonicalName.Substring(0, extIdx);
 
-                                        filePath = configNames.FirstOrDefault(n => n.StartsWith(projectPath,
-                                            StringComparison.OrdinalIgnoreCase) && !n.StartsWith(file.CanonicalName,
-                                            StringComparison.OrdinalIgnoreCase));
+                                        filePath = configNames.FirstOrDefault(n =>
+                                            n.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(solutionFile, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(file.ProjectFile, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(file.CanonicalName, StringComparison.OrdinalIgnoreCase));
 
                                         file.DependencyConfigurationFile = filePath;
                                     }

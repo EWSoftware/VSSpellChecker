@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/25/2018
+// Updated : 09/17/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -286,7 +286,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             {
                 Match language = reScriptLanguage.Match(scriptElement.Value);
 
-                var classifier = this.GetClassifier(language.Success ? language.Groups["Language"].Value : pageLanguage);
+                var classifier = this.GetClassifier(language.Success ? language.Groups["Language"].Value :
+                    pageLanguage ?? "JavaScript");
 
                 classifier.SetText(script.Substring(scriptElement.Index + scriptElement.Length));
 
@@ -312,16 +313,23 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             // Cache the script classifiers as there may be more than one script block on the page
             if(!classifiers.TryGetValue(language ?? String.Empty, out TextClassifier c))
             {
-                if(!String.IsNullOrWhiteSpace(language) && language.ToLowerInvariant().IndexOf("vb",
-                  StringComparison.OrdinalIgnoreCase) != -1)
+                if(!String.IsNullOrWhiteSpace(language) &&
+                  language.IndexOf("vb", StringComparison.OrdinalIgnoreCase) != -1)
                 {
                     c = ClassifierFactory.GetClassifier("~~.vb", this.SpellCheckConfiguration);
                 }
                 else
-                {
-                    // Anything else is considered a C-style script language (C#, PHP, JavaScript, etc.).
-                    c = ClassifierFactory.GetClassifier("~~.cs", this.SpellCheckConfiguration);
-                }
+                    if(!String.IsNullOrWhiteSpace(language) &&
+                      (language.IndexOf("JavaScript", StringComparison.OrdinalIgnoreCase) != -1 ||
+                      language.IndexOf("TypeScript", StringComparison.OrdinalIgnoreCase) != -1))
+                    {
+                        c = ClassifierFactory.GetClassifier("~~.js", this.SpellCheckConfiguration);
+                    }
+                    else
+                    {
+                        // Anything else is considered a C-style script language (C#, PHP, etc.).
+                        c = ClassifierFactory.GetClassifier("~~.cs", this.SpellCheckConfiguration);
+                    }
 
                 classifiers.Add(language ?? String.Empty, c);
             }

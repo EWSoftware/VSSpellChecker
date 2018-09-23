@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
+// Updated : 09/17/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -139,7 +139,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(extension))
                 extension = extension.Substring(1);
 
-            return (extensionMap.TryGetValue(extension, out string id) && id == "CStyle");
+            return (extensionMap.TryGetValue(extension, out string id) && id.StartsWith("CStyle", StringComparison.Ordinal));
         }
 
         /// <summary>

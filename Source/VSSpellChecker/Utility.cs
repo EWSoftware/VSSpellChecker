@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/30/2018
+// Updated : 09/17/2018
 // Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -128,6 +129,12 @@ namespace VisualStudio.SpellChecker
                     }
                 }
 
+                // If it's TypeScript, we can get it through the script block property
+                string filename = FilenameFromScriptBlock(buffer);
+
+                if(filename != null)
+                    return filename;
+
                 // See if the text in the buffer contains a filename reference from a code generator by looking
                 // for some common patterns (stuff like Razor HTML).
                 string content = buffer.CurrentSnapshot.GetText(0, Math.Min(buffer.CurrentSnapshot.Length, 4096));
@@ -137,6 +144,28 @@ namespace VisualStudio.SpellChecker
                 if(m.Success)
                     return m.Groups["Filename"].Value;
             }
+
+            return null;
+        }
+
+        /// <summary>
+        /// This is used to see if the buffer contains a script block property present in HTML files
+        /// </summary>
+        /// <param name="buffer">The text buffer from which to get the filename</param>
+        /// <returns>The filename if it could be obtained from the script block property, null if not</returns>
+        /// <remarks>There doesn't appear to be a reference assembly for the TypeScript language service so
+        /// reflection is used to obtain the property and its value.</remarks>
+        private static string FilenameFromScriptBlock(ITextBuffer buffer)
+        {
+            if(buffer.ContentType.TypeName == "TypeScript")
+                foreach(var p in buffer.Properties.PropertyList)
+                    if(p.Key is Type t && t.FullName == "Microsoft.VisualStudio.LanguageServices.TypeScript.ScriptContexts.ScriptBlock")
+                    {
+                        var filename = t.GetProperty("FileName");
+
+                        if(filename != null)
+                            return filename.GetValue(p.Value) as string;
+                    }
 
             return null;
         }
