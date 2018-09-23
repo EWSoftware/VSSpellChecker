@@ -37,7 +37,6 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Editors;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
-using VisualStudio.SpellChecker.Properties;
 
 namespace VisualStudio.SpellChecker
 {
@@ -152,8 +151,8 @@ namespace VisualStudio.SpellChecker
         /// This is used to see if the buffer contains a script block property present in HTML files
         /// </summary>
         /// <param name="buffer">The text buffer from which to get the filename</param>
-        /// <returns>The filename if it could be obtained from the script block property, null if not</returns>
-        /// <remarks>There doesn't appear to be a reference assembly for the TypeScript language service so
+        /// <returns>The filename if it could be obtained from the script context property, null if not</returns>
+        /// <remarks>There doesn't appear to be any reference assemblies for the script language services so
         /// reflection is used to obtain the property and its value.</remarks>
         private static string FilenameFromScriptBlock(ITextBuffer buffer)
         {
@@ -166,6 +165,52 @@ namespace VisualStudio.SpellChecker
                         if(filename != null)
                             return filename.GetValue(p.Value) as string;
                     }
+
+            if(buffer.ContentType.TypeName == "JavaScript")
+                foreach(var p in buffer.Properties.PropertyList)
+                {
+                    if(p.Value is System.Collections.IDictionary d)
+                    {
+                        foreach(var v in d.Values)
+                            if(v != null)
+                            {
+                                Type t = v.GetType();
+
+                                if(t.FullName == "Microsoft.VisualStudio.JSLS.Engine.ScriptContext")
+                                {
+                                    var primarySource = t.GetProperty("PrimarySource");
+
+                                    if(primarySource != null)
+                                    {
+                                        var ps = primarySource.GetValue(v);
+
+                                        if(ps != null)
+                                        {
+                                            t = ps.GetType();
+
+                                            var authorFile = t.GetProperty("AuthorFile", BindingFlags.NonPublic |
+                                                BindingFlags.Instance);
+
+                                            if(authorFile != null)
+                                            {
+                                                var af = authorFile.GetValue(ps);
+
+                                                if(af != null)
+                                                {
+                                                    t = af.GetType();
+
+                                                    var displayName = t.GetProperty("DisplayName");
+
+                                                    if(displayName != null)
+                                                        return displayName.GetValue(af) as string;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
+                }
 
             return null;
         }
