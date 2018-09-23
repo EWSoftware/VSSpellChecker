@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MenuCommand.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/26/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 09/01/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that is used to define a simple menu command
@@ -31,7 +31,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         #region Private data members
         //=====================================================================
 
-        private Action<object> action;
+        private readonly Action<object> action;
 
         #endregion
 
@@ -68,8 +68,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         /// <inheritdoc />
         public void Execute(object parameter)
         {
-            if(action != null)
-                action(parameter);
+            action?.Invoke(parameter);
         }
         #endregion
     }

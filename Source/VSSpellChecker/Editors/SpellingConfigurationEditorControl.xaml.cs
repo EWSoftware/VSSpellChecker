@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/16/2018
+// Updated : 08/29/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -25,7 +25,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -59,13 +58,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// <summary>
         /// This read-only property returns the filename
         /// </summary>
-        public string Filename
-        {
-            get
-            {
-                return (configFile == null) ? String.Empty : configFile.Filename;
-            }
-        }
+        public string Filename => (configFile == null) ? String.Empty : configFile.Filename;
+
         #endregion
 
         #region Events
@@ -83,10 +77,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <param name="e">The event arguments</param>
         private void OnConfigurationChanged(object sender, EventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(sender, e);
+            ConfigurationChanged?.Invoke(sender, e);
         }
         #endregion
 
@@ -162,7 +153,9 @@ namespace VisualStudio.SpellChecker.Editors
         {
             configFile = new SpellingConfigurationFile(configurationFile, null);
 
+#pragma warning disable VSTHRD010
             this.SetTitle();
+#pragma warning restore VSTHRD010
 
             foreach(TreeViewItem item in tvPages.Items)
             {
@@ -186,6 +179,7 @@ namespace VisualStudio.SpellChecker.Editors
         {
             configFile.Filename = configurationFile;
 
+#pragma warning disable VSTHRD010
             this.SetTitle();
 
             foreach(TreeViewItem item in tvPages.Items)
@@ -201,7 +195,7 @@ namespace VisualStudio.SpellChecker.Editors
                 if(configFile.ConfigurationType == ConfigurationType.Global)
                 {
                     if(configFile.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking))
-                        VSSpellCheckEverywherePackage.Instance.ConnectSpellChecker();
+                        VSSpellCheckEverywherePackage.Instance?.ConnectSpellChecker();
 
                     WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
                 }
@@ -209,6 +203,7 @@ namespace VisualStudio.SpellChecker.Editors
             else
                 MessageBox.Show("Unable to save spell checking configuration", PackageResources.PackageTitle,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -216,6 +211,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         private void SetTitle()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             string configFilename = configFile.Filename;
 
             if(configFilename.EndsWith(".vsspell", StringComparison.OrdinalIgnoreCase))

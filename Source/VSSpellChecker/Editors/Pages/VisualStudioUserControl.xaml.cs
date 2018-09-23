@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VisualStudioUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/12/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the Visual Studio WPF text box spell checker configuration
@@ -61,22 +61,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "Visual Studio WPF Text Boxes"; }
-        }
+        public string Title => "Visual Studio WPF Text Boxes";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "e23551ac-52f5-4505-b2d2-0728c7607fd3"; }
-        }
+        public string HelpUrl => "e23551ac-52f5-4505-b2d2-0728c7607fd3";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -187,9 +178,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(idx != -1)
             {
-                var form = new ExclusionExpressionAddEditForm();
-
-                form.Expression = expressions[idx];
+                var form = new ExclusionExpressionAddEditForm { Expression = expressions[idx] };
 
                 if(form.ShowDialog() ?? false)
                 {
@@ -285,10 +274,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

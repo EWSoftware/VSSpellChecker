@@ -87,7 +87,9 @@ namespace VisualStudio.SpellChecker.Tagging
                 if(buffer == null || spellingService == null || buffer.ContentType.IsOfType("R Markdown"))
                     return null;
 
+#pragma warning disable VSTHRD010
                 var config = spellingService.GetConfiguration(buffer);
+#pragma warning restore VSTHRD010
 
                 if(config == null)
                     return null;
@@ -340,10 +342,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="e">The event arguments</param>
         private void ClassificationChanged(object sender, ClassificationChangedEventArgs e)
         {
-            var handler = TagsChanged;
-
-            if(handler != null)
-                handler(this, new SnapshotSpanEventArgs(e.ChangeSpan));
+            this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(e.ChangeSpan));
         }
         #endregion
 

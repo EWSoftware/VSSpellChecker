@@ -77,6 +77,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             base.Initialize();
 
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             // Connect to solution events to find out when solutions are opened or closed, projects are
             // added/removed, etc.
             // Register for solution events so that we can clear the global dictionary cache when necessary
@@ -188,6 +190,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// </summary>
         private void solutionEvents_OpenedClosed()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(false);
 
             if(dte2 != null)
@@ -229,6 +233,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="Project">The project that was added</param>
         private void solutionEvents_ProjectAdded(Project Project)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             ucSpellCheck.AddProject(Project.FullName);
         }
 
@@ -238,6 +244,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="Project">The project that was removed</param>
         private void solutionEvents_ProjectRemoved(Project Project)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             ucSpellCheck.RemoveProject(Project.FullName);
         }
 
@@ -248,6 +256,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="Project">The project that was renamed</param>
         private void solutionEvents_ProjectRenamed(Project Project, string OldName)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             ucSpellCheck.ProjectRenamed(OldName, Project.FullName);
         }
         #endregion

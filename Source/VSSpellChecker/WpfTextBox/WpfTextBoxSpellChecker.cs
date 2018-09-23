@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/08/2017
-// Note    : Copyright 2016-2017, Eric Woodruff, All rights reserved
+// Updated : 08/30/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
@@ -37,6 +37,7 @@ using TextSpan = Microsoft.VisualStudio.Text.Span;
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
+using Microsoft.VisualStudio.Threading;
 
 namespace VisualStudio.SpellChecker.WpfTextBox
 {
@@ -145,12 +146,11 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                 EventManager.RegisterClassHandler(typeof(TextBox), UIElement.GotFocusEvent,
                     new RoutedEventHandler(async (sender, args) => await Task.Run(async () =>
                     {
-                        TextBox t = sender as TextBox;
-
-                        if(t != null && !wpfSpellCheckers.ContainsKey(t))
-                            if(!t.CheckAccess())
+                        if(sender is TextBox t && !wpfSpellCheckers.ContainsKey(t))
+                            if(!Microsoft.VisualStudio.Shell.ThreadHelper.CheckAccess())
                             {
-                                await t.Dispatcher.InvokeAsync(() => AddWpfSpellChecker(t));
+                                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                                AddWpfSpellChecker(t);
                             }
                             else
                                 AddWpfSpellChecker(t);
@@ -182,13 +182,17 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         /// Disconnect the event handlers from the text box to dispose of this instance
         /// </summary>
         /// <remarks>WPF text boxes don't implement <c>IDisposable</c> so we'll manage it ourselves</remarks>
-        public async void Disconnect()
+        public void Disconnect()
         {
-            WpfTextBoxSpellChecker value;
-
-            if(!textBox.CheckAccess())
+            if(!Microsoft.VisualStudio.Shell.ThreadHelper.CheckAccess())
             {
-                await textBox.Dispatcher.InvokeAsync(() => this.Disconnect());
+                // Fire and forget
+                Task.Run(async () =>
+                {
+                    await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    this.Disconnect();
+                }).Forget();
+
                 return;
             }
 
@@ -217,7 +221,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                 timer = null;
             }
 
-            wpfSpellCheckers.TryRemove(textBox, out value);
+            wpfSpellCheckers.TryRemove(textBox, out WpfTextBoxSpellChecker value);
 
             System.Diagnostics.Debug.WriteLine("******* Disconnected from " + ElementName(textBox) + " *******");
         }
@@ -240,9 +244,8 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                         configuration.Load(SpellingConfigurationFile.GlobalConfigurationFilename);
 
                         var globalDictionaries = configuration.DictionaryLanguages.Select(l =>
-                            GlobalDictionary.CreateGlobalDictionary(l, null,
-                            configuration.AdditionalDictionaryFolders, configuration.RecognizedWords)).Where(
-                                d => d != null).Distinct().ToList();
+                            GlobalDictionary.CreateGlobalDictionary(l, configuration.AdditionalDictionaryFolders,
+                            configuration.RecognizedWords)).Where(d => d != null).Distinct().ToList();
 
                         dictionary = new SpellingDictionary(globalDictionaries, configuration.IgnoredWords);
                     }
@@ -309,7 +312,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                     element = System.Windows.Media.VisualTreeHelper.GetParent(element) as FrameworkElement;
             }
 
-            if(!isWindow && !String.IsNullOrWhiteSpace(VSSpellCheckEverywherePackage.Instance.CurrentWindowId))
+            if(!isWindow && !String.IsNullOrWhiteSpace(VSSpellCheckEverywherePackage.Instance?.CurrentWindowId))
                 nameParts.Add(VSSpellCheckEverywherePackage.Instance.CurrentWindowId);
 
             System.Diagnostics.Debug.WriteLine("******* " + String.Join(".", nameParts.Reverse<string>()));
@@ -541,21 +544,20 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void timer_Elapsed(object sender, ElapsedEventArgs e)
+        private async void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            try
             {
-                try
-                {
-                    this.CheckSpelling(textBox.Text);
-                    adorner.UpdateMisspellings(misspelledWords);
-                }
-                catch(Exception ex)
-                {
-                    // Ignore exceptions
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
-            }));
+                this.CheckSpelling(textBox.Text);
+                adorner.UpdateMisspellings(misspelledWords);
+            }
+            catch(Exception ex)
+            {
+                // Ignore exceptions
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         /// <summary>

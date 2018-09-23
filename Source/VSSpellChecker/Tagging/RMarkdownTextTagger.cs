@@ -68,7 +68,9 @@ namespace VisualStudio.SpellChecker.Tagging
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
                 var classifier = classifierAggregatorService.GetClassifier(buffer);
+#pragma warning disable VSTHRD010
                 var config = spellingService.GetConfiguration(buffer);
+#pragma warning restore VSTHRD010
 
                 if(config == null)
                     return new RMarkdownTextTagger(buffer, classifier, null) as ITagger<T>;
@@ -207,10 +209,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="e">The event arguments</param>
         private void ClassificationChanged(object sender, ClassificationChangedEventArgs e)
         {
-            var handler = TagsChanged;
-
-            if(handler != null)
-                handler(this, new SnapshotSpanEventArgs(e.ChangeSpan));
+            this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(e.ChangeSpan));
         }
         #endregion
 

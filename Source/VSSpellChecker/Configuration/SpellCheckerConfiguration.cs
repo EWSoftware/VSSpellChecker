@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/23/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -43,9 +43,6 @@ namespace VisualStudio.SpellChecker.Configuration
     {
         #region Private data members
         //=====================================================================
-
-        private readonly CSharpOptions csharpOptions;
-        private readonly CodeAnalysisDictionaryOptions cadOptions;
 
         private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords;
         private List<CultureInfo> dictionaryLanguages;
@@ -177,18 +174,12 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// This read-only property returns the C# source code file options
         /// </summary>
-        public CSharpOptions CSharpOptions
-        {
-            get { return csharpOptions; }
-        }
+        public CSharpOptions CSharpOptions { get; }
 
         /// <summary>
         /// This read-only property returns the code analysis dictionary options
         /// </summary>
-        public CodeAnalysisDictionaryOptions CadOptions
-        {
-            get { return cadOptions; }
-        }
+        public CodeAnalysisDictionaryOptions CadOptions { get; }
 
         /// <summary>
         /// This is used to indicate whether or not ignored file patterns are inherited by other configurations
@@ -202,10 +193,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// This read-only property returns an enumerable list of ignored file patterns
         /// </summary>
         /// <remarks>Filenames matching the patterns in this set will not be spell checked</remarks>
-        public IEnumerable<Regex> IgnoredFilePatterns
-        {
-            get { return ignoredFilePatterns; }
-        }
+        public IEnumerable<Regex> IgnoredFilePatterns => ignoredFilePatterns;
 
         /// <summary>
         /// This is used to indicate whether or not additional dictionary folders are inherited by other
@@ -221,10 +209,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// </summary>
         /// <remarks>When searching for dictionaries, these folders will be included in the search.  This allows
         /// for solution and project-specific dictionaries.</remarks>
-        public IEnumerable<string> AdditionalDictionaryFolders
-        {
-            get { return additionalDictionaryFolders; }
-        }
+        public IEnumerable<string> AdditionalDictionaryFolders => additionalDictionaryFolders;
 
         /// <summary>
         /// This is used to indicate whether or not ignored words are inherited by other configurations
@@ -237,10 +222,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// This read-only property returns an enumerable list of ignored words that will not be spell checked
         /// </summary>
-        public IEnumerable<string> IgnoredWords
-        {
-            get { return ignoredWords; }
-        }
+        public IEnumerable<string> IgnoredWords => ignoredWords;
 
         /// <summary>
         /// This is used to indicate whether or not exclusion expressions are inherited by other configurations
@@ -254,10 +236,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// This read-only property returns an enumerable list of exclusion regular expressions that will be used
         /// to find ranges of text that should not be spell checked.
         /// </summary>
-        public IEnumerable<Regex> ExclusionExpressions
-        {
-            get { return exclusionExpressions; }
-        }
+        public IEnumerable<Regex> ExclusionExpressions => exclusionExpressions;
 
         /// <summary>
         /// This is used to indicate whether or not ignored XML elements and included attributes are inherited by
@@ -272,19 +251,13 @@ namespace VisualStudio.SpellChecker.Configuration
         /// This read-only property returns an enumerable list of ignored XML element names that will not have
         /// their content spell checked.
         /// </summary>
-        public IEnumerable<string> IgnoredXmlElements
-        {
-            get { return ignoredXmlElements; }
-        }
+        public IEnumerable<string> IgnoredXmlElements => ignoredXmlElements;
 
         /// <summary>
         /// This read-only property returns an enumerable list of XML attribute names that will not have their
         /// values spell checked.
         /// </summary>
-        public IEnumerable<string> SpellCheckedXmlAttributes
-        {
-            get { return spellCheckedXmlAttributes; }
-        }
+        public IEnumerable<string> SpellCheckedXmlAttributes => spellCheckedXmlAttributes;
 
         /// <summary>
         /// This is used to indicate whether or not ignored classifications are inherited by other configurations
@@ -297,37 +270,25 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// This read-only property returns the recognized words loaded from code analysis dictionaries
         /// </summary>
-        public IEnumerable<string> RecognizedWords
-        {
-            get { return recognizedWords; }
-        }
+        public IEnumerable<string> RecognizedWords => recognizedWords;
 
         /// <summary>
         /// This read-only property returns the unrecognized words loaded from code analysis dictionaries
         /// </summary>
         /// <value>The key is the unrecognized word and the value is the list of spelling alternatives</value>
-        public IDictionary<string, IList<string>> UnrecognizedWords
-        {
-            get { return unrecognizedWords; }
-        }
+        public IDictionary<string, IList<string>> UnrecognizedWords => unrecognizedWords;
 
         /// <summary>
         /// This read-only property returns the deprecated terms loaded from code analysis dictionaries
         /// </summary>
         /// <value>The key is the deprecated term and the value is the preferred alternate</value>
-        public IDictionary<string, string> DeprecatedTerms
-        {
-            get { return deprecatedTerms; }
-        }
+        public IDictionary<string, string> DeprecatedTerms => deprecatedTerms;
 
         /// <summary>
         /// This read-only property returns the compound terms loaded from code analysis dictionaries
         /// </summary>
         /// <value>The key is the discrete term and the value is the compound alternate</value>
-        public IDictionary<string, string> CompoundTerms
-        {
-            get { return compoundTerms; }
-        }
+        public IDictionary<string, string> CompoundTerms => compoundTerms;
 
         /// <summary>
         /// This is used to indicate whether or not to spell check any WPF text box within Visual Studio
@@ -341,116 +302,83 @@ namespace VisualStudio.SpellChecker.Configuration
         /// to exclude WPF text boxes in Visual Studio editor and tool windows from being spell checked.
         /// </summary>
         /// <value>This option only applies to the global configuration.</value>
-        public IEnumerable<Regex> VisualStudioExclusions
-        {
-            get { return visualStudioExclusions; }
-        }
+        public IEnumerable<Regex> VisualStudioExclusions => visualStudioExclusions;
 
         /// <summary>
         /// This read-only property returns the default list of ignored words
         /// </summary>
         /// <remarks>The default list includes words starting with what looks like an escape sequence such as
         /// various Doxygen documentation tags (i.e. \anchor, \ref, \remarks, etc.).</remarks>
-        public static IEnumerable<string> DefaultIgnoredWords
-        {
-            get
-            {
-                return new string[] { "\\addindex", "\\addtogroup", "\\anchor", "\\arg", "\\attention",
-                    "\\author", "\\authors", "\\brief", "\\bug", "\\file", "\\fn", "\\name", "\\namespace",
-                    "\\nosubgrouping", "\\note", "\\ref", "\\refitem", "\\related", "\\relates", "\\relatedalso",
-                    "\\relatesalso", "\\remark", "\\remarks", "\\result", "\\return", "\\returns", "\\retval",
-                    "\\rtfonly", "\\tableofcontents", "\\test", "\\throw", "\\throws", "\\todo", "\\tparam",
-                    "\\typedef", "\\var", "\\verbatim", "\\verbinclude", "\\version", "\\vhdlflow"};
-            }
-        }
+        public static IEnumerable<string> DefaultIgnoredWords =>
+            new string[] { "\\addindex", "\\addtogroup", "\\anchor", "\\arg", "\\attention", "\\author",
+                "\\authors", "\\brief", "\\bug", "\\file", "\\fn", "\\name", "\\namespace", "\\nosubgrouping",
+                "\\note", "\\ref", "\\refitem", "\\related", "\\relates", "\\relatedalso", "\\relatesalso",
+                "\\remark", "\\remarks", "\\result", "\\return", "\\returns", "\\retval", "\\rtfonly",
+                "\\tableofcontents", "\\test", "\\throw", "\\throws", "\\todo", "\\tparam", "\\typedef",
+                "\\var", "\\verbatim", "\\verbinclude", "\\version", "\\vhdlflow" };
 
         /// <summary>
         /// This read-only property returns the default list of ignored classifications
         /// </summary>
-        public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> DefaultIgnoredClassifications
-        {
-            get
-            {
-                return new[] {
-                    // Only comments are spell checked in EditorConfig files.  Ignore the string classification
-                    // use by the EditorConfig Language Service extension by Mads Kristensen.
-                    new KeyValuePair<string, IEnumerable<string>>("EditorConfig", new[] { "string" })
-                };
-            }
-        }
+        public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> DefaultIgnoredClassifications =>
+            new[] {
+                // Only comments are spell checked in EditorConfig files.  Ignore the string classification
+                // use by the EditorConfig Language Service extension by Mads Kristensen.
+                new KeyValuePair<string, IEnumerable<string>>("EditorConfig", new[] { "string" })
+            };
 
         /// <summary>
         /// This read-only property returns the default list of ignored file patterns
         /// </summary>
-        public static IEnumerable<string> DefaultIgnoredFilePatterns
-        {
-            get
-            {
-                return new[] { @"\bin\*", "*.min.cs", "*.min.js", "*.rproj", "CodeAnalysisLog.xml",
-                    "GlobalSuppressions.*", "Resources.Designer.*", "Settings.Designer.cs", "Settings.settings",
-                    "UpgradeLog.htm", "bootstrap*.css", "bootstrap*.js", "html5shiv.js", "jquery*.d.ts",
-                    "jquery*.js", "respond*.js", "robots.txt" };
-            }
-        }
+        public static IEnumerable<string> DefaultIgnoredFilePatterns =>
+            new[] { @"\bin\*", "*.min.cs", "*.min.js", "*.rproj", "CodeAnalysisLog.xml", "GlobalSuppressions.*",
+                "Resources.Designer.*", "Settings.Designer.cs", "Settings.settings", "UpgradeLog.htm",
+                "bootstrap*.css", "bootstrap*.js", "html5shiv.js", "jquery*.d.ts", "jquery*.js", "respond*.js",
+                "robots.txt" };
 
         /// <summary>
         /// This read-only property returns the default list of ignored XML elements
         /// </summary>
-        public static IEnumerable<string> DefaultIgnoredXmlElements
-        {
-            get
-            {
-                return new string[] { "c", "code", "codeEntityReference", "codeReference", "codeInline",
-                    "command", "environmentVariable", "fictitiousUri", "foreignPhrase", "link", "linkTarget",
-                    "linkUri", "localUri", "replaceable", "resheader", "see", "seeAlso", "style",
-                    "unmanagedCodeEntityReference", "token" };
-            }
-        }
+        public static IEnumerable<string> DefaultIgnoredXmlElements =>
+            new string[] { "c", "code", "codeEntityReference", "codeReference", "codeInline", "command",
+                "environmentVariable", "fictitiousUri", "foreignPhrase", "link", "linkTarget", "linkUri",
+                "localUri", "replaceable", "resheader", "see", "seeAlso", "style", "unmanagedCodeEntityReference",
+                "token" };
 
         /// <summary>
         /// This read-only property returns the default list of spell checked XML attributes
         /// </summary>
-        public static IEnumerable<string> DefaultSpellCheckedAttributes
-        {
-            get
-            {
-                return new[] { "altText", "Caption", "CompoundAlternate", "Content", "Header", "lead",
-                    "PreferredAlternate", "SpellingAlternates", "title", "term", "Text", "ToolTip" };
-            }
-        }
+        public static IEnumerable<string> DefaultSpellCheckedAttributes =>
+            new[] { "altText", "Caption", "CompoundAlternate", "Content", "Header", "lead", "PreferredAlternate",
+                "SpellingAlternates", "title", "term", "Text", "ToolTip" };
 
         /// <summary>
         /// This read-only property returns the default list of excluded Visual Studio text box IDs
         /// </summary>
-        public static IEnumerable<string> DefaultVisualStudioExclusions
-        {
-            get
-            {
-                return new[] {
-                    @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|" +
-                        "filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
-                    @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
-                    @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
-                    @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
-                    @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
-                    @"1c79180c-bb93-46d2-b4d3-f22e7015a6f1\.txtFindID(?# SHFB resource item editor)",
-                    @"581e89c0-e423-4453-bde3-a0403d5f380d\.ucEntityReferences\.txtFindName(?# SHFB entity references)",
-                    @"7aad2922-72a2-42c1-a077-85f5097a8fa7\.txtFindID(?# SHFB content layout editor)",
-                    @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
-                    @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|" +
-                        "txtWebsiteAdContent|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|" +
-                        "pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)",
-                    @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
-                        "(?# SHFB build component and plug-in configuration forms)",
-                    @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
-                    @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
-                        "txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
-                    @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
-                    @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
-                        "(?# Spell checker exclusion expression editor)"
-                };
-            }
-        }
+        public static IEnumerable<string> DefaultVisualStudioExclusions =>
+            new[] {
+                @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|" +
+                    "filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
+                @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
+                @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
+                @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
+                @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
+                @"1c79180c-bb93-46d2-b4d3-f22e7015a6f1\.txtFindID(?# SHFB resource item editor)",
+                @"581e89c0-e423-4453-bde3-a0403d5f380d\.ucEntityReferences\.txtFindName(?# SHFB entity references)",
+                @"7aad2922-72a2-42c1-a077-85f5097a8fa7\.txtFindID(?# SHFB content layout editor)",
+                @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
+                @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|" +
+                    "txtWebsiteAdContent|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|" +
+                    "pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)",
+                @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
+                    "(?# SHFB build component and plug-in configuration forms)",
+                @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
+                @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
+                    "txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
+                @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
+                @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
+                    "(?# Spell checker exclusion expression editor)" };
+
         #endregion
 
         #region Constructor
@@ -461,8 +389,8 @@ namespace VisualStudio.SpellChecker.Configuration
         /// </summary>
         public SpellCheckerConfiguration()
         {
-            csharpOptions = new CSharpOptions();
-            cadOptions = new CodeAnalysisDictionaryOptions();
+            this.CSharpOptions = new CSharpOptions();
+            this.CadOptions = new CodeAnalysisDictionaryOptions();
 
             dictionaryLanguages = new List<CultureInfo>();
 
@@ -530,9 +458,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <returns>An enumerable list of ignored classifications or an empty set if there are none</returns>
         public IEnumerable<string> IgnoredClassificationsFor(string contentType)
         {
-            HashSet<string> classifications;
-
-            if(!ignoredClassifications.TryGetValue(contentType, out classifications))
+            if(!ignoredClassifications.TryGetValue(contentType, out HashSet<string> classifications))
                 classifications = new HashSet<string>();
 
             return classifications;
@@ -594,34 +520,34 @@ namespace VisualStudio.SpellChecker.Configuration
                 this.DetermineResourceFileLanguageFromName = configuration.ToBoolean(
                     PropertyNames.DetermineResourceFileLanguageFromName);
 
-                csharpOptions.IgnoreXmlDocComments = configuration.ToBoolean(
+                this.CSharpOptions.IgnoreXmlDocComments = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreXmlDocComments);
-                csharpOptions.IgnoreDelimitedComments = configuration.ToBoolean(
+                this.CSharpOptions.IgnoreDelimitedComments = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreDelimitedComments);
-                csharpOptions.IgnoreStandardSingleLineComments = configuration.ToBoolean(
+                this.CSharpOptions.IgnoreStandardSingleLineComments = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreStandardSingleLineComments);
-                csharpOptions.IgnoreQuadrupleSlashComments = configuration.ToBoolean(
+                this.CSharpOptions.IgnoreQuadrupleSlashComments = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreQuadrupleSlashComments);
-                csharpOptions.IgnoreNormalStrings = configuration.ToBoolean(
+                this.CSharpOptions.IgnoreNormalStrings = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreNormalStrings);
-                csharpOptions.IgnoreVerbatimStrings = configuration.ToBoolean(
+                this.CSharpOptions.IgnoreVerbatimStrings = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreVerbatimStrings);
-                csharpOptions.IgnoreInterpolatedStrings = configuration.ToBoolean(
+                this.CSharpOptions.IgnoreInterpolatedStrings = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsIgnoreInterpolatedStrings);
-                csharpOptions.ApplyToAllCStyleLanguages = configuration.ToBoolean(
+                this.CSharpOptions.ApplyToAllCStyleLanguages = configuration.ToBoolean(
                     PropertyNames.CSharpOptionsApplyToAllCStyleLanguages);
 
-                cadOptions.ImportCodeAnalysisDictionaries = configuration.ToBoolean(
+                this.CadOptions.ImportCodeAnalysisDictionaries = configuration.ToBoolean(
                     PropertyNames.CadOptionsImportCodeAnalysisDictionaries);
-                cadOptions.RecognizedWordHandling = configuration.ToEnum<RecognizedWordHandling>(
+                this.CadOptions.RecognizedWordHandling = configuration.ToEnum<RecognizedWordHandling>(
                     PropertyNames.CadOptionsRecognizedWordHandling);
-                cadOptions.TreatUnrecognizedWordsAsMisspelled = configuration.ToBoolean(
+                this.CadOptions.TreatUnrecognizedWordsAsMisspelled = configuration.ToBoolean(
                     PropertyNames.CadOptionsTreatUnrecognizedWordsAsMisspelled);
-                cadOptions.TreatDeprecatedTermsAsMisspelled = configuration.ToBoolean(
+                this.CadOptions.TreatDeprecatedTermsAsMisspelled = configuration.ToBoolean(
                     PropertyNames.CadOptionsTreatDeprecatedTermsAsMisspelled);
-                cadOptions.TreatCompoundTermsAsMisspelled = configuration.ToBoolean(
+                this.CadOptions.TreatCompoundTermsAsMisspelled = configuration.ToBoolean(
                     PropertyNames.CadOptionsTreatCompoundTermsAsMisspelled);
-                cadOptions.TreatCasingExceptionsAsIgnoredWords = configuration.ToBoolean(
+                this.CadOptions.TreatCasingExceptionsAsIgnoredWords = configuration.ToBoolean(
                     PropertyNames.CadOptionsTreatCasingExceptionsAsIgnoredWords);
 
                 this.InheritAdditionalDictionaryFolders = configuration.ToBoolean(
@@ -775,10 +701,9 @@ namespace VisualStudio.SpellChecker.Configuration
                     foreach(var type in configuration.Element(PropertyNames.IgnoredClassifications).Elements(
                       PropertyNames.ContentType))
                     {
-                        HashSet<string> classifications;
                         string typeName = type.Attribute(PropertyNames.ContentTypeName).Value;
 
-                        if(!ignoredClassifications.TryGetValue(typeName, out classifications))
+                        if(!ignoredClassifications.TryGetValue(typeName, out HashSet<string> classifications))
                         {
                             classifications = new HashSet<string>();
                             ignoredClassifications.Add(typeName, classifications);

@@ -78,7 +78,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public char Mnemonic
         {
-            get { return mnemonic; }
+            get => mnemonic;
             set
             {
                 if(value != '&' && value != '_')

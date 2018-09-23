@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 08/02/2018
+// Updated : 09/01/2018
 // Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -62,7 +62,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// </summary>
         public IWpfTextView CurrentTextView
         {
-            get { return currentTextView; }
+            get => currentTextView;
             set
             {
                 if(currentTextView != value)
@@ -77,7 +77,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
                     else
                         currentTagger = null;
-                    
+
                     ucSpellCheck.SetAddWordContextMenuDictionaries(null);
 
                     if(currentTagger != null)
@@ -122,7 +122,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// up.  This works around the issue so that we can reliably update state only when focused.</remarks>
         public bool ParentFocused
         {
-            get { return parentFocused; }
+            get => parentFocused;
             set
             {
                 parentFocused = value;
@@ -216,9 +216,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void cmdReplace_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             ITrackingSpan span;
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
 
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
                 if(currentIssue.MisspellingType != MisspellingType.DoubledWord)
                 {
                     var suggestion = ucSpellCheck.SelectedSuggestion;
@@ -250,9 +249,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdReplaceAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
-
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
             {
                 var suggestion = ucSpellCheck.SelectedSuggestion;
 
@@ -277,9 +274,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdIgnoreOnce_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
-
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
                 currentTagger.Dictionary.IgnoreWordOnce(currentIssue.Span);
         }
 
@@ -292,9 +287,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdIgnoreAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
-
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
                 currentTagger.Dictionary.IgnoreWord(currentIssue.Word);
         }
 
@@ -307,10 +300,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdAddToDictionary_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
             string word;
 
-            if(currentIssue != null)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue)
             {
                 word = ucSpellCheck.MisspelledWord;
 

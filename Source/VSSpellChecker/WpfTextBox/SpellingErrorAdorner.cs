@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingErrorAdorner.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/29/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 08/29/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that is used to adorn spelling errors in a WPF text box with an underline
@@ -27,11 +27,12 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Threading;
+using System.Threading.Tasks;
 
 using TextSpan = Microsoft.VisualStudio.Text.Span;
 
 using VisualStudio.SpellChecker.ProjectSpellCheck;
+using Microsoft.VisualStudio.Threading;
 
 namespace VisualStudio.SpellChecker.WpfTextBox
 {
@@ -153,7 +154,12 @@ namespace VisualStudio.SpellChecker.WpfTextBox
             if(clearCachedBounds)
                 misspelledWords.ForEach(m => m.ActualBounds = Rect.Empty);
 
-            textBox.Dispatcher.BeginInvoke(DispatcherPriority.Background, (Action)InvalidateVisual);
+            // Fire and forget
+            Task.Run(async () =>
+            {
+                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                this.InvalidateVisual();
+            }).Forget();
         }
 
         /// <summary>
@@ -178,10 +184,9 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         /// <inheritdoc />
         protected override void OnRender(DrawingContext drawingContext)
         {
-            Visual topLevelControl = GetTopLevelControl(textBox) as Visual;
             Rect controlBounds, wordBounds, startRect, endRect;
 
-            if(topLevelControl != null)
+            if(misspelledWords.Count != 0 && textBox.LineCount != 0 && GetTopLevelControl(textBox) is Visual topLevelControl)
                 try
                 {
                     controlBounds = textBox.TransformToVisual(topLevelControl).TransformBounds(

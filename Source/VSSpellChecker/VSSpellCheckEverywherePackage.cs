@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckEverywherePackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/11/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 08/29/2018
+// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class that defines the Visual Studio Spell Check Everywhere package
@@ -20,12 +20,12 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+
 using VisualStudio.SpellChecker.Configuration;
 
 namespace VisualStudio.SpellChecker
@@ -39,7 +39,7 @@ namespace VisualStudio.SpellChecker
     /// <c>Package</c> class that provides the implementation of the <c>IVsPackage</c> interface and uses the
     /// registration attributes defined in the framework to  register itself and its components with the shell.</remarks>
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is a package
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     // This attribute is used to register the information needed to show this package in the Help/About dialog of
     // Visual Studio.
     [InstalledProductRegistration("#113", "#114", "VSSpellCheckEverywhere", IconResourceID = 400)]
@@ -49,8 +49,8 @@ namespace VisualStudio.SpellChecker
     [ProvideBindingPath()]
     // This package loads at startup as it needs to integrate with any editor/tool window regardless of whether
     // or not a solution is open.
-    [ProvideAutoLoad(UIContextGuids.NoSolution)]
-    public sealed class VSSpellCheckEverywherePackage : Package, IVsSelectionEvents
+    [ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
+    public sealed class VSSpellCheckEverywherePackage : AsyncPackage, IVsSelectionEvents
     {
         #region Private data members
         //=====================================================================
@@ -85,8 +85,7 @@ namespace VisualStudio.SpellChecker
         /// Studio environment. The place to do all the other initialization is the Initialize method.</remarks>
         public VSSpellCheckEverywherePackage()
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentCulture, "Entering constructor for {0}",
-                this.ToString()));
+            Trace.WriteLine($"Entering constructor for {this.ToString()}");
         }
         #endregion
 
@@ -109,12 +108,16 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <remarks>This method is called right after the package is sited, so this is the place where you can
         /// put all the initialization code that relies on services provided by Visual Studio.</remarks>
-        protected override void Initialize()
+        protected override async System.Threading.Tasks.Task InitializeAsync(
+          System.Threading.CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentCulture, "Entering Initialize() of {0}",
-                this.ToString()));
+            Trace.WriteLine($"Entering Initialize() of {this.ToString()}");
 
-            base.Initialize();
+            await base.InitializeAsync(cancellationToken, progress);
+
+            // When initialized asynchronously, we *may* be on a background thread at this point.  Do any
+            // initialization that requires the UI thread after switching to the UI thread.
+            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             Instance = this;
 
@@ -138,13 +141,16 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public void ConnectSpellChecker()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             if(selectionMonitorCookie == 0)
                 try
                 {
-                    var ms = Utility.GetServiceFromPackage<IVsMonitorSelection, SVsShellMonitorSelection>(false);
-
-                    if(ms == null || ms.AdviseSelectionEvents(this, out selectionMonitorCookie) != VSConstants.S_OK)
+                    if(!(this.GetService(typeof(SVsShellMonitorSelection)) is IVsMonitorSelection ms) ||
+                      ms.AdviseSelectionEvents(this, out selectionMonitorCookie) != VSConstants.S_OK)
+                    {
                         selectionMonitorCookie = 0;
+                    }
 
                     if(selectionMonitorCookie != 0)
                         WpfTextBox.WpfTextBoxSpellChecker.ConnectSpellChecker();
@@ -171,25 +177,20 @@ namespace VisualStudio.SpellChecker
         /// <remarks>Track the ID of the active editor or tool window for use in uniquely naming the text boxes</remarks>
         int IVsSelectionEvents.OnElementValueChanged(uint elementid, object varValueOld, object varValueNew)
         {
-            Guid editorGuid, toolWindowType;
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            if((Constants)elementid == Constants.SEID_WindowFrame)
+            if((Constants)elementid == Constants.SEID_WindowFrame && varValueNew is IVsWindowFrame frame)
             {
-                var frame = varValueNew as IVsWindowFrame;
+                if(frame.GetGuidProperty((int)__VSFPROPID.VSFPROPID_guidEditorType, out Guid editorGuid) != VSConstants.S_OK)
+                    editorGuid = Guid.Empty;
 
-                if(frame != null)
-                {
-                    if(frame.GetGuidProperty((int)__VSFPROPID.VSFPROPID_guidEditorType, out editorGuid) != VSConstants.S_OK)
-                        editorGuid = Guid.Empty;
+                if(editorGuid != Guid.Empty || frame.GetGuidProperty((int)__VSFPROPID.VSFPROPID_GuidPersistenceSlot,
+                    out Guid toolWindowType) != VSConstants.S_OK)
+                    toolWindowType = Guid.Empty;
 
-                    if(editorGuid != Guid.Empty || frame.GetGuidProperty((int)__VSFPROPID.VSFPROPID_GuidPersistenceSlot,
-                      out toolWindowType) != VSConstants.S_OK)
-                        toolWindowType = Guid.Empty;
+                this.CurrentWindowId = ((editorGuid != Guid.Empty) ? editorGuid : toolWindowType).ToString();
 
-                    this.CurrentWindowId = ((editorGuid != Guid.Empty) ? editorGuid : toolWindowType).ToString();
-
-                    Debug.WriteLine("******* " + this.CurrentWindowId + " *******");
-                }
+                Debug.WriteLine("******* " + this.CurrentWindowId + " *******");
             }
 
             return VSConstants.S_OK;

@@ -84,8 +84,10 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                     return null;
                 }
 
+#pragma warning disable VSTHRD010
                 // Getting the dictionary determines if spell checking is enabled for this file
                 var dictionary = spellingService.GetDictionary(textBuffer);
+#pragma warning restore VSTHRD010
 
                 if(dictionary == null)
                     return null;

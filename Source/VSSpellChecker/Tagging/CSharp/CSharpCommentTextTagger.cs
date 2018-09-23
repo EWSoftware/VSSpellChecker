@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/09/2018
+// Updated : 09/02/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -48,9 +48,10 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer _buffer;
-        private ITextSnapshot _lineCacheSnapshot;
-        private List<State> _lineCache;
+        private ITextBuffer buffer;
+        private ITextSnapshot lineCacheSnapshot;
+        private List<State> lineCache;
+
         #endregion
 
         #region Properties
@@ -124,21 +125,20 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <param name="buffer">The text buffer to use</param>
         public CSharpCommentTextTagger(ITextBuffer buffer)
         {
-            _buffer = buffer;
-
+            this.buffer = buffer;
             this.IgnoredXmlElements = this.SpellCheckedAttributes = new string[0];
 
             // Populate our cache initially
-            ITextSnapshot snapshot = _buffer.CurrentSnapshot;
+            ITextSnapshot snapshot = this.buffer.CurrentSnapshot;
 
-            _lineCache = new List<State>(snapshot.LineCount);
-            _lineCache.AddRange(Enumerable.Repeat(State.Default, snapshot.LineCount));
+            lineCache = new List<State>(snapshot.LineCount);
+            lineCache.AddRange(Enumerable.Repeat(State.Default, snapshot.LineCount));
 
             RescanLines(snapshot, startLine: 0, lastDirtyLine: snapshot.LineCount - 1);
-            _lineCacheSnapshot = snapshot;
+            lineCacheSnapshot = snapshot;
 
             // Listen for text changes so we can stay up-to-date.
-            _buffer.Changed += OnTextBufferChanged;
+            this.buffer.Changed += OnTextBufferChanged;
         }
         #endregion
 
@@ -148,8 +148,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <inheritdoc />
         public void Dispose()
         {
-            if(_buffer != null)
-                _buffer.Changed -= OnTextBufferChanged;
+            if(buffer != null)
+                buffer.Changed -= OnTextBufferChanged;
         }
         #endregion
 
@@ -165,7 +165,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             foreach(SnapshotSpan span in spans)
             {
                 // If we're called on the non-current snapshot, return nothing.
-                if(span.Snapshot != _lineCacheSnapshot)
+                if(span.Snapshot != lineCacheSnapshot)
                     yield break;
 
                 SnapshotPoint lineStart = span.Start;
@@ -173,7 +173,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 while(lineStart < span.End)
                 {
                     ITextSnapshotLine line = lineStart.GetContainingLine();
-                    State state = _lineCache[line.LineNumber];
+                    State state = lineCache[line.LineNumber];
 
                     List<SnapshotSpan> naturalTextSpans = new List<SnapshotSpan>();
                     state = ScanLine(state, line, naturalTextSpans);
@@ -192,7 +192,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         {
             ITextSnapshot snapshot = e.After;
 
-            // First update _lineCache so its size matches snapshot.LineCount.
+            // First update lineCache so its size matches snapshot.LineCount.
             foreach(ITextChange change in e.Changes)
             {
                 if(change.LineCountDelta > 0)
@@ -202,20 +202,20 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
                     // Copy the state of the line to continue multi-line comments and strings.  If not,
                     // we lose the state and it doesn't parse the spans correctly.
-                    if(line < _lineCache.Count)
-                        state = _lineCache[line];
+                    if(line < lineCache.Count)
+                        state = lineCache[line];
 
-                    _lineCache.InsertRange(line, Enumerable.Repeat(state, change.LineCountDelta));
+                    lineCache.InsertRange(line, Enumerable.Repeat(state, change.LineCountDelta));
                 }
                 else if(change.LineCountDelta < 0)
                 {
                     int line = snapshot.GetLineFromPosition(change.NewPosition).LineNumber;
-                    _lineCache.RemoveRange(line, -change.LineCountDelta);
+                    lineCache.RemoveRange(line, -change.LineCountDelta);
                 }
             }
 
-            // Now that _lineCache is the appropriate size we can safely start rescanning.
-            // If we hadn't updated _lineCache, then rescanning could walk off the edge.
+            // Now that lineCache is the appropriate size we can safely start rescanning.
+            // If we hadn't updated lineCache, then rescanning could walk off the edge.
             List<SnapshotSpan> changedSpans = new List<SnapshotSpan>();
 
             foreach(ITextChange change in e.Changes)
@@ -228,7 +228,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     snapshot.GetLineFromLineNumber(lastUpdatedLine).End));
             }
 
-            _lineCacheSnapshot = snapshot;
+            lineCacheSnapshot = snapshot;
 
             var tagsChanged = TagsChanged;
 
@@ -247,7 +247,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         private int RescanLines(ITextSnapshot snapshot, int startLine, int lastDirtyLine)
         {
             int currentLine = startLine;
-            State state = _lineCache[currentLine];
+            State state = lineCache[currentLine];
             bool updatedStateForCurrentLine = true;
 
             // Go until we have covered all of the dirty lines and we get to a line where our
@@ -261,8 +261,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 currentLine++;
                 if(currentLine < snapshot.LineCount)
                 {
-                    updatedStateForCurrentLine = (state != _lineCache[currentLine]);
-                    _lineCache[currentLine] = state;
+                    updatedStateForCurrentLine = (state != lineCache[currentLine]);
+                    lineCache[currentLine] = state;
                 }
             }
 

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/19/2018
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
+// Updated : 09/05/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to hold information about a file that will be spell checked
@@ -131,9 +131,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>An enumerable list of project file information</returns>
         public static IEnumerable<SpellCheckFileInfo> AllProjectFiles(string projectName)
         {
-            string solutionFolder, solutionFile, userOptionsFile, projectPath, filePath;
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             List<SpellCheckFileInfo> projectFiles = new List<SpellCheckFileInfo>();
+            string projectPath, filePath;
 
             try
             {
@@ -141,8 +142,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                 if(solution != null)
                 {
-                    if(solution.GetSolutionInfo(out solutionFolder, out solutionFile, out userOptionsFile) ==
-                      VSConstants.S_OK)
+                    if(solution.GetSolutionInfo(out string solutionFolder, out string solutionFile,
+                      out string userOptionsFile) == VSConstants.S_OK)
                     {
                         // Use the IVsHierarchy interface as it is reportedly significantly faster than using the
                         // automation interfaces for very large projects.
@@ -186,15 +187,21 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                                 if(idx != -1)
                                 {
-                                    idx = file.CanonicalName.IndexOf('.', idx);
+                                    // Look for the first period, not the last, as we want to look for parent
+                                    // filenames (i.e. Form.cs for Form.Designer.cs).  Add one to the index as
+                                    // we don't want to match one for another file such as Form2.cs.
+                                    int extIdx = file.CanonicalName.IndexOf('.', idx) + 1;
 
-                                    if(idx != -1)
+                                    // Ignore it if not found or the filename starts with a period like .editorconfig
+                                    if(extIdx > idx + 2 && extIdx < file.CanonicalName.Length)
                                     {
-                                        projectPath = file.CanonicalName.Substring(0, idx);
+                                        projectPath = file.CanonicalName.Substring(0, extIdx);
 
-                                        filePath = configNames.FirstOrDefault(n => n.StartsWith(projectPath,
-                                            StringComparison.OrdinalIgnoreCase) && !n.StartsWith(file.CanonicalName,
-                                            StringComparison.OrdinalIgnoreCase));
+                                        filePath = configNames.FirstOrDefault(n =>
+                                            n.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(solutionFile, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(file.ProjectFile, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(file.CanonicalName, StringComparison.OrdinalIgnoreCase));
 
                                         file.DependencyConfigurationFile = filePath;
                                     }
@@ -243,6 +250,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// dependency items, those are returned as well.</returns>
         public static IEnumerable<SpellCheckFileInfo> SelectedProjectFiles()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
+#pragma warning disable VSTHRD010
             List<SpellCheckFileInfo> projectFiles = new List<SpellCheckFileInfo>();
             var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(false);
 
@@ -268,7 +278,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     string path = null;
 
                     // Looks like a project.  Not all of them implement properties though.
-                    if(item.Project.Properties != null)
+                    if(!String.IsNullOrWhiteSpace(item.Project.FullName) && item.Project.FullName.EndsWith(
+                      "proj", StringComparison.OrdinalIgnoreCase))
+                    {
+                        path = item.Project.FullName;
+                    }
+
+                    if(path == null && item.Project.Properties != null)
                     {
                         Property fullPath;
 
@@ -293,9 +309,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         if(fullPath != null && fullPath.Value != null)
                             path = (string)fullPath.Value;
                     }
-                    else
-                        if(String.IsNullOrWhiteSpace(path) && item.Project.FullName.EndsWith("proj", StringComparison.OrdinalIgnoreCase))
-                            path = item.Project.FullName;
 
                     if(!String.IsNullOrWhiteSpace(path))
                     {
@@ -340,9 +353,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                                 if(!String.IsNullOrWhiteSpace(path))
                                 {
-                                    // Folder items have a trailing backslash
-                                    if(path[path.Length - 1] == '\\')
+                                    // Folder items have a trailing backslash in some project systems, others don't
+                                    if(path[path.Length - 1] == '\\' || (!File.Exists(path) && Directory.Exists(path)))
+                                    {
+                                        if(path[path.Length - 1] != '\\')
+                                            path += @"\";
+
                                         folders.Add(path);
+                                    }
                                     else
                                     {
                                         files.Add(path);
@@ -365,6 +383,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                 files.Add(item.ProjectItem.get_FileNames(1));
                             }
             }
+#pragma warning restore VSTHRD010
 
             var allFiles = AllProjectFiles(null);
 
@@ -415,17 +434,19 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         private static void ProcessHierarchyNodeRecursively(IVsHierarchy hierarchy, uint itemId,
           IList<SpellCheckFileInfo> projectFiles)
         {
-            int result;
-            IntPtr nestedHierarchyValue = IntPtr.Zero;
-            uint nestedItemIdValue = 0;
-            object value = null;
-            uint visibleChildNode;
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             Guid nestedHierarchyGuid;
             IVsHierarchy nestedHierarchy;
+            IntPtr nestedHierarchyValue = IntPtr.Zero;
+
+            object value = null;
+            uint visibleChildNode;
+            int result;
 
             // First, guess if the node is actually the root of another hierarchy (a project, for example)
             nestedHierarchyGuid = typeof(IVsHierarchy).GUID;
-            result = hierarchy.GetNestedHierarchy(itemId, ref nestedHierarchyGuid, out nestedHierarchyValue, out nestedItemIdValue);
+            result = hierarchy.GetNestedHierarchy(itemId, ref nestedHierarchyGuid, out nestedHierarchyValue, out uint nestedItemIdValue);
 
             if(result == VSConstants.S_OK && nestedHierarchyValue != IntPtr.Zero && nestedItemIdValue == VSConstants.VSITEMID_ROOT)
             {
@@ -473,16 +494,12 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// unrecognized nodes.</remarks>
         private static SpellCheckFileInfo DetermineProjectFileInformation(IVsHierarchy hierarchy, uint itemId)
         {
-            Guid guid;
-            int result;
-            object value;
-            string projectName = "", name, canonicalName;
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
-            var project = hierarchy as IVsProject;
-
-            if(project != null)
+            if(hierarchy is IVsProject project)
             {
-                result = project.GetMkDocument(VSConstants.VSITEMID_ROOT, out projectName);
+                string projectName = String.Empty;
+                int result = project.GetMkDocument(VSConstants.VSITEMID_ROOT, out projectName);
 
                 // If there is no project name, it's probably a solution item
                 if(result != VSConstants.S_OK)
@@ -491,18 +508,18 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     if(projectName.Length > 1 && projectName[projectName.Length - 1] == '\\')
                         projectName += Path.GetFileName(projectName.Substring(0, projectName.Length - 1));
 
-                result = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_Name, out value);
+                result = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_Name, out object value);
 
                 if(result == VSConstants.S_OK && value != null)
                 {
-                    name = value.ToString();
+                    string name = value.ToString();
 
                     // Certain project folders in C++ projects return a GUID for their name.  These should be
                     // ignored (References, External Dependencies, etc.).
-                    if(name.Length != 0 && name[0] == '{' && Guid.TryParse(name, out guid))
+                    if(name.Length != 0 && name[0] == '{' && Guid.TryParse(name, out Guid guid))
                         return IgnoredHierarchyItem;
 
-                    result = hierarchy.GetCanonicalName(itemId, out canonicalName);
+                    result = hierarchy.GetCanonicalName(itemId, out string canonicalName);
 
                     if(result == VSConstants.S_OK && !String.IsNullOrWhiteSpace(canonicalName) &&
                       canonicalName.IndexOfAny(Path.GetInvalidPathChars()) == -1 &&
@@ -608,10 +625,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     {
                         ext = ext.Substring(1);
 
-                        SpellCheckerDictionary match;
-
                         if(SpellCheckerDictionary.AvailableDictionaries(
-                          config.AdditionalDictionaryFolders).TryGetValue(ext, out match))
+                          config.AdditionalDictionaryFolders).TryGetValue(ext, out SpellCheckerDictionary match))
                         {
                             // Clear any existing dictionary languages and use just the one that matches the
                             // file's language.

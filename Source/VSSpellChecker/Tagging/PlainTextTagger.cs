@@ -4,7 +4,7 @@
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
 // Updated : 08/18/2017
 // Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+//           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for plain text files

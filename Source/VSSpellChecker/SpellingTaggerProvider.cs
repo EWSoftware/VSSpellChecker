@@ -27,7 +27,6 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.Tagging;
 
@@ -47,6 +46,7 @@ namespace VisualStudio.SpellChecker
 
         [Import]
         private SpellingServiceFactory spellingService = null;
+
         #endregion
 
         #region IViewTaggerProvider Members
@@ -62,14 +62,13 @@ namespace VisualStudio.SpellChecker
         /// one in the view or spell checking as you type is disabled.</returns>
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
-            SpellingTagger spellingTagger = null;
-
             // Make sure we are only tagging the top buffer
             if(textView == null || buffer == null || spellingService == null || textView.TextBuffer != buffer)
                 return null;
 
-            if(!textView.Properties.TryGetProperty(typeof(SpellingTagger), out spellingTagger))
+            if(!textView.Properties.TryGetProperty(typeof(SpellingTagger), out SpellingTagger spellingTagger))
             {
+#pragma warning disable VSTHRD010
                 // Getting the configuration determines if spell checking is enabled for this file
                 var config = spellingService.GetConfiguration(buffer);
 
@@ -88,6 +87,7 @@ namespace VisualStudio.SpellChecker
                         textView.Properties[typeof(SpellingTagger)] = spellingTagger;
                     }
                 }
+#pragma warning restore VSTHRD010
             }
 
             return spellingTagger as ITagger<T>;

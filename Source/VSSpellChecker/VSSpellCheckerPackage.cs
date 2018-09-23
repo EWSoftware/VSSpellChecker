@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 09/01/2018
 // Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -19,10 +19,11 @@
 // 08/23/2015  EFW  Added support for solution/project spell checking
 //===============================================================================================================
 
+// Ignore Spelling: proj
+
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -36,9 +37,11 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Outlining;
+
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Editors;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
+using VisualStudio.SpellChecker.Properties;
 using VisualStudio.SpellChecker.ToolWindows;
 
 namespace VisualStudio.SpellChecker
@@ -52,7 +55,7 @@ namespace VisualStudio.SpellChecker
     /// <c>Package</c> class that provides the implementation of the <c>IVsPackage</c> interface and uses the
     /// registration attributes defined in the framework to  register itself and its components with the shell.</remarks>
     // This attribute tells the PkgDef creation utility (CreatePkgDef.exe) that this class is a package
-    [PackageRegistration(UseManagedResourcesOnly = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     // This attribute is used to register the information needed to show this package in the Help/About dialog of
     // Visual Studio.
     [InstalledProductRegistration("#110", "#111", "VSSpellChecker", IconResourceID = 400)]
@@ -73,22 +76,12 @@ namespace VisualStudio.SpellChecker
     [ProvideEditorExtension(typeof(SpellingConfigurationEditorFactory), ".vsspell", 50)]
     // Provide a binding path for finding custom assemblies in this package
     [ProvideBindingPath()]
-    public class VSSpellCheckerPackage : Package
+    public class VSSpellCheckerPackage : AsyncPackage
     {
         #region Private data members
         //=====================================================================
 
         private SolutionEvents solutionEvents;
-
-        #endregion
-
-        #region Properties
-        //=====================================================================
-
-        /// <summary>
-        /// This read-only property returns the package instance
-        /// </summary>
-        internal static VSSpellCheckerPackage Instance { get; private set; }
 
         #endregion
 
@@ -103,8 +96,7 @@ namespace VisualStudio.SpellChecker
         /// Studio environment. The place to do all the other initialization is the Initialize method.</remarks>
         public VSSpellCheckerPackage()
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentCulture, "Entering constructor for {0}",
-                this.ToString()));
+            Trace.WriteLine($"Entering constructor for {this.ToString()}");
         }
         #endregion
 
@@ -117,8 +109,6 @@ namespace VisualStudio.SpellChecker
         /// <param name="disposing">True if managed resources should be disposed; otherwise, false</param>
         protected override void Dispose(bool disposing)
         {
-            VSSpellCheckerPackage.Instance = null;
-
             base.Dispose(disposing);
         }
 
@@ -127,22 +117,22 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <remarks>This method is called right after the package is sited, so this is the place where you can
         /// put all the initialization code that relies on services provided by Visual Studio.</remarks>
-        protected override void Initialize()
+        protected override async System.Threading.Tasks.Task InitializeAsync(
+          System.Threading.CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            Trace.WriteLine(String.Format(CultureInfo.CurrentCulture, "Entering Initialize() of {0}",
-                this.ToString()));
+            Trace.WriteLine($"Entering Initialize() of {this.ToString()}");
 
-            base.Initialize();
+            await base.InitializeAsync(cancellationToken, progress);
 
-            VSSpellCheckerPackage.Instance = this;
+            // When initialized asynchronously, we *may* be on a background thread at this point.  Do any
+            // initialization that requires the UI thread after switching to the UI thread.
+            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
             // Register the spelling configuration file editor factory
             this.RegisterEditorFactory(new SpellingConfigurationEditorFactory());
 
             // Add our command handlers for menu items (commands must exist in the .vsct file)
-            OleMenuCommandService mcs = this.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-
-            if(mcs != null)
+            if((await this.GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs))
             {
                 CommandID commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
                     (int)PkgCmdIDList.SpellCheckerConfiguration);
@@ -194,13 +184,10 @@ namespace VisualStudio.SpellChecker
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.ViewSpellCheckToolWindow);
                 menuItem = new OleMenuCommand(ViewSpellCheckToolWindowExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
-
             }
 
             // Register for solution events so that we can clear the global dictionary cache when necessary
-            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
-
-            if(dte != null && dte.Events != null)
+            if(await this.GetServiceAsync(typeof(DTE)) is DTE dte && dte.Events != null)
             {
                 solutionEvents = dte.Events.SolutionEvents;
 
@@ -233,6 +220,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void SpellCheckerConfigurationExecuteHandler(object sender, EventArgs e)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             string configFile = SpellingConfigurationFile.GlobalConfigurationFilename;
 
             // Convert the legacy configuration?
@@ -254,9 +243,7 @@ namespace VisualStudio.SpellChecker
                 file.Save();
             }
 
-            var dte = Utility.GetServiceFromPackage<DTE, SDTE>(true);
-
-            if(dte != null)
+            if(this.GetService(typeof(SDTE)) is DTE dte)
             {
                 var doc = dte.ItemOperations.OpenFile(configFile, EnvDTE.Constants.vsViewKindPrimary);
 
@@ -272,6 +259,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void SpellCheckInteractiveExecuteHandler(object sender, EventArgs e)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var window = this.FindToolWindow(typeof(ToolWindows.InteractiveSpellCheckToolWindow), 0, true);
 
             if(window == null || window.Frame == null)
@@ -288,39 +277,34 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void SpellCheckNextPriorIssueExecuteHandler(object sender, EventArgs e)
         {
-            var command = sender as OleMenuCommand;
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            if(command == null)
+            if(!(sender is OleMenuCommand command))
                 return;
 
-            IWpfTextView wpfTextView = null;
-            object value;
+            if(!(this.GetService(typeof(SVsShellMonitorSelection)) is IVsMonitorSelection ms))
+                return;
 
-            IVsMonitorSelection ms = (IVsMonitorSelection)GetService(typeof(SVsShellMonitorSelection));
-            ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out value);
+            ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out object value);
 
-            IVsWindowFrame frame = value as IVsWindowFrame;
-
-            if(frame != null && frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK &&
+            if(value is IVsWindowFrame frame &&
+              frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK &&
               ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))
             {
                 var textView = VsShellUtilities.GetTextView(frame);
 
                 if(textView != null)
                 {
-                    var componentModel = Utility.GetServiceFromPackage<IComponentModel, SComponentModel>(true);
-
-                    if(componentModel != null)
+                    if(this.GetService(typeof(SComponentModel)) is IComponentModel componentModel)
                     {
                         var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
 
                         if(editorAdapterFactoryService != null)
                             try
                             {
-                                wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
-                                SpellingTagger tagger;
+                                var wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
 
-                                if(wpfTextView.Properties.TryGetProperty(typeof(SpellingTagger), out tagger) &&
+                                if(wpfTextView.Properties.TryGetProperty(typeof(SpellingTagger), out SpellingTagger tagger) &&
                                   tagger.CurrentMisspellings.Any())
                                 {
                                     var caretPoint = wpfTextView.Caret.Position.BufferPosition;
@@ -393,14 +377,13 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void AddSpellCheckerConfigQueryStatusHandler(object sender, EventArgs e)
         {
-            Project p;
-            string filename;
-            var command = sender as OleMenuCommand;
-
-            if(command != null)
+            if(sender is OleMenuCommand command)
                 try
                 {
-                    command.Visible = command.Enabled = DetermineContainingProjectAndSettingsFile(out p, out filename);
+#pragma warning disable VSTHRD010
+                    command.Visible = command.Enabled = DetermineContainingProjectAndSettingsFile(out Project p,
+                      out string filename);
+#pragma warning restore VSTHRD010
                 }
                 catch(Exception ex)
                 {
@@ -417,16 +400,13 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void AddSpellCheckerConfigExecuteHandler(object sender, EventArgs e)
         {
-            Project containingProject;
-            string settingsFilename;
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             try
             {
-                if(DetermineContainingProjectAndSettingsFile(out containingProject, out settingsFilename))
+                if(DetermineContainingProjectAndSettingsFile(out Project containingProject, out string settingsFilename))
                 {
-                    var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(true);
-
-                    if(dte2 != null)
+                    if(this.GetService(typeof(SDTE)) is DTE2 dte2)
                     {
                         // Don't add it again if it's already there, just open it
                         var existingItem = dte2.Solution.FindProjectItemForFile(settingsFilename);
@@ -454,11 +434,13 @@ namespace VisualStudio.SpellChecker
                             }
                             else
                             {
+#pragma warning disable VSTHRD010
                                 // Add solution settings file.  Don't enumerate projects to find an existing copy
                                 // of the folder.  It's not a project so it won't be found that way.  Just search
                                 // the project collection.  It'll be at the root level if it exists.
                                 var siProject = dte2.Solution.Projects.Cast<Project>().FirstOrDefault(
                                     p => p.Name == "Solution Items");
+#pragma warning restore VSTHRD010
 
                                 if(siProject == null)
                                     siProject = ((Solution2)dte2.Solution).AddSolutionFolder("Solution Items");
@@ -490,8 +472,11 @@ namespace VisualStudio.SpellChecker
             catch(Exception ex)
             {
                 // Ignore on error but report it
-                Utility.ShowMessageBox(OLEMSGICON.OLEMSGICON_CRITICAL, "Unable to add spell checker " +
-                    "configuration file.  Reason: {0}", ex.Message);
+                System.Diagnostics.Debug.WriteLine(ex);
+
+                VsShellUtilities.ShowMessageBox(this, $"Unable to add spell checker configuration file: {ex.Message}",
+                     Resources.PackageTitle, OLEMSGICON.OLEMSGICON_CRITICAL, OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                     OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
             }
         }
 
@@ -502,6 +487,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void SpellCheckEntireSolutionExecuteHandler(object sender, EventArgs e)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
 
             if(window == null || window.Frame == null)
@@ -510,9 +497,7 @@ namespace VisualStudio.SpellChecker
             var windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
 
-            var control = window.Content as SolutionProjectSpellCheckControl;
-
-            if(control != null)
+            if(window.Content is SolutionProjectSpellCheckControl control)
                 control.SpellCheck(SpellCheckTarget.EntireSolution);
         }
 
@@ -523,6 +508,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void SpellCheckCurrentProjectExecuteHandler(object sender, EventArgs e)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
 
             if(window == null || window.Frame == null)
@@ -531,9 +518,7 @@ namespace VisualStudio.SpellChecker
             var windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
 
-            var control = window.Content as SolutionProjectSpellCheckControl;
-
-            if(control != null)
+            if(window.Content is SolutionProjectSpellCheckControl control)
                 control.SpellCheck(SpellCheckTarget.CurrentProject);
         }
 
@@ -545,6 +530,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void SpellCheckSelectedItemsExecuteHandler(object sender, EventArgs e)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
 
             if(window == null || window.Frame == null)
@@ -553,9 +540,7 @@ namespace VisualStudio.SpellChecker
             var windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
 
-            var control = window.Content as SolutionProjectSpellCheckControl;
-
-            if(control != null)
+            if(window.Content is SolutionProjectSpellCheckControl control)
                 control.SpellCheck(SpellCheckTarget.SelectedItems);
         }
 
@@ -566,6 +551,8 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void ViewSpellCheckToolWindowExecuteHandler(object sender, EventArgs e)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
 
             if(window == null || window.Frame == null)
@@ -591,15 +578,15 @@ namespace VisualStudio.SpellChecker
         private static bool DetermineContainingProjectAndSettingsFile(out Project containingProject,
           out string settingsFilename)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             string folderName = null;
 
             containingProject = null;
             settingsFilename = null;
 
-            var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(true);
-
             // Only add if a single file is selected
-            if(dte2 == null || dte2.SelectedItems.Count != 1)
+            if(!(Package.GetGlobalService(typeof(SDTE)) is DTE2 dte2) || dte2.SelectedItems.Count != 1)
                 return false;
 
             SelectedItem item = dte2.SelectedItems.Item(1);
@@ -608,46 +595,57 @@ namespace VisualStudio.SpellChecker
               item.Project.Kind != EnvDTE.Constants.vsProjectKindUnmodeled &&
               item.Project.Kind != EnvDTE.Constants.vsProjectKindMisc)
             {
-                // Looks like a project
-                Property fullPath;
+                string path = null;
 
-                try
+                // Looks like a project.  Not all of them implement properties though.
+                if(!String.IsNullOrWhiteSpace(item.Project.FullName) && item.Project.FullName.EndsWith(
+                  "proj", StringComparison.OrdinalIgnoreCase))
                 {
-                    fullPath = item.Project.Properties.Item("FullPath");
+                    path = item.Project.FullName;
                 }
-                catch
+
+                if(path == null && item.Project.Properties != null)
                 {
-                    // C++ projects use a different property name and throw an exception above
+                    Property fullPath;
+
                     try
                     {
-                        fullPath = item.Project.Properties.Item("ProjectFile");
+                        fullPath = item.Project.Properties.Item("FullPath");
                     }
                     catch
                     {
-                        // If that fails, give up
-                        fullPath = null;
+                        // C++ projects use a different property name and throw an exception above
+                        try
+                        {
+                            fullPath = item.Project.Properties.Item("ProjectFile");
+                        }
+                        catch
+                        {
+                            // If that fails, give up
+                            fullPath = null;
+                        }
                     }
+
+                    if(fullPath != null && fullPath.Value != null)
+                        path = (string)fullPath.Value;
                 }
 
-                if(fullPath != null && fullPath.Value != null)
+                if(!String.IsNullOrWhiteSpace(path))
                 {
-                    string path = (string)fullPath.Value;
+#pragma warning disable VSTHRD010
+                    var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
+#pragma warning restore VSTHRD010
 
-                    if(!String.IsNullOrWhiteSpace(path))
+                    if(project != null)
                     {
-                        var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
+                        containingProject = project;
+                        settingsFilename = project.FullName;
 
-                        if(project != null)
+                        // Website projects are named after the folder rather than a file
+                        if(settingsFilename.Length > 1 && settingsFilename[settingsFilename.Length - 1] == '\\')
                         {
-                            containingProject = project;
-                            settingsFilename = project.FullName;
-
-                            // Website projects are named after the folder rather than a file
-                            if(settingsFilename.Length > 1 && settingsFilename[settingsFilename.Length - 1] == '\\')
-                            {
-                                folderName = settingsFilename;
-                                settingsFilename += item.Name;
-                            }
+                            folderName = settingsFilename;
+                            settingsFilename += item.Name;
                         }
                     }
                 }
@@ -682,10 +680,13 @@ namespace VisualStudio.SpellChecker
                             {
                                 containingProject = item.ProjectItem.ContainingProject;
 
-                                // Folder items have a trailing backslash.  We'll put the configuration file in
-                                // the folder using its name as the filename.
-                                if(path[path.Length - 1] == '\\')
+                                // Folder items have a trailing backslash in some project systems, others don't.
+                                // We'll put the configuration file in the folder using its name as the filename.
+                                if(path[path.Length - 1] == '\\' || (!File.Exists(path) && Directory.Exists(path)))
                                 {
+                                    if(path[path.Length - 1] != '\\')
+                                        path += @"\";
+
                                     folderName = path;
                                     settingsFilename = path + item.Name;
                                 }

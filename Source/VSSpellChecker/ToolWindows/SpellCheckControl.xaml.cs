@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/13/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 09/01/2018
+// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the user control that presents the spell checking options to the user
@@ -56,10 +56,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <summary>
         /// This returns the current misspelled word with any edits made in the user control
         /// </summary>
-        public string MisspelledWord
-        {
-            get { return txtMisspelledWord.Text.Trim(); }
-        }
+        public string MisspelledWord => txtMisspelledWord.Text.Trim();
 
         /// <summary>
         /// This is used to get or set the text to display when there is no current issue
@@ -252,9 +249,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     else
                         peer = UIElementAutomationPeer.CreatePeerForElement(btnReplace);
 
-                    var provider = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
-
-                    if(provider != null)
+                    if(peer.GetPattern(PatternInterface.Invoke) is IInvokeProvider provider)
                         provider.Invoke();
 
                     break;
@@ -336,9 +331,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void ctxAddWordMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var item = e.Source as MenuItem;
-
-            if(item != null && this.CurrentIssue != null)
+            if(e.Source is MenuItem item && this.CurrentIssue != null)
                 SpellCheckCommands.AddToDictionary.Execute((CultureInfo)item.Tag, sender as IInputElement);
         }
         #endregion

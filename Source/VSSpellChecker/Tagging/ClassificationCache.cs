@@ -55,18 +55,13 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <summary>
         /// This read-only property returns an enumerable list of the cached content types
         /// </summary>
-        public static IEnumerable<string> ContentTypes
-        {
-            get { return contentTypes.Keys; }
-        }
+        public static IEnumerable<string> ContentTypes => contentTypes.Keys;
 
         /// <summary>
         /// This read-only property returns an enumerable list of the cached classifications
         /// </summary>
-        public IEnumerable<string> Classifications
-        {
-            get { return contentClassifications.Keys; }
-        }
+        public IEnumerable<string> Classifications => contentClassifications.Keys;
+
         #endregion
 
         #region Constructor

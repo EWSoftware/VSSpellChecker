@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
-// Updated : 09/23/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that represents a misspelling withing a project file
@@ -40,7 +40,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the misspelling type
         /// </summary>
-        public MisspellingType MisspellingType { get; private set; }
+        public MisspellingType MisspellingType { get; }
 
         /// <summary>
         /// This is used to get or set the span containing the misspelled word
@@ -65,7 +65,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the misspelled or doubled word
         /// </summary>
-        public string Word { get; private set; }
+        public string Word { get; }
 
         /// <summary>
         /// This is used to indicate whether or not to escape apostrophes when replacing words
@@ -95,26 +95,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property is used to get the name of the project containing the file
         /// </summary>
-        public string ProjectName
-        {
-            get { return (this.FileInfo != null) ? Path.GetFileName(this.FileInfo.ProjectFile) : null; }
-        }
+        public string ProjectName => (this.FileInfo != null) ? Path.GetFileName(this.FileInfo.ProjectFile) : null;
 
         /// <summary>
         /// This read-only property is used to get the name of the file containing the issue (no path)
         /// </summary>
-        public string Filename
-        {
-            get { return (this.FileInfo != null) ? this.FileInfo.Filename : null; }
-        }
+        public string Filename => this.FileInfo?.Filename;
 
         /// <summary>
         /// This read-only property is used to get the canonical name of the file (full path)
         /// </summary>
-        public string CanonicalName
-        {
-            get { return (this.FileInfo != null) ? this.FileInfo.CanonicalName : null; }
-        }
+        public string CanonicalName => this.FileInfo?.CanonicalName;
 
         /// <summary>
         /// This is used to get or set the line number for the issue

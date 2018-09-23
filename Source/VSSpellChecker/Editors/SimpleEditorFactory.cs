@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SimpleEditorFactory.cs
 // Author  : Istvan Novak
-// Updated : 02/06/2015
+// Updated : 09/02/2018
 // Source  : http://learnvsxnow.codeplex.com/
-// Note    : Copyright 2008-2015, Istvan Novak, All rights reserved
+// Note    : Copyright 2008-2018, Istvan Novak, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that implements the core functionality for an editor factory
@@ -21,7 +21,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
@@ -44,7 +43,7 @@ namespace VisualStudio.SpellChecker.Editors
     {
         #region Private fields
 
-        private ServiceProvider _ServiceProvider;
+        private ServiceProvider serviceProvider;
 
         #endregion
 
@@ -56,11 +55,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         public SimpleEditorFactory()
         {
-            Trace.WriteLine(
-              string.Format(CultureInfo.CurrentCulture,
-              "Entering {0} constructor", typeof(TEditorPane)));
+            Trace.WriteLine($"Entering {typeof(TEditorPane)} constructor");
         }
-
         #endregion
 
         #region IDisposable pattern implementation
@@ -70,7 +66,10 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         public void Dispose()
         {
+#pragma warning disable VSTHRD010
             this.Dispose(true);
+#pragma warning restore VSTHRD010
+
             GC.SuppressFinalize(this);
         }
 
@@ -83,20 +82,21 @@ namespace VisualStudio.SpellChecker.Editors
         /// </param>
         private void Dispose(bool disposing)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             // --- If disposing equals true, dispose all managed and unmanaged resources
             if(disposing)
             {
-                // --- Since we create a ServiceProvider which implements IDisposable we
-                // --- also need to implement IDisposable to make sure that the ServiceProvider's
+                // --- Since we create a service provider which implements IDisposable we
+                // --- also need to implement IDisposable to make sure that the service provider's
                 // --- Dispose method gets called.
-                if(_ServiceProvider != null)
+                if(serviceProvider != null)
                 {
-                    _ServiceProvider.Dispose();
-                    _ServiceProvider = null;
+                    serviceProvider.Dispose();
+                    serviceProvider = null;
                 }
             }
         }
-
         #endregion
 
         #region IVsEditorFactory Members
@@ -111,7 +111,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <returns>S_OK if the method succeeds.</returns>
         public virtual int SetSite(IOleServiceProvider serviceProvider)
         {
-            _ServiceProvider = new ServiceProvider(serviceProvider);
+            this.serviceProvider = new ServiceProvider(serviceProvider);
             return VSConstants.S_OK;
         }
 
@@ -201,21 +201,11 @@ namespace VisualStudio.SpellChecker.Editors
         /// see "Demand vs. LinkDemand" article in MSDN for more details.
         /// </remarks>
         [EnvironmentPermission(SecurityAction.Demand, Unrestricted = true)]
-        public virtual int CreateEditorInstance(
-          uint grfCreateDoc,
-          string pszMkDocument,
-          string pszPhysicalView,
-          IVsHierarchy pvHier,
-          uint itemid,
-          IntPtr punkDocDataExisting,
-          out IntPtr ppunkDocView,
-          out IntPtr ppunkDocData,
-          out string pbstrEditorCaption,
-          out Guid pguidCmdUI,
-          out int pgrfCDW)
+        public virtual int CreateEditorInstance(uint grfCreateDoc, string pszMkDocument, string pszPhysicalView,
+          IVsHierarchy pvHier, uint itemid, IntPtr punkDocDataExisting, out IntPtr ppunkDocView,
+          out IntPtr ppunkDocData, out string pbstrEditorCaption, out Guid pguidCmdUI, out int pgrfCDW)
         {
-            Trace.WriteLine(string.Format(CultureInfo.CurrentCulture,
-              "Entering {0} CreateEditorInstance()", ToString()));
+            Trace.WriteLine($"Entering {this.ToString()} CreateEditorInstance()");
 
             // --- Initialize to null
             ppunkDocView = IntPtr.Zero;
@@ -226,13 +216,10 @@ namespace VisualStudio.SpellChecker.Editors
 
             // --- Validate inputs
             if((grfCreateDoc & (VSConstants.CEF_OPENFILE | VSConstants.CEF_SILENT)) == 0)
-            {
                 return VSConstants.E_INVALIDARG;
-            }
+
             if(punkDocDataExisting != IntPtr.Zero)
-            {
                 return VSConstants.VS_E_INCOMPATIBLEDOCDATA;
-            }
 
             // --- Create the Document (editor)
             TEditorPane newEditor = new TEditorPane();
@@ -242,7 +229,6 @@ namespace VisualStudio.SpellChecker.Editors
 
             return VSConstants.S_OK;
         }
-
         #endregion
 
         #region Other methods
@@ -255,9 +241,10 @@ namespace VisualStudio.SpellChecker.Editors
         /// A a null reference if there is no service object of type serviceType.</returns>
         public object GetService(Type serviceType)
         {
-            return _ServiceProvider.GetService(serviceType);
-        }
+            ThreadHelper.ThrowIfNotOnUIThread();
 
+            return serviceProvider.GetService(serviceType);
+        }
         #endregion
     }
 }

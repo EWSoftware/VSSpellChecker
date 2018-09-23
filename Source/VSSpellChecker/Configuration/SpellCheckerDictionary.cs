@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/12/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to contain information about the available spell checker dictionaries
@@ -38,17 +38,17 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// This read-only property returns the dictionary culture information
         /// </summary>
-        public CultureInfo Culture { get; private set; }
+        public CultureInfo Culture { get; }
 
         /// <summary>
         /// This read-only property returns the affix file path
         /// </summary>
-        public string AffixFilePath { get; private set; }
+        public string AffixFilePath { get; }
 
         /// <summary>
         /// This read-only property returns the dictionary file path
         /// </summary>
-        public string DictionaryFilePath { get; private set; }
+        public string DictionaryFilePath { get; }
 
         /// <summary>
         /// This read-only property returns the user dictionary file path
@@ -59,7 +59,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// This read-only property returns true if this is a custom dictionary or false if it is a standard
         /// dictionary supplied with the package.
         /// </summary>
-        public bool IsCustomDictionary { get; private set; }
+        public bool IsCustomDictionary { get; }
 
         /// <summary>
         /// This read-only property returns true if this dictionary has an alternate user dictionary, one from
@@ -112,10 +112,10 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <returns>Returns true if the dictionaries are equal, false if they are not</returns>
         public static bool Equals(SpellCheckerDictionary d1, SpellCheckerDictionary d2)
         {
-            if((object)d1 == null && (object)d2 == null)
+            if(d1 == null && d2 == null)
                 return true;
 
-            if((object)d1 == null)
+            if(d1 == null)
                 return false;
 
             return d1.Equals(d2);
@@ -128,9 +128,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <returns>Returns true if the object equals this instance, false if it does not</returns>
         public override bool Equals(object obj)
         {
-            SpellCheckerDictionary d = obj as SpellCheckerDictionary;
-
-            return (d != null && this.Culture.Name == d.Culture.Name);
+            return (obj is SpellCheckerDictionary d && this.Culture.Name == d.Culture.Name);
         }
 
         /// <summary>
@@ -180,13 +178,13 @@ namespace VisualStudio.SpellChecker.Configuration
             string dllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), userDictPath, location;
             bool isCustomDictionary;
 
-            var searchFolders = new List<string>();
-
             // The package comes with a variety of common dictionaries.  We'll search that path first.  These may
             // be replaced by user-supplied dictionaries in any of the other folders that are searched.
-            searchFolders.Add(Path.Combine(dllPath, "NHunspell"));
-
-            searchFolders.Add(SpellingConfigurationFile.GlobalConfigurationFilePath);
+            var searchFolders = new List<string>
+            {
+                Path.Combine(dllPath, "NHunspell"),
+                SpellingConfigurationFile.GlobalConfigurationFilePath
+            };
 
             if(additionalSearchFolders != null)
                 searchFolders.AddRange(additionalSearchFolders);

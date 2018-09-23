@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingEventArgs.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 08/25/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to contain arguments for spelling events
@@ -44,26 +44,27 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <remarks>If <c>null</c>, it means that the entire dictionary has changed and words that may have
         /// been ignored before may now no longer be in the dictionary.</remarks>
-        public string Word { get; private set; }
+        public string Word { get; }
 
         /// <summary>
         /// This read-only property returns the culture related to the replacement word
         /// </summary>
         /// <value>This will be null if not applicable</value>
-        public CultureInfo Culture { get; private set; }
+        public CultureInfo Culture { get; }
 
         /// <summary>
         /// This read-only property returns the word that should replace <see cref="Word"/> if applicable to
         /// the event.
         /// </summary>
         /// <value>This will be null if not applicable</value>
-        public string ReplacementWord { get; private set; }
+        public string ReplacementWord { get; }
 
         /// <summary>
         /// This read-only property returns the tracking span related to the event
         /// </summary>
         /// <value>This will be null if not applicable</value>
-        public ITrackingSpan Span { get; private set; }
+        public ITrackingSpan Span { get; }
+
         #endregion
 
         #region Constructors
