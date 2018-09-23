@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/22/2018
+// Updated : 09/23/2018
 // Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -161,6 +162,12 @@ namespace VisualStudio.SpellChecker
                     }
                 }
 
+                // If it's TypeScript, we can get it through the script block property
+                string filename = FilenameFromScriptBlock(buffer);
+
+                if(filename != null)
+                    return filename;
+
                 // See if the text in the buffer contains a filename reference from a code generator by looking
                 // for some common patterns (stuff like Razor HTML).
                 string content = buffer.CurrentSnapshot.GetText(0, Math.Min(buffer.CurrentSnapshot.Length, 4096));
@@ -170,6 +177,81 @@ namespace VisualStudio.SpellChecker
                 if(m.Success)
                     return m.Groups["Filename"].Value;
             }
+
+            return null;
+        }
+
+        /// <summary>
+        /// This is used to see if the buffer contains a script block property present in HTML files
+        /// </summary>
+        /// <param name="buffer">The text buffer from which to get the filename</param>
+        /// <returns>The filename if it could be obtained from the script context property, null if not</returns>
+        /// <remarks>There doesn't appear to be any reference assemblies for the script language services so
+        /// reflection is used to obtain the property and its value.</remarks>
+        private static string FilenameFromScriptBlock(ITextBuffer buffer)
+        {
+            if(buffer.ContentType.TypeName == "TypeScript")
+                foreach(var p in buffer.Properties.PropertyList)
+                {
+                    Type t = p.Key as Type;
+
+                    if(t != null)
+                        if(t.FullName == "Microsoft.VisualStudio.LanguageServices.TypeScript.ScriptContexts.ScriptBlock")
+                        {
+                            var filename = t.GetProperty("FileName");
+
+                            if(filename != null)
+                                return filename.GetValue(p.Value) as string;
+                        }
+                }
+
+            if(buffer.ContentType.TypeName == "JavaScript")
+                foreach(var p in buffer.Properties.PropertyList)
+                {
+                    var d = p.Value as System.Collections.IDictionary;
+
+                    if(d != null)
+                    {
+                        foreach(var v in d.Values)
+                            if(v != null)
+                            {
+                                Type t = v.GetType();
+
+                                if(t.FullName == "Microsoft.VisualStudio.JSLS.Engine.ScriptContext")
+                                {
+                                    var primarySource = t.GetProperty("PrimarySource");
+
+                                    if(primarySource != null)
+                                    {
+                                        var ps = primarySource.GetValue(v);
+
+                                        if(ps != null)
+                                        {
+                                            t = ps.GetType();
+
+                                            var authorFile = t.GetProperty("AuthorFile", BindingFlags.NonPublic |
+                                                BindingFlags.Instance);
+
+                                            if(authorFile != null)
+                                            {
+                                                var af = authorFile.GetValue(ps);
+
+                                                if(af != null)
+                                                {
+                                                    t = af.GetType();
+
+                                                    var displayName = t.GetProperty("DisplayName");
+
+                                                    if(displayName != null)
+                                                        return displayName.GetValue(af) as string;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    }
+                }
 
             return null;
         }
@@ -336,9 +418,21 @@ namespace VisualStudio.SpellChecker
         /// <returns>The project item of the configuration file if found or null if not found</returns>
         public static ProjectItem FindProjectItemForFile(this Solution solution, string filename)
         {
+            if(String.IsNullOrWhiteSpace(filename))
+                return null;
+
+            if(!Path.IsPathRooted(filename))
+            {
+                // We're making an assumption that the path is in or just below the solution folder.  This may
+                // not be the case if the project has a folder too.  In such cases, we'll never find the file.
+                System.Diagnostics.Debug.WriteLine("**** FindProjectItemForFile called with a relative path.  " +
+                    "Assuming the file is in or below the solution folder.  This may not be correct.");
+                filename = Path.Combine(Path.GetDirectoryName(solution.FullName), filename);
+            }
+
             // If the file doesn't exist, we don't need to look any further.  This saves searching the solution
             // which can be slow for extremely large projects.
-            if(String.IsNullOrWhiteSpace(filename) || !File.Exists(filename))
+            if(!File.Exists(filename))
                 return null;
 
             return solution.FindProjectItem(filename);

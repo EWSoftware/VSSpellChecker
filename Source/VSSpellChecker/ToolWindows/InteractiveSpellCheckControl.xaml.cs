@@ -77,7 +77,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
                     else
                         currentTagger = null;
-                    
+
                     ucSpellCheck.SetAddWordContextMenuDictionaries(null);
 
                     if(currentTagger != null)

@@ -72,10 +72,10 @@ namespace VisualStudio.SpellChecker
         /// <returns>Returns true if the suggestions are equal, false if they are not</returns>
         public static bool Equals(SpellingSuggestion s1, SpellingSuggestion s2)
         {
-            if((object)s1 == null && (object)s2 == null)
+            if(s1 == null && s2 == null)
                 return true;
 
-            if((object)s1 == null)
+            if(s1 == null)
                 return false;
 
             return s1.Equals(s2);

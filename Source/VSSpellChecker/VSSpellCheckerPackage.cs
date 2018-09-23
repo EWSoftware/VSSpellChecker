@@ -194,7 +194,6 @@ namespace VisualStudio.SpellChecker
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.ViewSpellCheckToolWindow);
                 menuItem = new OleMenuCommand(ViewSpellCheckToolWindowExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
-
             }
 
             // Register for solution events so that we can clear the global dictionary cache when necessary
@@ -608,46 +607,55 @@ namespace VisualStudio.SpellChecker
               item.Project.Kind != EnvDTE.Constants.vsProjectKindUnmodeled &&
               item.Project.Kind != EnvDTE.Constants.vsProjectKindMisc)
             {
-                // Looks like a project
-                Property fullPath;
+                string path = null;
 
-                try
+                // Looks like a project.  Not all of them implement properties though.
+                if(!String.IsNullOrWhiteSpace(item.Project.FullName) && item.Project.FullName.EndsWith(
+                  "proj", StringComparison.OrdinalIgnoreCase))
                 {
-                    fullPath = item.Project.Properties.Item("FullPath");
+                    path = item.Project.FullName;
                 }
-                catch
+
+                if(path == null && item.Project.Properties != null)
                 {
-                    // C++ projects use a different property name and throw an exception above
+                    Property fullPath;
+
                     try
                     {
-                        fullPath = item.Project.Properties.Item("ProjectFile");
+                        fullPath = item.Project.Properties.Item("FullPath");
                     }
                     catch
                     {
-                        // If that fails, give up
-                        fullPath = null;
+                        // C++ projects use a different property name and throw an exception above
+                        try
+                        {
+                            fullPath = item.Project.Properties.Item("ProjectFile");
+                        }
+                        catch
+                        {
+                            // If that fails, give up
+                            fullPath = null;
+                        }
                     }
+
+                    if(fullPath != null && fullPath.Value != null)
+                        path = (string)fullPath.Value;
                 }
 
-                if(fullPath != null && fullPath.Value != null)
+                if(!String.IsNullOrWhiteSpace(path))
                 {
-                    string path = (string)fullPath.Value;
+                    var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
 
-                    if(!String.IsNullOrWhiteSpace(path))
+                    if(project != null)
                     {
-                        var project = dte2.Solution.EnumerateProjects().FirstOrDefault(p => p.Name == item.Name);
+                        containingProject = project;
+                        settingsFilename = project.FullName;
 
-                        if(project != null)
+                        // Website projects are named after the folder rather than a file
+                        if(settingsFilename.Length > 1 && settingsFilename[settingsFilename.Length - 1] == '\\')
                         {
-                            containingProject = project;
-                            settingsFilename = project.FullName;
-
-                            // Website projects are named after the folder rather than a file
-                            if(settingsFilename.Length > 1 && settingsFilename[settingsFilename.Length - 1] == '\\')
-                            {
-                                folderName = settingsFilename;
-                                settingsFilename += item.Name;
-                            }
+                            folderName = settingsFilename;
+                            settingsFilename += item.Name;
                         }
                     }
                 }
@@ -682,10 +690,13 @@ namespace VisualStudio.SpellChecker
                             {
                                 containingProject = item.ProjectItem.ContainingProject;
 
-                                // Folder items have a trailing backslash.  We'll put the configuration file in
-                                // the folder using its name as the filename.
-                                if(path[path.Length - 1] == '\\')
+                                // Folder items have a trailing backslash in some project systems, others don't.
+                                // We'll put the configuration file in the folder using its name as the filename.
+                                if(path[path.Length - 1] == '\\' || (!File.Exists(path) && Directory.Exists(path)))
                                 {
+                                    if(path[path.Length - 1] != '\\')
+                                        path += @"\";
+
                                     folderName = path;
                                     settingsFilename = path + item.Name;
                                 }

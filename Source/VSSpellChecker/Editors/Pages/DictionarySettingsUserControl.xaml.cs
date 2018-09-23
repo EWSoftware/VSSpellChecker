@@ -330,10 +330,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     // Find the project item for the file we are opening
                     if(configType != ConfigurationType.Folder)
-                        projectItem = solution.FindProjectItemForFile(relatedFilename);
+                        projectItem = solution.FindProjectItemForFile(Path.Combine(configFilePath, relatedFilename));
                     else
-                        projectItem = solution.FindProjectItemForFile(Path.Combine(relatedFilename,
-                            relatedFilename + ".vsspell"));
+                        projectItem = solution.FindProjectItemForFile(Path.Combine(configFilePath, relatedFilename + ".vsspell"));
 
                     if(projectItem != null)
                     {

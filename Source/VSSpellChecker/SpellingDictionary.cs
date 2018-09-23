@@ -62,7 +62,6 @@ namespace VisualStudio.SpellChecker
 
         #endregion
 
-
         #region Constructor
         //=====================================================================
 

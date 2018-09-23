@@ -186,15 +186,21 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                                 if(idx != -1)
                                 {
-                                    idx = file.CanonicalName.IndexOf('.', idx);
+                                    // Look for the first period, not the last, as we want to look for parent
+                                    // filenames (i.e. Form.cs for Form.Designer.cs).  Add one to the index as
+                                    // we don't want to match one for another file such as Form2.cs.
+                                    int extIdx = file.CanonicalName.IndexOf('.', idx) + 1;
 
-                                    if(idx != -1)
+                                    // Ignore it if not found or the filename starts with a period like .editorconfig
+                                    if(extIdx > idx + 2 && extIdx < file.CanonicalName.Length)
                                     {
-                                        projectPath = file.CanonicalName.Substring(0, idx);
+                                        projectPath = file.CanonicalName.Substring(0, extIdx);
 
-                                        filePath = configNames.FirstOrDefault(n => n.StartsWith(projectPath,
-                                            StringComparison.OrdinalIgnoreCase) && !n.StartsWith(file.CanonicalName,
-                                            StringComparison.OrdinalIgnoreCase));
+                                        filePath = configNames.FirstOrDefault(n =>
+                                            n.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(solutionFile, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(file.ProjectFile, StringComparison.OrdinalIgnoreCase) &&
+                                            !n.StartsWith(file.CanonicalName, StringComparison.OrdinalIgnoreCase));
 
                                         file.DependencyConfigurationFile = filePath;
                                     }
@@ -268,7 +274,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     string path = null;
 
                     // Looks like a project.  Not all of them implement properties though.
-                    if(item.Project.Properties != null)
+                    if(!String.IsNullOrWhiteSpace(item.Project.FullName) && item.Project.FullName.EndsWith(
+                      "proj", StringComparison.OrdinalIgnoreCase))
+                    {
+                        path = item.Project.FullName;
+                    }
+
+                    if(path == null && item.Project.Properties != null)
                     {
                         Property fullPath;
 
@@ -293,9 +305,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         if(fullPath != null && fullPath.Value != null)
                             path = (string)fullPath.Value;
                     }
-                    else
-                        if(String.IsNullOrWhiteSpace(path) && item.Project.FullName.EndsWith("proj", StringComparison.OrdinalIgnoreCase))
-                            path = item.Project.FullName;
 
                     if(!String.IsNullOrWhiteSpace(path))
                     {
@@ -340,9 +349,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                                 if(!String.IsNullOrWhiteSpace(path))
                                 {
-                                    // Folder items have a trailing backslash
-                                    if(path[path.Length - 1] == '\\')
+                                    // Folder items have a trailing backslash in some project systems, others don't
+                                    if(path[path.Length - 1] == '\\' || (!File.Exists(path) && Directory.Exists(path)))
+                                    {
+                                        if(path[path.Length - 1] != '\\')
+                                            path += @"\";
+
                                         folders.Add(path);
+                                    }
                                     else
                                     {
                                         files.Add(path);
