@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/02/2018
+// Updated : 10/05/2018
 // Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -375,7 +375,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         ScanMultiLineDocComment(p);
                     }
                 }
-                else if((p.Char() == '@' || p.Char() == 'R') && p.NextChar() == '"') // Verbatim/raw string
+                else if(((p.Char() == '@' || p.Char() == 'R') && p.NextChar() == '"') ||
+                  (p.Char() == '@' && p.NextChar() == '$' && p.NextNextChar() == '"')) // Verbatim, raw, or verbatim interpolated string
                 {
                     // Keep the leading text so that we can handle escape sequences properly
                     p.State = State.MultiLineString;
@@ -607,7 +608,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             // For verbatim strings, skip the leading format identifier.  We keep it so that we can skip escape
             // sequence checking in it.
             if(isVerbatimString)
-                p.Advance(2);
+                p.Advance((p.NextChar() == '$') ? 3 : 2);
 
             while(!p.EndOfLine)
             {

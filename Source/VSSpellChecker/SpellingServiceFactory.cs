@@ -82,7 +82,7 @@ namespace VisualStudio.SpellChecker
             {
 #pragma warning disable VSTHRD010
                 // Generate the configuration settings unique to the file
-                config = this.GenerateConfiguration(buffer);
+                config = GenerateConfiguration(buffer);
 #pragma warning restore VSTHRD010
 
                 if(config == null || !config.SpellCheckAsYouType || config.ShouldExcludeFile(buffer.GetFilename()))
@@ -144,7 +144,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>The generated configuration to use</returns>
         /// <remarks>The configuration is a merger of the global settings plus any solution, project, folder, and
         /// file settings related to the text buffer.</remarks>
-        private SpellCheckerConfiguration GenerateConfiguration(ITextBuffer buffer)
+        private static SpellCheckerConfiguration GenerateConfiguration(ITextBuffer buffer)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 

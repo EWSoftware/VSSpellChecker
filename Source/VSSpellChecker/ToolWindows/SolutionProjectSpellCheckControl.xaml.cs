@@ -698,7 +698,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                     if(issue.LineText.Length > 255)
                                     {
                                         // This may not be the right instance but we'll take what we can get
-                                        int start = issue.LineText.IndexOf(issue.Word) - 20;
+                                        int start = issue.LineText.IndexOf(issue.Word, StringComparison.Ordinal) - 20;
 
                                         if(start < 0)
                                             start = 0;
@@ -1193,7 +1193,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void dgIssues_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
 #pragma warning disable VSTHRD010
-            if(ItemsControl.ContainerFromElement((DataGrid)sender, e.OriginalSource as DependencyObject) is DataGridRow row)
+            if(ItemsControl.ContainerFromElement((DataGrid)sender, e.OriginalSource as DependencyObject) is DataGridRow)
                 cmdGoToIssue_Executed(sender, null);
 #pragma warning restore VSTHRD010
         }
@@ -1772,7 +1772,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
                 var issue = issues[dgIssues.SelectedIndex];
 
-                Clipboard.SetText(String.Format("Ignore Spelling: {0}", issue.Word));
+                Clipboard.SetText($"Ignore Spelling: {issue.Word}");
             }
         }
 

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2018
+// Updated : 10/05/2018
 // Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -50,7 +50,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
           bool escapeApostrophes, IEnumerable<CultureInfo> cultures, SpellingDictionary dictionary) :
           base(trackingSpan, replaceWith, escapeApostrophes, dictionary)
         {
-            this.DisplayTextSuffix = String.Join(" | ", cultures.Select(c => c.Name));
+            this.DisplayTextSuffix = String.Join(" | ", cultures.Where(c => c != null).Select(c => c.Name));
         }
         #endregion
     }

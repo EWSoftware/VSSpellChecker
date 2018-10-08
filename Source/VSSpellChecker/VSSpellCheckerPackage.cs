@@ -285,9 +285,9 @@ namespace VisualStudio.SpellChecker
             if(!(this.GetService(typeof(SVsShellMonitorSelection)) is IVsMonitorSelection ms))
                 return;
 
-            ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out object value);
+            int result = ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out object value);
 
-            if(value is IVsWindowFrame frame &&
+            if(result == VSConstants.S_OK && value is IVsWindowFrame frame &&
               frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK &&
               ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))
             {

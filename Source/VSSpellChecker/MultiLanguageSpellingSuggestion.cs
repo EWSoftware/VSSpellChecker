@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellingSuggestion.cs
 // Author  : Franz Alex Gaisie-Essilfie
-// Updated : 09/01/2018
+// Updated : 10/05/2018
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to represent spelling suggestions from multiple dictionaries that can be used
@@ -40,7 +40,7 @@ namespace VisualStudio.SpellChecker
         public MultiLanguageSpellingSuggestion(IEnumerable<CultureInfo> cultures, string suggestion) :
           base(cultures.First(), suggestion)
         {
-            formattedText = $"{base.Suggestion}\t\t({String.Join(" | ", cultures.Select(c => c.Name))})";
+            formattedText = $"{base.Suggestion}\t\t({String.Join(" | ", cultures.Where(c => c != null).Select(c => c.Name))})";
         }
 
         /// <inheritdoc />

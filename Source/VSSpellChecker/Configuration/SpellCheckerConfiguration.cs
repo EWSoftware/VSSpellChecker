@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
+// Updated : 10/05/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -44,7 +44,8 @@ namespace VisualStudio.SpellChecker.Configuration
         #region Private data members
         //=====================================================================
 
-        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords;
+        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords,
+            loadedConfigFiles;
         private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
         private List<Regex> exclusionExpressions, ignoredFilePatterns, visualStudioExclusions;
@@ -355,30 +356,32 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// This read-only property returns the default list of excluded Visual Studio text box IDs
         /// </summary>
-        public static IEnumerable<string> DefaultVisualStudioExclusions =>
-            new[] {
-                @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|" +
-                    "filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
-                @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
-                @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
-                @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
-                @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
-                @"1c79180c-bb93-46d2-b4d3-f22e7015a6f1\.txtFindID(?# SHFB resource item editor)",
-                @"581e89c0-e423-4453-bde3-a0403d5f380d\.ucEntityReferences\.txtFindName(?# SHFB entity references)",
-                @"7aad2922-72a2-42c1-a077-85f5097a8fa7\.txtFindID(?# SHFB content layout editor)",
-                @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
-                @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|" +
-                    "txtWebsiteAdContent|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|" +
-                    "pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)",
-                @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
-                    "(?# SHFB build component and plug-in configuration forms)",
-                @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
-                @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
-                    "txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
-                @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
-                @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
-                    "(?# Spell checker exclusion expression editor)" };
-
+        public static IEnumerable<string> DefaultVisualStudioExclusions => new[] {
+            @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|" +
+                "filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
+            @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
+            @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
+            @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
+            @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
+            @"1c79180c-bb93-46d2-b4d3-f22e7015a6f1\.txtFindID(?# SHFB resource item editor)",
+            @"581e89c0-e423-4453-bde3-a0403d5f380d\.ucEntityReferences\.txtFindName(?# SHFB entity references)",
+            @"7aad2922-72a2-42c1-a077-85f5097a8fa7\.txtFindID(?# SHFB content layout editor)",
+            @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
+            @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|" +
+                "txtWebsiteAdContent|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|" +
+                "pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)",
+            @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
+                "(?# SHFB build component and plug-in configuration forms)",
+            @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
+            @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
+                "txtFilePattern|txtIgnoredElement|txtIgnoredWord|txtImportSettingsFile)(?# Spell checker config editor)",
+            @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
+            @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
+                "(?# Spell checker exclusion expression editor)",
+            @"da95c001-7ed0-4f46-b5f0-351125ab8bda.*(?# Web publishing dialog box)",
+            @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.AdvancedPreCompileOptionsDialog.*" +
+                "(?# Web publishing compile options dialog box)"
+        };
         #endregion
 
         #region Constructor
@@ -407,6 +410,7 @@ namespace VisualStudio.SpellChecker.Configuration
             ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
             spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
             recognizedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            loadedConfigFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             additionalDictionaryFolders = new List<string>();
 
@@ -485,6 +489,29 @@ namespace VisualStudio.SpellChecker.Configuration
                     return;
 
                 var configuration = new SpellingConfigurationFile(filename, this);
+
+                loadedConfigFiles.Add(filename);
+
+                // Import settings from a user-defined location if necessary.  However, if we've seen the file
+                // already, ignore it to prevent getting stuck in an endless loop.
+                string importSettingsFile = configuration.ToString(PropertyNames.ImportSettingsFile);
+
+                if(!String.IsNullOrWhiteSpace(importSettingsFile))
+                {
+                    if(importSettingsFile.IndexOf('%') != -1)
+                        importSettingsFile = Environment.ExpandEnvironmentVariables(importSettingsFile);
+
+                    if(!Path.IsPathRooted(importSettingsFile))
+                        importSettingsFile = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(filename),
+                            importSettingsFile));
+
+                    // For non-global settings files, settings in this file will override the settings in the
+                    // imported file.  If this is the global settings file, the imported settings will be loaded
+                    // last and will override the global settings since the global file doesn't inherit settings
+                    // from anything else.
+                    if(!loadedConfigFiles.Contains(importSettingsFile) && configuration.ConfigurationType != ConfigurationType.Global)
+                        this.Load(importSettingsFile);
+                }
 
                 this.SpellCheckAsYouType = configuration.ToBoolean(PropertyNames.SpellCheckAsYouType);
                 
@@ -741,6 +768,13 @@ namespace VisualStudio.SpellChecker.Configuration
 
                     if(languages.Count != 0)
                         dictionaryLanguages = languages.Select(l => new CultureInfo(l)).ToList();
+                }
+
+                // As noted above, imported settings override settings in the global configuration
+                if(!String.IsNullOrWhiteSpace(importSettingsFile) && !loadedConfigFiles.Contains(importSettingsFile) &&
+                  configuration.ConfigurationType == ConfigurationType.Global)
+                {
+                    this.Load(importSettingsFile);
                 }
             }
             catch(Exception ex)
