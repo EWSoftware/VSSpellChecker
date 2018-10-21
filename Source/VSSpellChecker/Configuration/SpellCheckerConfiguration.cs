@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/23/2018
+// Updated : 10/05/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -47,7 +47,8 @@ namespace VisualStudio.SpellChecker.Configuration
         private readonly CSharpOptions csharpOptions;
         private readonly CodeAnalysisDictionaryOptions cadOptions;
 
-        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords;
+        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords,
+            loadedConfigFiles;
         private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
         private List<Regex> exclusionExpressions, ignoredFilePatterns, visualStudioExclusions;
@@ -444,10 +445,13 @@ namespace VisualStudio.SpellChecker.Configuration
                         "(?# SHFB build component and plug-in configuration forms)",
                     @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
                     @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
-                        "txtFilePattern|txtIgnoredElement|txtIgnoredWord)(?# Spell checker config editor)",
+                        "txtFilePattern|txtIgnoredElement|txtIgnoredWord|txtImportSettingsFile)(?# Spell checker config editor)",
                     @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
                     @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
-                        "(?# Spell checker exclusion expression editor)"
+                        "(?# Spell checker exclusion expression editor)",
+                    @"da95c001-7ed0-4f46-b5f0-351125ab8bda.*(?# Web publishing dialog box)",
+                    @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.AdvancedPreCompileOptionsDialog.*" +
+                        "(?# Web publishing compile options dialog box)"
                 };
             }
         }
@@ -479,6 +483,7 @@ namespace VisualStudio.SpellChecker.Configuration
             ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
             spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
             recognizedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            loadedConfigFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             additionalDictionaryFolders = new List<string>();
 
@@ -559,6 +564,29 @@ namespace VisualStudio.SpellChecker.Configuration
                     return;
 
                 var configuration = new SpellingConfigurationFile(filename, this);
+
+                loadedConfigFiles.Add(filename);
+
+                // Import settings from a user-defined location if necessary.  However, if we've seen the file
+                // already, ignore it to prevent getting stuck in an endless loop.
+                string importSettingsFile = configuration.ToString(PropertyNames.ImportSettingsFile);
+
+                if(!String.IsNullOrWhiteSpace(importSettingsFile))
+                {
+                    if(importSettingsFile.IndexOf('%') != -1)
+                        importSettingsFile = Environment.ExpandEnvironmentVariables(importSettingsFile);
+
+                    if(!Path.IsPathRooted(importSettingsFile))
+                        importSettingsFile = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(filename),
+                            importSettingsFile));
+
+                    // For non-global settings files, settings in this file will override the settings in the
+                    // imported file.  If this is the global settings file, the imported settings will be loaded
+                    // last and will override the global settings since the global file doesn't inherit settings
+                    // from anything else.
+                    if(!loadedConfigFiles.Contains(importSettingsFile) && configuration.ConfigurationType != ConfigurationType.Global)
+                        this.Load(importSettingsFile);
+                }
 
                 this.SpellCheckAsYouType = configuration.ToBoolean(PropertyNames.SpellCheckAsYouType);
                 
@@ -816,6 +844,13 @@ namespace VisualStudio.SpellChecker.Configuration
 
                     if(languages.Count != 0)
                         dictionaryLanguages = languages.Select(l => new CultureInfo(l)).ToList();
+                }
+
+                // As noted above, imported settings override settings in the global configuration
+                if(!String.IsNullOrWhiteSpace(importSettingsFile) && !loadedConfigFiles.Contains(importSettingsFile) &&
+                  configuration.ConfigurationType == ConfigurationType.Global)
+                {
+                    this.Load(importSettingsFile);
                 }
             }
             catch(Exception ex)

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellSmartTagAction.cs
 // Author  : Franz Alex Gaisie-Essilfie
-// Updated : 08/25/2015
+// Updated : 10/08/2018
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a smart tag action for inserting multi-language spelling suggestions
@@ -15,9 +15,9 @@
 //    Date     Who   Comments
 // ==============================================================================================================
 // 2015-08-18  FAGE  Created the code
-// 2015-08-22  FAGE  Use same suggestion formatter as MultiLanguageSpellingSuggestion.cs
 //===============================================================================================================
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -28,13 +28,16 @@ using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.SmartTags
 {
-    /// <summary>Smart tag action for inserting multi-language spelling suggestions.</summary>
+    /// <summary>
+    /// Smart tag action for inserting multi-language spelling suggestions
+    /// </summary>
     internal class MultiLanguageSpellSmartTagAction : SpellSmartTagAction
     {
-        private CultureInfo[] cultures;
-        private string displayText;
+        private readonly string displayText;
 
-        /// <summary>Constructor for multi-language spelling suggestions smart tag actions.</summary>
+        /// <summary>
+        /// Constructor for multi-language spelling suggestions smart tag actions
+        /// </summary>
         /// <param name="trackingSpan">The tracking span.</param>
         /// <param name="replaceWith">The suggestion to replace misspelled word with</param>
         /// <param name="cultures">The cultures from which the suggested word was chosen.</param>
@@ -42,18 +45,21 @@ namespace VisualStudio.SpellChecker.SmartTags
         public MultiLanguageSpellSmartTagAction(ITrackingSpan trackingSpan, ISpellingSuggestion replaceWith,
             IEnumerable<CultureInfo> cultures, SpellingDictionary dictionary) : base(trackingSpan, replaceWith, dictionary)
         {
-            this.cultures = cultures.ToArray();
-            this.displayText = null;
+            if(cultures != null && cultures.Any(c => c != null))
+            {
+                displayText = String.Format(CultureInfo.InvariantCulture, "{0}\t\t({1})", base.DisplayText,
+                    String.Join(" | ", cultures.Where(c => c != null).Select(c => c.Name)));
+            }
+            else
+                displayText = base.DisplayText;
         }
 
-        /// <summary>Display text</summary>
+        /// <summary>
+        /// Display text
+        /// </summary>
         public override string DisplayText
         {
-            get
-            {
-                return displayText ??
-                      (displayText = MultiLanguageSpellingSuggestion.FormatSuggestion(base.DisplayText, cultures));
-            }
+            get { return displayText; }
         }
     }
 }

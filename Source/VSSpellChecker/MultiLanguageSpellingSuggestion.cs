@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellingSuggestion.cs
 // Author  : Franz Alex Gaisie-Essilfie
-// Updated : 09/18/2015
+// Updated : 10/08/2018
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to represent spelling suggestions from multiple dictionaries
@@ -30,42 +30,29 @@ namespace VisualStudio.SpellChecker
     /// </summary>
     public class MultiLanguageSpellingSuggestion : SpellingSuggestion
     {
-        private IEnumerable<CultureInfo> cultures;
-        private string formattedText;
+        private readonly string formattedText;
 
-        /// <summary>Multi-language suggestion constructor.</summary>
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="suggestion">The suggestion to replace misspelled word with</param>
-        /// <param name="cultures">The cultures from which the suggested word was chosen.</param>
+        /// <param name="cultures">The cultures from which the suggested word was chosen</param>
         public MultiLanguageSpellingSuggestion(IEnumerable<CultureInfo> cultures, string suggestion) :
           base(cultures.First(), suggestion)
         {
-            this.cultures = cultures;
-            this.formattedText = null;
-        }
-
-        /// <summary>Gets the culture information for the suggestion.</summary>
-        public IEnumerable<CultureInfo> Cultures
-        {
-            get
+            if(cultures != null && cultures.Any(c => c != null))
             {
-                return cultures;
+                formattedText = String.Format(CultureInfo.InvariantCulture, "{0}\t\t({1})", base.Suggestion,
+                    String.Join(" | ", cultures.Where(c => c != null).Select(c => c.Name)));
             }
+            else
+                formattedText = base.Suggestion;
         }
 
-        /// <summary>Returns a <see cref="System.String" /> that represents this instance.</summary>
-        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
+        /// <inheritdoc />
         public override string ToString()
         {
-            return formattedText ?? (formattedText = FormatSuggestion(base.Suggestion, cultures));
-        }
-
-        /// <summary>Formats the suggestion to display the language to which it applies.</summary>
-        /// <param name="suggestion">The suggested word.</param>
-        /// <param name="cultures">The cultures to which the suggestion applies.</param>
-        public static string FormatSuggestion(string suggestion, IEnumerable<CultureInfo> cultures)
-        {
-            return String.Format(CultureInfo.InvariantCulture, "{0}\t\t({1})", suggestion,
-                String.Join(" | ", cultures.Select(c => c.Name)));
+            return formattedText;
         }
     }
 }

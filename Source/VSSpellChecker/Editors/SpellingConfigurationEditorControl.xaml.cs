@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/16/2018
+// Updated : 10/05/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -25,7 +25,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -106,6 +105,7 @@ namespace VisualStudio.SpellChecker.Editors
             // The property pages will be listed in this order
             Type[] propertyPages = new[] {
                 typeof(FileInfoUserControl),
+                typeof(ImportSettingsUserControl),
                 typeof(DictionarySettingsUserControl),
                 typeof(GeneralSettingsUserControl),
                 typeof(CSharpOptionsUserControl),

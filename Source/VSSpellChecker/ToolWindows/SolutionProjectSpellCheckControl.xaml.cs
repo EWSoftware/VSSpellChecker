@@ -695,7 +695,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                     if(issue.LineText.Length > 255)
                                     {
                                         // This may not be the right instance but we'll take what we can get
-                                        int start = issue.LineText.IndexOf(issue.Word) - 20;
+                                        int start = issue.LineText.IndexOf(issue.Word, StringComparison.Ordinal) - 20;
 
                                         if(start < 0)
                                             start = 0;
@@ -1764,7 +1764,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
                 var issue = issues[dgIssues.SelectedIndex];
 
-                Clipboard.SetText(String.Format("Ignore Spelling: {0}", issue.Word));
+                Clipboard.SetText(String.Format(CultureInfo.InvariantCulture, "Ignore Spelling: {0}", issue.Word));
             }
         }
 

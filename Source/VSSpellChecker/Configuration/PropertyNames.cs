@@ -31,6 +31,11 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         /// <summary>
+        /// Import settings file
+        /// </summary>
+        public const string ImportSettingsFile = "ImportSettingsFile";
+
+        /// <summary>
         /// Selected languages list
         /// </summary>
         public const string SelectedLanguages = "SelectedLanguages";

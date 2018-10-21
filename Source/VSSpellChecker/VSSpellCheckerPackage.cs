@@ -19,6 +19,8 @@
 // 08/23/2015  EFW  Added support for solution/project spell checking
 //===============================================================================================================
 
+// Ignore Spelling: proj
+
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -293,12 +295,13 @@ namespace VisualStudio.SpellChecker
                 return;
 
             IWpfTextView wpfTextView = null;
+            IVsWindowFrame frame = null;
             object value;
 
             IVsMonitorSelection ms = (IVsMonitorSelection)GetService(typeof(SVsShellMonitorSelection));
-            ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out value);
 
-            IVsWindowFrame frame = value as IVsWindowFrame;
+            if(ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out value) == VSConstants.S_OK)
+                frame = value as IVsWindowFrame;
 
             if(frame != null && frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK &&
               ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))

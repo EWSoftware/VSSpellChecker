@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
+// Updated : 10/05/2018
 // Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -42,8 +42,8 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         private Dictionary<string, PropertyInfo> propertyCache;
-        private PropertyDescriptorCollection configCache, csoCache, cadCache;
-        private SpellCheckerConfiguration defaultConfig;
+        private readonly PropertyDescriptorCollection configCache, csoCache, cadCache;
+        private readonly SpellCheckerConfiguration defaultConfig;
 
         private XDocument document;
         private XElement root;
@@ -141,6 +141,9 @@ namespace VisualStudio.SpellChecker.Configuration
             if(String.IsNullOrWhiteSpace(filename))
                 throw new ArgumentNullException("filename", "Filename cannot be null or empty");
 
+            this.Filename = filename;
+            this.defaultConfig = defaultConfig;
+
             try
             {
                 // Get the property cache for finding current and default values
@@ -160,25 +163,24 @@ namespace VisualStudio.SpellChecker.Configuration
                 foreach(PropertyInfo property in typeof(CodeAnalysisDictionaryOptions).GetProperties(
                   BindingFlags.Public | BindingFlags.Instance))
                     propertyCache.Add(property.Name, property);
+
+                if(File.Exists(filename))
+                {
+                    document = XDocument.Load(filename);
+                    root = document.Root;
+
+                    // If it's an older configuration file, upgrade it to the new format
+                    if(root.Attribute("Format") == null || root.Attribute("Format").Value != AssemblyInfo.ConfigSchemaVersion)
+                        this.UpgradeConfiguration();
+                }
             }
-            catch
+            catch(Exception ex)
             {
-                // Ignore exceptions
+                // Ignore exceptions, we'll just use a blank configuration
+                System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            this.Filename = filename;
-            this.defaultConfig = defaultConfig;
-
-            if(File.Exists(filename))
-            {
-                document = XDocument.Load(filename);
-                root = document.Root;
-
-                // If it's an older configuration file, upgrade it to the new format
-                if(root.Attribute("Format") == null || root.Attribute("Format").Value != AssemblyInfo.ConfigSchemaVersion)
-                    this.UpgradeConfiguration();
-            }
-            else
+            if(document == null)
             {
                 root = new XElement("SpellCheckerConfiguration", new XAttribute("Format",
                     AssemblyInfo.ConfigSchemaVersion));
@@ -433,7 +435,7 @@ namespace VisualStudio.SpellChecker.Configuration
             var ignoredClassifications = new XElement(PropertyNames.IgnoredClassifications);
             var ignoreComments = root.Element("IgnoreHtmlComments");
 
-            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value))
+            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value, CultureInfo.InvariantCulture))
             {
                 ignoreComments.Remove();
 
@@ -451,7 +453,7 @@ namespace VisualStudio.SpellChecker.Configuration
 
             ignoreComments = root.Element("IgnoreXmlComments");
 
-            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value))
+            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value, CultureInfo.InvariantCulture))
             {
                 ignoreComments.Remove();
 

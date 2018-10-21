@@ -190,7 +190,8 @@ namespace VisualStudio.SpellChecker
 
                                 // If it looks like an verbatim string, skip it too
                                 if((text.Length > 2 && (text[0] == '@' || text[0] == 'R') && text[1] == '"') ||
-                                  (text.Length > 3 && text[0] == '$' && text[1] == '@' && text[2] == '"'))
+                                  (text.Length > 3 && ((text[0] == '$' && text[1] == '@' && text[2] == '"') ||
+                                  (text[0] == '@' && text[1] == '$' && text[2] == '"'))))
                                     continue;
                                 break;
                         }
@@ -282,7 +283,8 @@ namespace VisualStudio.SpellChecker
                     end = i + 1;
 
                     if(i > 0 && ((text.Length > 2 && text[0] == '$' && text[1] == '"') ||
-                      (text.Length > 3 && text[0] == '$' && text[1] == '@' && text[2] == '"')))
+                      (text.Length > 3 && ((text[0] == '$' && text[1] == '@' && text[2] == '"') ||
+                      (text[0] == '@' && text[1] == '$' && text[2] == '"')))))
                     {
                         // Interpolated string: $"{Property}" or $@"\{Property}\".  Find the end accounting for
                         // escaped braces.

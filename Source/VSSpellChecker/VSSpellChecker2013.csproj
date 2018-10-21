@@ -91,6 +91,9 @@
     <Compile Include="Editors\Pages\FileInfoUserControl.xaml.cs">
       <DependentUpon>FileInfoUserControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Editors\Pages\ImportSettingsUserControl.xaml.cs">
+      <DependentUpon>ImportSettingsUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Editors\Pages\VisualStudioUserControl.xaml.cs">
       <DependentUpon>VisualStudioUserControl.xaml</DependentUpon>
     </Compile>
@@ -550,6 +553,10 @@
     <Page Include="Editors\Pages\FileInfoUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Editors\Pages\ImportSettingsUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Editors\Pages\VisualStudioUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
