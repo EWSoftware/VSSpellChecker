@@ -104,8 +104,8 @@
     <Compile Include="Editors\Pages\IgnoredWordsUserControl.xaml.cs">
       <DependentUpon>IgnoredWordsUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Editors\Pages\ImportedSettingsUserControl.xaml.cs">
-      <DependentUpon>ImportedSettingsUserControl.xaml</DependentUpon>
+    <Compile Include="Editors\Pages\ImportSettingsUserControl.xaml.cs">
+      <DependentUpon>ImportSettingsUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editors\Pages\VisualStudioUserControl.xaml.cs">
       <DependentUpon>VisualStudioUserControl.xaml</DependentUpon>
@@ -650,7 +650,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Editors\Pages\ImportedSettingsUserControl.xaml">
+    <Page Include="Editors\Pages\ImportSettingsUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

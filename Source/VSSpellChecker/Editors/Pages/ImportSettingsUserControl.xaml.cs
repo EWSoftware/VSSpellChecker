@@ -68,7 +68,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public string Title => "Import Settings";
 
         /// <inheritdoc />
-        public string HelpUrl => "TODO: Set help URL ID";
+        public string HelpUrl => "b156d5ad-347f-4f63-89dc-4f945953ae41";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
