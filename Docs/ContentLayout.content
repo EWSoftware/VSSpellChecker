@@ -56,7 +56,7 @@
       <HelpKeyword index="K" term="configuration, configuration files" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isSelected="true" title="Configuration Options">
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
@@ -153,6 +153,11 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="875213fe-3e53-4bf3-acdc-7654d0c7756d" visible="True" isSelected="true" title="Version 2018.10.27.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2018.10.27.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="67af1ab3-1e2b-43ee-81a0-588b0cb0d336" visible="True" title="Version 2018.8.25.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2018.8.25.0" />

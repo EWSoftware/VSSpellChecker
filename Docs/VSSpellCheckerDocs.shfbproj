@@ -49,7 +49,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2018.8.25.0</HelpFileVersion>
+    <HelpFileVersion>2018.10.27.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -173,6 +173,7 @@
     <None Include="Content\VersionHistory\v2016.7.28.0.aml" />
     <None Include="Content\VersionHistory\v2017.12.29.0.aml" />
     <None Include="Content\VersionHistory\v2017.8.26.0.aml" />
+    <None Include="Content\VersionHistory\v2018.10.27.0.aml" />
     <None Include="Content\VersionHistory\v2018.8.3.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2015.8.15.0.aml" />
