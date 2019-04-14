@@ -93,5 +93,5 @@ internal static partial class AssemblyInfo
 
     // Assembly copyright information
     public const string Copyright = "Copyright \xA9 2013-2019, Eric Woodruff, All Rights Reserved.\r\n" +
-        "Portions Copyright \xA9 2010-2018, Microsoft Corporation, All Rights Reserved.";
+        "Portions Copyright \xA9 2010-2019, Microsoft Corporation, All Rights Reserved.";
 }
