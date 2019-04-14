@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SuggestedActionBase.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/07/2016
-// Note    : Copyright 2016, Eric Woodruff, All rights reserved
+// Updated : 04/10/2019
+// Note    : Copyright 2016-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used as an abstract base class for suggested actions
@@ -60,7 +60,9 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         /// <summary>
         /// This is used to get a preview object for the action
         /// </summary>
-        public object Preview { get; set; }
+        /// <remarks>The preview object must be recreated on each call as prior instances may be hosted in
+        /// another control and cannot be reused.</remarks>
+        public Func<object> Preview { get; set; }
 
         #endregion
 
@@ -108,7 +110,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         /// <inheritdoc />
         public Task<object> GetPreviewAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult<object>(this.Preview);
+            return Task.FromResult<object>(this.Preview != null ? this.Preview() : null);
         }
 
         /// <inheritdoc />

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/05/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 04/12/2019
+// Note    : Copyright 2015-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to hold information about a file that will be spell checked
@@ -150,8 +150,28 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         var hierarchy = (IVsHierarchy)solution;
 
                         if(projectName != null)
+                        {
+                            // See if there is a solution configuration.  We need to look for it separately as
+                            // we won't see it when getting the files for a single project.
+                            var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(false);
+
+                            if(dte2 != null)
+                            {
+                                string solutionConfig = dte2.Solution.FullName + ".vsspell";
+                                var projectItem = dte2.Solution.FindProjectItemForFile(solutionConfig);
+
+                                if(projectItem != null)
+                                    projectFiles.Add(new SpellCheckFileInfo
+                                    {
+                                        ProjectFile = "Solution Items",
+                                        Filename = Path.GetFileName(solutionConfig),
+                                        CanonicalName = solutionConfig
+                                    });
+                            }
+
                             if(solution.GetProjectOfUniqueName(projectName, out hierarchy) != VSConstants.S_OK)
                                 hierarchy = null;
+                        }
 
                         if(hierarchy != null)
                         {

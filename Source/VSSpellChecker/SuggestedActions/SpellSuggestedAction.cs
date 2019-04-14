@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 04/10/2019
+// Note    : Copyright 2016-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide a suggested action for inserting spelling suggestions
@@ -63,7 +63,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 
             // The preview is used to remind users that they can hold Ctrl when selecting this suggestion to
             // replace all instances of the word.
-            this.Preview = new TextBlock(new Run { Text = "Hold Ctrl to replace all" }) { Padding = new Thickness(5) };
+            this.Preview = () => new TextBlock(new Run { Text = "Hold Ctrl to replace all" }) { Padding = new Thickness(5) };
         }
         #endregion
 
