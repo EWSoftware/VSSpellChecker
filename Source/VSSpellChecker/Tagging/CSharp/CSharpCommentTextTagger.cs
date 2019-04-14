@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/05/2018
-// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
+// Updated : 04/08/2019
+// Note    : Copyright 2010-2019, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for C# code
@@ -376,7 +376,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     }
                 }
                 else if(((p.Char() == '@' || p.Char() == 'R') && p.NextChar() == '"') ||
-                  (p.Char() == '@' && p.NextChar() == '$' && p.NextNextChar() == '"')) // Verbatim, raw, or verbatim interpolated string
+                  (p.Char() == '$' && p.NextChar() == '@' && p.NextNextChar() == '"') ||
+                  (p.Char() == '@' && p.NextChar() == '$' && p.NextNextChar() == '"')) // Verbatim, raw, or interpolated verbatim string
                 {
                     // Keep the leading text so that we can handle escape sequences properly
                     p.State = State.MultiLineString;
@@ -388,8 +389,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     p.State = State.String;
                     ScanString(p, false);
                 }
-                else if((p.Char() == '$' && p.NextChar() == '"') ||
-                  (p.Char() == '$' && p.NextChar() == '@' && p.NextNextChar() == '"')) // Interpolated or interpolated verbatim string
+                else if(p.Char() == '$' && p.NextChar() == '"') // Interpolated string
                 {
                     // Keep the leading text so that we can handle the format specifiers properly
                     p.State = State.String;
@@ -429,6 +429,26 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
                         p.State = State.Default;
                         return;
+                    }
+
+                    // If it looks like a C/C+ #include, skip the filename
+                    if(p.NextSegment(7) == "include")
+                    {
+                        p.Advance(7);
+
+                        while(!p.EndOfLine && System.Char.IsWhiteSpace(p.Char()))
+                            p.Advance();
+
+                        if(p.Char() == '"')
+                        {
+                            p.Advance();
+
+                            while(!p.EndOfLine && p.Char() != '"')
+                                p.Advance();
+
+                            if(!p.EndOfLine)
+                                p.Advance();
+                        }
                     }
                 }
                 else
@@ -605,10 +625,10 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             if(markText)
                 p.StartNaturalText();
 
-            // For verbatim strings, skip the leading format identifier.  We keep it so that we can skip escape
-            // sequence checking in it.
+            // For verbatim/raw/interpolated strings, skip the leading format identifier.  We keep it so that we
+            // can skip escape sequence checking and properties in them.
             if(isVerbatimString)
-                p.Advance((p.NextChar() == '$') ? 3 : 2);
+                p.Advance((p.NextChar() == '$' || p.NextChar() == '@') ? 3 : 2);
 
             while(!p.EndOfLine)
             {
@@ -647,7 +667,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             // For interpolated strings, skip the leading format identifier.  We keep it so that we can skip the
             // properties in it.
             if(isInterpolatedString)
-                p.Advance((p.NextChar() == '@') ? 3 : 2);
+                p.Advance(2);
 
             while(!p.EndOfLine)
             {
