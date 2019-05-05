@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/30/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 04/17/2019
+// Note    : Copyright 2016-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
@@ -444,26 +444,24 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                     Command = new MenuCommand(o => this.ReplaceWord(s))
                 }));
 
-                if(commands.Count != 0)
-                {
-                    commands.Add(new Separator());
+                if(commands.Count == 0)
+                    commands.Add(new MenuItem { Header = "No Suggestions", Command = new MenuCommand(null) });
 
-                    foreach(var d in dictionary.Dictionaries)
-                        commands.Add(new MenuItem
-                        {
-                            Header = String.Format(CultureInfo.InvariantCulture, "Add to Dictionary - {0} ({1})",
-                                d.Culture.EnglishName, d.Culture.Name),
-                            Command = new MenuCommand(o => this.AddToDictionary(d.Culture))
-                        });
+                commands.Add(new Separator());
 
+                foreach(var d in dictionary.Dictionaries)
                     commands.Add(new MenuItem
                     {
-                        Header = "Ignore Word",
-                        Command = new MenuCommand(o => this.IgnoreWord())
+                        Header = String.Format(CultureInfo.InvariantCulture, "Add to Dictionary - {0} ({1})",
+                            d.Culture.EnglishName, d.Culture.Name),
+                        Command = new MenuCommand(o => this.AddToDictionary(d.Culture))
                     });
-                }
-                else
-                    commands.Add(new MenuItem { Header = "No Suggestions", Command = new MenuCommand(null) });
+
+                commands.Add(new MenuItem
+                {
+                    Header = "Ignore Word",
+                    Command = new MenuCommand(o => this.IgnoreWord())
+                });
             }
             else
                 commands.Add(new MenuItem

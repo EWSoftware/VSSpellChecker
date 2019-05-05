@@ -3,8 +3,11 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
 	mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="700"
-	Background="{DynamicResource ToolWindowBackgroundBrushKey}" FontSize="12">
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -47,7 +50,7 @@
 				<ColumnDefinition />
 			</Grid.ColumnDefinitions>
 			<StackPanel Orientation="Horizontal" Grid.Column="0">
-				<Button Name="btnReset" Content="Reset" Width="80"
+				<Button Name="btnReset" Content="Reset" MinWidth="80"
 					ToolTip="Reset the configuration to its defaults" Click="btnReset_Click" />
 			</StackPanel>
 			<TextBlock Margin="3" Grid.Column="1" ToolTip="View project website">
@@ -55,7 +58,7 @@
 						Click="lnkProjectSite_Click">https://github.com/EWSoftware/VSSpellChecker</Hyperlink>
 			</TextBlock>
 			<StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
-				<Button Name="btnHelp" Content="Help" Width="80" Command="ApplicationCommands.Help"
+				<Button Name="btnHelp" Content="Help" MinWidth="80" Command="ApplicationCommands.Help"
 					ToolTip="Show help for the selected category" />
 			</StackPanel>
 		</Grid>

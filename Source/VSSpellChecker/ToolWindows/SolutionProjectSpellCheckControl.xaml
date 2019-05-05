@@ -4,8 +4,11 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
-	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="800"
-	Background="{DynamicResource ToolWindowBackgroundBrushKey}" FontSize="12" Name="ucSolutionProjectSpellCheck">
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
+	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="800" Name="ucSolutionProjectSpellCheck"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -61,9 +64,9 @@
 							<ComboBox Grid.Column="1" Margin="3" Name="cboSpellCheckTarget" MinWidth="230" MaxWidth="500"
 								VerticalAlignment="Center"/>
 							<Label Grid.Column="2" Margin="3" Content="Max Iss_ues" Target="{Binding ElementName=txtMaxIssues}" />
-							<TextBox Grid.Column="3" Margin="3" Name="txtMaxIssues" MaxLength="5" Width="50" Text="5000"
+							<TextBox Grid.Column="3" Margin="3" Name="txtMaxIssues" MaxLength="5" MinWidth="50" Text="5000"
 								VerticalContentAlignment="Center"/>
-							<Button Grid.Column="4" Margin="3" Name="btnStartCancel" Content="S_tart" Width="50"
+							<Button Grid.Column="4" Margin="3" Name="btnStartCancel" Content="S_tart" MinWidth="50"
 								Click="btnStartCancel_ClickAsync" />
 							<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="10,5,0,0" x:Name="spSpinner"
                 HorizontalAlignment="Left"/>

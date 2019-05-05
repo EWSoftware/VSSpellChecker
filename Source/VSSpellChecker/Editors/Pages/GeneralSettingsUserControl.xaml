@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-	mc:Ignorable="d" d:DesignHeight="460" d:DesignWidth="500"
+	mc:Ignorable="d" d:DesignHeight="530" d:DesignWidth="500"
 	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
 	<UserControl.Resources>
 		<ResourceDictionary>
@@ -22,47 +22,47 @@
 			<GroupBox Header="_General" Grid.Row="0">
 				<StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboSpellCheckAsYouType" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboSpellCheckAsYouType" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Spell c_heck as you type" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal" Name="spIncludeInProjectSpellCheck">
-						<ComboBox Name="cboIncludeInProjectSpellCheck" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIncludeInProjectSpellCheck" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Include when performing solution/project spell checking" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboDetectDoubledWords" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboDetectDoubledWords" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Detect doubled words" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboIgnoreWordsWithDigits" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIgnoreWordsWithDigits" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore words with digits" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboIgnoreAllUppercase" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIgnoreAllUppercase" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore words in all uppercase" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboIgnoreMixedCase" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIgnoreMixedCase" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore words in mixed/camel case" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboIgnoreFormatSpecifiers" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIgnoreFormatSpecifiers" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore .NET and C-style format string specifiers" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboIgnoreFilenamesAndEMail" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIgnoreFilenamesAndEMail" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore words that look like filenames and e-mail addresses" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboIgnoreXmlInText" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIgnoreXmlInText" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore words that look like XML elements in spell checked text" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboTreatUnderscoresAsSeparators" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboTreatUnderscoresAsSeparators" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Treat underscores as separators" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboIgnoreMnemonics" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboIgnoreMnemonics" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Ignore mnemonics within words" />
 					</StackPanel>
 				</StackPanel>

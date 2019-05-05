@@ -34,19 +34,19 @@ word.  The default set includes common Doxygen tags that fit this category.</Tex
 			</TextBlock>
 		</CheckBox>
 		<StackPanel Orientation="Horizontal" Grid.Row="2" Margin="3">
-			<TextBox Name="txtIgnoredWord" Width="250" Margin="0, 0, 3, 0" />
-			<Button Name="btnAddIgnoredWord" Content="Add" Width="50" ToolTip="Add new ignored word(s)"
+			<TextBox Name="txtIgnoredWord" MinWidth="250" Margin="0, 0, 3, 0" />
+			<Button Name="btnAddIgnoredWord" Content="Add" MinWidth="50" ToolTip="Add new ignored word(s)"
 				Click="btnAddIgnoredWord_Click" />
 		</StackPanel>
 		<ListBox Name="lbIgnoredWords" Grid.Row="3" Margin="3" />
 		<StackPanel Orientation="Horizontal" Grid.Row="4" Margin="3">
-			<Button Name="btnRemoveIgnoredWord" Content="Remove" Width="80" Margin="0, 0, 3, 0"
+			<Button Name="btnRemoveIgnoredWord" Content="Remove" MinWidth="80" Margin="0, 0, 3, 0"
 				ToolTip="Remove selected ignored word" Click="btnRemoveIgnoredWord_Click" />
-			<Button Name="btnDefaultIgnoredWords" Content="Default" Width="80" Margin="0, 0, 3, 0"
+			<Button Name="btnDefaultIgnoredWords" Content="Default" MinWidth="80" Margin="0, 0, 3, 0"
 				ToolTip="Reset to default list of ignored words" Click="btnDefaultIgnoredWords_Click" />
-			<Button Name="btnImport" Content="Import" Width="80" Margin="0, 0, 3, 0"
+			<Button Name="btnImport" Content="Import" MinWidth="80" Margin="0, 0, 3, 0"
 			    ToolTip="Import ignored words from a file" Click="btnImport_Click" />
-			<Button Name="btnExport" Content="Export" Width="80" Margin="0, 0, 3, 0"
+			<Button Name="btnExport" Content="Export" MinWidth="80" Margin="0, 0, 3, 0"
 			    ToolTip="Export ignored words to a file" Click="btnExport_Click" />
 		</StackPanel>
 	</Grid>

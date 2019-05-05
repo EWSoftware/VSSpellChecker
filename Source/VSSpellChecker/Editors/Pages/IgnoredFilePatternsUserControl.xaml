@@ -31,17 +31,17 @@ file patterns.
 			</TextBlock>
 		</CheckBox>
 		<StackPanel Orientation="Horizontal" Grid.Row="2" Margin="3">
-			<TextBox Name="txtFilePattern" Width="250" Margin="0, 0, 3, 0" />
-			<Button Name="btnAddFilePattern" Content="Add" Width="50" ToolTip="Add new ignored file pattern"
+			<TextBox Name="txtFilePattern" MinWidth="250" Margin="0, 0, 3, 0" />
+			<Button Name="btnAddFilePattern" Content="Add" MinWidth="50" ToolTip="Add new ignored file pattern"
 				Click="btnAddFilePattern_Click" />
 		</StackPanel>
 		<ListBox Name="lbIgnoredFilePatterns" Grid.Row="3" Margin="3" />
 		<StackPanel Orientation="Horizontal" Grid.Row="4" Margin="3">
-			<Button Name="btnRemoveFilePattern" Content="Remove" Width="80" Margin="0, 0, 3, 0"
+			<Button Name="btnRemoveFilePattern" Content="Remove" MinWidth="80" Margin="0, 0, 3, 0"
 				ToolTip="Remove selected file pattern" Click="btnRemoveFilePattern_Click" />
-			<Button Name="btnClearFilePatterns" Content="Clear" Width="80" Margin="0, 0, 3, 0"
+			<Button Name="btnClearFilePatterns" Content="Clear" MinWidth="80" Margin="0, 0, 3, 0"
 				ToolTip="Clear all ignored file patterns" Click="btnClearFilePatterns_Click" />
-			<Button Name="btnDefaultFilePatterns" Content="Default" Width="80"
+			<Button Name="btnDefaultFilePatterns" Content="Default" MinWidth="80"
 				ToolTip="Reset to default list of ignored file patterns" Click="btnDefaultFilePatterns_Click" />
 		</StackPanel>
 	</Grid>

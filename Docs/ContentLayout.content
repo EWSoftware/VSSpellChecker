@@ -153,6 +153,11 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="904f5ad1-18d3-4615-ba34-9f9259f11776" visible="True" title="Version 2019.5.5.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2019.5.5.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="f9804039-6ccd-48b3-be55-789d78c00ca7" visible="True" title="Version 2019.4.14.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2019.4.14.0" />

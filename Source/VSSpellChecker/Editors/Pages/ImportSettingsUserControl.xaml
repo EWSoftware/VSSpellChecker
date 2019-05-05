@@ -33,7 +33,7 @@ to be relative to the configuration file.
 			</Grid.ColumnDefinitions>
 			<TextBox Name="txtImportSettingsFile" Margin="3, 0, 3, 0" Grid.Column="0" TextChanged="Property_Changed"
 				LostFocus="txtImportSettingsFile_LostFocus" />
-			<Button Name="btnSelectFile" Margin="0, 0, 3, 0" Content="..." Width="23" Grid.Column="1"
+			<Button Name="btnSelectFile" Margin="0, 0, 3, 0" Content="..." MinWidth="23" Grid.Column="1"
 						ToolTip="Select a settings file to import" Click="btnSelectFile_Click" />
 		</Grid>
 		<TextBlock Grid.Row="2" Name="tbFileNotFound" TextWrapping="Wrap" Margin="3,10,3,10" Padding="3"

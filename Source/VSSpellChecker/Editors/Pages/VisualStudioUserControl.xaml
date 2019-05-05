@@ -33,13 +33,13 @@ information on known issues and limitations.</TextBlock>
 		<ListBox Name="lbExclusionExpressions" Grid.Row="2" Margin="3"
 			MouseDoubleClick="lbExclusionExpressions_MouseDoubleClick"/>
 		<StackPanel Orientation="Horizontal" Grid.Row="3" Margin="3">
-			<Button Name="btnAddExpression" Content="Add" Width="80" Margin="3"
+			<Button Name="btnAddExpression" Content="Add" MinWidth="80" Margin="3"
 				ToolTip="Add a new exclusion expression" Click="btnAddExpression_Click" />
-			<Button Name="btnEditExpression" Content="Edit" Width="80" Margin="3"
+			<Button Name="btnEditExpression" Content="Edit" MinWidth="80" Margin="3"
 				ToolTip="Edit the selected exclusion expression" Click="btnEditExpression_Click" />
-			<Button Name="btnRemoveExpression" Content="Remove" Width="80" Margin="3"
+			<Button Name="btnRemoveExpression" Content="Remove" MinWidth="80" Margin="3"
 				ToolTip="Remove the selected exclusion expression" Click="btnRemoveExpression_Click" />
-			<Button Name="btnDefaultIds" Content="Default" Width="80" Margin="3"
+			<Button Name="btnDefaultIds" Content="Default" MinWidth="80" Margin="3"
 				ToolTip="Reset to default list of ignored text box ID expressions" Click="btnDefaultIDs_Click" />
 		</StackPanel>
 	</Grid>

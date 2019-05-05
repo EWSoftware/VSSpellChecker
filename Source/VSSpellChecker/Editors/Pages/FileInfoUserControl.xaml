@@ -3,7 +3,8 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-	mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="500"
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
+	mc:Ignorable="d" d:DesignHeight="720" d:DesignWidth="500"
 	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
 	<UserControl.Resources>
 		<ResourceDictionary>
@@ -46,7 +47,9 @@ you close and re-open the spell checked file in which you want the changes to ap
 <Bold>Tools | Options | Environment | Fonts and Colors</Bold> and select the <Bold>Spelling Error</Bold>
 display item.</TextBlock>
 			<FlowDocumentScrollViewer Name="fdvAddConfigs" VerticalScrollBarVisibility="Hidden" IsEnabled="False">
-				<FlowDocument FontFamily="Verdana" FontSize="12" PagePadding="10" TextAlignment="Left">
+				<FlowDocument PagePadding="10" TextAlignment="Left"
+					FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+					FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
 					<Section Name="secAddFileSpecific">
 						<Paragraph>To add folder or file-specific settings, use one of the following methods when a solution
 file is loaded:</Paragraph>

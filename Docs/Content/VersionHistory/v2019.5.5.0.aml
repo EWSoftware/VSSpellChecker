@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="904f5ad1-18d3-4615-ba34-9f9259f11776" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>If no suggestions are found in the WPF text box spell checker, the Add to Dictionary and Ignore
+Word options are now shown.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the spell checker configuration editor and tool windows so that they use the Visual
+Studio environment font and font size.  This allows them to scale based on the user's preferred Visual Studio
+font and size rather than just with the system DPI settings.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>
