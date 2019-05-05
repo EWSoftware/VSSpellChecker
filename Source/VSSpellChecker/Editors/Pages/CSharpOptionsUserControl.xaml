@@ -16,35 +16,35 @@
 	<ScrollViewer VerticalScrollBarVisibility="Auto">
 		<StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreXmlDocComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboIgnoreXmlDocComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Ignore XM_L documentation comments (/// ... and /** ... */)" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreDelimitedComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboIgnoreDelimitedComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Ignore delimited comments (/* ... */)" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreStandardSingleLineComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboIgnoreStandardSingleLineComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Ignore standard single line comments (// ...)" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreQuadrupleSlashComments" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboIgnoreQuadrupleSlashComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Ignore quadruple slash single line comments (//// ...)" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreNormalStrings" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboIgnoreNormalStrings" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Ignore normal string literals (&quot;...&quot;)" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreVerbatimStrings" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboIgnoreVerbatimStrings" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Ignore verbatim string literals (@&quot;...&quot;)" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal">
-				<ComboBox Name="cboIgnoreInterpolatedStrings" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboIgnoreInterpolatedStrings" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Ignore interpolated string literals ($&quot;{PropertyName}...&quot;)" />
 			</StackPanel>
 			<StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-				<ComboBox Name="cboApplyToAllCStyleLanguages" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+				<ComboBox Name="cboApplyToAllCStyleLanguages" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 				<Label Margin="3" Content="Apply the above options to all C-style languages as applicable" />
 			</StackPanel>
 		</StackPanel>

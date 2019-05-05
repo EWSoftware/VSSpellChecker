@@ -5,7 +5,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
 	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="300"
-	Name="ucInteractiveSpellCheck" FontSize="12">
+	Name="ucInteractiveSpellCheck">
 	<UserControl.CommandBindings>
 		<CommandBinding Command="vssc:SpellCheckCommands.Replace" Executed="cmdReplace_Executed" />
 		<CommandBinding Command="vssc:SpellCheckCommands.ReplaceAll" Executed="cmdReplaceAll_Executed" />

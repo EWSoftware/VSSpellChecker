@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ThemeColors.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/18/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 05/03/2019
+// Note    : Copyright 2015-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide Visual Studio theme colors in a version independent manner
@@ -37,10 +37,27 @@ namespace VisualStudio.SpellChecker.Theme
         //=====================================================================
 
         private static ThemeColors instance;
+
         #endregion
 
         #region Properties
         //=====================================================================
+
+        /// <summary>
+        /// This read-only property returns the environment font family key
+        /// </summary>
+        public static string EnvironmentFontFamilyKey
+        {
+            get { return VsFonts.EnvironmentFontFamilyKey; }
+        }
+
+        /// <summary>
+        /// This read-only property returns the environment font size key
+        /// </summary>
+        public static string EnvironmentFontSizeKey
+        {
+            get { return VsFonts.EnvironmentFontSizeKey; }
+        }
 
         /// <summary>
         /// This read-only property returns the theme color instance

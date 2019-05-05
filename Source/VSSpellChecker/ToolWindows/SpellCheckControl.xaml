@@ -4,8 +4,11 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
-	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="300"
-	Background="{DynamicResource ToolWindowBackgroundBrushKey}" FontSize="12" Name="ucSpellCheckControl">
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
+	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="300" Name="ucSpellCheckControl"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -50,19 +53,19 @@ filename extension.</TextBlock>
 				</Grid.ColumnDefinitions>
 				<ListBox Grid.Column="0" Name="lbSuggestions" Margin="3" MouseDoubleClick="lbSuggestions_MouseDoubleClick" />
 				<StackPanel Grid.Column="1">
-					<Button Name="btnReplace" Content="R_eplace" Width="100" Margin="3"
+					<Button Name="btnReplace" Content="R_eplace" MinWidth="100" Margin="3"
 						Command="vssc:SpellCheckCommands.Replace"
 						ToolTip="Replace current misspelling with the selected word" />
-					<Button Name="btnReplaceAll" Content="Replace _All" Width="100" Margin="3, 3, 3, 12"
+					<Button Name="btnReplaceAll" Content="Replace _All" MinWidth="100" Margin="3, 3, 3, 12"
 						Command="vssc:SpellCheckCommands.ReplaceAll"
 						ToolTip="Replace all occurrences with the selected word" />
-					<Button Name="btnIgnoreOnce" Content="_Ignore Once" Width="100" Margin="3"
+					<Button Name="btnIgnoreOnce" Content="_Ignore Once" MinWidth="100" Margin="3"
 						Command="vssc:SpellCheckCommands.IgnoreOnce"
 						ToolTip="Ignore just this occurrence of the misspelled word" />
-					<Button Name="btnIgnoreAll" Content="Ig_nore All" Width="100" Margin="3, 3, 3, 12"
+					<Button Name="btnIgnoreAll" Content="Ig_nore All" MinWidth="100" Margin="3, 3, 3, 12"
 						Command="vssc:SpellCheckCommands.IgnoreAll"
 						ToolTip="Ignore all occurrences of this misspelled word" />
-					<Button Name="btnAddWord" Content="Add _Word" Width="100" Margin="3" Click="btnAddWord_Click"
+					<Button Name="btnAddWord" Content="Add _Word" MinWidth="100" Margin="3" Click="btnAddWord_Click"
 						ToolTip="Add the word to the user dictionary"
 						ContextMenuOpening="btnAddWord_ContextMenuOpening">
 						<Button.ContextMenu>
