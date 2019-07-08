@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 04/08/2019
+// Updated : 07/08/2019
 // Note    : Copyright 2010-2019, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
@@ -439,7 +439,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         while(!p.EndOfLine && System.Char.IsWhiteSpace(p.Char()))
                             p.Advance();
 
-                        if(p.Char() == '"')
+                        if(!p.EndOfLine && p.Char() == '"')
                         {
                             p.Advance();
 
