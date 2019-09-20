@@ -6,19 +6,17 @@
 		<title>EWSoftware Visual Studio Spell Checker Definitions</title>
 		<authors>Eric Woodruff</authors>
 		<owners>Eric Woodruff</owners>
-		<licenseUrl>https://github.com/EWSoftware/VSSpellChecker/blob/master/LICENSE</licenseUrl>
-		<projectUrl>https://github.com/EWSoftware/VSSpellChecker</projectUrl>
+        <license type="expression">MS-PL</license>
 		<iconUrl>https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/NuGet/VSSpellChecker.png</iconUrl>
+		<projectUrl>https://github.com/EWSoftware/VSSpellChecker</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>This package contains the definitions assembly used to create third party taggers that can be integrated with the EWSoftware Visual Studio Spell Checker.</description>
-		<copyright>Eric Woodruff (c) 2013-2017</copyright>
+		<copyright>Eric Woodruff (c) 2013-2019</copyright>
 		<tags>Visual Studio spell checker integration</tags>
 	</metadata>
 	<files>
-		<file src="..\Source\VSSpellCheckerDefinitions\bin\2013\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net45" />
-		<file src="..\Source\VSSpellCheckerDefinitions\bin\2013\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net45" />
-		<file src="..\Source\VSSpellCheckerDefinitions\bin\2017\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net46" />
-		<file src="..\Source\VSSpellCheckerDefinitions\bin\2017\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net46" />
+		<file src="..\Source\VSSpellCheckerDefinitions\bin\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net46" />
+		<file src="..\Source\VSSpellCheckerDefinitions\bin\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net46" />
 		<file src="ReadMe.txt" target="ReadMe.txt" />
 	</files>
 </package>

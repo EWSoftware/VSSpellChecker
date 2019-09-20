@@ -350,8 +350,8 @@ namespace VisualStudio.SpellChecker.Configuration
         /// This read-only property returns the default list of spell checked XML attributes
         /// </summary>
         public static IEnumerable<string> DefaultSpellCheckedAttributes =>
-            new[] { "altText", "Caption", "CompoundAlternate", "Content", "Header", "lead", "PreferredAlternate",
-                "SpellingAlternates", "title", "term", "Text", "ToolTip" };
+            new[] { "altText", "Caption", "CompoundAlternate", "Content", "content", "Header", "lead",
+                "PreferredAlternate", "SpellingAlternates", "title", "term", "Text", "ToolTip" };
 
         /// <summary>
         /// This read-only property returns the default list of excluded Visual Studio text box IDs

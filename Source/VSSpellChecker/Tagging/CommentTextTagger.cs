@@ -292,8 +292,8 @@ namespace VisualStudio.SpellChecker.Tagging
                     }
 
                     if((name.Contains("comment") || name.Contains("string") || name.Contains("xml text") ||
-                      name.Contains("xaml text") || name.Contains("attribute value")) &&
-                      !name.Contains("xml doc tag"))
+                      name.Contains("xaml text") || name.Contains("attribute value") ||
+                      name.Equals("text", StringComparison.OrdinalIgnoreCase)) && !name.Contains("xml doc tag"))
                     {
                         // If it's not a wanted attribute name, don't spell check its value
                         if(attributeName != null && name.Contains("attribute value") &&
