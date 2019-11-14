@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/17/2018
-// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
+// Updated : 10/02/2019
+// Note    : Copyright 2010-2019, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for source code files of any type
@@ -312,7 +312,10 @@ namespace VisualStudio.SpellChecker.Tagging
                         // Include files in C/C++ are tagged as a string but we don't want to spell check them
                         if(preprocessorKeywordSeen && name == "string" &&
                           classificationSpan.Span.Snapshot.ContentType.IsOfType("C/C++"))
+                        {
+                            preprocessorKeywordSeen = false;
                             continue;
+                        }
 
                         preprocessorKeywordSeen = false;
 
@@ -357,6 +360,8 @@ namespace VisualStudio.SpellChecker.Tagging
                 classifier.ClassificationChanged -= ClassificationChanged;
                 classifier = null;
             }
+
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

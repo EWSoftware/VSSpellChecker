@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/12/2019
+// Updated : 10/02/2019
 // Note    : Copyright 2015-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -122,6 +122,21 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         #region Helper methods
         //=====================================================================
+
+        /// <summary>
+        /// Return spell check file info for an open document
+        /// </summary>
+        /// <param name="filename">The filename of the open document</param>
+        /// <returns>An instance for an open document</returns>
+        public static SpellCheckFileInfo ForOpenDocument(string filename)
+        {
+            return new SpellCheckFileInfo
+            {
+                ProjectFile = "Open Document",
+                Filename = Path.GetFileName(filename),
+                CanonicalName = filename
+            };
+        }
 
         /// <summary>
         /// This is used to get information for all files in the solution or a specific project

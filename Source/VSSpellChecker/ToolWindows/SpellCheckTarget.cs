@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckTarget.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/26/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 10/02/2019
+// Note    : Copyright 2015-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains an enumerated type that defines the spell check targets for solution/project spell
@@ -42,6 +42,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// The selected items in the Solution Explorer window
         /// </summary>
         /// <remarks>The selected items may be projects, folders, or files with dependencies</remarks>
-        SelectedItems
+        SelectedItems,
+        /// <summary>
+        /// All currently open documents
+        /// </summary>
+        /// <remarks>The open documents may be part of the currently open solution or not</remarks>
+        AllOpenDocuments
     }
 }

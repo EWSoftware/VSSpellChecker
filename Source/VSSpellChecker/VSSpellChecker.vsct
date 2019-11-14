@@ -96,7 +96,16 @@
 				</Strings>
 			</Button>
 
-			<Button guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckOpenDocuments" priority="0x0103">
+				<Strings>
+					<CommandName>cmdidSpellCheckOpenDocuments</CommandName>
+					<ButtonText>Spell Check All Open Documents</ButtonText>
+					<MenuText>Spell Check All Open Documents</MenuText>
+					<ToolTipText>Spell check all open documents</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0104">
 				<Strings>
 					<CommandName>cmdidViewSpellCheckToolWindow</CommandName>
 					<ButtonText>Open the Solution/Project Spell Checker Window</ButtonText>
@@ -194,7 +203,10 @@
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckSelectedItems" priority="0x0102">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
 		</CommandPlacement>
-		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckOpenDocuments" priority="0x0103">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0104">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
 		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0xFFF0">
@@ -237,6 +249,7 @@
 			<IDSymbol name="SpellCheckEntireSolution" value="0x0010" />
 			<IDSymbol name="SpellCheckCurrentProject" value="0x0011" />
 			<IDSymbol name="SpellCheckSelectedItems" value="0x0012" />
+			<IDSymbol name="SpellCheckOpenDocuments" value="0x0017" />
 			<IDSymbol name="ViewSpellCheckToolWindow" value="0x0013" />
 			<IDSymbol name="SolutionExplorerAddCtx" value="0x000C" />
 			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />

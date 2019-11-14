@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/01/2018
-// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
+// Updated : 10/02/2019
+// Note    : Copyright 2013-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
@@ -181,6 +181,10 @@ namespace VisualStudio.SpellChecker
                 menuItem = new OleMenuCommand(SpellCheckSelectedItemsExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
 
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckOpenDocuments);
+                menuItem = new OleMenuCommand(SpellCheckOpenDocumentsExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.ViewSpellCheckToolWindow);
                 menuItem = new OleMenuCommand(ViewSpellCheckToolWindowExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
@@ -207,7 +211,7 @@ namespace VisualStudio.SpellChecker
         /// detects a change in solution.  This package will not load unless a configuration is edited.  This is
         /// needed to consistently clear the cache if editing configurations in different solutions without
         /// opening any spell checked files.</remarks>
-        private void solutionEvents_AfterClosing()
+        private static void solutionEvents_AfterClosing()
         {
             WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
             GlobalDictionary.ClearDictionaryCache();
@@ -542,6 +546,27 @@ namespace VisualStudio.SpellChecker
 
             if(window.Content is SolutionProjectSpellCheckControl control)
                 control.SpellCheck(SpellCheckTarget.SelectedItems);
+        }
+
+        /// <summary>
+        /// Show the solution/project spell checker tool window and spell check all open documents
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void SpellCheckOpenDocumentsExecuteHandler(object sender, EventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var window = this.FindToolWindow(typeof(ToolWindows.SolutionProjectSpellCheckToolWindow), 0, true);
+
+            if(window == null || window.Frame == null)
+                throw new NotSupportedException("Unable to create solution/project spell checker tool window");
+
+            var windowFrame = (IVsWindowFrame)window.Frame;
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+            if(window.Content is SolutionProjectSpellCheckControl control)
+                control.SpellCheck(SpellCheckTarget.AllOpenDocuments);
         }
 
         /// <summary>

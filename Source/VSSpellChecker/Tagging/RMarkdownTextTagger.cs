@@ -224,6 +224,8 @@ namespace VisualStudio.SpellChecker.Tagging
                 classifier.ClassificationChanged -= this.ClassificationChanged;
                 classifier = null;
             }
+
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

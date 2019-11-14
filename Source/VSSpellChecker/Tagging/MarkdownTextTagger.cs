@@ -136,6 +136,8 @@ namespace VisualStudio.SpellChecker.Tagging
                 classifier.ClassificationChanged -= ClassificationChanged;
                 classifier = null;
             }
+
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/01/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 10/02/2019
+// Note    : Copyright 2015-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -118,6 +118,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         break;
 
                     case SpellCheckTarget.SelectedItems:
+                        cboSpellCheckTarget.SelectedIndex = cboSpellCheckTarget.Items.Count - 2;
+                        break;
+
+                    case SpellCheckTarget.AllOpenDocuments:
                         cboSpellCheckTarget.SelectedIndex = cboSpellCheckTarget.Items.Count - 1;
                         break;
 
@@ -222,6 +226,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         cboSpellCheckTarget.Items.Add(Path.GetFileName(p));
 
                 cboSpellCheckTarget.Items.Add("Selected Solution Explorer items");
+                cboSpellCheckTarget.Items.Add("All Open Documents");
                 cboSpellCheckTarget.SelectedIndex = 0;
 
                 cboSpellCheckTarget.IsEnabled = txtMaxIssues.IsEnabled = btnStartCancel.IsEnabled = true;
@@ -250,8 +255,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             else
             {
                 projectNames.Add(projectName);
-                cboSpellCheckTarget.Items.Insert(cboSpellCheckTarget.Items.Count - 1,
-                    Path.GetFileName(projectName));
+                cboSpellCheckTarget.Items.Insert(cboSpellCheckTarget.Items.Count - 2, Path.GetFileName(projectName));
             }
         }
 
@@ -264,8 +268,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // If spell checking is in progress, cancel it
             this.CancelSpellCheck(false);
 
-            if(cboSpellCheckTarget.Items.Count == 3 && projectNames.Contains(projectName))
-                this.UpdateProjects(new string[] { });
+            if(cboSpellCheckTarget.Items.Count == 4 && projectNames.Contains(projectName))
+                this.UpdateProjects(Array.Empty<string>());
             else
             {
                 int idx = projectNames.IndexOf(projectName);
@@ -441,7 +445,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <returns>An enumerable list of the filenames of currently open documents</returns>
         /// <remarks>This has to be done on the UI thread.  By getting the names upfront, we avoid having to
         /// switch to the UI thread repeatedly while doing the spell checking to see if the document is open.</remarks>
-        private IEnumerable<string> GetOpenDocumentNames()
+        private static IEnumerable<string> GetOpenDocumentNames()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -459,7 +463,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     rdt.GetDocumentInfo(docCookie[0], out uint flags, out uint readLocks, out uint editLocks, out string moniker,
                         out IVsHierarchy docHierarchy, out uint docId, out docData);
 
-                    yield return moniker;
+                    // Some monikers are not actual filenames so we ignore them
+                    if(moniker.IndexOf("::", StringComparison.Ordinal) == -1 &&
+                      moniker.IndexOfAny(Path.GetInvalidPathChars()) == -1)
+                    {
+                        yield return moniker;
+                    }
                 }
             }
         }
@@ -933,10 +942,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             // Get the files to spell check.  This must be done on the UI thread as it interacts with the
             // project system.  It should be fast even for large projects.
-            if(cboSpellCheckTarget.SelectedIndex == 0)
+            if(cboSpellCheckTarget.SelectedIndex == 0 || cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 1)
                 spellCheckFiles = SpellCheckFileInfo.AllProjectFiles(null).ToList();
             else
-                if(cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 1)
+                if(cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 2)
                     spellCheckFiles = SpellCheckFileInfo.SelectedProjectFiles().ToList();
                 else
                 {
@@ -946,7 +955,18 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             // Likewise, get the list of open documents upfront.  That way, we only need to switch to the UI
             // thread to get the content of documents that we know are open.
-            var openDocuments = new HashSet<string>(this.GetOpenDocumentNames(), StringComparer.OrdinalIgnoreCase);
+            var openDocuments = new HashSet<string>(GetOpenDocumentNames(), StringComparer.OrdinalIgnoreCase);
+
+            // If limited to open documents, filter the list and add items not in the solution
+            if(cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 1)
+            {
+                spellCheckFiles = spellCheckFiles.Where(f => openDocuments.Contains(f.CanonicalName)).Concat(
+                    openDocuments.Where(od =>
+                        !spellCheckFiles.Any(f => f.CanonicalName.Equals(od, StringComparison.OrdinalIgnoreCase)) &&
+                        !od.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) &&
+                        !projectNames.Any(p => p.Equals(od, StringComparison.OrdinalIgnoreCase))).Select(
+                            od => SpellCheckFileInfo.ForOpenDocument(od))).ToList();
+            }
 
             // I'm not sure if there's a better way to do this but it does seem to work.  We need to find one or
             // more arbitrary files with an item type of "CodeAnalysisDictionary".  We do so by getting the
@@ -1018,12 +1038,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     cancellationTokenSource = null;
                 }
 
-                // If a solution is closed, and there are not targets, don't enable the controls
+                // If a solution is closed, and there are no targets, don't enable the controls
                 if(cboSpellCheckTarget.Items.Count != 0)
-                {
-                    cboSpellCheckTarget.IsEnabled = txtMaxIssues.IsEnabled = true;
-                    btnStartCancel.IsEnabled = true;
-                }
+                    cboSpellCheckTarget.IsEnabled = txtMaxIssues.IsEnabled = btnStartCancel.IsEnabled = true;
 
                 btnStartCancel.Content = "S_tart";
                 spSpinner.Visibility = Visibility.Hidden;
