@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/30/2018
-// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/21/2020
+// Note    : Copyright 2014-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the spell checker dictionary settings
 //
@@ -52,7 +51,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         private ConfigurationType configType;
         private string configFilePath, relatedFilename;
         private bool isGlobal;
-        private List<string> selectedLanguages;
+        private readonly List<string> selectedLanguages;
 
         #endregion
 
@@ -711,6 +710,15 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             int idx = lbUserDictionary.SelectedIndex;
             string word = null;
 
+            var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
+
+            if(!GlobalDictionary.IsReadyForUse(selectedDictionary.Culture))
+            {
+                MessageBox.Show("The selected dictionary is still loading.  Please try again in a few seconds.",
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
             if(idx != -1)
             {
                 word = (string)lbUserDictionary.Items[idx];
@@ -730,8 +738,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             try
             {
-                var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
-
                 if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
                   selectedDictionary.DictionaryFilePath))
                 {
@@ -762,6 +768,15 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnImport_Click(object sender, RoutedEventArgs e)
         {
+            var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
+
+            if(!GlobalDictionary.IsReadyForUse(selectedDictionary.Culture))
+            {
+                MessageBox.Show("The selected dictionary is still loading.  Please try again in a few seconds.",
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
             OpenFileDialog dlg = new OpenFileDialog
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -771,7 +786,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 CheckFileExists = true
             };
 
-            if((dlg.ShowDialog() ?? false))
+            if(dlg.ShowDialog() ?? false)
             {
                 try
                 {
@@ -795,8 +810,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     try
                     {
-                        var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
-
                         if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
                           selectedDictionary.DictionaryFilePath))
                         {
@@ -805,7 +818,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                             GlobalDictionary.LoadUserDictionaryFile(selectedDictionary.Culture);
 
                             cboAvailableLanguages_SelectionChanged(sender, new SelectionChangedEventArgs(
-                                e.RoutedEvent, new object[] { }, new object[] { }));
+                                e.RoutedEvent, Array.Empty<object>(), Array.Empty<object>()));
                         }
                         else
                             MessageBox.Show("Unable to save user dictionary.  The file could not be added to " +

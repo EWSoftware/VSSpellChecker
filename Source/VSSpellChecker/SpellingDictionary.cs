@@ -2,10 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/01/2018
-// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/04/2020
+// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling dictionary service
 //
@@ -43,7 +42,7 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        private IEnumerable<string> ignoredWords;
+        private readonly IEnumerable<string> ignoredWords;
 
         #endregion
 
@@ -59,6 +58,11 @@ namespace VisualStudio.SpellChecker
         /// This read-only property returns the list of dictionaries being used for spell checking
         /// </summary>
         public IEnumerable<GlobalDictionary> Dictionaries { get; }
+
+        /// <summary>
+        /// This read-only property is used to see if the dictionary is fully initialized and ready for use
+        /// </summary>
+        public bool IsReadyForUse => this.Dictionaries.All(d => d.IsInitialized);
 
         #endregion
 

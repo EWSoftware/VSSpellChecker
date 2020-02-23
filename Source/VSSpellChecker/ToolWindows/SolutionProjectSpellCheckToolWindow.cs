@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/07/2017
-// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 01/22/2020
+// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the solution/project spell check tool window
 //
@@ -212,7 +211,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 
-                    SpellingServiceFactory.LastSolutionName = solution.FullName;
+                    SpellingServiceProxy.LastSolutionName = solution.FullName;
                 }
                 else
                 {
@@ -220,7 +219,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     solutionEvents.ProjectAdded -= solutionEvents_ProjectAdded;
 
                     ucSpellCheck.UpdateProjects(null);
-                    SpellingServiceFactory.LastSolutionName = null;
+                    SpellingServiceProxy.LastSolutionName = null;
                 }
             }
             else

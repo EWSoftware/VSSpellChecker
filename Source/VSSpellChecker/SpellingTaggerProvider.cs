@@ -2,10 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTaggerProvider.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/19/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 01/22/2020
+// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to create the spelling tagger
 //
@@ -42,10 +41,7 @@ namespace VisualStudio.SpellChecker
         //=====================================================================
 
         [Import]
-        private IViewTagAggregatorFactoryService aggregatorFactory = null;
-
-        [Import]
-        private SpellingServiceFactory spellingService = null;
+        private readonly IViewTagAggregatorFactoryService aggregatorFactory = null;
 
         #endregion
 
@@ -63,18 +59,18 @@ namespace VisualStudio.SpellChecker
         public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
             // Make sure we are only tagging the top buffer
-            if(textView == null || buffer == null || spellingService == null || textView.TextBuffer != buffer)
+            if(textView == null || buffer == null || textView.TextBuffer != buffer)
                 return null;
 
             if(!textView.Properties.TryGetProperty(typeof(SpellingTagger), out SpellingTagger spellingTagger))
             {
 #pragma warning disable VSTHRD010
                 // Getting the configuration determines if spell checking is enabled for this file
-                var config = spellingService.GetConfiguration(buffer);
+                var config = SpellingServiceProxy.GetConfiguration(buffer);
 
                 if(config != null)
                 {
-                    var dictionary = spellingService.GetDictionary(buffer);
+                    var dictionary = SpellingServiceProxy.GetDictionary(buffer);
 
                     if(dictionary != null)
                     {

@@ -6,7 +6,8 @@
 		<title>EWSoftware Visual Studio Spell Checker Definitions</title>
 		<authors>Eric Woodruff</authors>
 		<owners>Eric Woodruff</owners>
-        <license type="expression">MS-PL</license>
+		<license type="expression">MS-PL</license>
+		<icon>VSSpellChecker.png</icon>
 		<iconUrl>https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/NuGet/VSSpellChecker.png</iconUrl>
 		<projectUrl>https://github.com/EWSoftware/VSSpellChecker</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -18,5 +19,6 @@
 		<file src="..\Source\VSSpellCheckerDefinitions\bin\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net46" />
 		<file src="..\Source\VSSpellCheckerDefinitions\bin\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net46" />
 		<file src="ReadMe.txt" target="ReadMe.txt" />
+		<file src="VSSpellChecker.png" target="VSSpellChecker.png" />
 	</files>
 </package>

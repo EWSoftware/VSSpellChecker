@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedActionSource.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/02/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 01/22/2020
+// Note    : Copyright 2016-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to implement the suggestion source for spelling light bulbs
 //
@@ -44,7 +43,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         #region Private data members
         //=====================================================================
 
-        private SpellingDictionary dictionary;
+        private readonly SpellingDictionary dictionary;
         private ITagAggregator<MisspellingTag> misspellingAggregator;
         private bool disposed;
 
@@ -60,10 +59,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         internal class SpellSmartTaggerProvider : ISuggestedActionsSourceProvider
         {
             [Import]
-            private SpellingServiceFactory spellingService = null;
-
-            [Import]
-            private IViewTagAggregatorFactoryService tagAggregatorFactory = null;
+            private readonly IViewTagAggregatorFactoryService tagAggregatorFactory = null;
 
             /// <summary>
             /// Creates a tag provider for the specified view and buffer
@@ -76,7 +72,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             public ISuggestedActionsSource CreateSuggestedActionsSource(ITextView textView, ITextBuffer textBuffer)
             {
                 // If this view isn't editable, then there isn't a good reason to be showing these
-                if(textView == null || textBuffer == null || spellingService == null ||
+                if(textView == null || textBuffer == null ||
                   !textView.Roles.Contains(PredefinedTextViewRoles.Editable) ||
                   (!textView.Roles.Contains(PredefinedTextViewRoles.PrimaryDocument) &&
                   !textView.Roles.Contains(Utility.EmbeddedPeekTextView)))
@@ -86,7 +82,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 
 #pragma warning disable VSTHRD010
                 // Getting the dictionary determines if spell checking is enabled for this file
-                var dictionary = spellingService.GetDictionary(textBuffer);
+                var dictionary = SpellingServiceProxy.GetDictionary(textBuffer);
 #pragma warning restore VSTHRD010
 
                 if(dictionary == null)

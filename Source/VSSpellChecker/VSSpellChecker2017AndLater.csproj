@@ -151,7 +151,6 @@
     </Compile>
     <Compile Include="SpellingDictionary.cs" />
     <Compile Include="SpellingEventArgs.cs" />
-    <Compile Include="SpellingServiceFactory.cs" />
     <Compile Include="SpellingServiceProxy.cs" />
     <Compile Include="SpellingSuggestion.cs" />
     <Compile Include="SpellingTagger.cs" />

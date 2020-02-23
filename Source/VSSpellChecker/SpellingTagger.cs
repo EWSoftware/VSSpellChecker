@@ -2,10 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/03/2018
-// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/21/2020
+// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling tagger
 //
@@ -97,12 +96,12 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer buffer;
-        private ITagAggregator<INaturalTextTag> naturalTextAggregator;
-        private ITagAggregator<IUrlTag> urlAggregator;
+        private readonly ITextBuffer buffer;
+        private readonly ITagAggregator<INaturalTextTag> naturalTextAggregator;
+        private readonly ITagAggregator<IUrlTag> urlAggregator;
 
-        private SpellCheckerConfiguration configuration;
-        private WordSplitter wordSplitter;
+        private readonly SpellCheckerConfiguration configuration;
+        private readonly WordSplitter wordSplitter;
 
         private volatile List<MisspellingTag> misspellings;
 
@@ -110,10 +109,10 @@ namespace VisualStudio.SpellChecker
         private readonly ConcurrentQueue<IgnoredOnceWord> wordsIgnoredOnce;
         private readonly List<InlineIgnoredWord> inlineIgnoredWords;
 
-        private bool spellCheckInProgress;
-        private DispatcherTimer timer;
+        private bool isClosed, spellCheckInProgress;
+        private readonly bool unescapeApostrophes;
 
-        private bool isClosed, unescapeApostrophes;
+        private DispatcherTimer timer;
 
         #endregion
 
@@ -473,8 +472,10 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void StartUpdateTask(object sender, EventArgs e)
         {
-            if(!isClosed && !spellCheckInProgress)
+            if(!isClosed && !spellCheckInProgress && this.Dictionary.IsReadyForUse)
             {
+                System.Diagnostics.Debug.WriteLine("SpellingTagger: Spell checking text");
+
                 timer.Stop();
 
                 if(!dirtySpans.IsEmpty)
@@ -494,6 +495,11 @@ namespace VisualStudio.SpellChecker
                     System.Threading.Tasks.Task.Run(() => this.CheckSpellings(normalizedSpans)).Forget();
                 }
             }
+#if DEBUG
+            else
+                if(!isClosed && !spellCheckInProgress && !this.Dictionary.IsReadyForUse)
+                    System.Diagnostics.Debug.WriteLine("SpellingTagger: Dictionaries not ready for use.  Waiting...");
+#endif
         }
 
         /// <summary>

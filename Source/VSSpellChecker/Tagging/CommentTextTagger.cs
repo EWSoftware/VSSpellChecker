@@ -2,10 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/02/2019
-// Note    : Copyright 2010-2019, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2019, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 01/22/2020
+// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for source code files of any type
 //
@@ -55,7 +54,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
         private readonly ITextBuffer buffer;
         private IClassifier classifier;
-        private IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes, ignoredClassifications;
+        private readonly IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes, ignoredClassifications;
         private readonly ClassificationCache classificationCache;
 
         #endregion
@@ -70,10 +69,7 @@ namespace VisualStudio.SpellChecker.Tagging
         internal class CommentTextTaggerProvider : ITaggerProvider
         {
             [Import]
-            private IClassifierAggregatorService classifierAggregatorService = null;
-
-            [Import]
-            private SpellingServiceFactory spellingService = null;
+            private readonly IClassifierAggregatorService classifierAggregatorService = null;
 
             /// <summary>
             /// Creates a tag provider for the specified buffer
@@ -84,11 +80,11 @@ namespace VisualStudio.SpellChecker.Tagging
             /// service is unavailable.</returns>
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null || spellingService == null || buffer.ContentType.IsOfType("R Markdown"))
+                if(buffer == null || buffer.ContentType.IsOfType("R Markdown"))
                     return null;
 
 #pragma warning disable VSTHRD010
-                var config = spellingService.GetConfiguration(buffer);
+                var config = SpellingServiceProxy.GetConfiguration(buffer);
 #pragma warning restore VSTHRD010
 
                 if(config == null)
@@ -171,8 +167,6 @@ namespace VisualStudio.SpellChecker.Tagging
 
             if(classifier == null || spans == null || spans.Count == 0)
                 yield break;
-
-            ITextSnapshot snapshot = spans[0].Snapshot;
 
             foreach(var snapshotSpan in spans)
             {

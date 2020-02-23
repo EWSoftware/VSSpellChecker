@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PhpTextTaggerProvider.cs
 // Authors : Miloslav Beňo (DevSense - http://www.devsense.com/)
-// Updated : 08/15/2018
-// Note    : Copyright 2016-2018, DevSense, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 01/22/2020
+// Note    : Copyright 2016-2020, DevSense, All rights reserved
 //
 // This file contains a class used to provide tags for PHP files when PHP Tools for Visual Studio are installed
 //
@@ -37,17 +36,14 @@ namespace VisualStudio.SpellChecker.Tagging
     class PhpTextTaggerProvider : ITaggerProvider
     {
         [Import]
-        private IClassifierAggregatorService classifierAggregatorService = null;
-
-        [Import]
-        private SpellingServiceFactory spellingService = null;
+        private readonly IClassifierAggregatorService classifierAggregatorService = null;
 
         /// <inheritdoc />
         public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
         {
             var classifier = classifierAggregatorService.GetClassifier(buffer);
 #pragma warning disable VSTHRD010
-            var config = spellingService.GetConfiguration(buffer);
+            var config = SpellingServiceProxy.GetConfiguration(buffer);
 #pragma warning restore VSTHRD010
 
             // Use existing comment text tagger, it works well with PHP classifier

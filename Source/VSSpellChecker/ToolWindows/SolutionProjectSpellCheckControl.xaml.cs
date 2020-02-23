@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/02/2019
-// Note    : Copyright 2015-2019, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/21/2020
+// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -59,9 +58,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         #region Private data members
         //=====================================================================
 
-        private List<string> projectNames;
+        private readonly List<string> projectNames;
         private CancellationTokenSource cancellationTokenSource;
-        private IProgress<string> spellCheckProgress;
+        private readonly IProgress<string> spellCheckProgress;
         private WordSplitter wordSplitter;
         private bool unescapeApostrophes;
 
@@ -345,8 +344,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             var openDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, SVsUIShellOpenDocument>(false);
 
             if(openDoc != null && openDoc.OpenDocumentViaProject(filename, VSConstants.LOGVIEWID_TextView,
-              out Microsoft.VisualStudio.OLE.Interop.IServiceProvider ppSP, out IVsUIHierarchy ppHier,
-              out uint pitemid, out ppWindowFrame) == VSConstants.S_OK)
+              out _, out _, out _, out ppWindowFrame) == VSConstants.S_OK)
             {
                 // On occasion, the call above is successful but we get a null frame for some reason
                 if(ppWindowFrame != null)
@@ -449,7 +447,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            IntPtr docData = IntPtr.Zero;
             uint[] docCookie = new uint[1];
 
             var rdt = Utility.GetServiceFromPackage<IVsRunningDocumentTable, SVsRunningDocumentTable>(false);
@@ -460,8 +457,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 while(documents.Next(1, docCookie, out uint fetched) == VSConstants.S_OK && fetched == 1)
                 {
-                    rdt.GetDocumentInfo(docCookie[0], out uint flags, out uint readLocks, out uint editLocks, out string moniker,
-                        out IVsHierarchy docHierarchy, out uint docId, out docData);
+                    rdt.GetDocumentInfo(docCookie[0], out _, out _, out _, out string moniker, out _, out _, out _);
 
                     // Some monikers are not actual filenames so we ignore them
                     if(moniker.IndexOf("::", StringComparison.Ordinal) == -1 &&
@@ -644,6 +640,29 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         {
                             var dictionary = new SpellingDictionary(globalDictionaries,
                                 wordSplitter.Configuration.IgnoredWords);
+
+                            // Dictionaries are initialized asynchronously.  Wait until they are ready for a
+                            // reasonable amount of time if necessary.
+                            if(!dictionary.IsReadyForUse)
+                            {
+                                spellCheckProgress.Report("Waiting for dictionaries to load");
+
+                                int waitCount = 0, maxWaitCount = dictionary.DictionaryCount * 20;
+
+                                while(!dictionary.IsReadyForUse && waitCount++ < maxWaitCount)
+                                {
+                                    System.Diagnostics.Debug.WriteLine("Dictionaries not ready yet.  Waiting ({0})...", waitCount);
+                                    System.Threading.Thread.Sleep(250);
+
+                                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                                }
+
+                                if(!dictionary.IsReadyForUse)
+                                    throw new InvalidOperationException("Dictionary is not ready for use.  Please try again.");
+
+                                System.Diagnostics.Debug.WriteLine("Dictionary wait time: {0} seconds for {1} dictionaries",
+                                    waitCount / 4, dictionary.DictionaryCount);
+                            }
 
                             classifier = ClassifierFactory.GetClassifier(file.CanonicalName, wordSplitter.Configuration);
 

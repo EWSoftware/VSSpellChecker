@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RMarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 08/17/2018
-// Note    : Copyright 2017-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 01/22/2020
+// Note    : Copyright 2017-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for R markdown files when the R Tools for Visual Studio
 // package is installed (part of the Data Science and Analytical Applications workload).
@@ -59,17 +58,14 @@ namespace VisualStudio.SpellChecker.Tagging
         internal class RMarkdownTextTaggerProvider : ITaggerProvider
         {
             [Import]
-            private IClassifierAggregatorService classifierAggregatorService = null;
-
-            [Import]
-            private SpellingServiceFactory spellingService = null;
+            private readonly IClassifierAggregatorService classifierAggregatorService = null;
 
             /// <inheritdoc />
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
                 var classifier = classifierAggregatorService.GetClassifier(buffer);
 #pragma warning disable VSTHRD010
-                var config = spellingService.GetConfiguration(buffer);
+                var config = SpellingServiceProxy.GetConfiguration(buffer);
 #pragma warning restore VSTHRD010
 
                 if(config == null)

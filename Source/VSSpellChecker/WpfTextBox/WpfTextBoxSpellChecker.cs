@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/17/2019
-// Note    : Copyright 2016-2019, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/21/2020
+// Note    : Copyright 2016-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
 //
@@ -54,21 +53,21 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         #region Private data members
         //=====================================================================
 
-        private static ConcurrentDictionary<TextBox, WpfTextBoxSpellChecker> wpfSpellCheckers =
+        private static readonly ConcurrentDictionary<TextBox, WpfTextBoxSpellChecker> wpfSpellCheckers =
             new ConcurrentDictionary<TextBox, WpfTextBoxSpellChecker>();
 
         private static SpellCheckerConfiguration configuration;
         private static SpellingDictionary dictionary;
         private static bool isRegistered;
 
-        private TextBox textBox;
-        private WordSplitter wordSplitter;
-        private SpellingErrorAdorner adorner;
+        private readonly TextBox textBox;
+        private readonly WordSplitter wordSplitter;
+        private readonly SpellingErrorAdorner adorner;
         private Timer timer;
-        private List<FileMisspelling> misspelledWords;
+        private readonly List<FileMisspelling> misspelledWords;
         private FileMisspelling selectedMisspelling;
 
-        private static object syncRoot = new Object();
+        private static readonly object syncRoot = new Object();
 
         #endregion
 
@@ -548,8 +547,17 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
             try
             {
-                this.CheckSpelling(textBox.Text);
-                adorner.UpdateMisspellings(misspelledWords);
+                if(dictionary != null && dictionary.IsReadyForUse)
+                {
+                    System.Diagnostics.Debug.WriteLine("WpfTextBoxSpellChecker: Spell checking textbox");
+
+                    this.CheckSpelling(textBox.Text);
+                    adorner.UpdateMisspellings(misspelledWords);
+                }
+#if DEBUG
+                else
+                    System.Diagnostics.Debug.WriteLine("WpfTextBoxSpellChecker: Dictionaries not ready for use.  Waiting...");
+#endif
             }
             catch(Exception ex)
             {

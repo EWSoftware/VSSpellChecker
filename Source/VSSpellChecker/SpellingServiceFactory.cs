@@ -20,7 +20,7 @@
 // 04/30/2013  EFW  Moved the global dictionary creation into the GlobalDictionary class
 // 07/24/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
-
+#if HASFACTORY
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -334,3 +334,4 @@ namespace VisualStudio.SpellChecker
         #endregion
     }
 }
+#endif
