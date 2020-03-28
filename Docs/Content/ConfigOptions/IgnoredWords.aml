@@ -5,9 +5,14 @@
 			<para>This category lets you define ignored words that are never presented as misspelled words nor will
 they appear as suggestions for other misspelled words.  This is useful for excluding things such as
 abbreviations, programming terms, etc.</para>
+
+			<para>The ignored words list is stored within the configuration file.  The ignored words file is a
+standalone text file (one word per line) that allows for an alternate method of managing ignored words.  Words
+can be added to this file from the spelling suggestion context menu and from the spell checking tool windows.</para>
 		</introduction>
 
 		<section>
+			<title>Ignores Words List</title>
 			<content>
 				<para>Escaped words are a special class of ignored words.  These are words that start with what looks
 like a valid escape sequence (<codeInline>\a</codeInline>, <codeInline>\t</codeInline>, etc.) but the remainder
@@ -40,6 +45,23 @@ importing or exporting words, you will be asked whether you want to replace the 
 the existing words.  Escaped words (those starting with a backslash) will not be exported to XML user dictionary
 files as they do not support escaped words.</para>
 
+			</content>
+		</section>
+
+		<section>
+			<title>Ignored Words File</title>
+			<content>
+				<para>If an ignored words file is specified, words in it are added to the word list in the configuration
+file.  The global configuration uses a default file called <localUri>IgnoredWords.dic</localUri> which will be
+stored in the same location as the global configuration file.  Click the "<ui>...</ui>" button to select the
+location and name of the ignored words file.</para>
+				<para>A relative path is considered to be relative to the configuration file's location.  For the global
+configuration, the path should always be fully qualified. For solution, project, folder, and file-specific
+settings files, the path should typically be relative so that if the solution or project moves, the ignored
+words file can still be found.  Environment variable references such as
+<environmentVariable>%USERPROFILE%\OneDrive\Dictionaries</environmentVariable> are supported.  This is useful if
+you want to store the ignored words file in a location that you can back up such as your My Documents folder.
+Ignored words files in solutions and projects can be added to source control.</para>
 			</content>
 		</section>
 

@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/16/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/10/2020
+// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the class containing the configuration property name constants
 //
@@ -189,6 +188,11 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Ignored words
         /// </summary>
         public const string IgnoredWords = "IgnoredWords";
+
+        /// <summary>
+        /// Ignored words file
+        /// </summary>
+        public const string IgnoredWordsFile = "IgnoredWordsFile";
 
         /// <summary>
         /// Ignored words item

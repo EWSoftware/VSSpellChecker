@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/02/2019
-// Note    : Copyright 2015-2019, Eric Woodruff, All rights reserved
+// Updated : 03/17/2020
+// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to hold information about a file that will be spell checked
@@ -117,6 +117,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// </summary>
         /// <value>The configuration files are in order from parent to child folders</value>
         public IEnumerable<string> FolderConfigurationFiles { get; private set; }
+
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of ignored words files that were loaded by the
+        /// configuration.
+        /// </summary>
+        public IEnumerable<(ConfigurationType ConfigType, string Filename)> IgnoredWordsFiles { get; private set; }
 
         #endregion
 
@@ -470,23 +477,18 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
           IList<SpellCheckFileInfo> projectFiles)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-
-            Guid nestedHierarchyGuid;
             IVsHierarchy nestedHierarchy;
-            IntPtr nestedHierarchyValue = IntPtr.Zero;
-
-            object value = null;
-            uint visibleChildNode;
-            int result;
 
             // First, guess if the node is actually the root of another hierarchy (a project, for example)
-            nestedHierarchyGuid = typeof(IVsHierarchy).GUID;
-            result = hierarchy.GetNestedHierarchy(itemId, ref nestedHierarchyGuid, out nestedHierarchyValue, out uint nestedItemIdValue);
+            Guid nestedHierarchyGuid = typeof(IVsHierarchy).GUID;
+            int result = hierarchy.GetNestedHierarchy(itemId, ref nestedHierarchyGuid, out IntPtr nestedHierarchyValue,
+                out uint nestedItemIdValue);
 
             if(result == VSConstants.S_OK && nestedHierarchyValue != IntPtr.Zero && nestedItemIdValue == VSConstants.VSITEMID_ROOT)
             {
                 // Get the new hierarchy
-                nestedHierarchy = System.Runtime.InteropServices.Marshal.GetObjectForIUnknown(nestedHierarchyValue) as IVsHierarchy;
+                nestedHierarchy = System.Runtime.InteropServices.Marshal.GetObjectForIUnknown(
+                    nestedHierarchyValue) as IVsHierarchy;
                 System.Runtime.InteropServices.Marshal.Release(nestedHierarchyValue);
 
                 if(nestedHierarchy != null)
@@ -502,19 +504,20 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     if(projectFile != null)
                         projectFiles.Add(projectFile);
 
-                    result = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild, out value);
+                    result = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild,
+                        out object value);
 
                     while(result == VSConstants.S_OK && value != null && value is int)
                     {
-                        visibleChildNode = (uint)(int)value;
+                        uint visibleChildNode = (uint)(int)value;
 
                         if(visibleChildNode == VSConstants.VSITEMID_NIL)
                             break;
 
                         ProcessHierarchyNodeRecursively(hierarchy, visibleChildNode, projectFiles);
 
-                        value = null;
-                        result = hierarchy.GetProperty(visibleChildNode, (int)__VSHPROPID.VSHPROPID_NextVisibleSibling, out value);
+                        result = hierarchy.GetProperty(visibleChildNode, (int)__VSHPROPID.VSHPROPID_NextVisibleSibling,
+                            out value);
                     }
                 }
             }
@@ -533,8 +536,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             if(hierarchy is IVsProject project)
             {
-                string projectName = String.Empty;
-                int result = project.GetMkDocument(VSConstants.VSITEMID_ROOT, out projectName);
+                int result = project.GetMkDocument(VSConstants.VSITEMID_ROOT, out string projectName);
 
                 // If there is no project name, it's probably a solution item
                 if(result != VSConstants.S_OK)
@@ -549,9 +551,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 {
                     string name = value.ToString();
 
+
                     // Certain project folders in C++ projects return a GUID for their name.  These should be
                     // ignored (References, External Dependencies, etc.).
-                    if(name.Length != 0 && name[0] == '{' && Guid.TryParse(name, out Guid guid))
+                    if(name.Length != 0 && name[0] == '{' && Guid.TryParse(name, out _))
                         return IgnoredHierarchyItem;
 
                     result = hierarchy.GetCanonicalName(itemId, out string canonicalName);
@@ -677,8 +680,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            return (!config.IncludeInProjectSpellCheck || config.ShouldExcludeFile(this.CanonicalName) ||
-                IsBinaryFile(this.CanonicalName)) ? null : config;
+            if(!config.IncludeInProjectSpellCheck || config.ShouldExcludeFile(this.CanonicalName) ||
+              IsBinaryFile(this.CanonicalName))
+            {
+                return null;
+            }
+
+            this.IgnoredWordsFiles = config.IgnoredWordsFiles;
+            return config;
         }
 
         /// <summary>

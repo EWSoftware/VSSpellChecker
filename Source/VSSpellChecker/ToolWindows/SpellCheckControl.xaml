@@ -5,7 +5,7 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
 	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
-	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="300" Name="ucSpellCheckControl"
+	mc:Ignorable="d" d:DesignHeight="390" d:DesignWidth="300" Name="ucSpellCheckControl"
 	Background="{DynamicResource ToolWindowBackgroundBrushKey}"
 	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
 	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
@@ -65,11 +65,18 @@ filename extension.</TextBlock>
 					<Button Name="btnIgnoreAll" Content="Ig_nore All" MinWidth="100" Margin="3, 3, 3, 12"
 						Command="vssc:SpellCheckCommands.IgnoreAll"
 						ToolTip="Ignore all occurrences of this misspelled word" />
-					<Button Name="btnAddWord" Content="Add _Word" MinWidth="100" Margin="3" Click="btnAddWord_Click"
+					<Button Name="btnAddWord" Content="Add _Word" MinWidth="100" Margin="3, 3, 3, 12" Click="btnAddWord_Click"
 						ToolTip="Add the word to the user dictionary"
 						ContextMenuOpening="btnAddWord_ContextMenuOpening">
 						<Button.ContextMenu>
 							<ContextMenu Name="ctxAddWord" MenuItem.Click="ctxAddWordMenuItem_Click" />
+						</Button.ContextMenu>
+					</Button>
+					<Button Name="btnAddIgnored" Content="A_dd Ignored" MinWidth="100" Margin="3" Click="btnAddIgnored_Click"
+						ToolTip="Add the word to the ignored words file"
+						ContextMenuOpening="btnAddIgnored_ContextMenuOpening">
+						<Button.ContextMenu>
+							<ContextMenu Name="ctxAddIgnored" MenuItem.Click="ctxAddIgnored_Click" />
 						</Button.ContextMenu>
 					</Button>
 				</StackPanel>

@@ -43,6 +43,16 @@ dictionary.  If spell checking against multiple dictionaries, you will see one <
 for each available language.  Choosing an option will add the word to that language's user dictionary.</para>
 					</listItem>
 
+					<listItem>
+						<para><ui>Add To Ignored Words File</ui> - This will add the word to the ignored words file so that
+it is no longer flagged as a misspelled word.  Ignored words will not be presented as suggestions for other
+misspelled words.  Edit the ignored words file to remove words from it.  The ignored words files can be specified
+in any configuration file.  The global configuration uses <localUri>IgnoredWords.dic</localUri> stored in the
+same location as the global configuration file.  The configuration file editor has an option to open the file for
+editing.  If ignored words files are specified in multiple configurations, you will see one <ui>Add to Ignored
+Words file</ui> option for each available ignored words file.  Choosing an option will add the word to the
+selected file.</para>
+					</listItem>
 				</list>
 
 				<para>You can add Ignore Spelling directives to a comment within a file to inform the spell checker about

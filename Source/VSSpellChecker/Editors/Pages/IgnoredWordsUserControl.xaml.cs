@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/19/2020
+// Note    : Copyright 2014-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored words spell checker configuration settings
 //
@@ -27,6 +26,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 
 using VisualStudio.SpellChecker.Configuration;
@@ -40,6 +42,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
     /// </summary>
     public partial class IgnoredWordsUserControl : UserControl, ISpellCheckerConfiguration
     {
+        #region Private data members
+        //=====================================================================
+
+        private string configFilePath;
+
+        #endregion
+
         #region Constructor
         //=====================================================================
 
@@ -70,6 +79,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             IEnumerable<string> words;
             lbIgnoredWords.Items.Clear();
 
+            configFilePath = Path.GetDirectoryName(configuration.Filename);
+
             if(configuration.ConfigurationType == ConfigurationType.Global)
             {
                 chkInheritIgnoredWords.IsChecked = false;
@@ -77,6 +88,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
             else
                 chkInheritIgnoredWords.IsChecked = configuration.ToBoolean(PropertyNames.InheritIgnoredWords);
+
+            txtIgnoredWordsFile.Text = configuration.ToString(PropertyNames.IgnoredWordsFile);
+
+            if(String.IsNullOrWhiteSpace(txtIgnoredWordsFile.Text) && configuration.ConfigurationType == ConfigurationType.Global)
+                txtIgnoredWordsFile.Text = "IgnoredWords.dic";
 
             if(configuration.HasProperty(PropertyNames.IgnoredWords))
                 words = configuration.ToValues(PropertyNames.IgnoredWords, PropertyNames.IgnoredWordsItem);
@@ -99,6 +115,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             HashSet<string> newList = null;
 
+            configFilePath = Path.GetDirectoryName(configuration.Filename);
+
             if(lbIgnoredWords.Items.Count != 0 || !chkInheritIgnoredWords.IsChecked.Value)
             {
                 newList = new HashSet<string>(lbIgnoredWords.Items.Cast<string>(), StringComparer.OrdinalIgnoreCase);
@@ -112,6 +130,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 configuration.StoreProperty(PropertyNames.InheritIgnoredWords, chkInheritIgnoredWords.IsChecked);
 
             configuration.StoreValues(PropertyNames.IgnoredWords, PropertyNames.IgnoredWordsItem, newList);
+            configuration.StoreProperty(PropertyNames.IgnoredWordsFile, txtIgnoredWordsFile.Text.Trim());
         }
 
         /// <inheritdoc />
@@ -331,6 +350,89 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         "to '{0}'.  Reason: {1}", dlg.FileName, ex.Message), PackageResources.PackageTitle,
                         MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Select an ignored words file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnSelectFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                InitialDirectory = Directory.Exists(configFilePath) ? configFilePath :
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Filter = "Ignored Words Files (*.dic,*.txt)|*.dic;*.txt|All Files (*.*)|*.*",
+                CheckFileExists = false
+            };
+
+            if(dlg.ShowDialog() ?? false)
+            {
+                string filename = dlg.FileName;
+
+                if(filename.StartsWith(configFilePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    filename = Path.Combine(Path.GetDirectoryName(filename).ToRelativePath(configFilePath),
+                        Path.GetFileName(filename));
+                }
+
+                txtIgnoredWordsFile.Text = filename;
+            }
+        }
+
+        /// <summary>
+        /// Edit the ignored words file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnEditFile_Click(object sender, RoutedEventArgs e)
+        {
+            string filename = txtIgnoredWordsFile.Text;
+
+            if(String.IsNullOrWhiteSpace(filename))
+            {
+                MessageBox.Show("Specify or select an ignored words file first", PackageResources.PackageTitle,
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            if(!Path.IsPathRooted(filename))
+                filename = Path.GetFullPath(Path.Combine(configFilePath, filename));
+
+            try
+            {
+                if(!File.Exists(filename))
+                {
+                    if(MessageBox.Show("The ignored words file does not exist.  Do you want to create it?",
+                      PackageResources.PackageTitle, MessageBoxButton.YesNo, MessageBoxImage.Question,
+                      MessageBoxResult.No) == MessageBoxResult.No)
+                    {
+                        return;
+                    }
+
+                    File.WriteAllText(filename, String.Empty);
+                }
+
+                ThreadHelper.ThrowIfNotOnUIThread();
+
+                var openDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, SVsUIShellOpenDocument>(false);
+
+                if(openDoc != null && openDoc.OpenDocumentViaProject(filename, VSConstants.LOGVIEWID_TextView,
+                  out _, out _, out _, out IVsWindowFrame ppWindowFrame) == VSConstants.S_OK)
+                {
+                    // On occasion, the call above is successful but we get a null frame for some reason
+                    if(ppWindowFrame != null)
+                        ppWindowFrame.Show();
+                }
+            }
+            catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+
+                MessageBox.Show("Unable to open the specified ignored words file for editing.  Reason: " + ex.Message,
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
 

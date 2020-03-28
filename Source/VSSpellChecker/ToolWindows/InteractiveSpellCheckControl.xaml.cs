@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 09/01/2018
-// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/18/2020
+// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -36,6 +35,8 @@ using Microsoft.VisualStudio.Text.Outlining;
 using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.Tagging;
+using Microsoft.VisualStudio.Shell;
+using System.Collections.Generic;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -65,6 +66,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
             get => currentTextView;
             set
             {
+                ThreadHelper.ThrowIfNotOnUIThread();
+
                 if(currentTextView != value)
                 {
                     if(currentTagger != null)
@@ -79,6 +82,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         currentTagger = null;
 
                     ucSpellCheck.SetAddWordContextMenuDictionaries(null);
+                    ucSpellCheck.SetAddIgnoredContextMenuFiles(null);
 
                     if(currentTagger != null)
                     {
@@ -98,8 +102,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         tagger_TagsChanged(this, null);
 
                         if(currentTagger.Dictionary.DictionaryCount != 1)
+                        {
                             ucSpellCheck.SetAddWordContextMenuDictionaries(
                                 currentTagger.Dictionary.Dictionaries.Select(d => d.Culture));
+                        }
+
+                        var config = SpellingServiceProxy.GetConfiguration(currentTextView.TextBuffer);
+
+                        if(config != null)
+                            ucSpellCheck.SetAddIgnoredContextMenuFiles(config.IgnoredWordsFiles);
                     }
                     else
                     {
@@ -288,7 +299,41 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void cmdIgnoreAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
+            {
+                // Add to ignored words file?
+                if(e.Parameter is string ignoredWordsFile && ignoredWordsFile != null)
+                {
+                    // Remove mnemonics
+                    string wordToIgnore = currentIssue.Word.Replace("&", String.Empty).Replace("_", String.Empty);
+
+                    try
+                    {
+                        var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                            StringComparer.OrdinalIgnoreCase);
+
+                        if(!words.Contains(wordToIgnore))
+                        {
+                            words.Add(wordToIgnore);
+
+                            if(!ignoredWordsFile.CanWriteToUserWordsFile(null))
+                            {
+                                MessageBox.Show("Ignored words file is read-only or could not be checked out",
+                                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                return;
+                            }
+
+                            Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        // Ignore errors, we just won't save it to the file
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+                }
+
                 currentTagger.Dictionary.IgnoreWord(currentIssue.Word);
+            }
         }
 
         /// <summary>

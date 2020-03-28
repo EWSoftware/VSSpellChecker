@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/01/2018
-// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/17/2020
+// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the interactive spell check tool window
 //
@@ -44,7 +43,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         #region Private data members
         //=====================================================================
 
-        private InteractiveSpellCheckControl ucSpellCheck;
+        private readonly InteractiveSpellCheckControl ucSpellCheck;
         private uint selectionMonitorCookie, docTableCookie;
         private object scope;
 
@@ -248,6 +247,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <remarks>When an editor window closes, clear the current spell checking target</remarks>
         public int OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             if(VsShellUtilities.GetTextView(pFrame) != null)
                 ucSpellCheck.CurrentTextView = null;
 

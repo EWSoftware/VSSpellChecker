@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/17/2018
-// Note    : Copyright 2013-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/10/2020
+// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
 //
@@ -55,8 +54,9 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public const string EmbeddedPeekTextView = "EMBEDDED_PEEK_TEXT_VIEW";
 
-        private static Regex reUppercase = new Regex("([A-Z])"); 
-        private static Regex reAutoGenCodeFilename = new Regex("(#ExternalSource\\(|#line\\s\\d*\\s)\"(?<Filename>.*?)\"");
+        private static readonly Regex reUppercase = new Regex("([A-Z])"); 
+        private static readonly Regex reAutoGenCodeFilename = new Regex(
+            "(#ExternalSource\\(|#line\\s\\d*\\s)\"(?<Filename>.*?)\"");
 
         #endregion
 
@@ -447,17 +447,16 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         /// <param name="dictionaryWordsFile">The user dictionary words file</param>
         /// <param name="dictionaryFile">The related dictionary file or null if there isn't one</param>
-        /// <param name="serviceProvider">The service provider to use for interacting with the solution/project</param>
         /// <returns>True if it can, false if not</returns>
         public static bool CanWriteToUserWordsFile(this string dictionaryWordsFile, string dictionaryFile)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
             if(String.IsNullOrWhiteSpace(dictionaryWordsFile))
-                throw new ArgumentException("Dictionary words file cannot be null or empty", "dictionaryWordsFile");
+                throw new ArgumentException("Dictionary words file cannot be null or empty", nameof(dictionaryWordsFile));
 
             if(dictionaryFile != null && dictionaryFile.Trim().Length == 0)
-                throw new ArgumentException("Dictionary file cannot be empty", "dictionaryFile");
+                throw new ArgumentException("Dictionary file cannot be empty", nameof(dictionaryFile));
 
             // The file must exist
             if(!File.Exists(dictionaryWordsFile))
@@ -552,6 +551,9 @@ namespace VisualStudio.SpellChecker
         {
             IEnumerable<string> words = Enumerable.Empty<string>();
             string action = onlyAddedWords ? "Add" : "Ignore";
+
+            if(!File.Exists(filename))
+                return Enumerable.Empty<string>();
 
             try
             {

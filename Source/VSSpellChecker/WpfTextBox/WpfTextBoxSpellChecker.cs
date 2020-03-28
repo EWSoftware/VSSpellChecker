@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/21/2020
+// Updated : 03/19/2020
 // Note    : Copyright 2016-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
@@ -32,11 +32,11 @@ using System.Windows.Documents;
 using System.Windows.Input;
 
 using TextSpan = Microsoft.VisualStudio.Text.Span;
+using Microsoft.VisualStudio.Threading;
 
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
-using Microsoft.VisualStudio.Threading;
 
 namespace VisualStudio.SpellChecker.WpfTextBox
 {
@@ -458,6 +458,12 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
                 commands.Add(new MenuItem
                 {
+                    Header = "Add to Ignored Words File (Global)",
+                    Command = new MenuCommand(o => this.AddIgnoredWord())
+                });
+
+                commands.Add(new MenuItem
+                {
                     Header = "Ignore Word",
                     Command = new MenuCommand(o => this.IgnoreWord())
                 });
@@ -501,6 +507,42 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         {
             dictionary.IgnoreWord(selectedMisspelling.Word);
             textBox.RaiseEvent(new TextChangedEventArgs(TextBox.TextChangedEvent, UndoAction.None));
+        }
+
+        /// <summary>
+        /// Ignore the word and add it to the ignored words file
+        /// </summary>
+        private void AddIgnoredWord()
+        {
+            dictionary.IgnoreWord(selectedMisspelling.Word);
+            textBox.RaiseEvent(new TextChangedEventArgs(TextBox.TextChangedEvent, UndoAction.None));
+
+            string ignoredWordsFile = null;
+
+            if(configuration.IgnoredWordsFiles.Any())
+                ignoredWordsFile = configuration.IgnoredWordsFiles.First().Filename;
+
+            if(!String.IsNullOrWhiteSpace(ignoredWordsFile))
+            {
+                try
+                {
+                    var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    if(!words.Contains(selectedMisspelling.Word))
+                    {
+                        words.Add(selectedMisspelling.Word);
+
+                        if(ignoredWordsFile.CanWriteToUserWordsFile(null))
+                            Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    // Ignore errors, we just won't save it to the file
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+            }
         }
 
         /// <summary>

@@ -45,6 +45,15 @@ such a case, only the default dictionaries supplied with the package will be ava
 					<para>Dictionaries are global resources and are cached for reuse when subsequent files are opened
 within the same solution.  If you make changes to the dictionary locations used in a configuration, you must
 close and reopen the solution to ensure that the dictionary location changes take effect.</para>
+
+					<para>Since they are a global resource, user dictionaries are best specified at the solution file level
+if used.  They can be placed at the project level if there is only a single project in the solution.  If you have
+multiple project-specific dictionaries, only the first project that creates the dictionary will get it's
+project-specific dictionary added to it and it will be used across all projects since they are all using the same
+dictionary.  Since subsequent projects will not create the dictionary any user dictionaries in their
+configurations are ignored.  Likewise, if a solution configuration contains a user dictionary and a project
+contains a user dictionary, the project user dictionary would override the solution-level one rather than being
+additive to it.</para>
 				</alert>
 			</content>
 		</section>

@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionaryAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/31/2013
-// Note    : Copyright 2013, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/12/2020
+// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains an enumerated type that defines the various dictionary actions that can be taken
 //
@@ -17,8 +16,6 @@
 // ==============================================================================================================
 // 05/25/2013  EFW  Created the code
 //===============================================================================================================
-
-using System;
 
 namespace VisualStudio.SpellChecker.SuggestedActions
 {

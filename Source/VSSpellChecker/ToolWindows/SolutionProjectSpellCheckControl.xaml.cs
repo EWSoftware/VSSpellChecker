@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/21/2020
+// Updated : 03/19/2020
 // Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -1198,9 +1198,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 if(issue.Dictionary.DictionaryCount == 1)
                     ucSpellCheck.SetAddWordContextMenuDictionaries(null);
                 else
-                    ucSpellCheck.SetAddWordContextMenuDictionaries(
-                        issue.Dictionary.Dictionaries.Select(d => d.Culture));
+                    ucSpellCheck.SetAddWordContextMenuDictionaries(issue.Dictionary.Dictionaries.Select(d => d.Culture));
 
+                ucSpellCheck.SetAddIgnoredContextMenuFiles(issue.FileInfo.IgnoredWordsFiles);
                 ucSpellCheck.UpdateState(false, (issue.Dictionary.DictionaryCount != 1), issue);
             }
             else
@@ -1576,6 +1576,38 @@ namespace VisualStudio.SpellChecker.ToolWindows
             {
                 var issues = (IList<FileMisspelling>)dgIssues.ItemsSource;
                 var currentIssue = issues[dgIssues.SelectedIndex];
+
+                // Add to ignored words file?
+                if(e.Parameter is string ignoredWordsFile && ignoredWordsFile != null)
+                {
+                    // Remove mnemonics
+                    string wordToIgnore = currentIssue.Word.Replace("&", String.Empty).Replace("_", String.Empty);
+
+                    try
+                    {
+                        var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                            StringComparer.OrdinalIgnoreCase);
+
+                        if(!words.Contains(wordToIgnore))
+                        {
+                            words.Add(wordToIgnore);
+
+                            if(!ignoredWordsFile.CanWriteToUserWordsFile(null))
+                            {
+                                MessageBox.Show("Ignored words file is read-only or could not be checked out",
+                                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                return;
+                            }
+
+                            Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        // Ignore errors, we just won't save it to the file
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+                }
 
                 currentIssue.Dictionary.IgnoreWord(currentIssue.Word);
 

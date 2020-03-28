@@ -153,7 +153,12 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="791803a7-37d8-40a9-beba-bac4f0a74279" visible="True" isSelected="true" title="Version 2019.7.8.0">
+    <Topic id="e4168091-4de6-4a6c-af01-70854d72959f" visible="True" isSelected="true" title="Version 2020.3.28.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2020.3.28.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="791803a7-37d8-40a9-beba-bac4f0a74279" visible="True" title="Version 2019.7.8.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2019.7.8.0" />
       </HelpKeywords>

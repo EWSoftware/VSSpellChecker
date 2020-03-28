@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/05/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/21/2020
+// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
 //
@@ -44,11 +43,13 @@ namespace VisualStudio.SpellChecker.Configuration
         #region Private data members
         //=====================================================================
 
-        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes, recognizedWords,
-            loadedConfigFiles;
+        private HashSet<string> ignoredWords, ignoredXmlElements, spellCheckedXmlAttributes; 
+        private readonly HashSet<string> recognizedWords, loadedConfigFiles;
+        private readonly List<(ConfigurationType ConfigType, string Filename)> ignoredWordsFiles;
         private List<CultureInfo> dictionaryLanguages;
         private List<string> additionalDictionaryFolders;
-        private List<Regex> exclusionExpressions, ignoredFilePatterns, visualStudioExclusions;
+        private List<Regex> exclusionExpressions, visualStudioExclusions;
+        private readonly List<Regex> ignoredFilePatterns;
 
         private readonly Dictionary<string, HashSet<string>> ignoredClassifications;
         private readonly Dictionary<string, string> deprecatedTerms, compoundTerms;
@@ -224,6 +225,12 @@ namespace VisualStudio.SpellChecker.Configuration
         /// This read-only property returns an enumerable list of ignored words that will not be spell checked
         /// </summary>
         public IEnumerable<string> IgnoredWords => ignoredWords;
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of ignored words files that were loaded by this
+        /// configuration.
+        /// </summary>
+        public IEnumerable<(ConfigurationType ConfigType, string Filename)> IgnoredWordsFiles => ignoredWordsFiles;
 
         /// <summary>
         /// This is used to indicate whether or not exclusion expressions are inherited by other configurations
@@ -411,6 +418,7 @@ namespace VisualStudio.SpellChecker.Configuration
             spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
             recognizedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             loadedConfigFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            ignoredWordsFiles = new List<(ConfigurationType ConfigType, string Filename)>();
 
             additionalDictionaryFolders = new List<string>();
 
@@ -620,6 +628,31 @@ namespace VisualStudio.SpellChecker.Configuration
                     }
                     else
                         ignoredWords = tempHashSet;
+                }
+
+                // Load the ignored words file if one is specified.  The global ignored words file is always
+                // added even if not specified or it doesn't exist yet.
+                string ignoredWordsFile = configuration.ToString(PropertyNames.IgnoredWordsFile);
+
+                if(String.IsNullOrWhiteSpace(ignoredWordsFile) && configuration.ConfigurationType == ConfigurationType.Global)
+                    ignoredWordsFile = "IgnoredWords.dic";
+
+                if(!String.IsNullOrWhiteSpace(ignoredWordsFile))
+                {
+                    if(ignoredWordsFile.IndexOf('%') != -1)
+                        ignoredWordsFile = Environment.ExpandEnvironmentVariables(ignoredWordsFile);
+
+                    if(!Path.IsPathRooted(ignoredWordsFile))
+                    {
+                        ignoredWordsFile = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(configuration.Filename),
+                            ignoredWordsFile));
+                    }
+
+                    if(File.Exists(ignoredWordsFile))
+                        ignoredWords.UnionWith(Utility.LoadUserDictionary(ignoredWordsFile, false, false));
+
+                    if(!ignoredWordsFiles.Any(f => f.Filename.Equals(ignoredWordsFile, StringComparison.OrdinalIgnoreCase)))
+                        ignoredWordsFiles.Add((configuration.ConfigurationType, ignoredWordsFile));
                 }
 
                 this.InheritExclusionExpressions = configuration.ToBoolean(PropertyNames.InheritExclusionExpressions);

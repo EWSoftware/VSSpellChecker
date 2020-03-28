@@ -58,11 +58,11 @@ following options:</para>
 					</listItem>
 
 					<listItem>
-						<para><ui>Move to Next Spelling Issue</ui> and <ui>Move to Prior Spelling Issue</ui> - These move to
-the next and previous spelling issue within the current text editor.  These can be
-<link xlink:href="63d5096c-6695-441d-886a-01a120f2894a">bound to keyboard shortcuts</link> to make navigating
-between issues easier if you don't want to open the interactive spell checking tool window.
-					</para>
+						<para><ui>Move to Next Spelling Issue</ui> and <ui>Move to Prior Spelling Issue</ui> - These can be
+used in text editors to move to the next/prior spelling issue in the file.  If these are bound to shortcut keys
+and used in conjunction with the Quick Actions shortcut key (<ui>Ctrl+.</ui>), it can be a quick and convenient
+way to find and resolve spelling issues without using the interactive spell checking tool window.  See the
+<link xlink:href="63d5096c-6695-441d-886a-01a120f2894a" /> topic for more information.</para>
 					</listItem>
 
 					<listItem>
@@ -83,6 +83,11 @@ or any combination thereof).  If the solution node is selected, it effectively c
 					</listItem>
 
 					<listItem>
+						<para><ui>Spell Check All Open Documents</ui> - This opens the solution/project spell check tool
+window and immediately spell checks just the files currently open for editing in Visual Studio.</para>
+					</listItem>
+
+					<listItem>
 						<para><ui>Open the Solution/Project Spell Checker Window</ui> - This opens the solution/project spell
 check tool window but takes no action.</para>
 					</listItem>
@@ -95,12 +100,6 @@ global spell checker settings.</para>
 
 				</list>
 
-				<para>There are two additional options on the submenu: <ui>Move to Next Spelling Issue</ui> and <ui>Move
-to Prior Spelling Issue</ui>.  These can be used in text editors to move to the next/prior spelling issue in the
-file.  If these are bound to shortcut keys and used in conjunction with the Quick Actions shortcut key
-(<ui>Ctrl+.</ui>), it can be a quick and convenient way to find and resolve spelling issues without using the
-interactive spell checking tool window.  See the <link xlink:href="63d5096c-6695-441d-886a-01a120f2894a" /> topic
-for more information.</para>
 			</content>
 		</section>
 
