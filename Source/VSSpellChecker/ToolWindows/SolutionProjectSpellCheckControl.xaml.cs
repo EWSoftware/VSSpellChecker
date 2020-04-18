@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/19/2020
+// Updated : 04/18/2020
 // Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -532,7 +532,17 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                   frame != null && frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out object value) == VSConstants.S_OK &&
                                   ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))
                                 {
-                                    var textView = VsShellUtilities.GetTextView(frame);
+                                    IVsTextView textView = null;
+
+                                    try
+                                    {
+                                        textView = VsShellUtilities.GetTextView(frame);
+                                    }
+                                    catch(NotImplementedException)
+                                    {
+                                        // Ignore errors.  Some frames don't implement the text view in certain
+                                        // modes.  For example, the XAML editor with the code tab hidden on open.
+                                    }
 
                                     if(textView != null)
                                     {

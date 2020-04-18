@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/21/2020
+// Updated : 04/18/2020
 // Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -19,7 +19,7 @@
 // 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
-// Ignore spelling: lt
+// Ignore spelling: lt cebf
 
 using System;
 using System.Collections.Generic;
@@ -230,7 +230,23 @@ namespace VisualStudio.SpellChecker.Configuration
         /// This read-only property returns an enumerable list of ignored words files that were loaded by this
         /// configuration.
         /// </summary>
-        public IEnumerable<(ConfigurationType ConfigType, string Filename)> IgnoredWordsFiles => ignoredWordsFiles;
+        public IEnumerable<(ConfigurationType ConfigType, string Filename)> IgnoredWordsFiles
+        {
+            get
+            {
+                // In a brand new configuration with no saved settings, ensure that at least the default global
+                // ignored words file is returned.
+                if(ignoredWordsFiles.Count == 0)
+                {
+                    string ignoredWordsFile = Path.Combine(SpellingConfigurationFile.GlobalConfigurationFilePath,
+                        "IgnoredWords.dic");
+
+                    ignoredWordsFiles.Add((ConfigurationType.Global, ignoredWordsFile));
+                }
+
+                return ignoredWordsFiles;
+            }
+        }
 
         /// <summary>
         /// This is used to indicate whether or not exclusion expressions are inherited by other configurations
