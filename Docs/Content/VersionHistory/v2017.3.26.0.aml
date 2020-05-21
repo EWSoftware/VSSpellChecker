@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="dfcecbc6-1e86-4076-b8c6-0d6e94aa1629" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed the suggested action source so that it works properly with HTML files in Visual Studio
+2017.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the XML file classifier so that it doesn't miss comments between the start of the
+document and the root element when doing solution/project spell checking.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the word splitter to treat Unicode single quotes (\u2019) like ASCII single quotes (')
+for contractions to prevent false misspelling reports.</para>
+					</listItem>
+
+					<listItem>
+						<!-- Ignore spelling: Kristensen -->
+						<para>Added support for <localUri>.editorconfig</localUri> files when using the
+<externalLink>
+	<linkText>EditorConfig Language Service</linkText>
+	<linkUri>https://marketplace.visualstudio.com/items?itemName=MadsKristensen.EditorConfig</linkUri>
+	<linkTarget>_blank</linkTarget>
+</externalLink> extension by Mads Kristensen so that it only spell checks the comments.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added "Ignore comments in XML files" and "Ignore comments in HTML files" options to the XML
+configuration settings category.  If enabled, they will ignore comments in XML and HTML files respectively when
+spell checking.</para>
+					</listItem>
+
+				</list>
+				
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 10/05/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit spell checker configuration settings files
@@ -25,7 +25,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Web;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -59,13 +58,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// <summary>
         /// This read-only property returns the filename
         /// </summary>
-        public string Filename
-        {
-            get
-            {
-                return (configFile == null) ? String.Empty : configFile.Filename;
-            }
-        }
+        public string Filename => (configFile == null) ? String.Empty : configFile.Filename;
+
         #endregion
 
         #region Events
@@ -83,10 +77,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <param name="e">The event arguments</param>
         private void OnConfigurationChanged(object sender, EventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(sender, e);
+            ConfigurationChanged?.Invoke(sender, e);
         }
         #endregion
 
@@ -106,14 +97,18 @@ namespace VisualStudio.SpellChecker.Editors
             // The property pages will be listed in this order
             Type[] propertyPages = new[] {
                 typeof(FileInfoUserControl),
+                typeof(ImportSettingsUserControl),
                 typeof(DictionarySettingsUserControl),
                 typeof(GeneralSettingsUserControl),
                 typeof(CSharpOptionsUserControl),
+                typeof(IgnoredClassificationsUserControl),
                 typeof(IgnoredWordsUserControl),
                 typeof(ExclusionExpressionsUserControl),
                 typeof(IgnoredFilePatternsUserControl),
                 typeof(XmlFilesUserControl),
-                typeof(CodeAnalysisUserControl)
+                typeof(CodeAnalysisUserControl),
+                // Global only, should always be last
+                typeof(VisualStudioUserControl)
             };
 
             try
@@ -127,10 +122,12 @@ namespace VisualStudio.SpellChecker.Editors
                     page.Control.Visibility = Visibility.Collapsed;
                     page.ConfigurationChanged += this.OnConfigurationChanged;
 
-                    node = new TreeViewItem();
-                    node.Header = page.Title;
-                    node.Name = pageType.Name;
-                    node.Tag = page;
+                    node = new TreeViewItem
+                    {
+                        Header = page.Title,
+                        Name = pageType.Name,
+                        Tag = page
+                    };
 
                     tvPages.Items.Add(node);
                     pnlPages.Children.Add(page.Control);
@@ -157,10 +154,22 @@ namespace VisualStudio.SpellChecker.Editors
         {
             configFile = new SpellingConfigurationFile(configurationFile, null);
 
+#pragma warning disable VSTHRD010
             this.SetTitle();
+#pragma warning restore VSTHRD010
 
             foreach(TreeViewItem item in tvPages.Items)
-                ((ISpellCheckerConfiguration)item.Tag).LoadConfiguration(configFile);
+            {
+                ISpellCheckerConfiguration page = ((ISpellCheckerConfiguration)item.Tag);
+
+                if(page.AppliesTo(configFile.ConfigurationType))
+                {
+                    item.Visibility = Visibility.Visible;
+                    page.LoadConfiguration(configFile);
+                }
+                else
+                    item.Visibility = Visibility.Collapsed;
+            }
         }
 
         /// <summary>
@@ -171,17 +180,31 @@ namespace VisualStudio.SpellChecker.Editors
         {
             configFile.Filename = configurationFile;
 
+#pragma warning disable VSTHRD010
             this.SetTitle();
 
             foreach(TreeViewItem item in tvPages.Items)
             {
                 ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
-                page.SaveConfiguration(configFile);
+
+                if(page.AppliesTo(configFile.ConfigurationType))
+                    page.SaveConfiguration(configFile);
             }
 
-            if(!configFile.Save())
+            if(configFile.Save())
+            {
+                if(configFile.ConfigurationType == ConfigurationType.Global)
+                {
+                    if(configFile.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking))
+                        VSSpellCheckEverywherePackage.Instance?.ConnectSpellChecker();
+
+                    WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
+                }
+            }
+            else
                 MessageBox.Show("Unable to save spell checking configuration", PackageResources.PackageTitle,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -189,6 +212,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         private void SetTitle()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             string configFilename = configFile.Filename;
 
             if(configFilename.EndsWith(".vsspell", StringComparison.OrdinalIgnoreCase))
@@ -262,7 +287,7 @@ namespace VisualStudio.SpellChecker.Editors
 
                 try
                 {
-                    string targetUrl = lnkProjectSite.NavigateUri.AbsoluteUri + "/wiki/" + page.HelpUrl;
+                    string targetUrl = "https://ewsoftware.github.io/VSSpellChecker/html/" + page.HelpUrl + ".htm";
 
                     Process.Start(targetUrl);
                 }
@@ -292,8 +317,10 @@ namespace VisualStudio.SpellChecker.Editors
 
             // Pass a dummy filename to create a new configuration and then set the filename so that the pages
             // know the type of configuration file in use.
-            var newConfigFile = new SpellingConfigurationFile("__ResetTemp__", new SpellCheckerConfiguration());
-            newConfigFile.Filename = configFile.Filename;
+            var newConfigFile = new SpellingConfigurationFile("__ResetTemp__", new SpellCheckerConfiguration())
+            {
+                Filename = configFile.Filename
+            };
 
             if(result == MessageBoxResult.Yes)
             {
@@ -302,7 +329,12 @@ namespace VisualStudio.SpellChecker.Editors
                   MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
                 {
                     foreach(TreeViewItem item in tvPages.Items)
-                        ((ISpellCheckerConfiguration)item.Tag).LoadConfiguration(newConfigFile);
+                    {
+                        ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
+
+                        if(page.AppliesTo(configFile.ConfigurationType))
+                            page.LoadConfiguration(newConfigFile);
+                    }
 
                     this.OnConfigurationChanged(sender, e);
                 }

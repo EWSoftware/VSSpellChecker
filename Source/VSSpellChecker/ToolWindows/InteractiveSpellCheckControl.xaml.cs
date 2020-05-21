@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 09/05/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/18/2020
+// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -36,6 +35,8 @@ using Microsoft.VisualStudio.Text.Outlining;
 using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.Tagging;
+using Microsoft.VisualStudio.Shell;
+using System.Collections.Generic;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -62,9 +63,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// </summary>
         public IWpfTextView CurrentTextView
         {
-            get { return currentTextView; }
+            get => currentTextView;
             set
             {
+                ThreadHelper.ThrowIfNotOnUIThread();
+
                 if(currentTextView != value)
                 {
                     if(currentTagger != null)
@@ -77,8 +80,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
                     else
                         currentTagger = null;
-                    
+
                     ucSpellCheck.SetAddWordContextMenuDictionaries(null);
+                    ucSpellCheck.SetAddIgnoredContextMenuFiles(null);
 
                     if(currentTagger != null)
                     {
@@ -98,8 +102,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         tagger_TagsChanged(this, null);
 
                         if(currentTagger.Dictionary.DictionaryCount != 1)
+                        {
                             ucSpellCheck.SetAddWordContextMenuDictionaries(
                                 currentTagger.Dictionary.Dictionaries.Select(d => d.Culture));
+                        }
+
+                        var config = SpellingServiceProxy.GetConfiguration(currentTextView.TextBuffer);
+
+                        if(config != null)
+                            ucSpellCheck.SetAddIgnoredContextMenuFiles(config.IgnoredWordsFiles);
                     }
                     else
                     {
@@ -122,7 +133,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// up.  This works around the issue so that we can reliably update state only when focused.</remarks>
         public bool ParentFocused
         {
-            get { return parentFocused; }
+            get => parentFocused;
             set
             {
                 parentFocused = value;
@@ -216,17 +227,21 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void cmdReplace_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             ITrackingSpan span;
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
 
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
                 if(currentIssue.MisspellingType != MisspellingType.DoubledWord)
                 {
                     var suggestion = ucSpellCheck.SelectedSuggestion;
 
                     if(suggestion != null)
                     {
+                        string replaceWith = suggestion.Suggestion;
+
+                        if(currentIssue.EscapeApostrophes)
+                            replaceWith = replaceWith.Replace("'", "''");
+
                         span = currentIssue.Span;
-                        span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), suggestion.Suggestion);
+                        span.TextBuffer.Replace(span.GetSpan(span.TextBuffer.CurrentSnapshot), replaceWith);
                     }
                 }
                 else
@@ -245,14 +260,19 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdReplaceAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
-
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
             {
                 var suggestion = ucSpellCheck.SelectedSuggestion;
 
                 if(suggestion != null)
-                    currentTagger.Dictionary.ReplaceAllOccurrences(currentIssue.Word, suggestion);
+                {
+                    var replacement = suggestion;
+
+                    if(currentIssue.EscapeApostrophes)
+                        replacement = new SpellingSuggestion(replacement.Culture, replacement.Suggestion.Replace("'", "''"));
+
+                    currentTagger.Dictionary.ReplaceAllOccurrences(currentIssue.Word, replacement);
+                }
             }
         }
 
@@ -265,9 +285,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdIgnoreOnce_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
-
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
                 currentTagger.Dictionary.IgnoreWordOnce(currentIssue.Span);
         }
 
@@ -280,10 +298,42 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdIgnoreAll_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
+            {
+                // Add to ignored words file?
+                if(e.Parameter is string ignoredWordsFile && ignoredWordsFile != null)
+                {
+                    // Remove mnemonics
+                    string wordToIgnore = currentIssue.Word.Replace("&", String.Empty).Replace("_", String.Empty);
 
-            if(currentIssue != null && currentIssue.Word.Length != 0)
+                    try
+                    {
+                        var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                            StringComparer.OrdinalIgnoreCase);
+
+                        if(!words.Contains(wordToIgnore))
+                        {
+                            words.Add(wordToIgnore);
+
+                            if(!ignoredWordsFile.CanWriteToUserWordsFile(null))
+                            {
+                                MessageBox.Show("Ignored words file is read-only or could not be checked out",
+                                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                return;
+                            }
+
+                            Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        // Ignore errors, we just won't save it to the file
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+                }
+
                 currentTagger.Dictionary.IgnoreWord(currentIssue.Word);
+            }
         }
 
         /// <summary>
@@ -295,10 +345,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// be raised and will notify us of the remaining misspellings.</remarks>
         private void cmdAddToDictionary_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            MisspellingTag currentIssue = ucSpellCheck.CurrentIssue as MisspellingTag;
             string word;
 
-            if(currentIssue != null)
+            if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue)
             {
                 word = ucSpellCheck.MisspelledWord;
 
@@ -327,8 +376,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             try
             {
-                System.Diagnostics.Process.Start("https://github.com/EWSoftware/VSSpellChecker/wiki/" +
-                    "53ffc5b7-b7dc-4f03-9a51-ed4176bff504");
+                System.Diagnostics.Process.Start(
+                    "https://ewsoftware.github.io/VSSpellChecker/html/53ffc5b7-b7dc-4f03-9a51-ed4176bff504.htm");
             }
             catch(Exception ex)
             {

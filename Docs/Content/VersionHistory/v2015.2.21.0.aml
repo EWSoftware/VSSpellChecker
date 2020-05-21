@@ -28,7 +28,7 @@ duplicate instances on views when called multiple times.</para>
 					</listItem>
 
 					<listItem>
-						<para>Added the back tick (\`) and ellipsis (&#8230;) characters as valid word break characters.</para>
+						<para>Added the back tick (`) and ellipsis (&#8230;) characters as valid word break characters.</para>
 					</listItem>
 
 					<listItem>

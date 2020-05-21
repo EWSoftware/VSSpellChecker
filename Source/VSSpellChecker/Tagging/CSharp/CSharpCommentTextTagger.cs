@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/18/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 07/08/2019
+// Note    : Copyright 2010-2019, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2019, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for C# code
@@ -23,6 +23,8 @@
 // 09/18/2015  EFW  Fixed up issues with XML doc comment elements that span lines and added support for spell
 //                  checking XML doc comment attributes and ignoring unwanted XML doc comment elements.
 //===============================================================================================================
+
+// Ignore spelling: endregion pragma
 
 using System;
 using System.Collections.Generic;
@@ -46,9 +48,10 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer _buffer;
-        private ITextSnapshot _lineCacheSnapshot;
-        private List<State> _lineCache;
+        private ITextBuffer buffer;
+        private ITextSnapshot lineCacheSnapshot;
+        private List<State> lineCache;
+
         #endregion
 
         #region Properties
@@ -122,21 +125,20 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <param name="buffer">The text buffer to use</param>
         public CSharpCommentTextTagger(ITextBuffer buffer)
         {
-            _buffer = buffer;
-
+            this.buffer = buffer;
             this.IgnoredXmlElements = this.SpellCheckedAttributes = new string[0];
 
             // Populate our cache initially
-            ITextSnapshot snapshot = _buffer.CurrentSnapshot;
+            ITextSnapshot snapshot = this.buffer.CurrentSnapshot;
 
-            _lineCache = new List<State>(snapshot.LineCount);
-            _lineCache.AddRange(Enumerable.Repeat(State.Default, snapshot.LineCount));
+            lineCache = new List<State>(snapshot.LineCount);
+            lineCache.AddRange(Enumerable.Repeat(State.Default, snapshot.LineCount));
 
             RescanLines(snapshot, startLine: 0, lastDirtyLine: snapshot.LineCount - 1);
-            _lineCacheSnapshot = snapshot;
+            lineCacheSnapshot = snapshot;
 
             // Listen for text changes so we can stay up-to-date.
-            _buffer.Changed += OnTextBufferChanged;
+            this.buffer.Changed += OnTextBufferChanged;
         }
         #endregion
 
@@ -146,8 +148,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// <inheritdoc />
         public void Dispose()
         {
-            if(_buffer != null)
-                _buffer.Changed -= OnTextBufferChanged;
+            if(buffer != null)
+                buffer.Changed -= OnTextBufferChanged;
         }
         #endregion
 
@@ -163,7 +165,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             foreach(SnapshotSpan span in spans)
             {
                 // If we're called on the non-current snapshot, return nothing.
-                if(span.Snapshot != _lineCacheSnapshot)
+                if(span.Snapshot != lineCacheSnapshot)
                     yield break;
 
                 SnapshotPoint lineStart = span.Start;
@@ -171,7 +173,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 while(lineStart < span.End)
                 {
                     ITextSnapshotLine line = lineStart.GetContainingLine();
-                    State state = _lineCache[line.LineNumber];
+                    State state = lineCache[line.LineNumber];
 
                     List<SnapshotSpan> naturalTextSpans = new List<SnapshotSpan>();
                     state = ScanLine(state, line, naturalTextSpans);
@@ -190,7 +192,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         {
             ITextSnapshot snapshot = e.After;
 
-            // First update _lineCache so its size matches snapshot.LineCount.
+            // First update lineCache so its size matches snapshot.LineCount.
             foreach(ITextChange change in e.Changes)
             {
                 if(change.LineCountDelta > 0)
@@ -200,20 +202,20 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
                     // Copy the state of the line to continue multi-line comments and strings.  If not,
                     // we lose the state and it doesn't parse the spans correctly.
-                    if(line < _lineCache.Count)
-                        state = _lineCache[line];
+                    if(line < lineCache.Count)
+                        state = lineCache[line];
 
-                    _lineCache.InsertRange(line, Enumerable.Repeat(state, change.LineCountDelta));
+                    lineCache.InsertRange(line, Enumerable.Repeat(state, change.LineCountDelta));
                 }
                 else if(change.LineCountDelta < 0)
                 {
                     int line = snapshot.GetLineFromPosition(change.NewPosition).LineNumber;
-                    _lineCache.RemoveRange(line, -change.LineCountDelta);
+                    lineCache.RemoveRange(line, -change.LineCountDelta);
                 }
             }
 
-            // Now that _lineCache is the appropriate size we can safely start rescanning.
-            // If we hadn't updated _lineCache, then rescanning could walk off the edge.
+            // Now that lineCache is the appropriate size we can safely start rescanning.
+            // If we hadn't updated lineCache, then rescanning could walk off the edge.
             List<SnapshotSpan> changedSpans = new List<SnapshotSpan>();
 
             foreach(ITextChange change in e.Changes)
@@ -226,7 +228,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     snapshot.GetLineFromLineNumber(lastUpdatedLine).End));
             }
 
-            _lineCacheSnapshot = snapshot;
+            lineCacheSnapshot = snapshot;
 
             var tagsChanged = TagsChanged;
 
@@ -245,7 +247,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         private int RescanLines(ITextSnapshot snapshot, int startLine, int lastDirtyLine)
         {
             int currentLine = startLine;
-            State state = _lineCache[currentLine];
+            State state = lineCache[currentLine];
             bool updatedStateForCurrentLine = true;
 
             // Go until we have covered all of the dirty lines and we get to a line where our
@@ -259,8 +261,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 currentLine++;
                 if(currentLine < snapshot.LineCount)
                 {
-                    updatedStateForCurrentLine = (state != _lineCache[currentLine]);
-                    _lineCache[currentLine] = state;
+                    updatedStateForCurrentLine = (state != lineCache[currentLine]);
+                    lineCache[currentLine] = state;
                 }
             }
 
@@ -288,7 +290,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         break;
 
                     case State.MultiLineString:
-                        ScanMultiLineString(p);
+                        ScanMultiLineString(p, false);
                         break;
 
                     case State.DocComment:
@@ -373,11 +375,13 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         ScanMultiLineDocComment(p);
                     }
                 }
-                else if(p.Char() == '@' && p.NextChar() == '"') // Verbatim string
+                else if(((p.Char() == '@' || p.Char() == 'R') && p.NextChar() == '"') ||
+                  (p.Char() == '$' && p.NextChar() == '@' && p.NextNextChar() == '"') ||
+                  (p.Char() == '@' && p.NextChar() == '$' && p.NextNextChar() == '"')) // Verbatim, raw, or interpolated verbatim string
                 {
-                    p.Advance(2);
+                    // Keep the leading text so that we can handle escape sequences properly
                     p.State = State.MultiLineString;
-                    ScanMultiLineString(p);
+                    ScanMultiLineString(p, true);
                 }
                 else if(p.Char() == '"') // Single-line string
                 {
@@ -397,20 +401,54 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     p.State = State.Character;
                     ScanCharacter(p);
                 }
-                else if(p.Char() == '#')    // Possible preprocessor keyword, check for #region
+                else if(p.Char() == '#') // Possible preprocessor keyword, check for a region
                 {
                     p.Advance(1);
 
+                    int segmentLength = 0;
+
                     // If found, treat it like a single line comment
                     if(p.NextSegment(6) == "region")
+                        segmentLength = 6;
+                    else
+                        if(p.NextSegment(9) == "endregion")
+                            segmentLength = 9;
+                        else
+                            if(p.NextSegment(13) == "pragma region")
+                                segmentLength = 13;
+                            else
+                                if(p.NextSegment(16) == "pragma endregion")
+                                    segmentLength = 16;
+
+                    if(segmentLength != 0)
                     {
-                        p.Advance(6);
+                        p.Advance(segmentLength);
                         p.StartNaturalText();
                         p.AdvanceToEndOfLine();
                         p.EndNaturalText();
 
                         p.State = State.Default;
                         return;
+                    }
+
+                    // If it looks like a C/C+ #include, skip the filename
+                    if(p.NextSegment(7) == "include")
+                    {
+                        p.Advance(7);
+
+                        while(!p.EndOfLine && System.Char.IsWhiteSpace(p.Char()))
+                            p.Advance();
+
+                        if(!p.EndOfLine && p.Char() == '"')
+                        {
+                            p.Advance();
+
+                            while(!p.EndOfLine && p.Char() != '"')
+                                p.Advance();
+
+                            if(!p.EndOfLine)
+                                p.Advance();
+                        }
                     }
                 }
                 else
@@ -580,12 +618,17 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             Debug.Assert(p.State == State.MultiLineDocComment);
         }
 
-        private void ScanMultiLineString(LineProgress p)
+        private void ScanMultiLineString(LineProgress p, bool isVerbatimString)
         {
             bool markText = !this.IgnoreVerbatimStrings;
 
             if(markText)
                 p.StartNaturalText();
+
+            // For verbatim/raw/interpolated strings, skip the leading format identifier.  We keep it so that we
+            // can skip escape sequence checking and properties in them.
+            if(isVerbatimString)
+                p.Advance((p.NextChar() == '$' || p.NextChar() == '@') ? 3 : 2);
 
             while(!p.EndOfLine)
             {

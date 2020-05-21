@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="791803a7-37d8-40a9-beba-bac4f0a74279" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed a crash in C++ files when entering an <codeInline>#include</codeInline> statement.</para>
+					</listItem>
+				</list>
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

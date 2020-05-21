@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
-// Updated : 09/10/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that represents a misspelling withing a project file
@@ -20,6 +20,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Windows;
 
 using Microsoft.VisualStudio.Text;
 
@@ -38,7 +40,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the misspelling type
         /// </summary>
-        public MisspellingType MisspellingType { get; private set; }
+        public MisspellingType MisspellingType { get; }
 
         /// <summary>
         /// This is used to get or set the span containing the misspelled word
@@ -51,6 +53,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public Span DeleteWordSpan { get; set; }
 
         /// <summary>
+        /// The bounds of the misspelled word when used by the WPF text box spell checker
+        /// </summary>
+        public Rect ActualBounds { get; set; }
+
+        /// <summary>
         /// This is used to get or set the suggestions that can be used to replace the misspelled word
         /// </summary>
         public IEnumerable<ISpellingSuggestion> Suggestions { get; set; }
@@ -58,7 +65,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the misspelled or doubled word
         /// </summary>
-        public string Word { get; private set; }
+        public string Word { get; }
+
+        /// <summary>
+        /// This is used to indicate whether or not to escape apostrophes when replacing words
+        /// </summary>
+        /// <remarks>This will be true for language types such as SQL, false for all others</remarks>
+        public bool EscapeApostrophes { get; set; }
 
         /// <summary>
         /// This is used to get or set the spelling dictionary for the issue
@@ -75,19 +88,24 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public bool SuggestionsDetermined { get; set; }
 
         /// <summary>
-        /// This is used to get or set the name of the project containing the file
+        /// This is used to get or set the information for the file containing the issue
         /// </summary>
-        public string ProjectName { get; set; }
+        public SpellCheckFileInfo FileInfo { get; set; }
 
         /// <summary>
-        /// This is used to get or set the name of the file containing the issue (no path)
+        /// This read-only property is used to get the name of the project containing the file
         /// </summary>
-        public string Filename { get; set; }
+        public string ProjectName => (this.FileInfo != null) ? Path.GetFileName(this.FileInfo.ProjectFile) : null;
 
         /// <summary>
-        /// This is used to get or set the canonical name of the file (full path)
+        /// This read-only property is used to get the name of the file containing the issue (no path)
         /// </summary>
-        public string CanonicalName { get; set; }
+        public string Filename => this.FileInfo?.Filename;
+
+        /// <summary>
+        /// This read-only property is used to get the canonical name of the file (full path)
+        /// </summary>
+        public string CanonicalName => this.FileInfo?.CanonicalName;
 
         /// <summary>
         /// This is used to get or set the line number for the issue
@@ -149,6 +167,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Word = word;
             this.Suggestions = suggestions ?? new SpellingSuggestion[0];
             this.SuggestionsDetermined = (suggestions != null);
+            this.ActualBounds = Rect.Empty;
         }
 
         /// <summary>
@@ -177,6 +196,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Word = word;
             this.Suggestions = new SpellingSuggestion[0];
             this.SuggestionsDetermined = true;
+            this.ActualBounds = Rect.Empty;
         }
         #endregion
     }

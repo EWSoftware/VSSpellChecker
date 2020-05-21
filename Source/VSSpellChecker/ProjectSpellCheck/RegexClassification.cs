@@ -30,12 +30,12 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the expression used to classify text
         /// </summary>
-        public Regex Expression { get; private set; }
+        public Regex Expression { get; }
 
         /// <summary>
         /// This read-only property returns the classification to use for matched text
         /// </summary>
-        public RangeClassification Classification { get; private set; }
+        public RangeClassification Classification { get; }
 
         /// <summary>
         /// Constructor

@@ -12,10 +12,10 @@ installing this package.  To install this package:</para>
 					<listItem>
 						<para>Download the latest release of the VSIX installer from the <externalLink>
 <linkText>Releases</linkText>
-<linkAlternateText>Releases</linkAlternateText>
 <linkUri>https://GitHub.com/EWSoftware/VSSpellChecker/releases</linkUri>
 <linkTarget>_blank</linkTarget>
-</externalLink> page of this project site.</para>
+</externalLink> page of this project site.  Separate packages are available for Visual Studio 2013/2015 and
+Visual Studio 2017 and later.</para>
 					</listItem>
 
 					<listItem>
@@ -24,20 +24,25 @@ installing this package.  To install this package:</para>
 
 					<listItem>
 						<para>Run the downloaded package and follow the prompts to install it.  It can be installed in any
-version of Visual Studio 2013 and later.  The Community Edition is also supported but the older Express editions
-are not as they do not allow installation of extensions.  Consider switching to the newer Community Edition which
-does support them.</para>
+edition of Visual Studio except Express editions.  Express editions are not supported as they do not allow
+installation of third-party extensions.  Consider switching to the newer Community Edition which does support
+them.</para>
 					</listItem>
 
 				</list>
 
-				<para>This package can also be installed from within Visual Studio from the <externalLink>
-<linkText>Visual Studio Online Gallery</linkText>
-<linkAlternateText>Visual Studio Online Gallery</linkAlternateText>
-<linkUri>http://visualstudiogallery.msdn.microsoft.com/a23de100-31a1-405c-b4b7-d6be40c3dfff</linkUri>
+				<para>This package can also be installed from within Visual Studio from the Visual Studio Marketplace
+(<externalLink>
+<linkText>Visual Studio 2013/2015</linkText>
+<linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellChecker</linkUri>
 <linkTarget>_blank</linkTarget>
-</externalLink> using the <ui>Tools | Extension Manager</ui> option.  Select the online gallery and search for
-"Visual Studio Spell Checker".  Include the quote marks for an exact match and find the one created by
+</externalLink> and
+<externalLink>
+<linkText>Visual Studio 2017 or later</linkText>
+<linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2017andLater</linkUri>
+<linkTarget>_blank</linkTarget>
+</externalLink>) using the <ui>Tools | Extension and Updates</ui> option.  Select the online marketplace and
+search for "Visual Studio Spell Checker".  Include the quote marks for an exact match and find the one created by
 <legacyItalic>EWSoftware</legacyItalic>.  Once found, you can click the <ui>Download</ui> button to download and
 install it.</para>
 
@@ -50,6 +55,14 @@ following options:</para>
 					<listItem>
 						<para><ui>Spell Check Current Document</ui> - This opens the
 <link xlink:href="53ffc5b7-b7dc-4f03-9a51-ed4176bff504">active document spell check tool window</link>.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Move to Next Spelling Issue</ui> and <ui>Move to Prior Spelling Issue</ui> - These can be
+used in text editors to move to the next/prior spelling issue in the file.  If these are bound to shortcut keys
+and used in conjunction with the Quick Actions shortcut key (<ui>Ctrl+.</ui>), it can be a quick and convenient
+way to find and resolve spelling issues without using the interactive spell checking tool window.  See the
+<link xlink:href="63d5096c-6695-441d-886a-01a120f2894a" /> topic for more information.</para>
 					</listItem>
 
 					<listItem>
@@ -70,6 +83,11 @@ or any combination thereof).  If the solution node is selected, it effectively c
 					</listItem>
 
 					<listItem>
+						<para><ui>Spell Check All Open Documents</ui> - This opens the solution/project spell check tool
+window and immediately spell checks just the files currently open for editing in Visual Studio.</para>
+					</listItem>
+
+					<listItem>
 						<para><ui>Open the Solution/Project Spell Checker Window</ui> - This opens the solution/project spell
 check tool window but takes no action.</para>
 					</listItem>
@@ -81,6 +99,7 @@ global spell checker settings.</para>
 					</listItem>
 
 				</list>
+
 			</content>
 		</section>
 

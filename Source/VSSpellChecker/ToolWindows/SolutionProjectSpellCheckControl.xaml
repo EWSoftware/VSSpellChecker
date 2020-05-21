@@ -4,8 +4,11 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
 	xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
-	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="800"
-	Background="{DynamicResource ToolWindowBackgroundBrushKey}" FontSize="12" Name="ucSolutionProjectSpellCheck">
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
+	mc:Ignorable="d" d:DesignHeight="350" d:DesignWidth="800" Name="ucSolutionProjectSpellCheck"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -26,6 +29,7 @@
 		<CommandBinding Command="vssc:SpellCheckCommands.ExportAllIssues" Executed="cmdExportIssues_Executed" />
 		<CommandBinding Command="vssc:SpellCheckCommands.ExportProjectIssues" Executed="cmdExportIssues_Executed" />
 		<CommandBinding Command="vssc:SpellCheckCommands.ExportFileIssues" Executed="cmdExportIssues_Executed" />
+		<CommandBinding Command="vssc:SpellCheckCommands.CopyAsDirective" Executed="cmdCopyAsDirective_Executed" />
 		<CommandBinding Command="ApplicationCommands.Help" Executed="cmdHelp_Executed" />
 	</UserControl.CommandBindings>
 	<Grid>
@@ -39,7 +43,6 @@
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
 					<RowDefinition />
-					<RowDefinition Height="Auto" />
 				</Grid.RowDefinitions>
 				<Border Grid.Row="0" BorderBrush="{StaticResource LightBorderBrushKey}" BorderThickness="1"
 					CornerRadius="2" Margin="3">
@@ -60,12 +63,13 @@
 							<Label Grid.Column="0" Margin="3" Content="S_pell Check" Target="{Binding ElementName=cboSpellCheckTarget}" />
 							<ComboBox Grid.Column="1" Margin="3" Name="cboSpellCheckTarget" MinWidth="230" MaxWidth="500"
 								VerticalAlignment="Center"/>
-							<Label Grid.Column="2" Margin="3" Content="Max Iss_ues" Target="{Binding ElementName=txtMaxIssues}" />
-							<TextBox Grid.Column="3" Margin="3" Name="txtMaxIssues" MaxLength="5" Width="50" Text="5000"
+							<Label Grid.Column="2" Margin="3" Content="Ma_x Issues" Target="{Binding ElementName=txtMaxIssues}" />
+							<TextBox Grid.Column="3" Margin="3" Name="txtMaxIssues" MaxLength="5" MinWidth="50" Text="5000"
 								VerticalContentAlignment="Center"/>
-							<Button Grid.Column="4" Margin="3" Name="btnStartCancel" Content="S_tart" Width="50"
-								Click="btnStartCancel_Click" />
-							<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="10,5,0,0" x:Name="spSpinner"/>
+							<Button Grid.Column="4" Margin="3" Name="btnStartCancel" Content="S_tart" MinWidth="50"
+								Click="btnStartCancel_ClickAsync" />
+							<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="10,5,0,0" x:Name="spSpinner"
+                HorizontalAlignment="Left"/>
 							<TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Name="lblIssueCount" Text="--"
 								Style="{StaticResource PlainText}" />
 							<TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="5" Padding="3" Margin="3"
@@ -102,20 +106,17 @@
 							<Separator />
 							<MenuItem Command="vssc:SpellCheckCommands.GoToIssue" />
 							<MenuItem Command="ApplicationCommands.Copy" Header="Copy Word to Clipboard" />
+							<MenuItem Command="vssc:SpellCheckCommands.CopyAsDirective" />
+							<Separator />
 							<MenuItem Header="Export">
 								<MenuItem Command="vssc:SpellCheckCommands.ExportAllIssues" />
 								<MenuItem Command="vssc:SpellCheckCommands.ExportProjectIssues" />
 								<MenuItem Command="vssc:SpellCheckCommands.ExportFileIssues" />
 							</MenuItem>
+							<MenuItem Header="Edit Configuration File" Name="miEditConfig" />
 						</ContextMenu>
 					</DataGrid.ContextMenu>
 				</DataGrid>
-				<TextBlock Grid.Row="2" Margin="3" Padding="3" TextWrapping="Wrap" Style="{StaticResource ShadedText}">
-					This tool window is in beta.  Found a problem or want to suggest an enhancement?
-					<Hyperlink Name="lnkFeedback"
-						NavigateUri="https://github.com/EWSoftware/VSSpellChecker/wiki/bda126a1-e534-4172-81dc-35a32d91e4cc"
-						Click="lnkFeedback_Click">Open an Issue</Hyperlink>
-				</TextBlock>
 			</Grid>
 		</Grid>
 		<GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center"

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/29/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify source code file content using a set of regular expressions
@@ -43,7 +43,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         private string xmlDocCommentDelimiter, quadSlashDelimiter, oldStyleDocCommentDelimiter;
-        private bool isCSharp, isCStyleCode;
+        private readonly bool isCSharp, isCStyleCode;
 
         #endregion
 
@@ -74,17 +74,18 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         /// <inheritdoc />
-        /// <remarks>This classifier will ignore elements excluded by the C# options in C# files and, if wanted,
-        /// all C-style code.  It will also classify XML documentation comments to eliminated things that
-        /// shouldn't be spell checked within them.</remarks>
+        /// <remarks>This classifier will ignore elements classified as undefined and those excluded by the C#
+        /// options in C# files and, if wanted, all C-style code.  It will also classify XML documentation
+        /// comments to eliminated things that shouldn't be spell checked within them.</remarks>
         public override IEnumerable<SpellCheckSpan> Parse()
         {
-            int line, column;
-
             var spans = base.Parse();
 
             foreach(var span in spans)
             {
+                if(span.Classification == RangeClassification.Undefined)
+                    continue;
+
                 // Apply the C# options to C# code and, if wanted, all C-style code
                 if(isCSharp || isCStyleCode)
                 {
@@ -117,7 +118,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     var docSpans = new List<SpellCheckSpan>();
 
-                    this.GetPosition(span.Span.Start, out line, out column);
+                    this.GetPosition(span.Span.Start, out int line, out int column);
 
                     this.LineOffset = line;
                     this.ColumnOffset = column;
@@ -144,7 +145,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 switch(span.Classification)
                 {
                     case RangeClassification.NormalStringLiteral:
-                        if(span.Text[0] == '@')
+                        if(span.Text[0] == '@' || span.Text[0] == 'R')
                             span.Classification = RangeClassification.VerbatimStringLiteral;
                         else
                             if(span.Text[0] == '$')
@@ -217,7 +218,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             Span = new Span(this.GetOffset(textNode.Line, textNode.LinePosition),
                                 textNode.Text.Length),
                             Text = textNode.Text,
-                            Classification = RangeClassification.InnerText
+                            Classification = RangeClassification.XmlCommentsInnerText
                         });
                     break;
 

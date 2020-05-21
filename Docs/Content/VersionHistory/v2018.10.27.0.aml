@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="875213fe-3e53-4bf3-acdc-7654d0c7756d" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<alert class="important">
+				<para>As of this release, the VS2017 and Later version of the package requires at least Visual Studio
+2017 version <legacyUnderline>15.5</legacyUnderline> in order to install the package.</para>
+			</alert>
+
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed a bug with suggestions from code analysis files which don't specify a culture on the
+suggestions.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added a new <link xlink:href="b156d5ad-347f-4f63-89dc-4f945953ae41" /> category to the
+configuration file editor to allow specifying an unrelated configuration file from which settings are imported.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for C# 8 verbatim interpolated strings (<codeInline>@$"..."</codeInline> versus
+the current <codeInline>$@"..."</codeInline> format).</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for retrieving filenames from JavaScript and TypeScript secondary buffers so that
+they can be spell checked.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for asynchronous package loading in the VS2017 and Later version of
+the package.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for installing the package in the upcoming Visual Studio 2019 preview.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

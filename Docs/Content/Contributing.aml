@@ -10,7 +10,7 @@
 			<content>
 				<para>If you don't feel like working on the code yourself, <externalLink>
 <linkText>filing an issue</linkText>
-<linkAlternateText>filing an issue</linkAlternateText>
+<linkAlternateText>VSSpellChecker Issues</linkAlternateText>
 <linkUri>https://github.com/EWSoftware/VSSpellChecker/issues</linkUri>
 <linkTarget>_blank</linkTarget>
 </externalLink> and letting me handle the change is fine.  You don't need to file an issue for trivial changes
@@ -61,7 +61,7 @@ incoming changes from the origin.</para>
 			<title>Coding Style</title>
 			<content>
 				<para>In general, use the Visual Studio defaults.  Take a look at the existing code to see the styles in
-use.</para>
+use. The <localUri>.editorconfig</localUri> file defines the preferred style defaults.</para>
 
 				<list class="ordered">
 					<listItem>
@@ -80,6 +80,7 @@ Remove any unused namespaces to avoid unnecessary clutter.</para>
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: Allman -->
 						<para>Use Allman style braces where each brace begins on a new line. A single line statement block
 can go without braces but the block must be properly indented on its own line.</para>
 					</listItem>
@@ -107,7 +108,6 @@ not <codeInline>string foo</codeInline>).</para>
 			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
 			<externalLink>
 				<linkText>License Agreement</linkText>
-				<linkAlternateText>License Agreement</linkAlternateText>
 				<linkUri>https://github.com/EWSoftware/VSSpellChecker/blob/master/LICENSE</linkUri>
 				<linkTarget>_blank</linkTarget>
 			</externalLink>

@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommandTargetArguments.cs
 // Author  : Istvan Novak
-// Updated : 02/06/2015
+// Updated : 09/02/2018
 // Source  : http://learnvsxnow.codeplex.com/
-// Note    : Copyright 2008-2015, Istvan Novak, All rights reserved
+// Note    : Copyright 2008-2018, Istvan Novak, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains classes that define event arguments used by the SimpleEditorPane class
@@ -32,17 +32,30 @@ namespace VisualStudio.SpellChecker.Editors
     /// </summary>
     public class ExecArgs
     {
-        #region Private fields
+        /// <summary>
+        /// Gets the ID of the command group.
+        /// </summary>
+        public Guid GroupId { get; }
 
-        private readonly Guid _GroupId;
-        private readonly uint _CommandId;
-        private uint _CommandExecOpt;
-        private IntPtr _pvaIn;
-        private IntPtr _pvaOut;
+        /// <summary>
+        /// Gets the ID of the command within the group.
+        /// </summary>
+        public uint CommandId { get; }
 
-        #endregion
+        /// <summary>
+        /// Options for the command
+        /// </summary>
+        public uint CommandExecOpt { get; set; }
 
-        #region Lifecycle methods
+        /// <summary>
+        /// Pointer to input arguments
+        /// </summary>
+        public IntPtr PvaIn { get; set; }
+
+        /// <summary>
+        /// Pointer to output arguments
+        /// </summary>
+        public IntPtr PvaOut { get; set; }
 
         /// <summary>
         /// Creates a new instance of this class with the specified command identifiers.
@@ -51,58 +64,9 @@ namespace VisualStudio.SpellChecker.Editors
         /// <param name="commandId">ID of the command within the group.</param>
         public ExecArgs(Guid groupId, uint commandId)
         {
-            _GroupId = groupId;
-            _CommandId = commandId;
+            GroupId = groupId;
+            CommandId = commandId;
         }
-
-        #endregion
-
-        #region Public properties
-
-        /// <summary>
-        /// Gets the ID of the command group.
-        /// </summary>
-        public Guid GroupId
-        {
-            get { return _GroupId; }
-        }
-
-        /// <summary>
-        /// Gets the ID of the command within the group.
-        /// </summary>
-        public uint CommandId
-        {
-            get { return _CommandId; }
-        }
-
-        /// <summary>
-        /// Options for the command
-        /// </summary>
-        public uint CommandExecOpt
-        {
-            get { return _CommandExecOpt; }
-            set { _CommandExecOpt = value; }
-        }
-
-        /// <summary>
-        /// Pointer to input arguments
-        /// </summary>
-        public IntPtr PvaIn
-        {
-            get { return _pvaIn; }
-            set { _pvaIn = value; }
-        }
-
-        /// <summary>
-        /// Pointer to output arguments
-        /// </summary>
-        public IntPtr PvaOut
-        {
-            get { return _pvaOut; }
-            set { _pvaOut = value; }
-        }
-
-        #endregion
     }
     #endregion
 
@@ -114,16 +78,39 @@ namespace VisualStudio.SpellChecker.Editors
     /// </summary>
     public sealed class QueryStatusArgs
     {
-        #region Private fields
+        /// <summary>
+        /// The group ID
+        /// </summary>
+        public Guid GroupId { get; }
 
-        private readonly Guid _GroupId;
-        private uint _CommandCount;
-        private OLECMD[] _Commands;
-        private IntPtr _pCmdText;
+        /// <summary>
+        /// The command count
+        /// </summary>
+        public uint CommandCount { get; set; }
 
-        #endregion
+        /// <summary>
+        /// The commands
+        /// </summary>
+        public OLECMD[] Commands { get; set; }
 
-        #region Lifecycle methods
+        /// <summary>
+        /// The command text
+        /// </summary>
+        public IntPtr PCmdText { get; set; }
+
+        /// <summary>
+        /// The first command ID
+        /// </summary>
+        public uint FirstCommandId => this.Commands[0].cmdID;
+
+        /// <summary>
+        /// The first command status
+        /// </summary>
+        public uint FirstCommandStatus
+        {
+            get => this.Commands[0].cmdf;
+            set => this.Commands[0].cmdf = value;
+        }
 
         /// <summary>
         /// Constructor
@@ -131,66 +118,8 @@ namespace VisualStudio.SpellChecker.Editors
         /// <param name="groupId">The group ID</param>
         public QueryStatusArgs(Guid groupId)
         {
-            _GroupId = groupId;
+            this.GroupId = groupId;
         }
-
-        #endregion
-
-        #region Public properties
-
-        /// <summary>
-        /// The group ID
-        /// </summary>
-        public Guid GroupId
-        {
-            get { return _GroupId; }
-        }
-
-        /// <summary>
-        /// The command count
-        /// </summary>
-        public uint CommandCount
-        {
-            get { return _CommandCount; }
-            set { _CommandCount = value; }
-        }
-
-        /// <summary>
-        /// The commands
-        /// </summary>
-        public OLECMD[] Commands
-        {
-            get { return _Commands; }
-            set { _Commands = value; }
-        }
-
-        /// <summary>
-        /// The command text
-        /// </summary>
-        public IntPtr PCmdText
-        {
-            get { return _pCmdText; }
-            set { _pCmdText = value; }
-        }
-
-        /// <summary>
-        /// The first command ID
-        /// </summary>
-        public uint FirstCommandId
-        {
-            get { return _Commands[0].cmdID; }
-        }
-
-        /// <summary>
-        /// The first command status
-        /// </summary>
-        public uint FirstCommandStatus
-        {
-            get { return _Commands[0].cmdf; }
-            set { _Commands[0].cmdf = value; }
-        }
-
-        #endregion
     }
     #endregion
 }

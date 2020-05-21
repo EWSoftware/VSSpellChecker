@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpOptionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/29/2015
-// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the C# spell checker configuration settings
@@ -47,22 +47,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "C# Options"; }
-        }
+        public string Title => "C# Options";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d"; }
-        }
+        public string HelpUrl => "09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -119,6 +110,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
+        }
+
+        /// <inheritdoc />
         public event EventHandler ConfigurationChanged;
 
         #endregion
@@ -133,10 +130,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

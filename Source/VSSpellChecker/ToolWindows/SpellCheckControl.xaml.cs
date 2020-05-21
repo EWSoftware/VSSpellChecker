@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/13/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/18/2020
+// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that presents the spell checking options to the user
 //
@@ -21,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Automation.Peers;
@@ -28,7 +28,7 @@ using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-
+using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.ToolWindows
@@ -56,10 +56,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <summary>
         /// This returns the current misspelled word with any edits made in the user control
         /// </summary>
-        public string MisspelledWord
-        {
-            get { return txtMisspelledWord.Text.Trim(); }
-        }
+        public string MisspelledWord => txtMisspelledWord.Text.Trim();
 
         /// <summary>
         /// This is used to get or set the text to display when there is no current issue
@@ -121,6 +118,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             ctxAddWord.Items.Clear();
 
             if(dictionaryCultures != null && dictionaryCultures.Count() > 1)
+            {
                 foreach(var culture in dictionaryCultures)
                     ctxAddWord.Items.Add(new MenuItem()
                     {
@@ -128,6 +126,34 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             culture.EnglishName, culture.Name),
                         Tag = culture
                     });
+            }
+        }
+
+        /// <summary>
+        /// This is used to set the context menu items for the Add Ignored button's context menu when multiple
+        /// ignored words files are in use.
+        /// </summary>
+        /// <param name="ignoredWordsFiles">An enumerable list of ignored words files or null</param>
+        public void SetAddIgnoredContextMenuFiles(IEnumerable<(ConfigurationType ConfigType, string Filename)> ignoredWordsFiles)
+        {
+            ctxAddIgnored.Items.Clear();
+            btnAddIgnored.Tag = null;
+
+            if(ignoredWordsFiles != null)
+            {
+                if(ignoredWordsFiles.Count() == 1)
+                    btnAddIgnored.Tag = ignoredWordsFiles.First().Filename;
+                else
+                {
+                    foreach(var file in ignoredWordsFiles)
+                        ctxAddIgnored.Items.Add(new MenuItem()
+                        {
+                            Header = (file.ConfigType == ConfigurationType.Global) ? "Global" :
+                                $"{file.ConfigType} ({Path.GetFileName(file.Filename)})",
+                            Tag = file.Filename
+                        });
+                }
+            }
         }
 
         /// <summary>
@@ -144,7 +170,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 updatingState = lbSuggestions.IsEnabled = true;
 
                 btnReplace.IsEnabled = btnReplaceAll.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled =
-                    btnAddWord.IsEnabled = btnUndo.IsEnabled = txtMisspelledWord.IsEnabled = false;
+                    btnAddWord.IsEnabled = btnAddIgnored.IsEnabled = btnUndo.IsEnabled =
+                    txtMisspelledWord.IsEnabled = false;
                 lblIssue.Content = "_Misspelled Word";
                 txtMisspelledWord.Text = null;
                 lbSuggestions.Items.Clear();
@@ -174,7 +201,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 else
                 {
                     txtMisspelledWord.IsEnabled = btnIgnoreOnce.IsEnabled = btnIgnoreAll.IsEnabled = true;
-                    btnAddWord.IsEnabled = (currentIssue.MisspellingType == MisspellingType.MisspelledWord);
+                    btnAddWord.IsEnabled = btnAddIgnored.IsEnabled = (currentIssue.MisspellingType == MisspellingType.MisspelledWord);
 
                     switch(currentIssue.MisspellingType)
                     {
@@ -252,9 +279,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     else
                         peer = UIElementAutomationPeer.CreatePeerForElement(btnReplace);
 
-                    var provider = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
-
-                    if(provider != null)
+                    if(peer.GetPattern(PatternInterface.Invoke) is IInvokeProvider provider)
                         provider.Invoke();
 
                     break;
@@ -320,6 +345,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void btnAddWord_Click(object sender, RoutedEventArgs e)
         {
             if(this.CurrentIssue != null)
+            {
                 if(ctxAddWord.Items.Count == 0)
                     SpellCheckCommands.AddToDictionary.Execute(null, sender as IInputElement);
                 else
@@ -327,6 +353,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     btnAddWord_ContextMenuOpening(sender, null);
                     ctxAddWord.IsOpen = true;
                 }
+            }
         }
 
         /// <summary>
@@ -336,10 +363,58 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void ctxAddWordMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var item = e.Source as MenuItem;
-
-            if(item != null && this.CurrentIssue != null)
+            if(e.Source is MenuItem item && this.CurrentIssue != null)
                 SpellCheckCommands.AddToDictionary.Execute((CultureInfo)item.Tag, sender as IInputElement);
+        }
+
+        /// <summary>
+        /// Set the properties on the context menu when it opens
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnAddIgnored_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if(ctxAddIgnored.Items.Count == 0)
+                e.Handled = true;
+            else
+            {
+                ctxAddIgnored.PlacementTarget = btnAddIgnored;
+                ctxAddIgnored.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                ContextMenuService.SetPlacement(btnAddIgnored, System.Windows.Controls.Primitives.PlacementMode.Bottom);
+            }
+        }
+
+        /// <summary>
+        /// Add the word to the ignored words file if there is only one file or show the context menu if there
+        /// are multiple files.
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        /// <remarks>Since we're making the change through the dictionary, the <c>TagsChanged</c> event will
+        /// be raised and will notify us of the remaining misspellings.</remarks>
+        private void btnAddIgnored_Click(object sender, RoutedEventArgs e)
+        {
+            if(this.CurrentIssue != null)
+            {
+                if(ctxAddIgnored.Items.Count == 0)
+                    SpellCheckCommands.IgnoreAll.Execute((string)btnAddIgnored.Tag, sender as IInputElement);
+                else
+                {
+                    btnAddIgnored_ContextMenuOpening(sender, null);
+                    ctxAddIgnored.IsOpen = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle Ignore Word context menu item clicks
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void ctxAddIgnored_Click(object sender, RoutedEventArgs e)
+        {
+            if(e.Source is MenuItem item && this.CurrentIssue != null)
+                SpellCheckCommands.IgnoreAll.Execute((string)item.Tag, sender as IInputElement);
         }
         #endregion
     }

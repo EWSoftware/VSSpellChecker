@@ -9,6 +9,7 @@
 			<content>
 				<list class="bullet">
 					<listItem>
+						<!-- Ignore spelling: Koelman -->
 						<para>Fixed the solution/project spell checking tool window so that it correctly handles projects
 nested within solution item folders.  Thanks to Bart Koelman for supplying the suggested fix for this.</para>
 					</listItem>

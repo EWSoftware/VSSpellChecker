@@ -43,16 +43,16 @@ the configuration file.</TextBlock>
 						<ColumnDefinition Width="Auto" />
 					</Grid.ColumnDefinitions>
 					<TextBox Name="txtAdditionalFolder" Margin="3, 0, 3, 0" Grid.Column="0" />
-					<Button Name="btnSelectFolder" Margin="0, 0, 3, 0" Content="..." Width="23" Grid.Column="1"
+					<Button Name="btnSelectFolder" Margin="0, 0, 3, 0" Content="..." MinWidth="23" Grid.Column="1"
 						ToolTip="Select an additional dictionary folder" Click="btnSelectFolder_Click" />
-					<Button Name="btnAddFolder" Content="Add" Width="50" ToolTip="Add new additional folder"
+					<Button Name="btnAddFolder" Content="Add" MinWidth="50" ToolTip="Add new additional folder"
 						Click="btnAddFolder_Click" Grid.Column="2" />
 				</Grid>
 				<ListBox Name="lbAdditionalFolders" Grid.Row="3" Margin="3" />
 				<StackPanel Orientation="Horizontal" Grid.Row="4" Margin="3">
-					<Button Name="btnRemoveFolder" Content="Remove" Width="80" Margin="0, 0, 3, 0"
+					<Button Name="btnRemoveFolder" Content="Remove" MinWidth="80" Margin="0, 0, 3, 0"
 						ToolTip="Remove selected additional folder" Click="btnRemoveFolder_Click" />
-					<Button Name="btnClearFolders" Content="Clear" Width="80"
+					<Button Name="btnClearFolders" Content="Clear" MinWidth="80"
 						ToolTip="Clear all additional folders" Click="btnClearFolders_Click" />
 				</StackPanel>
 			</Grid>
@@ -94,7 +94,7 @@ the configuration file.</TextBlock>
 						<Button Name="btnMoveLanguageDown" Content="Move Down" Margin="3" Padding="10,3"
 							ToolTip="Move the selected language down" Click="btnMoveLanguageDown_Click" />
 					</StackPanel>
-					<ComboBox Name="cboDetermineResxLang" Width="75" Margin="3" Grid.Row="3" Grid.Column="0"
+					<ComboBox Name="cboDetermineResxLang" MinWidth="75" Margin="3" Grid.Row="3" Grid.Column="0"
 						SelectionChanged="Property_Changed" />
 					<TextBlock Margin="3" Grid.Row="3" Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center"
 						Text="Determine localized resource file language from the filename" />
@@ -119,13 +119,13 @@ the configuration file.</TextBlock>
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
-						<Button Grid.Column="0" Name="btnRemoveWord" Content="Remove" Width="80" Margin="3"
+						<Button Grid.Column="0" Name="btnRemoveWord" Content="Remove" MinWidth="80" Margin="3"
 							ToolTip="Remove selected word from user dictionary" HorizontalAlignment="Left"
 							Click="btnRemoveDictionaryWord_Click" />
-						<Button Grid.Column="1" Name="btnImport" Content="Import" Width="80" Margin="3"
-							ToolTip="Import user dictionary words from a file" Click="btnImportDictionary_Click" />
-						<Button Grid.Column="2" Name="btnExport" Content="Export" Width="80" Margin="3"
-							ToolTip="Export user dictionary words to a file" Click="btnExportDictionary_Click" />
+						<Button Grid.Column="1" Name="btnImport" Content="Import" MinWidth="80" Margin="3"
+							ToolTip="Import user dictionary words from a file" Click="btnImport_Click" />
+						<Button Grid.Column="2" Name="btnExport" Content="Export" MinWidth="80" Margin="3"
+							ToolTip="Export user dictionary words to a file" Click="btnExport_Click" />
 					</Grid>
 				</Grid>
 			</GroupBox>

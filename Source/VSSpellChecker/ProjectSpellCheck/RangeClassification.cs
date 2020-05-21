@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RangeClassification.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/31/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 08/22/2017
+// Note    : Copyright 2015-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains an enumerated type that defines the classification for a range of text
@@ -25,6 +25,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
     /// </summary>
     internal enum RangeClassification
     {
+        /// <summary>Undefined</summary>
+        /// <remarks>This can be used to mark spans of text that will be ignored</remarks>
+        Undefined,
+
         /// <summary>Plain text</summary>
         PlainText,
 
@@ -45,6 +49,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         XmlDocComments,
         /// <summary>Quadruple slash comment in code</summary>
         QuadSlashComment,
+        /// <summary>XML comments element inner text</summary>
+        XmlCommentsInnerText,
         /// <summary>Normal string literal in code</summary>
         NormalStringLiteral,
         /// <summary>Verbatim string literal in code</summary>

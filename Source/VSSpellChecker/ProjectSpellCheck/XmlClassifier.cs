@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/13/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 08/18/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify XML file content
@@ -102,8 +102,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 
                 try
                 {
-                    reader.MoveToContent();
-
                     while(!reader.EOF)
                     {
                         switch(reader.NodeType)
@@ -217,7 +215,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     System.Diagnostics.Debug.WriteLine(ex);
                 }
 
-                return spans;
+                return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
             }
         }
 

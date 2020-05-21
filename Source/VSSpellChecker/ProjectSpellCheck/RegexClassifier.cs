@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify text file content using a set of regular expressions
@@ -17,6 +17,8 @@
 // ==============================================================================================================
 // 08/26/2015  EFW  Created the code
 //===============================================================================================================
+
+// Ignore spelling: separ ated
 
 using System;
 using System.Collections.Generic;
@@ -39,6 +41,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         private List<RegexClassification> expressions;
+
         #endregion
 
         #region Properties
@@ -47,10 +50,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the classification expressions
         /// </summary>
-        protected IEnumerable<RegexClassification> Expressions
-        {
-            get { return expressions; }
-        }
+        protected IEnumerable<RegexClassification> Expressions => expressions;
+
         #endregion
 
         #region Constructor
@@ -68,8 +69,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
           XElement classifierConfiguration) : base(filename, spellCheckConfiguration)
         {
             string expression, options;
-            RangeClassification classification;
-            RegexOptions regexOptions;
 
             expressions = new List<RegexClassification>();
 
@@ -83,11 +82,16 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         options = (string)match.Attribute("Options");
 
                         if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options, true,
-                          out regexOptions))
+                          out RegexOptions regexOptions))
+                        {
                             regexOptions = RegexOptions.None;
+                        }
 
-                        if(!Enum.TryParse<RangeClassification>((string)match.Attribute("Classification"), out classification))
+                        if(!Enum.TryParse<RangeClassification>((string)match.Attribute("Classification"),
+                          out RangeClassification classification))
+                        {
                             classification = RangeClassification.PlainText;
+                        }
 
                         try
                         {
@@ -140,7 +144,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             spans = spans.OrderBy(s => s.Span.Start).ToList();
 
-            // Merge intersecting spans and remove entirely overlapped spans
+            // Merge intersecting spans and either remove or split entirely overlapped spans
             for(int idx = 0; idx < spans.Count - 1; idx++)
             {
                 current = spans[idx];
@@ -148,20 +152,35 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                 if(current.Span.IntersectsWith(next.Span))
                 {
-                    // The spans overlap.  If overlapped entirely, remove one or the other.  If partially
-                    // overlapping, combine them and account for the overlap if they are of the same type.
-                    // If overlapped but of a different type, leave them alone except the noted special case.
+                    // The spans overlap.  If overlapped entirely, remove one or the other or split the
+                    // containing span accordingly.  If partially overlapping, combine them and account for the
+                    // overlap if they are of the same type.  If overlapped but of a different type, leave them
+                    // alone except the noted special case.
                     if(current.Span.OverlapsWith(next.Span))
                     {
                         if(current.Span.Contains(next.Span))
                         {
-                            spans.Remove(next);
+                            if(current.Classification == RangeClassification.Undefined ||
+                              next.Classification == RangeClassification.Undefined)
+                            {
+                                SplitSpan(spans, idx, idx + 1);
+                            }
+                            else
+                                spans.Remove(next);
+
                             idx--;
                         }
                         else
                             if(next.Span.Contains(current.Span))
                             {
-                                spans.Remove(current);
+                                if(current.Classification == RangeClassification.Undefined ||
+                                  next.Classification == RangeClassification.Undefined)
+                                {
+                                    SplitSpan(spans, idx + 1, idx);
+                                }
+                                else
+                                    spans.Remove(current);
+
                                 idx--;
                             }
                             else
@@ -203,9 +222,51 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             idx--;
                         }
                 }
+                else
+                    if(current.Classification.ConsecutiveStringLiterals(next.Classification))
+                    {
+                        // See if two string literals of the same type are being concatenated that contain what
+                        // looks like a word spanning both.  This happens a lot in Windows Forms designer code.
+                        // For example: "A string of text that gets separ" + "ated by the designer"
+                        // This can result in a lot of false reports.  The word splitter will attempt to
+                        // join such words for the purposes of spell checking them.
+                        //
+                        // The classifications must match.  You can't for example combine a normal string literal
+                        // with a verbatim string literal or it may generate false reports on things like
+                        // escape sequences in the verbatim string literal.
+                        int pos = current.Span.Start + current.Span.Length, end = next.Span.Start;
+                        bool concatSeen = false;
+
+                        while(pos < end && (this.Text[pos] == '+' || this.Text[pos] == '&' ||
+                          this.Text[pos] == '@' || this.Text[pos] == '$' || this.Text[pos] == 'R' ||
+                          this.Text[pos] == '_' || Char.IsWhiteSpace(this.Text[pos])))
+                        {
+                            if((this.Text[pos] == '@' || this.Text[pos] == '$' || this.Text[pos] == 'R') &&
+                              (pos + 1 >= end || (this.Text[pos + 1] != '\"' && this.Text[pos + 1] != '@' &&
+                              this.Text[pos + 1] != '$')))
+                            {
+                                break;
+                            }
+
+                            if(this.Text[pos] == '+' || this.Text[pos] == '&')
+                                concatSeen = true;
+
+                            pos++;
+                        }
+
+                        if(concatSeen && pos == end)
+                        {
+                            current.Span = new Span(current.Span.Start, next.Span.Start + next.Span.Length -
+                                current.Span.Start);
+                            current.Text = this.Text.Substring(current.Span.Start, current.Span.Length);
+
+                            spans.Remove(next);
+                            idx--;
+                        }
+                    }
             }
 
-            return spans;
+            return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
         }
 
         /// <summary>

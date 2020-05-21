@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlFilesUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
-// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the XML files spell checker configuration settings
@@ -50,22 +50,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "XML Files"; }
-        }
+        public string Title => "XML Files";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "db9ee77f-6932-4df7-bd06-e94f20fc7450"; }
-        }
+        public string HelpUrl => "db9ee77f-6932-4df7-bd06-e94f20fc7450";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -124,7 +115,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbIgnoredXmlElements.Items.Count != 0 || !chkInheritXmlSettings.IsChecked.Value)
             {
-                newElementList = new HashSet<string>(lbIgnoredXmlElements.Items.OfType<string>());
+                newElementList = new HashSet<string>(lbIgnoredXmlElements.Items.Cast<string>());
 
                 if(configuration.ConfigurationType == ConfigurationType.Global &&
                   newElementList.SetEquals(SpellCheckerConfiguration.DefaultIgnoredXmlElements))
@@ -133,7 +124,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbSpellCheckedAttributes.Items.Count != 0 || !chkInheritXmlSettings.IsChecked.Value)
             {
-                newAttributeList = new HashSet<string>(lbSpellCheckedAttributes.Items.OfType<string>());
+                newAttributeList = new HashSet<string>(lbSpellCheckedAttributes.Items.Cast<string>());
 
                 if(configuration.ConfigurationType == ConfigurationType.Global &&
                   newAttributeList.SetEquals(SpellCheckerConfiguration.DefaultSpellCheckedAttributes))
@@ -147,6 +138,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 newElementList);
             configuration.StoreValues(PropertyNames.SpellCheckedXmlAttributes,
                 PropertyNames.SpellCheckedXmlAttributesItem, newAttributeList);
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />
@@ -318,10 +315,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

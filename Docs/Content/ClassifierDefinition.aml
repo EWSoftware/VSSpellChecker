@@ -58,11 +58,19 @@ common to many HTML file types.</para>
 					</listItem>
 
 					<listItem>
+						<para><codeInline>MarkdownClassifier</codeInline> - This classifier is identical to the HTML
+classifier but it is used on markdown files and excludes spans that look like inline or fenced code blocks.  This
+helps reduce the number of false misspelling reports that can result in such spans.</para>
+					</listItem>
+
+					<listItem>
 						<para><codeInline>CodeClassifier</codeInline> - This classifier is geared toward parsing code.  It
 uses a series of regular expressions to identify file content that looks like code comments and literal strings.
 Once done, it takes additional steps to further classify different string literal types (i.e. verbatim and
 interpolated) as well as parsing XML documentation comment elements to remove sections that should not be
-spell checked and include attribute values that should.</para>
+spell checked and include attribute values that should.  Expressions can be added to classify text as undefined.
+Such undefined spans are removed from other classified spans to reduce the number of false misspelling reports
+from the removed spans.</para>
 					</listItem>
 
 					<listItem>
@@ -86,7 +94,7 @@ definitions, override existing ones, and/or add additional recognized file types
 The following sections describe the various elements found in the configuration file.  For an example, see the
 package's <externalLink>
 	<linkText>standard configuration file</linkText>
-	<linkAlternateText>standard configuration file</linkAlternateText>
+	<linkAlternateText>Classifications.config</linkAlternateText>
 	<linkUri>https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/VSSpellChecker/Classifications.config</linkUri>
 	<linkTarget>_blank</linkTarget>
 </externalLink>.  This is also where you can see which file extensions are currently recognized and to which
@@ -165,6 +173,11 @@ attribute defines how the matched text is to be classified.  Below are the most 
 							<listItem>
 								<para><codeInline>RegionDirective</codeInline> - A region directive such as
 <codeInline>#region Private data members</codeInline>.</para>
+							</listItem>
+
+							<listItem>
+								<para><codeInline>Undefined</codeInline> - Some classifiers use this to mark spans of text that
+should be removed from other classifications to reduce false misspelling reports from unwanted text.</para>
 							</listItem>
 
 						</list>

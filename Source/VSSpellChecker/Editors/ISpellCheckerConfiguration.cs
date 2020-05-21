@@ -46,6 +46,13 @@ namespace VisualStudio.SpellChecker.Editors
         string HelpUrl { get; }
 
         /// <summary>
+        /// This is used to determine whether or not the configuration page applies to the given configuration type
+        /// </summary>
+        /// <param name="configurationType">The configuration type to check</param>
+        /// <returns>True if it applies, false if not</returns>
+        bool AppliesTo(ConfigurationType configurationType);
+
+        /// <summary>
         /// Load the configuration settings for the control
         /// </summary>
         /// <param name="configuration">The configuration file from which to load settings</param>

@@ -2,10 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/29/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 01/22/2020
+// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for source code files of any type
 //
@@ -24,7 +23,10 @@
 //                  support for disabling spell checking as you type.
 // 05/23/2013  EFW  Added conditions to exclude XAML elements and include XAML attributes
 // 06/06/2014  EFW  Added support for excluding from spell checking by filename extension
+// 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
+
+// Ignore spelling: sql
 
 using System;
 using System.Collections.Generic;
@@ -50,9 +52,11 @@ namespace VisualStudio.SpellChecker.Tagging
         #region Private data members
         //=====================================================================
 
-        private ITextBuffer buffer;
+        private readonly ITextBuffer buffer;
         private IClassifier classifier;
-        private IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes;
+        private readonly IEnumerable<string> ignoredXmlElements, spellCheckedXmlAttributes, ignoredClassifications;
+        private readonly ClassificationCache classificationCache;
+
         #endregion
 
         #region MEF Imports / Exports
@@ -65,10 +69,7 @@ namespace VisualStudio.SpellChecker.Tagging
         internal class CommentTextTaggerProvider : ITaggerProvider
         {
             [Import]
-            private IClassifierAggregatorService classifierAggregatorService = null;
-
-            [Import]
-            private SpellingServiceFactory spellingService = null;
+            private readonly IClassifierAggregatorService classifierAggregatorService = null;
 
             /// <summary>
             /// Creates a tag provider for the specified buffer
@@ -79,13 +80,20 @@ namespace VisualStudio.SpellChecker.Tagging
             /// service is unavailable.</returns>
             public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null || spellingService == null)
+                if(buffer == null || buffer.ContentType.IsOfType("R Markdown"))
                     return null;
 
-                var config = spellingService.GetConfiguration(buffer);
+#pragma warning disable VSTHRD010
+                var config = SpellingServiceProxy.GetConfiguration(buffer);
+#pragma warning restore VSTHRD010
 
                 if(config == null)
                     return null;
+
+                // Markdown has its own tagger
+                if(buffer.ContentType.IsOfType("Markdown"))
+                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
+                        config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
 
                 // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
                 // configuration options to exclude certain elements from being spell checked if not wanted.
@@ -114,7 +122,8 @@ namespace VisualStudio.SpellChecker.Tagging
                 }
 
                 return new CommentTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
-                    config.IgnoredXmlElements, config.SpellCheckedXmlAttributes) as ITagger<T>;
+                    config.IgnoredXmlElements, config.SpellCheckedXmlAttributes,
+                    config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
             }
         }
         #endregion
@@ -129,16 +138,20 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="classifier">The classifier</param>
         /// <param name="ignoredXmlElements">An optional enumerable list of ignored XML elements</param>
         /// <param name="spellCheckedXmlAttributes">An optional enumerable list of spell checked XML attributes</param>
+        /// <param name="ignoredClassifications">An optional enumerable list of ignored classifications for
+        /// the buffer's content type</param>
         public CommentTextTagger(ITextBuffer buffer, IClassifier classifier, IEnumerable<string> ignoredXmlElements,
-          IEnumerable<string> spellCheckedXmlAttributes)
+          IEnumerable<string> spellCheckedXmlAttributes, IEnumerable<string> ignoredClassifications)
         {
+            classificationCache = ClassificationCache.CacheFor(buffer.ContentType.TypeName);
+
             this.buffer = buffer;
             this.classifier = classifier;
-
             this.classifier.ClassificationChanged += ClassificationChanged;
 
             this.ignoredXmlElements = (ignoredXmlElements ?? Enumerable.Empty<string>());
             this.spellCheckedXmlAttributes = (spellCheckedXmlAttributes ?? Enumerable.Empty<string>());
+            this.ignoredClassifications = (ignoredClassifications ?? Enumerable.Empty<string>());
         }
         #endregion
 
@@ -155,19 +168,31 @@ namespace VisualStudio.SpellChecker.Tagging
             if(classifier == null || spans == null || spans.Count == 0)
                 yield break;
 
-            ITextSnapshot snapshot = spans[0].Snapshot;
-
             foreach(var snapshotSpan in spans)
             {
                 Debug.Assert(snapshotSpan.Snapshot.TextBuffer == buffer);
 
                 foreach(ClassificationSpan classificationSpan in classifier.GetClassificationSpans(snapshotSpan))
                 {
-                    string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant();
+                    string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant(),
+                        originalName = name;
 
                     // Do some conversion to make things simpler below
                     switch(name)
                     {
+                        case "sql string":
+                            // Skip the leading Unicode indicator if present
+                            var span = classificationSpan.Span;
+
+                            if(span.Length > 2 && span.GetText()[0] == 'N')
+                                span = new SnapshotSpan(span.Snapshot, span.Start + 1, span.Length - 1);
+
+                            classificationCache.Add(name);
+
+                            if(!ignoredClassifications.Contains(name))
+                                yield return new TagSpan<NaturalTextTag>(span, new NaturalTextTag());
+                            continue;
+
                         case "vb xml doc attribute":
                             name = "attribute value";
                             break;
@@ -195,7 +220,6 @@ namespace VisualStudio.SpellChecker.Tagging
                         default:
                             if(name == "identifier" || name.StartsWith("xml doc comment - ", StringComparison.Ordinal))
                                 continue;
-
                             break;
                     }
 
@@ -251,7 +275,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
                     // As long as the attribute value appears on the same line as the attribute name, we can
                     // spell check attribute values if wanted.
-                    if(name == "xml attribute" || name == "xaml attribute" || name.Contains("attribute name"))
+                    if(name.EndsWith(" attribute", StringComparison.Ordinal) || name.Contains("attribute name"))
                     {
                         // XAML attribute names may include leading and trailing white space
                         attributeName = classificationSpan.Span.GetText().Trim();
@@ -262,8 +286,8 @@ namespace VisualStudio.SpellChecker.Tagging
                     }
 
                     if((name.Contains("comment") || name.Contains("string") || name.Contains("xml text") ||
-                      name.Contains("xaml text") || name.Contains("attribute value")) &&
-                      !name.Contains("xml doc tag"))
+                      name.Contains("xaml text") || name.Contains("attribute value") ||
+                      name.Equals("text", StringComparison.OrdinalIgnoreCase)) && !name.Contains("xml doc tag"))
                     {
                         // If it's not a wanted attribute name, don't spell check its value
                         if(attributeName != null && name.Contains("attribute value") &&
@@ -282,9 +306,19 @@ namespace VisualStudio.SpellChecker.Tagging
                         // Include files in C/C++ are tagged as a string but we don't want to spell check them
                         if(preprocessorKeywordSeen && name == "string" &&
                           classificationSpan.Span.Snapshot.ContentType.IsOfType("C/C++"))
+                        {
+                            preprocessorKeywordSeen = false;
                             continue;
+                        }
 
                         preprocessorKeywordSeen = false;
+
+                        // Track and ignore classifications by original name to allow the user to be more
+                        // selective if necessary.
+                        classificationCache.Add(originalName);
+
+                        if(ignoredClassifications.Contains(originalName))
+                            continue;
 
                         yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
                     }
@@ -305,10 +339,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <param name="e">The event arguments</param>
         private void ClassificationChanged(object sender, ClassificationChangedEventArgs e)
         {
-            var handler = TagsChanged;
-
-            if(handler != null)
-                handler(this, new SnapshotSpanEventArgs(e.ChangeSpan));
+            this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(e.ChangeSpan));
         }
         #endregion
 
@@ -323,6 +354,8 @@ namespace VisualStudio.SpellChecker.Tagging
                 classifier.ClassificationChanged -= ClassificationChanged;
                 classifier = null;
             }
+
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

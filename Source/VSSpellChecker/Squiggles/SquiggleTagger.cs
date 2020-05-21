@@ -73,8 +73,7 @@ namespace VisualStudio.SpellChecker.Squiggles
 #pragma warning disable 414
         [Export(typeof(ErrorTypeDefinition))]
         [Name(SquiggleTagger.SpellingErrorType)]
-        [DisplayName(SquiggleTagger.SpellingErrorType)]
-        ErrorTypeDefinition SpellingErrorTypeDefinition = null;
+        private readonly ErrorTypeDefinition SpellingErrorTypeDefinition = null;
 #pragma warning restore 414
 
         /// <summary>
@@ -198,10 +197,7 @@ namespace VisualStudio.SpellChecker.Squiggles
         /// <param name="subjectSpan">The snapshot span to use for the event arguments</param>
         private void RaiseTagsChangedEvent(SnapshotSpan subjectSpan)
         {
-            EventHandler<SnapshotSpanEventArgs> handler = this.TagsChanged;
-
-            if(handler != null)
-                handler(this, new SnapshotSpanEventArgs(subjectSpan));
+            this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(subjectSpan));
         }
         #endregion
     }

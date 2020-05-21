@@ -114,6 +114,13 @@ add them to the list.</para>
 							</listItem>
 
 							<listItem>
+								<para><ui>Copy as Ignore Spelling directive</ui> - This will copy the current issue's word to the
+clipboard as an Ignore Spelling directive.  This is useful if you are adding infrequently used words to a file
+that you do not want to be flagged as misspellings.  You can copy and paste them into a comment in the file to
+have them ignored within it.</para>
+							</listItem>
+
+							<listItem>
 								<para><ui>Export</ui> - This contains a submenu with three options: Export All Issues, Export
 Project Issues (only those related to the project of the current issue), and Export File Issues (only those
 related to the file of the current issue).  The selected issues will be exported to a comma-separated values
@@ -121,6 +128,13 @@ related to the file of the current issue).  The selected issues will be exported
 whether or not you want to open the file.</para>
 							</listItem>
 
+							<listItem>
+								<para><ui>Edit Configuration File</ui> - This contains a submenu with an option for each of the
+configuration files associated with the selected issue.  This allows you to open them for editing so that you can
+adjust the options, add ignored files, add ignored words, etc.  The global configuration file is always listed
+first followed by any solution, project, folder, and file related configuration files that were used to create
+the options used to spell check the file for the selected issue.</para>
+							</listItem>
 						</list>
 					</listItem>
 

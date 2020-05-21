@@ -24,6 +24,7 @@ types implemented by third-party VSPackages.</para>
 					</listItem>
 
 					<listItem>
+						<!-- Ignore spelling: htmlx -->
 						<para>Added the "htmlx" content type to the HTML tagger so that files such as <localUri>.cshtml</localUri>
 files in Visual Studio 2013 Razor projects are spell checked correctly.</para>
 					</listItem>

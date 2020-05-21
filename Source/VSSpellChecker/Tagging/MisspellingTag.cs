@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MisspellingTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/25/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that represents a misspelling tag
@@ -43,18 +43,18 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <summary>
         /// This read-only property returns the misspelling type
         /// </summary>
-        public MisspellingType MisspellingType { get; private set; }
+        public MisspellingType MisspellingType { get; }
 
         /// <summary>
         /// This read-only property returns the span containing the misspelled word
         /// </summary>
-        public ITrackingSpan Span { get; private set; }
+        public ITrackingSpan Span { get; }
 
         /// <summary>
         /// This read-only property returns the span for deleting a doubled word which includes leading
         /// whitespace.
         /// </summary>
-        public ITrackingSpan DeleteWordSpan { get; private set; }
+        public ITrackingSpan DeleteWordSpan { get; }
 
         /// <summary>
         /// This is used to get or set the suggestions that can be used to replace the misspelled word
@@ -64,10 +64,14 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <summary>
         /// This read-only property returns the misspelled or doubled word
         /// </summary>
-        public string Word
-        {
-            get { return this.Span.GetText(this.Span.TextBuffer.CurrentSnapshot); }
-        }
+        public string Word => this.Span.GetText(this.Span.TextBuffer.CurrentSnapshot);
+
+        /// <summary>
+        /// This is used to indicate whether or not to escape apostrophes when replacing words
+        /// </summary>
+        /// <remarks>This will be true for language types such as SQL, false for all others</remarks>
+        public bool EscapeApostrophes { get; set; }
+
         #endregion
 
         #region Constructors

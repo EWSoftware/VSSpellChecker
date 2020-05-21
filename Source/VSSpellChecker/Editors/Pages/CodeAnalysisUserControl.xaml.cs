@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeAnalysisUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the code analysis dictionary configuration settings
@@ -48,22 +48,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "Code Analysis Dictionaries"; }
-        }
+        public string Title => "Code Analysis Dictionaries";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "e01bd3d9-c525-4407-8c65-fcdb64539299"; }
-        }
+        public string HelpUrl => "e01bd3d9-c525-4407-8c65-fcdb64539299";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -146,6 +137,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
+        }
+
+        /// <inheritdoc />
         public event EventHandler ConfigurationChanged;
 
         #endregion
@@ -160,10 +157,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

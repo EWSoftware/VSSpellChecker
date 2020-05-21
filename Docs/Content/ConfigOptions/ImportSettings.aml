@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="b156d5ad-347f-4f63-89dc-4f945953ae41" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category lets you specify another spell checker configuration file from which settings will be
+imported when the containing configuration file is loaded for use.  This allows you to import settings from a
+common, non-project-related location such as a company or team-specific configuration file, or from a settings
+file in a shared project that isn't part of the current solution or project's folder structure such as a Git
+submodule.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<para>To specify the configuration file, enter its name in the text box or use the button to browse for
+the file.  If specifying it in the global configuration, the path should be fully qualified.  For non-global
+configuration files (solution, project, folder, or file configurations), relative paths will be considered
+relative to the location of the configuration file containing the import file reference.</para>
+
+				<alert class="important">
+					<para>When specifying the import file in the global configuration, the settings in the imported file
+will override settings in the global configuration.  This is because the global settings file does not inherit
+from anything else.</para>
+
+					<para>When importing a configuration file into any other non-global configuration file, the settings in
+the containing file will override settings from the imported file.  This allows you to import a common set of
+base configuration settings and then selectively override them in the containing configuration file.</para>
+				</alert>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

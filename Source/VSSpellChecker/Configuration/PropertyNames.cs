@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PropertyNames.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/10/2020
+// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the class containing the configuration property name constants
 //
@@ -14,9 +13,10 @@
 // documentation, and source files.
 //
 //    Date     Who  Comments
-//===============================================================================================================
+// ==============================================================================================================
 // 02/01/2015  EFW  Refactored configuration settings
 // 07/22/2015  EFW  Added support for selecting multiple languages
+// 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
 namespace VisualStudio.SpellChecker.Configuration
@@ -28,6 +28,11 @@ namespace VisualStudio.SpellChecker.Configuration
     {
         #region Property name constants
         //=====================================================================
+
+        /// <summary>
+        /// Import settings file
+        /// </summary>
+        public const string ImportSettingsFile = "ImportSettingsFile";
 
         /// <summary>
         /// Selected languages list
@@ -185,6 +190,11 @@ namespace VisualStudio.SpellChecker.Configuration
         public const string IgnoredWords = "IgnoredWords";
 
         /// <summary>
+        /// Ignored words file
+        /// </summary>
+        public const string IgnoredWordsFile = "IgnoredWordsFile";
+
+        /// <summary>
         /// Ignored words item
         /// </summary>
         public const string IgnoredWordsItem = "Ignore";
@@ -228,6 +238,56 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Spell checked XML attributes item
         /// </summary>
         public const string SpellCheckedXmlAttributesItem = "SpellCheck";
+
+        /// <summary>
+        /// Inherit ignored classifications
+        /// </summary>
+        public const string InheritIgnoredClassifications = "InheritIgnoredClassifications";
+
+        /// <summary>
+        /// Ignored classifications
+        /// </summary>
+        public const string IgnoredClassifications = "IgnoredClassifications";
+
+        /// <summary>
+        /// Content type item
+        /// </summary>
+        public const string ContentType = "ContentType";
+
+        /// <summary>
+        /// Content type name attribute
+        /// </summary>
+        public const string ContentTypeName = "Name";
+
+        /// <summary>
+        /// Ignored classification item
+        /// </summary>
+        public const string Classification = "Classification";
+
+        /// <summary>
+        /// File type classification prefix
+        /// </summary>
+        public const string FileType = "File Type: ";
+
+        /// <summary>
+        /// Extension classification prefix
+        /// </summary>
+        public const string Extension = "Extension: ";
+
+        /// <summary>
+        /// Enable WPF text box spell checking
+        /// </summary>
+        public const string EnableWpfTextBoxSpellChecking = "EnableWpfTextBoxSpellChecking";
+
+        /// <summary>
+        /// Visual Studio ID exclusion expressions
+        /// </summary>
+        public const string VisualStudioIdExclusions = "VisualStudioIdExclusions";
+
+        /// <summary>
+        /// Visual Studio ID Exclusion expression item
+        /// </summary>
+        public const string VisualStudioIdExclusionItem = "IdExpression";
 
         /// <summary>
         /// Code analysis dictionary - Import code analysis dictionaries

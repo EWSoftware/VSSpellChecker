@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/12/2016
-// Note    : Copyright 2010-2016, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2016, Eric Woodruff, All rights reserved
+// Updated : 08/09/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that handles splitting spans of text up into individual words for spell checking
@@ -19,6 +19,8 @@
 // 09/02/2015  EFW  Moved the word splitting code into its own class for use in project spell checking as well
 // 10/27/2015  EFW  Added support for ignoring mnemonics
 //===============================================================================================================
+
+// Ignore spelling: Za tp sp nis ta ttest ransform xh uhhhh Uhhhhhhhh xh hh
 
 using System;
 using System.Collections.Generic;
@@ -39,10 +41,6 @@ namespace VisualStudio.SpellChecker
     {
         #region Private data members
         //=====================================================================
-
-        // Word break characters (\u201C/\u201D = Unicode quotes, \u2026 = Ellipsis character).
-        // Specifically excludes: _ . ' @ &
-        private const string wordBreakChars = " \t!\"#$%()*+,-/:;<=>?[\\]^`{|}~\u201C\u201D\u2026";
 
         // Regular expressions used to find things that look like XML elements and URLs
         internal static Regex XmlElement = new Regex(@"<[A-Za-z/]+?.*?>");
@@ -70,11 +68,17 @@ namespace VisualStudio.SpellChecker
         public RangeClassification Classification { get; set; }
 
         /// <summary>
+        /// This is used to get or set whether the file contains C-style code
+        /// </summary>
+        /// <remarks>This affects whether or not escape sequence checking will be performed</remarks>
+        public bool IsCStyleCode { get; set; }
+
+        /// <summary>
         /// The mnemonic character
         /// </summary>
         public char Mnemonic
         {
-            get { return mnemonic; }
+            get => mnemonic;
             set
             {
                 if(value != '&' && value != '_')
@@ -83,6 +87,17 @@ namespace VisualStudio.SpellChecker
                 mnemonic = value;
             }
         }
+
+        /// <summary>
+        /// This is used to determine whether or not the word splitter detects words that appear to span
+        /// string literals.
+        /// </summary>
+        /// <value>False by default.  If set to true, the word splitter will try to detect words that appear
+        /// to span string literals (i.e. "A string with a sp" + "lit word").  The span returned will include
+        /// the concatenating text.  The caller is responsible for removing it before spell checking the word.
+        /// This can be done with the <see cref="ActualWord"/> method.</value>
+        public bool DetectWordsSpanningStringLiterals { get; set; }
+
         #endregion
 
         #region Constructor
@@ -118,8 +133,7 @@ namespace VisualStudio.SpellChecker
                 // positive in file paths (i.e. \Folder\transform\File.txt flags "ransform" as a misspelled word
                 // because of the lowercase "t" following the backslash) but I can live with that.  If they are
                 // common enough, they can be added to the configuration's ignored word list as an escaped word.
-                // This is skipped in solution/project spell checking for verbatim strings.
-                if(text[i] == '\\' && this.Classification != RangeClassification.VerbatimStringLiteral)
+                if(text[i] == '\\')
                 {
                     end = i + 1;
 
@@ -155,6 +169,33 @@ namespace VisualStudio.SpellChecker
                                 }
                         }
 
+                        switch(this.Classification)
+                        {
+                            // For these classifications, skip further checking.  These aren't likely to contain
+                            // escape sequences that need skipping.  Note that we only get a classification when
+                            // doing solution/project spell checking.
+                            case RangeClassification.PlainText:
+                            case RangeClassification.XmlFileComment:
+                            case RangeClassification.XmlFileCData:
+                            case RangeClassification.AttributeValue:
+                            case RangeClassification.InnerText:
+                            case RangeClassification.VerbatimStringLiteral:
+                            case RangeClassification.RegionDirective:
+                                continue;
+
+                            default:
+                                // For all others, base it on whether or not this is C-style code
+                                if(!this.IsCStyleCode)
+                                    continue;
+
+                                // If it looks like an verbatim string, skip it too
+                                if((text.Length > 2 && (text[0] == '@' || text[0] == 'R') && text[1] == '"') ||
+                                  (text.Length > 3 && ((text[0] == '$' && text[1] == '@' && text[2] == '"') ||
+                                  (text[0] == '@' && text[1] == '$' && text[2] == '"'))))
+                                    continue;
+                                break;
+                        }
+
                         // Escape sequences
                         switch(text[end])
                         {
@@ -173,12 +214,13 @@ namespace VisualStudio.SpellChecker
                                 i++;
                                 break;
 
-                            case 'x':   // xh[h[h[h]]] or xhh[hh]
+                            case 'x':   // xh[h[h[h]]]
                                 while(++end < text.Length && (end - i) < 6 && (Char.IsDigit(text[end]) ||
                                   (Char.ToLower(text[end]) >= 'a' && Char.ToLower(text[end]) <= 'f')))
                                     ;
 
-                                i = --end;
+                                if((--end - i) > 1)
+                                    i = end;
                                 break;
 
                             case 'u':   // uhhhh
@@ -240,9 +282,12 @@ namespace VisualStudio.SpellChecker
                 {
                     end = i + 1;
 
-                    if(i > 0 && text.Length > 2 && text[0] == '$' && text[1] == '"')
+                    if(i > 0 && ((text.Length > 2 && text[0] == '$' && text[1] == '"') ||
+                      (text.Length > 3 && ((text[0] == '$' && text[1] == '@' && text[2] == '"') ||
+                      (text[0] == '@' && text[1] == '$' && text[2] == '"')))))
                     {
-                        // C# 6 string format: $"{Property}".  Find the end accounting for escaped braces
+                        // Interpolated string: $"{Property}" or $@"\{Property}\".  Find the end accounting for
+                        // escaped braces.
                         while(++end < text.Length)
                             if(text[end] == '}')
                             {
@@ -399,17 +444,59 @@ namespace VisualStudio.SpellChecker
                 }
 
                 // Skip leading apostrophes
-                while(i < end && text[i] == '\'')
+                while(i < end && (text[i] == '\'' || text[i] == '\u2019'))
                     i++;
 
                 // Skip trailing apostrophes, periods, at-signs, and mnemonics
-                while(--end > i && (text[end] == '\'' || text[end] == '.' || text[end] == '@' ||
-                  text[end] == mnemonic))
+                while(--end > i && (text[end] == '\'' || text[end] == '\u2019' || text[end] == '.' ||
+                  text[end] == '@' || text[end] == mnemonic))
                     ;
 
                 end++;    // Move back to last match
 
-                // Ignore anything less than two characters
+                if(this.DetectWordsSpanningStringLiterals && end < text.Length && text[end] == '\"' &&
+                  this.Classification.IsStringLiteral())
+                {
+                    int spanEnd = end + 1;
+                    bool concatSeen = false;
+
+                    while(spanEnd < text.Length && (text[spanEnd] == '+' || text[spanEnd] == '&' ||
+                      text[spanEnd] == '@' || text[spanEnd] == '$' || text[spanEnd] == 'R' ||
+                      text[spanEnd] == '_' || Char.IsWhiteSpace(text[spanEnd])))
+                    {
+                        if((text[spanEnd] == '@' || text[spanEnd] == '$' || text[spanEnd] == 'R') &&
+                          (spanEnd + 1 >= text.Length || (text[spanEnd + 1] != '\"' && text[spanEnd + 1] != '@' &&
+                          text[spanEnd + 1] != '$')))
+                        {
+                            break;
+                        }
+
+                        if(text[spanEnd] == '+' || text[spanEnd] == '&')
+                            concatSeen = true;
+
+                        spanEnd++;
+                    }
+
+                    if(concatSeen && spanEnd + 1 < text.Length && text[spanEnd] == '\"' &&
+                      !this.IsWordBreakCharacter(text[spanEnd + 1], false))
+                    {
+                        spanEnd++;
+
+                        while(spanEnd < text.Length && !this.IsWordBreakCharacter(text[spanEnd], false))
+                            spanEnd++;
+
+                        if(spanEnd < text.Length)
+                        {
+                            while(--spanEnd > i && (text[spanEnd] == '\'' || text[spanEnd] == '\u2019' ||
+                              text[spanEnd] == '.' || text[spanEnd] == '@' || text[spanEnd] == mnemonic))
+                                ;
+
+                            end = spanEnd + 1;
+                        }
+                    }
+                }
+
+                // Ignore empty strings and single characters
                 if(end - i > 1)
                 {
                     if(this.Configuration.IgnoreWordsInMixedCase)
@@ -480,10 +567,26 @@ namespace VisualStudio.SpellChecker
         /// <returns>True if the character is a word break, false if not</returns>
         private bool IsWordBreakCharacter(char c, bool includingMnemonic)
         {
-            return wordBreakChars.Contains(c) || Char.IsWhiteSpace(c) ||
-                (c == '_' && mnemonic != '_' && this.Configuration.TreatUnderscoreAsSeparator) ||
-                (c == mnemonic && (!this.Configuration.IgnoreMnemonics || includingMnemonic)) ||
-                ((c == '.' || c == '@') && !this.Configuration.IgnoreFilenamesAndEMailAddresses);
+            if(c == mnemonic)
+                return (!this.Configuration.IgnoreMnemonics || includingMnemonic);
+
+            switch(c)
+            {
+                case '\'':      // These could be apostrophes
+                case '\u2019':
+                    return false;
+
+                case '.':
+                case '@':
+                    return !this.Configuration.IgnoreFilenamesAndEMailAddresses;
+
+                case '_':
+                    return this.Configuration.TreatUnderscoreAsSeparator;
+
+                default:
+                    return (Char.IsWhiteSpace(c) || Char.IsPunctuation(c) || Char.IsSymbol(c) ||
+                        Char.IsControl(c));
+            }
         }
 
         /// <summary>
@@ -554,6 +657,35 @@ namespace VisualStudio.SpellChecker
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// This is used to get the actual word from a span excluding any concatenating text from words that
+        /// span string literals.
+        /// </summary>
+        /// <param name="containingText">The text containing the word span</param>
+        /// <param name="wordSpan">The word span location</param>
+        /// <returns>The word at the given span location without any concatenation text that may be within it</returns>
+        internal static string ActualWord(string containingText, Span wordSpan)
+        {
+            string word = containingText.Substring(wordSpan.Start, wordSpan.Length);
+
+            int concatPos = word.IndexOf('\"');
+
+            if(concatPos != -1)
+            {
+                int end = concatPos + 1;
+
+                while(end < word.Length && word[end] != '\"')
+                    end++;
+
+                if(end < word.Length - 1)
+                    word = word.Substring(0, concatPos) + word.Substring(end + 1);
+                else
+                    word = word.Substring(0, concatPos);
+            }
+
+            return word;
         }
         #endregion
     }

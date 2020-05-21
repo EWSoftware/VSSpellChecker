@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/04/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/17/2020
+// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the interactive spell check tool window
 //
@@ -44,7 +43,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         #region Private data members
         //=====================================================================
 
-        private InteractiveSpellCheckControl ucSpellCheck;
+        private readonly InteractiveSpellCheckControl ucSpellCheck;
         private uint selectionMonitorCookie, docTableCookie;
         private object scope;
 
@@ -75,16 +74,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             base.Initialize();
 
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var ms = Utility.GetServiceFromPackage<IVsMonitorSelection, SVsShellMonitorSelection>(true);
 
             if(ms != null && ms.AdviseSelectionEvents(this, out selectionMonitorCookie) == VSConstants.S_OK)
             {
                 // Get the current window frame and connect to it if it's a document editor
-                object value;
-
-                if(ms.GetCurrentElementValue((uint)Constants.SEID_WindowFrame, out value) == VSConstants.S_OK)
-                    ((IVsSelectionEvents)this).OnElementValueChanged((uint)Constants.SEID_WindowFrame,
-                        null, value);
+                if(ms.GetCurrentElementValue((uint)Constants.SEID_WindowFrame, out object value) == VSConstants.S_OK)
+                    ((IVsSelectionEvents)this).OnElementValueChanged((uint)Constants.SEID_WindowFrame, null, value);
             }
 
             var rdt = Utility.GetServiceFromPackage<IVsRunningDocumentTable, SVsRunningDocumentTable>(true);
@@ -99,6 +97,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             var ms = Utility.GetServiceFromPackage<IVsMonitorSelection, SVsShellMonitorSelection>(true);
 
             if(ms != null)
@@ -180,46 +180,44 @@ namespace VisualStudio.SpellChecker.ToolWindows
         int IVsSelectionEvents.OnElementValueChanged(uint elementid, object varValueOld, object varValueNew)
         {
             IWpfTextView wpfTextView = null;
-            object value;
+
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             if((Constants)elementid == Constants.SEID_WindowFrame)
             {
-                var frame = varValueNew as IVsWindowFrame;
-
                 ucSpellCheck.ParentFocused = false;
 
-                if(frame != null)
+                if(varValueNew is IVsWindowFrame frame)
                     if(this.Frame == frame)
                         ucSpellCheck.ParentFocused = true;
                     else
-                        if(frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out value) == VSConstants.S_OK)
-                            if((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild ||
-                              (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float)
+                        if(frame.GetProperty((int)__VSFPROPID.VSFPROPID_FrameMode, out object value) == VSConstants.S_OK &&
+                          ((VSFRAMEMODE)value == VSFRAMEMODE.VSFM_MdiChild || (VSFRAMEMODE)value == VSFRAMEMODE.VSFM_Float))
+                        {
+                            var textView = VsShellUtilities.GetTextView(frame);
+
+                            if(textView != null)
                             {
-                                var textView = VsShellUtilities.GetTextView(frame);
+                                var componentModel = Utility.GetServiceFromPackage<IComponentModel, SComponentModel>(true);
 
-                                if(textView != null)
+                                if(componentModel != null)
                                 {
-                                    var componentModel = Utility.GetServiceFromPackage<IComponentModel, SComponentModel>(true);
+                                    var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
 
-                                    if(componentModel != null)
-                                    {
-                                        var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
-
-                                        if(editorAdapterFactoryService != null)
-                                            try
-                                            {
-                                                wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
-                                            }
-                                            catch(ArgumentException)
-                                            {
-                                                // Not an IWpfTextView so ignore it
-                                            }
-                                    }
-
-                                    ucSpellCheck.CurrentTextView = wpfTextView;
+                                    if(editorAdapterFactoryService != null)
+                                        try
+                                        {
+                                            wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
+                                        }
+                                        catch(ArgumentException)
+                                        {
+                                            // Not an IWpfTextView so ignore it
+                                        }
                                 }
+
+                                ucSpellCheck.CurrentTextView = wpfTextView;
                             }
+                        }
             }
 
             return VSConstants.S_OK;
@@ -249,6 +247,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <remarks>When an editor window closes, clear the current spell checking target</remarks>
         public int OnAfterDocumentWindowHide(uint docCookie, IVsWindowFrame pFrame)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             if(VsShellUtilities.GetTextView(pFrame) != null)
                 ucSpellCheck.CurrentTextView = null;
 

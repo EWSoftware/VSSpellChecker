@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/10/2016
-// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/21/2020
+// Note    : Copyright 2014-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the spell checker dictionary settings
 //
@@ -31,8 +30,8 @@ using System.Windows.Controls;
 using EnvDTE;
 using EnvDTE80;
 
-using Microsoft.Win32;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.Win32;
 
 using VisualStudio.SpellChecker.Configuration;
 
@@ -52,7 +51,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         private ConfigurationType configType;
         private string configFilePath, relatedFilename;
         private bool isGlobal;
-        private List<string> selectedLanguages;
+        private readonly List<string> selectedLanguages;
 
         #endregion
 
@@ -71,22 +70,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "Dictionary Settings"; }
-        }
+        public string Title => "Dictionary Settings";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "af34b863-6a1c-41ed-bcf2-48a714686519"; }
-        }
+        public string HelpUrl => "af34b863-6a1c-41ed-bcf2-48a714686519";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -142,7 +132,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             selectedLanguages.AddRange(configuration.ToValues(PropertyNames.SelectedLanguages,
               PropertyNames.SelectedLanguagesItem, true).Distinct(StringComparer.OrdinalIgnoreCase));
 
+#pragma warning disable VSTHRD010
             this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
 
         /// <inheritdoc />
@@ -158,7 +150,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             isGlobal = configuration.ConfigurationType == ConfigurationType.Global;
 
             if(lbAdditionalFolders.Items.Count != 0)
-                newList = new HashSet<string>(lbAdditionalFolders.Items.OfType<string>(),
+                newList = new HashSet<string>(lbAdditionalFolders.Items.Cast<string>(),
                     StringComparer.OrdinalIgnoreCase);
 
             if(!isGlobal)
@@ -169,7 +161,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 PropertyNames.AdditionalDictionaryFoldersItem, newList);
 
             configuration.StoreValues(PropertyNames.SelectedLanguages, PropertyNames.SelectedLanguagesItem,
-                lbSelectedLanguages.Items.OfType<SpellCheckerDictionary>().Select(d => d.Culture.Name));
+                lbSelectedLanguages.Items.Cast<SpellCheckerDictionary>().Select(d => d.Culture.Name));
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />
@@ -196,7 +194,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 defaultLang = ((SpellCheckerDictionary)cboAvailableLanguages.SelectedItem).Culture;
 
                 selectedLanguages.Clear();
-                selectedLanguages.AddRange(lbSelectedLanguages.Items.OfType<SpellCheckerDictionary>().Select(
+                selectedLanguages.AddRange(lbSelectedLanguages.Items.Cast<SpellCheckerDictionary>().Select(
                     d => d.Culture.Name));
             }
 
@@ -212,13 +210,15 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             // user dictionary content across all configuration files within a solution and/or project
             if(chkInheritAdditionalFolders.IsChecked.Value)
             {
+#pragma warning disable VSTHRD010
                 var parentConfig = this.GenerateParentConfiguration();
+#pragma warning restore VSTHRD010
 
                 additionalFolders.AddRange(parentConfig.AdditionalDictionaryFolders);
             }
 
             // Fully qualify relative paths with the configuration file path
-            foreach(string folder in lbAdditionalFolders.Items.OfType<string>())
+            foreach(string folder in lbAdditionalFolders.Items.Cast<string>())
             {
                 if(folder.IndexOf('%') != -1 || Path.IsPathRooted(folder))
                     additionalFolders.Add(folder);
@@ -290,6 +290,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// inherited additional dictionary folders to use.</remarks>
         private SpellCheckerConfiguration GenerateParentConfiguration()
         {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
             ProjectItem projectItem, fileItem;
             string filename, projectPath;
 
@@ -324,10 +326,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     // Find the project item for the file we are opening
                     if(configType != ConfigurationType.Folder)
-                        projectItem = solution.FindProjectItemForFile(relatedFilename);
+                        projectItem = solution.FindProjectItemForFile(Path.Combine(configFilePath, relatedFilename));
                     else
-                        projectItem = solution.FindProjectItemForFile(Path.Combine(relatedFilename,
-                            relatedFilename + ".vsspell"));
+                        projectItem = solution.FindProjectItemForFile(Path.Combine(configFilePath, relatedFilename + ".vsspell"));
 
                     if(projectItem != null)
                     {
@@ -419,7 +420,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 if(dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
                     txtAdditionalFolder.Text = dlg.SelectedPath;
+#pragma warning disable VSTHRD010
                     btnAddFolder_Click(sender, e);
+#pragma warning restore VSTHRD010
                 }
             }
         }
@@ -457,9 +460,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 {
                     lbAdditionalFolders.Items.Add(txtAdditionalFolder.Text);
                     txtAdditionalFolder.Text = null;
+
+#pragma warning disable VSTHRD010
                     Property_Changed(sender, e);
 
                     this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
                 }
                 else
                     MessageBox.Show("The specified folder does not appear to exist", PackageResources.PackageTitle,
@@ -490,9 +496,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 lbAdditionalFolders.SelectedIndex = idx;
             }
 
+#pragma warning disable VSTHRD010
             Property_Changed(sender, e);
 
             this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -507,9 +515,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             var sd = new SortDescription { Direction = ListSortDirection.Ascending };
             lbAdditionalFolders.Items.SortDescriptions.Add(sd);
 
+#pragma warning disable VSTHRD010
             Property_Changed(sender, e);
 
             this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -610,7 +620,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             {
                 lbSelectedLanguages.SelectedIndex = lbSelectedLanguages.Items.Add(cboAvailableLanguages.SelectedItem);
                 lbSelectedLanguages.ScrollIntoView(lbSelectedLanguages.SelectedItem);
+#pragma warning disable VSTHRD010
                 Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
             }
         }
 
@@ -632,7 +644,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                 lbSelectedLanguages.SelectedIndex = idx;
 
+#pragma warning disable VSTHRD010
                 Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
             }
         }
 
@@ -654,7 +668,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     lbSelectedLanguages.Items.Insert(idx - 1, item);
                     lbSelectedLanguages.SelectedIndex = idx - 1;
 
+#pragma warning disable VSTHRD010
                     Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
                 }
             }
         }
@@ -677,7 +693,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     lbSelectedLanguages.Items.Insert(idx + 1, item);
                     lbSelectedLanguages.SelectedIndex = idx + 1;
 
+#pragma warning disable VSTHRD010
                     Property_Changed(sender, e);
+#pragma warning restore VSTHRD010
                 }
             }
         }
@@ -691,6 +709,15 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             int idx = lbUserDictionary.SelectedIndex;
             string word = null;
+
+            var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
+
+            if(!GlobalDictionary.IsReadyForUse(selectedDictionary.Culture))
+            {
+                MessageBox.Show("The selected dictionary is still loading.  Please try again in a few seconds.",
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
 
             if(idx != -1)
             {
@@ -711,13 +738,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             try
             {
-                var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
-
                 if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
-                  selectedDictionary.DictionaryFilePath, VSSpellCheckerPackage.Instance))
+                  selectedDictionary.DictionaryFilePath))
                 {
                     File.WriteAllLines(selectedDictionary.UserDictionaryFilePath,
-                        lbUserDictionary.Items.OfType<string>());
+                        lbUserDictionary.Items.Cast<string>());
 
                     if(!String.IsNullOrWhiteSpace(word))
                         GlobalDictionary.RemoveWord(selectedDictionary.Culture, word);
@@ -737,51 +762,67 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <summary>
-        /// Import words from a text file
+        /// Import words from a user dictionary file
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnImportDictionary_Click(object sender, RoutedEventArgs e)
+        private void btnImport_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
+            var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
-            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (*.txt)|*.txt|All Files (*.*)|*.*";
-            dlg.CheckPathExists = dlg.CheckFileExists = true;
+            if(!GlobalDictionary.IsReadyForUse(selectedDictionary.Culture))
+            {
+                MessageBox.Show("The selected dictionary is still loading.  Please try again in a few seconds.",
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
 
-            if((dlg.ShowDialog() ?? false))
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|" +
+                    "StyleCop Settings Files (*.stylecop)|*.stylecop|Text documents (*.txt)|*.txt|" +
+                    "All Files (*.*)|*.*",
+                CheckFileExists = true
+            };
+
+            if(dlg.ShowDialog() ?? false)
             {
                 try
                 {
-                    // Parse words based on the common word break characters and add unique instances to the
-                    // user dictionary if not already there excluding those containing digits and those less than
-                    // three characters in length.
-                    var uniqueWords = File.ReadAllText(dlg.FileName).Split(new[] { ',', '/', '<', '>', '?', ';',
-                        ':', '\"', '[', ']', '\\', '{', '}', '|', '-', '=', '+', '~', '!', '#', '$', '%', '^',
-                        '&', '*', '(', ')', ' ', '_', '.', '\'', '@', '\t', '\r', '\n' },
-                        StringSplitOptions.RemoveEmptyEntries)
-                            .Except(lbUserDictionary.Items.OfType<string>())
-                            .Distinct()
-                            .Where(w => w.Length > 2 && w.IndexOfAny(
-                                new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
+                    var uniqueWords = new HashSet<string>(Utility.LoadUserDictionary(dlg.FileName, true, false),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    if(uniqueWords.Count == 0)
+                    {
+                        MessageBox.Show("Unable to load any words from the selected file", PackageResources.PackageTitle,
+                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        return;
+                    }
+
+                    if(lbUserDictionary.Items.Count != 0 && MessageBox.Show("Do you want to replace the " +
+                      "existing list of words?  Click Yes to replace them or No to merge the new words into " +
+                      "the existing list.", PackageResources.PackageTitle, MessageBoxButton.YesNo,
+                      MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
+                    {
+                        uniqueWords.UnionWith(lbUserDictionary.Items.Cast<string>());
+                    }
 
                     try
                     {
-                        var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
-
                         if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
-                          selectedDictionary.DictionaryFilePath, VSSpellCheckerPackage.Instance))
+                          selectedDictionary.DictionaryFilePath))
                         {
                             File.WriteAllLines(selectedDictionary.UserDictionaryFilePath, uniqueWords);
 
                             GlobalDictionary.LoadUserDictionaryFile(selectedDictionary.Culture);
 
                             cboAvailableLanguages_SelectionChanged(sender, new SelectionChangedEventArgs(
-                                e.RoutedEvent, new object[] { }, new object[] { }));
+                                e.RoutedEvent, Array.Empty<object>(), Array.Empty<object>()));
                         }
                         else
                             MessageBox.Show("Unable to save user dictionary.  The file could not be added to " +
-                                "the project, could not be checked out, or is read-only",
+                                "the project, could not be checked out, or is read-only.",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     }
                     catch(Exception ex)
@@ -800,24 +841,55 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <summary>
-        /// Export words to a text file
+        /// Export words to a user dictionary file
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnExportDictionary_Click(object sender, RoutedEventArgs e)
+        private void btnExport_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
-
-            dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            dlg.FileName = "UserDictionary.dic";
-            dlg.DefaultExt = ".dic";
-            dlg.Filter = "Dictionary Files (*.dic)|*.dic|Text documents (*.txt)|*.txt|All Files (*.*)|*.*";
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                FileName = "UserDictionary.dic",
+                DefaultExt = ".dic",
+                OverwritePrompt = false,
+                Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|Text documents (*.txt)|*.txt|" +
+                    "All Files (*.*)|*.*"
+            };
 
             if((dlg.ShowDialog() ?? false))
             {
                 try
                 {
-                    File.WriteAllLines(dlg.FileName, lbUserDictionary.Items.OfType<string>());
+                    var uniqueWords = new HashSet<string>(lbUserDictionary.Items.Cast<string>(),
+                        StringComparer.OrdinalIgnoreCase);
+                    bool replaceWords = true;
+
+                    if(File.Exists(dlg.FileName))
+                    {
+                        if(!dlg.FileName.CanWriteToUserWordsFile(null))
+                        {
+                            MessageBox.Show("File is read-only or could not be checked out",
+                                PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            return;
+                        }
+
+                        MessageBoxResult result = MessageBox.Show("Do you want to replace the words in the " +
+                          "existing file?  Click Yes to replace them, No to merge the new words into the " +
+                          "existing file, or Cancel to stop and do nothing.", PackageResources.PackageTitle,
+                          MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
+
+                        if(result == MessageBoxResult.Cancel)
+                            return;
+
+                        if(result == MessageBoxResult.No)
+                        {
+                            uniqueWords.UnionWith(Utility.LoadUserDictionary(dlg.FileName, true, true));
+                            replaceWords = false;
+                        }
+                    }
+
+                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, true, uniqueWords.OrderBy(w => w));
                 }
                 catch(Exception ex)
                 {
@@ -835,13 +907,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
 
-            if(handler != null)
-                handler(this, EventArgs.Empty);
-
+#pragma warning disable VSTHRD010
             if(sender == chkInheritAdditionalFolders && cboAvailableLanguages.Items.Count != 0)
                 this.LoadAvailableLanguages();
+#pragma warning restore VSTHRD010
         }
         #endregion
     }

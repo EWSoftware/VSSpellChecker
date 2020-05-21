@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2015
-// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 03/19/2020
+// Note    : Copyright 2014-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored words spell checker configuration settings
 //
@@ -21,11 +20,20 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.Win32;
+
 using VisualStudio.SpellChecker.Configuration;
+
+using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
@@ -34,6 +42,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
     /// </summary>
     public partial class IgnoredWordsUserControl : UserControl, ISpellCheckerConfiguration
     {
+        #region Private data members
+        //=====================================================================
+
+        private string configFilePath;
+
+        #endregion
+
         #region Constructor
         //=====================================================================
 
@@ -50,28 +65,21 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "Ignored Words"; }
-        }
+        public string Title => "Ignored Words";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "c592c4d8-7387-47fe-9b79-28bf0168f447"; }
-        }
+        public string HelpUrl => "c592c4d8-7387-47fe-9b79-28bf0168f447";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
         {
             IEnumerable<string> words;
             lbIgnoredWords.Items.Clear();
+
+            configFilePath = Path.GetDirectoryName(configuration.Filename);
 
             if(configuration.ConfigurationType == ConfigurationType.Global)
             {
@@ -80,6 +88,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
             else
                 chkInheritIgnoredWords.IsChecked = configuration.ToBoolean(PropertyNames.InheritIgnoredWords);
+
+            txtIgnoredWordsFile.Text = configuration.ToString(PropertyNames.IgnoredWordsFile);
+
+            if(String.IsNullOrWhiteSpace(txtIgnoredWordsFile.Text) && configuration.ConfigurationType == ConfigurationType.Global)
+                txtIgnoredWordsFile.Text = "IgnoredWords.dic";
 
             if(configuration.HasProperty(PropertyNames.IgnoredWords))
                 words = configuration.ToValues(PropertyNames.IgnoredWords, PropertyNames.IgnoredWordsItem);
@@ -102,9 +115,11 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             HashSet<string> newList = null;
 
+            configFilePath = Path.GetDirectoryName(configuration.Filename);
+
             if(lbIgnoredWords.Items.Count != 0 || !chkInheritIgnoredWords.IsChecked.Value)
             {
-                newList = new HashSet<string>(lbIgnoredWords.Items.OfType<string>(), StringComparer.OrdinalIgnoreCase);
+                newList = new HashSet<string>(lbIgnoredWords.Items.Cast<string>(), StringComparer.OrdinalIgnoreCase);
 
                 if(configuration.ConfigurationType == ConfigurationType.Global &&
                   newList.SetEquals(SpellCheckerConfiguration.DefaultIgnoredWords))
@@ -115,6 +130,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 configuration.StoreProperty(PropertyNames.InheritIgnoredWords, chkInheritIgnoredWords.IsChecked);
 
             configuration.StoreValues(PropertyNames.IgnoredWords, PropertyNames.IgnoredWordsItem, newList);
+            configuration.StoreProperty(PropertyNames.IgnoredWordsFile, txtIgnoredWordsFile.Text.Trim());
+        }
+
+        /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
         }
 
         /// <inheritdoc />
@@ -149,7 +171,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         if(addWord.Length > 1 && addWord[0] == '\\' && !escapedLetters.Contains(addWord[1]))
                             addWord = addWord.Substring(1);
 
-                    if(addWord.Length > 2)
+                    if(addWord.Length > 1)
                     {
                         idx = lbIgnoredWords.Items.IndexOf(addWord);
 
@@ -214,16 +236,214 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <summary>
+        /// Import ignored words from a user dictionary file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|" +
+                    "StyleCop Settings Files (*.stylecop)|*.stylecop|Text documents (*.txt)|*.txt|" +
+                    "All Files (*.*)|*.*",
+                CheckFileExists = true
+            };
+
+            if((dlg.ShowDialog() ?? false))
+            {
+                try
+                {
+                    var uniqueWords = new HashSet<string>(Utility.LoadUserDictionary(dlg.FileName, false, false),
+                        StringComparer.OrdinalIgnoreCase);
+
+                    if(uniqueWords.Count == 0)
+                    {
+                        MessageBox.Show("Unable to load any words from the selected file", PackageResources.PackageTitle,
+                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        return;
+                    }
+
+                    if(lbIgnoredWords.Items.Count != 0 && MessageBox.Show("Do you want to replace the " +
+                      "existing list of words?  Click Yes to replace them or No to merge the new words into " +
+                      "the existing list.", PackageResources.PackageTitle, MessageBoxButton.YesNo,
+                      MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
+                    {
+                        uniqueWords.UnionWith(lbIgnoredWords.Items.Cast<string>());
+                    }
+
+                    lbIgnoredWords.Items.Clear();
+
+                    foreach(string w in uniqueWords)
+                        lbIgnoredWords.Items.Add(w);
+
+                    var sd = new SortDescription { Direction = ListSortDirection.Ascending };
+
+                    lbIgnoredWords.Items.SortDescriptions.Add(sd);
+
+                    Property_Changed(sender, e);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(String.Format(CultureInfo.CurrentCulture, "Unable to load ignored words " +
+                        "from '{0}'.  Reason: {1}", dlg.FileName, ex.Message), PackageResources.PackageTitle,
+                        MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Export ignored words to a file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnExport_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                FileName = "IgnoredWords.dic",
+                DefaultExt = ".dic",
+                OverwritePrompt = false,
+                Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|Text documents (*.txt)|*.txt|" +
+                    "All Files (*.*)|*.*"
+            };
+
+            if((dlg.ShowDialog() ?? false))
+            {
+                try
+                {
+                    var uniqueWords = new HashSet<string>(lbIgnoredWords.Items.Cast<string>(),
+                        StringComparer.OrdinalIgnoreCase);
+                    bool replaceWords = true;
+
+                    if(File.Exists(dlg.FileName))
+                    {
+                        if(!dlg.FileName.CanWriteToUserWordsFile(null))
+                        {
+                            MessageBox.Show("File is read-only or could not be checked out",
+                                PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                            return;
+                        }
+
+                        MessageBoxResult result = MessageBox.Show("Do you want to replace the words in the " +
+                          "existing file?  Click Yes to replace them, No to merge the new words into the " +
+                          "existing file, or Cancel to stop and do nothing.", PackageResources.PackageTitle,
+                          MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.No);
+
+                        if(result == MessageBoxResult.Cancel)
+                            return;
+
+                        if(result == MessageBoxResult.No)
+                        {
+                            uniqueWords.UnionWith(Utility.LoadUserDictionary(dlg.FileName, false, true));
+                            replaceWords = false;
+                        }
+                    }
+
+                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, false, uniqueWords.OrderBy(w => w));
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(String.Format(CultureInfo.CurrentCulture, "Unable to save ignored words " +
+                        "to '{0}'.  Reason: {1}", dlg.FileName, ex.Message), PackageResources.PackageTitle,
+                        MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Select an ignored words file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnSelectFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog
+            {
+                InitialDirectory = Directory.Exists(configFilePath) ? configFilePath :
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Filter = "Ignored Words Files (*.dic,*.txt)|*.dic;*.txt|All Files (*.*)|*.*",
+                CheckFileExists = false
+            };
+
+            if(dlg.ShowDialog() ?? false)
+            {
+                string filename = dlg.FileName;
+
+                if(filename.StartsWith(configFilePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    filename = Path.Combine(Path.GetDirectoryName(filename).ToRelativePath(configFilePath),
+                        Path.GetFileName(filename));
+                }
+
+                txtIgnoredWordsFile.Text = filename;
+            }
+        }
+
+        /// <summary>
+        /// Edit the ignored words file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnEditFile_Click(object sender, RoutedEventArgs e)
+        {
+            string filename = txtIgnoredWordsFile.Text;
+
+            if(String.IsNullOrWhiteSpace(filename))
+            {
+                MessageBox.Show("Specify or select an ignored words file first", PackageResources.PackageTitle,
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            if(!Path.IsPathRooted(filename))
+                filename = Path.GetFullPath(Path.Combine(configFilePath, filename));
+
+            try
+            {
+                if(!File.Exists(filename))
+                {
+                    if(MessageBox.Show("The ignored words file does not exist.  Do you want to create it?",
+                      PackageResources.PackageTitle, MessageBoxButton.YesNo, MessageBoxImage.Question,
+                      MessageBoxResult.No) == MessageBoxResult.No)
+                    {
+                        return;
+                    }
+
+                    File.WriteAllText(filename, String.Empty);
+                }
+
+                ThreadHelper.ThrowIfNotOnUIThread();
+
+                var openDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, SVsUIShellOpenDocument>(false);
+
+                if(openDoc != null && openDoc.OpenDocumentViaProject(filename, VSConstants.LOGVIEWID_TextView,
+                  out _, out _, out _, out IVsWindowFrame ppWindowFrame) == VSConstants.S_OK)
+                {
+                    // On occasion, the call above is successful but we get a null frame for some reason
+                    if(ppWindowFrame != null)
+                        ppWindowFrame.Show();
+                }
+            }
+            catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+
+                MessageBox.Show("Unable to open the specified ignored words file for editing.  Reason: " + ex.Message,
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+        }
+
+        /// <summary>
         /// Notify the parent of property changes that affect the file's dirty state
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

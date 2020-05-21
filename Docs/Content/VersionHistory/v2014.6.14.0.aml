@@ -62,6 +62,7 @@ contain Cyrillic or Asian text.</para>
 category used to disable spell checking of various C# source code elements.</para>
 					</listItem>
 
+					<!-- Ignore spelling: Ruhmann -->
 					<listItem>
 						<para>Merged changes from David Ruhmann to ignore Doxygen tags (escaped words) and enhance the word
 breaking code.</para>

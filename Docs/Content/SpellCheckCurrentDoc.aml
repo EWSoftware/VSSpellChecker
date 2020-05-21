@@ -63,6 +63,19 @@ be disabled for code analysis related misspellings (unrecognized word, deprecate
 the suggested replacements are what should replace the word and the term should not be added to the dictionary.</para>
 					</listItem>
 
+					<listItem>
+						<para><ui>Add Ignored</ui> - This will add the word to the ignored words file so that it is no longer
+flagged as a misspelled word.  Ignored words will not be presented as suggestions for other misspelled words.
+Edit the ignored words file to remove words from it.  The ignored words files can be specified in any
+configuration file.  The global configuration uses <localUri>IgnoredWords.dic</localUri> stored in the same
+location as the global configuration file.  The configuration file editor has an option to open the file for
+editing.  If ignored words files are specified in multiple configurations, the <ui>Add Ignored</ui> button will
+show a dropdown menu with an option for each available ignored words file.  Choosing an option will add the word
+to the selected file.  Note that this button will be disabled for code analysis related misspellings
+(unrecognized word, deprecated term, and compound term) since the suggested replacements are what should replace
+the word and the term should not be ignored.</para>
+					</listItem>
+
 				</list>
 
 				<para>As with the spell check as you type option, if you are spell checking against multiple languages,
@@ -105,6 +118,7 @@ options.</para>
 		<relatedTopics>
 			<link xlink:href="e8f67bc4-a8f8-4e50-ab5a-876599f3a645" />
 			<link xlink:href="fa790577-88c0-4141-b8f4-d8b70f625cfd" />
+			<link xlink:href="3094ee74-88ae-4355-b702-23dcd55b4197" />
 			<link xlink:href="e339cac1-9783-4c2a-919f-88436c78fef8" />
 			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
 		</relatedTopics>

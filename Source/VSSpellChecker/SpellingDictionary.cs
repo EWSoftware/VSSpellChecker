@@ -2,10 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 10/28/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/04/2020
+// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling dictionary service
 //
@@ -43,7 +42,7 @@ namespace VisualStudio.SpellChecker
         #region Private data members
         //=====================================================================
 
-        private IEnumerable<string> ignoredWords;
+        private readonly IEnumerable<string> ignoredWords;
 
         #endregion
 
@@ -53,15 +52,19 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This read-only property returns the dictionary count
         /// </summary>
-        public int DictionaryCount { get; private set; }
+        public int DictionaryCount { get; }
 
         /// <summary>
         /// This read-only property returns the list of dictionaries being used for spell checking
         /// </summary>
-        public IEnumerable<GlobalDictionary> Dictionaries { get; private set; }
+        public IEnumerable<GlobalDictionary> Dictionaries { get; }
+
+        /// <summary>
+        /// This read-only property is used to see if the dictionary is fully initialized and ready for use
+        /// </summary>
+        public bool IsReadyForUse => this.Dictionaries.All(d => d.IsInitialized);
 
         #endregion
-
 
         #region Constructor
         //=====================================================================
@@ -171,10 +174,7 @@ namespace VisualStudio.SpellChecker
         /// <param name="span">The tracking span used to locate the word to ignore once</param>
         public void IgnoreWordOnce(ITrackingSpan span)
         {
-            var handler = IgnoreOnce;
-
-            if(handler != null)
-                handler(this, new SpellingEventArgs(span));
+            IgnoreOnce?.Invoke(this, new SpellingEventArgs(span));
         }
 
         /// <summary>
@@ -218,10 +218,7 @@ namespace VisualStudio.SpellChecker
         /// <param name="word">The word that triggered the update</param>
         private void OnDictionaryUpdated(string word)
         {
-            var handler = DictionaryUpdated;
-
-            if(handler != null)
-                handler(this, new SpellingEventArgs(word));
+            DictionaryUpdated?.Invoke(this, new SpellingEventArgs(word));
         }
 
         /// <summary>
@@ -237,10 +234,7 @@ namespace VisualStudio.SpellChecker
         /// <param name="replacement">The suggestion to use as the replacement</param>
         public void ReplaceAllOccurrences(string word, ISpellingSuggestion replacement)
         {
-            var handler = ReplaceAll;
-
-            if(handler != null)
-                handler(this, new SpellingEventArgs(word, replacement));
+            ReplaceAll?.Invoke(this, new SpellingEventArgs(word, replacement));
         }
         #endregion
 

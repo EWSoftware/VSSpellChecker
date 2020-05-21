@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCommands.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/16/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 08/22/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class for the spell checker's routed UI commands
@@ -262,6 +262,28 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         typeof(SpellCheckCommands));
 
                 return exportFileIssues;
+            }
+        }
+        #endregion
+
+        #region Copy as Ignore Spelling Directive command
+        //=====================================================================
+
+        private static RoutedUICommand copyAsDirective;
+
+        /// <summary>
+        /// Copy as Ignore Spelling directive
+        /// </summary>
+        /// <remarks>This command has no default key binding</remarks>
+        public static RoutedUICommand CopyAsDirective
+        {
+            get
+            {
+                if(copyAsDirective == null)
+                    copyAsDirective = new RoutedUICommand("Copy as Ignore Spelling Directive", "CopyAsDirective",
+                        typeof(SpellCheckCommands));
+
+                return copyAsDirective;
             }
         }
         #endregion

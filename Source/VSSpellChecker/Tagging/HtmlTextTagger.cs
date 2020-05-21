@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/19/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 08/07/2018
+// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for HTML files
@@ -51,9 +51,11 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <summary>
         /// HTML text tagger provider
         /// </summary>
-        /// <remarks>The content types for this provider are "html" which covers regular HTML and "htmlx" which
-        /// covers derived types such as HTML files in Razor projects.</remarks>
-        [Export(typeof(ITaggerProvider)), ContentType("html"), ContentType("htmlx"), TagType(typeof(NaturalTextTag))]
+        /// <remarks>The content types for this provider are "html" which covers regular HTML, "htmlx" which
+        /// covers derived types such as HTML files in Razor projects, and "code++.PHP" and "code++.Markdown"
+        /// which cover PHP and markdown files when no extension is present that handles them.</remarks>
+        [Export(typeof(ITaggerProvider)), ContentType("html"), ContentType("htmlx"), ContentType("code++.PHP"),
+          ContentType("code++.Markdown"), TagType(typeof(NaturalTextTag))]
         internal class HtmlTextTaggerProvider : ITaggerProvider
         {
             [Import]

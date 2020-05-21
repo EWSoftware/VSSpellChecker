@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="f9804039-6ccd-48b3-be55-789d78c00ca7" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed a crash caused by cached instances of the preview object in margin lightbulb suggestion
+lists.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the C-style code tagger to exclude filenames after <codeInline>#include</codeInline>
+directives in C++ files.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed handling of interpolated verbatim strings when they span lines in the C-style code tagger.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the solution/project spell check so that it includes the solution configuration file
+if present when scanning a single project.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the solution/project spell check classification configurations to exclude filenames
+after <codeInline>#include</codeInline> directives in C++ files.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the solution/project spell check classification configurations to include text after
+<codeInline>#pragma region</codeInline> directives in C++ files and <codeInline>#endregion</codeInline>
+directives in C# files.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

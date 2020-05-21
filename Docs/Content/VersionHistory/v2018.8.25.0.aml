@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="67af1ab3-1e2b-43ee-81a0-588b0cb0d336" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+
+				<list class="bullet">
+					<listItem>
+						<para>Fixed obtaining text from open editors in the solution/project spell checks so that it works
+for document editors that implement <codeInline>IVsTextBufferProvider</codeInline> rather than
+<codeInline>IVsTextLines</codeInline> such as ASP.NET editors with the split design/edit views.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed a couple of issues that were preventing adding project-level spell check configuration
+files to C++ projects.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the markdown tagger to handle the more specific classifications now being used by the
+markdown extension.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for C++ raw strings to treat them like C# verbatim strings.  The handling of
+verbatim and interpolated strings in the C# tagger and the word splitter was also improved.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for the Visual Studio 2017 PHP content type in the HTML tagger.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for parsing inline ASP.NET/PHP script blocks and HTML <codeInline>script</codeInline>
+elements in web pages using the appropriate language classifier.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for Move to Next Spelling Issue and Move to Prior Spelling Issue commands on the
+spell checker menu.  These can be <link xlink:href="63d5096c-6695-441d-886a-01a120f2894a">bound to keyboard
+shortcuts</link> to make navigating between issues easier if you don't want to open the interactive spell
+checking tool window.</para>
+					</listItem>
+
+					<listItem>
+						<para>Words ignored once in open text editors are now ignored in the related files when doing a
+solution/project spell check.</para>
+					</listItem>
+
+					<listItem>
+						<para>Implemented support for ignored classifications to allow ignoring specific text classifications
+by content type/classification in the text editor and file type/extension in solution/project spell checking.
+This allows functionality similar to the options in the C# category of configuration properties without having to
+have a tagger specific to each language.</para>
+
+						<para>As a result, the configuration options "Ignore comments in HTML files" and "Ignore comments in
+XML files" in the XML category of project properties were removed.  They will be converted to the equivalent
+ignored classifications if enabled in older configuration files.  The <codeInline>string</codeInline>
+classification for <codeInline>EditorConfig</codeInline> files was also moved to the default ignored
+classifications in the global configuration file.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for an <link xlink:href="3094ee74-88ae-4355-b702-23dcd55b4197">Ignore Spelling
+directive</link>.  This is a specific text string that can be placed in a comment within a file to ignore words
+that you do not want spell checked.  See the help topic for more information.  An option was added to the
+solution/project spell check tool window context menu to copy the word to the clipboard using the Ignore Spelling
+directive format ready for pasting into a file.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

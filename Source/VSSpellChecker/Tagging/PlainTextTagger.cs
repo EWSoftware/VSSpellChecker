@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PlainTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/19/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 08/18/2017
+// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to provide tags for plain text files
@@ -56,8 +56,11 @@ namespace VisualStudio.SpellChecker.Tagging
             {
                 // If no buffer, not enabled, or the content type is one of the more derived types, don't use
                 // this one.
-                if(buffer == null || buffer.ContentType.IsOfType("code") || buffer.ContentType.IsOfType("html"))
+                if(buffer == null || buffer.ContentType.IsOfType("code") || buffer.ContentType.IsOfType("html") ||
+                  buffer.ContentType.IsOfType("RDoc"))
+                {
                     return null;
+                }
 
                 return new PlainTextTagger() as ITagger<T>;
             }

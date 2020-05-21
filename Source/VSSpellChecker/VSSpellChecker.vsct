@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-
 	<!-- This is the file that defines the actual layout and type of the commands.  It is divided in different
 			 sections (e.g. command definition, command placement, ...), with each defining a specific set of
 			 properties.  See the comment before each section for more details about how to use it. -->
@@ -52,6 +51,24 @@
 				</Strings>
 			</Button>
 
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0101">
+				<Strings>
+					<CommandName>cmdidSpellCheckNextIssue</CommandName>
+					<ButtonText>Move to Next Spelling Issue</ButtonText>
+					<MenuText>Move to Next Spelling Issue</MenuText>
+					<ToolTipText>Move to the next spelling issue in the current document</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
+				<Strings>
+					<CommandName>cmdidSpellCheckPriorIssue</CommandName>
+					<ButtonText>Move to Prior Spelling Issue</ButtonText>
+					<MenuText>Move to Prior Spelling Issue</MenuText>
+					<ToolTipText>Move to the prior spelling issue in the current document</ToolTipText>
+				</Strings>
+			</Button>
+
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckEntireSolution" priority="0x0100">
 				<Strings>
 					<CommandName>cmdidSpellCheckEntireSolution</CommandName>
@@ -79,7 +96,16 @@
 				</Strings>
 			</Button>
 
-			<Button guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckOpenDocuments" priority="0x0103">
+				<Strings>
+					<CommandName>cmdidSpellCheckOpenDocuments</CommandName>
+					<ButtonText>Spell Check All Open Documents</ButtonText>
+					<MenuText>Spell Check All Open Documents</MenuText>
+					<ToolTipText>Spell check all open documents</ToolTipText>
+				</Strings>
+			</Button>
+
+			<Button guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0104">
 				<Strings>
 					<CommandName>cmdidViewSpellCheckToolWindow</CommandName>
 					<ButtonText>Open the Solution/Project Spell Checker Window</ButtonText>
@@ -138,6 +164,12 @@
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
 		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0101">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
+		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0102">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
 		</CommandPlacement>
@@ -171,7 +203,10 @@
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckSelectedItems" priority="0x0102">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
 		</CommandPlacement>
-		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0103">
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckOpenDocuments" priority="0x0103">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
+		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="ViewSpellCheckToolWindow" priority="0x0104">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerSolution" />
 		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0xFFF0">
@@ -193,12 +228,19 @@
 		<GuidSymbol name="guidPackage" value="{86b8a6ea-6a96-4e31-b31d-943e86581421}" />
 
 		<!-- This is the GUID used to group the menu commands together -->
-		<GuidSymbol name="guidVSSpellCheckerCommandSet" value="{34482677-bc69-4bd3-8b8b-1ecd347f609d}">
+		<!--
+		*************************************************************************************************************
+		NOTE: The GUID for guidVSSpellCheckerCommandSet must match the VS2017 package GUID in Guids.cs
+		*************************************************************************************************************
+		-->
+		<GuidSymbol name="guidVSSpellCheckerCommandSet" value="{43EA967E-0DE2-4136-8E52-C6DCFB5C2748}">
 			<IDSymbol name="SpellCheckerConfig" value="0x0001" />
 			<IDSymbol name="SpellCheckerGroup" value="0x0004" />
 			<IDSymbol name="SpellCheckerActions" value="0x0008" />
 			<IDSymbol name="SpellCheckerConfiguration" value="0x0003" />
 			<IDSymbol name="SpellCheckInteractive" value="0x0007" />
+			<IDSymbol name="SpellCheckNextIssue" value="0x0015" />
+			<IDSymbol name="SpellCheckPriorIssue" value="0x0016" />
 			<IDSymbol name="SpellCheckerMenu" value="0x0002" />
 			<IDSymbol name="SpellCheckerSolution" value="0x0014" />
 			<IDSymbol name="AddSpellCheckerConfigForItem" value="0x0009" />
@@ -207,6 +249,7 @@
 			<IDSymbol name="SpellCheckEntireSolution" value="0x0010" />
 			<IDSymbol name="SpellCheckCurrentProject" value="0x0011" />
 			<IDSymbol name="SpellCheckSelectedItems" value="0x0012" />
+			<IDSymbol name="SpellCheckOpenDocuments" value="0x0017" />
 			<IDSymbol name="ViewSpellCheckToolWindow" value="0x0013" />
 			<IDSymbol name="SolutionExplorerAddCtx" value="0x000C" />
 			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />

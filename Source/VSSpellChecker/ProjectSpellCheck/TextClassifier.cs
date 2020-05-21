@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains an abstract base class used to implement text classification for the content of various
@@ -17,12 +17,16 @@
 //    Date     Who  Comments
 // ==============================================================================================================
 // 08/26/2015  EFW  Created the code
+// 08/18/2018  EFW  Added support for excluding by range classification
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+
+using Microsoft.VisualStudio.Text;
 
 using VisualStudio.SpellChecker.Configuration;
 
@@ -37,6 +41,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         //=====================================================================
 
         private List<int> lineOffsets;
+        private List<RangeClassification> ignoredClassifications;
 
         #endregion
 
@@ -46,12 +51,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the filename
         /// </summary>
-        public string Filename { get; private set; }
+        public string Filename { get; }
 
         /// <summary>
         /// This read-only property returns the spell checker configuration for the file
         /// </summary>
-        public SpellCheckerConfiguration SpellCheckConfiguration { get; private set; }
+        public SpellCheckerConfiguration SpellCheckConfiguration { get; }
+
+        /// <summary>
+        /// This is used to get an enumerable list of ignored range classifications that should not be spell checked
+        /// </summary>
+        public IEnumerable<RangeClassification> IgnoredClassifications => ignoredClassifications;
 
         /// <summary>
         /// This read-only property returns the text contained in the file
@@ -72,13 +82,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <summary>
         /// This read-only property returns the line count
         /// </summary>
-        public int LineCount
-        {
-            get
-            {
-                return lineOffsets.Count - 1;
-            }
-        }
+        public int LineCount => lineOffsets.Count - 1;
 
         /// <summary>
         /// This read-only property is used to get the given line from the text
@@ -89,8 +93,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             get
             {
-                if(line < 1 || line > lineOffsets.Count - 2)
+                if(line < 1 || line > lineOffsets.Count - 1)
                     return String.Empty;
+
+                if(line == lineOffsets.Count - 1)
+                    return this.Text.Substring(lineOffsets[line - 1]);
 
                 line--;
 
@@ -112,10 +119,32 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Filename = filename;
             this.SpellCheckConfiguration = spellCheckConfiguration;
 
-            using(StreamReader sr = new StreamReader(filename, Encoding.Default, true))
-            {
-                this.SetText(sr.ReadToEnd());
-            }
+            ignoredClassifications = new List<RangeClassification>();
+
+            // Get the ignored classifications based on the extension.  If there are none, check for the
+            // file type.
+            string ext = Path.GetExtension(filename);
+
+            if(!String.IsNullOrWhiteSpace(ext))
+                ext = ext.Substring(1);
+
+            var exclusions = spellCheckConfiguration.IgnoredClassificationsFor(PropertyNames.Extension + ext);
+
+            if(!exclusions.Any())
+                exclusions = spellCheckConfiguration.IgnoredClassificationsFor(PropertyNames.FileType +
+                    ClassifierFactory.ClassifierIdFor(filename));
+
+            foreach(string exclusion in exclusions)
+                if(Enum.TryParse<RangeClassification>(exclusion, out RangeClassification rangeType))
+                    ignoredClassifications.Add(rangeType);
+
+            if(!File.Exists(filename))
+                this.SetText(String.Empty);
+            else
+                using(StreamReader sr = new StreamReader(filename, Encoding.Default, true))
+                {
+                    this.SetText(sr.ReadToEnd());
+                }
         }
         #endregion
 
@@ -128,15 +157,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <param name="text">The text to use</param>
         /// <remarks>By default, the constructor calls this to set the text to the file content.  It can be
         /// called by other code to set alternate text such as from an open editor.</remarks>
-        public void SetText(string text)
+        public virtual void SetText(string text)
         {
             int length = text.Length;
 
             this.Text = text;
 
-            lineOffsets = new List<int>(length / 10 + 1);
-
-            lineOffsets.Add(0);
+            lineOffsets = new List<int>(length / 10 + 1) { 0 };
 
             for(int i = 0; i < length; i++)
                 switch(text[i])
@@ -193,9 +220,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>The line number containing the offset</returns>
         public int GetLineNumber(int offset)
         {
-            int line, column;
-
-            this.GetPosition(offset, out line, out column);
+            this.GetPosition(offset, out int line, out int column);
 
             return line;
         }
@@ -276,6 +301,82 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             }
 
             return low;
+        }
+
+        /// <summary>
+        /// This is used to split the first span, which completely contains the second, into two or three
+        /// contiguous non-overlapping spans.
+        /// </summary>
+        /// <param name="spans">The span collection</param>
+        /// <param name="firstSpanIdx">The first span containing the second span</param>
+        /// <param name="secondSpanIdx">The second span contained within the first span</param>
+        /// <remarks>This allows the classifier to exclude unwanted spans of text from a larger span that is
+        /// wanted.  For example, code spans within a larger span of plain text.</remarks>
+        protected static void SplitSpan(IList<SpellCheckSpan> spans, int firstSpanIdx, int secondSpanIdx)
+        {
+            SpellCheckSpan firstSpan = spans[firstSpanIdx], secondSpan = spans[secondSpanIdx];
+
+            if(secondSpanIdx < firstSpanIdx)
+            {
+                int i = firstSpanIdx;
+                firstSpanIdx = secondSpanIdx;
+                secondSpanIdx = i;
+            }
+
+            spans.RemoveAt(secondSpanIdx);
+            spans.RemoveAt(firstSpanIdx);
+
+            // Two identical spans were classified under different rules or the containing span is undefined
+            if(firstSpan.Span == secondSpan.Span || firstSpan.Classification == RangeClassification.Undefined)
+            {
+                spans.Insert(firstSpanIdx, firstSpan);
+                return;
+            }
+
+            // The second span is at the start of the first span
+            if(firstSpan.Span.Start == secondSpan.Span.Start)
+            {
+                spans.Insert(firstSpanIdx, secondSpan);
+                spans.Insert(secondSpanIdx, new SpellCheckSpan
+                {
+                    Span = new Span(secondSpan.Span.Start + secondSpan.Span.Length,
+                        firstSpan.Span.Length - secondSpan.Span.Length),
+                    Text = firstSpan.Text.Substring(secondSpan.Span.Length),
+                    Classification = firstSpan.Classification
+                });
+
+                return;
+            }
+
+            // The second span is at the end of the first span
+            if(firstSpan.Span.End == secondSpan.Span.End)
+            {
+                spans.Insert(firstSpanIdx, new SpellCheckSpan
+                {
+                    Span = new Span(firstSpan.Span.Start, firstSpan.Span.Length - secondSpan.Span.Length),
+                    Text = firstSpan.Text.Substring(0, secondSpan.Span.Start - firstSpan.Span.Start),
+                    Classification = firstSpan.Classification
+                });
+                spans.Insert(secondSpanIdx, secondSpan);
+
+                return;
+            }
+
+            // The second span splits the first span into two parts
+            spans.Insert(firstSpanIdx, new SpellCheckSpan
+            {
+                Span = new Span(firstSpan.Span.Start, secondSpan.Span.Start - firstSpan.Span.Start),
+                Text = firstSpan.Text.Substring(0, secondSpan.Span.Start - firstSpan.Span.Start),
+                Classification = firstSpan.Classification
+            });
+            spans.Insert(secondSpanIdx, secondSpan);
+            spans.Insert(secondSpanIdx + 1, new SpellCheckSpan
+            {
+                Span = new Span(secondSpan.Span.Start + secondSpan.Span.Length,
+                    firstSpan.Span.End - secondSpan.Span.End),
+                Text = firstSpan.Text.Substring(secondSpan.Span.Start - firstSpan.Span.Start + secondSpan.Span.Length),
+                Classification = firstSpan.Classification
+            });
         }
         #endregion
 

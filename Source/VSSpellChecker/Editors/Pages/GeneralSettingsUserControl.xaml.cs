@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2016
-// Note    : Copyright 2014-2016, Eric Woodruff, All rights reserved
+// Updated : 09/02/2018
+// Note    : Copyright 2014-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a user control used to edit the general spell checker configuration settings
@@ -48,22 +48,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <inheritdoc />
-        public UserControl Control
-        {
-            get { return this; }
-        }
+        public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title
-        {
-            get { return "General Settings"; }
-        }
+        public string Title => "General Settings";
 
         /// <inheritdoc />
-        public string HelpUrl
-        {
-            get { return "b4a8726f-5bee-48a4-81a9-00b1be332607"; }
-        }
+        public string HelpUrl => "b4a8726f-5bee-48a4-81a9-00b1be332607";
 
         /// <inheritdoc />
         public void LoadConfiguration(SpellingConfigurationFile configuration)
@@ -167,6 +158,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <inheritdoc />
+        public bool AppliesTo(ConfigurationType configurationType)
+        {
+            return true;
+        }
+
+        /// <inheritdoc />
         public event EventHandler ConfigurationChanged;
 
         #endregion
@@ -181,10 +178,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
-            var handler = ConfigurationChanged;
-
-            if(handler != null)
-                handler(this, EventArgs.Empty);
+            this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
     }

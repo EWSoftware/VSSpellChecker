@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/13/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 09/17/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to classify HTML file content
@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using Microsoft.VisualStudio.Text;
 
@@ -35,6 +36,26 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
     /// </summary>
     internal class HtmlClassifier : TextClassifier
     {
+        #region Private data members
+        //=====================================================================
+
+        private string pageLanguage;
+
+        private static readonly Regex reAspPhpScript = new Regex(@"<(%|\?).*?(\1)>", RegexOptions.Singleline);
+        private static readonly Regex rePageLanguage = new Regex("\xFE%@.*Language=\"(?<Language>.*?)\".*?%\xFF",
+            RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        private static readonly Regex reScript = new Regex(@"\xFE(%|\?).*?(\1)\xFF", RegexOptions.Singleline);
+        private static readonly Regex reScriptElement = new Regex(@"<script.*?(?<!(%|\?))>",
+            RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        private static readonly Regex reScriptLanguage = new Regex(@"type=(?<Language>[^\s]*)",
+            RegexOptions.IgnoreCase);
+
+        private static readonly MatchEvaluator matchReplacement = new MatchEvaluator(ReplaceAngleBrackets);
+
+        private Dictionary<string, TextClassifier> classifiers;
+
+        #endregion
+
         #region Constructor
         //=====================================================================
 
@@ -46,11 +67,20 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public HtmlClassifier(string filename, SpellCheckerConfiguration spellCheckConfiguration) :
           base(filename, spellCheckConfiguration)
         {
+            classifiers = new Dictionary<string, TextClassifier>(StringComparer.OrdinalIgnoreCase);
         }
         #endregion
 
         #region Method overrides
         //=====================================================================
+
+        /// <inheritdoc />
+        /// <remarks>This is overridden to replace angle brackets in ASP.NET/PHP code blocks with markers
+        /// as needed.</remarks>
+        public override void SetText(string text)
+        {
+            base.SetText(reAspPhpScript.Replace(text, matchReplacement));
+        }
 
         /// <inheritdoc />
         public override IEnumerable<SpellCheckSpan> Parse()
@@ -62,12 +92,24 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             this.ParseNode(doc.DocumentNode, spans);
 
-            return spans;
+            return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
         }
         #endregion
 
         #region Helper methods
         //=====================================================================
+
+        /// <summary>
+        /// This match evaluator handles replacing angle brackets in the text as needed
+        /// </summary>
+        /// <param name="m">The match to evaluate</param>
+        /// <returns>The modified text</returns>
+        /// <remarks>This works around an issue where angle brackets in inline ASP.NET/PHP code blocks that mess
+        /// up the HTML parser</remarks>
+        private static string ReplaceAngleBrackets(Match m)
+        {
+            return m.Value.Replace('<', '\xFE').Replace('>', '\xFF');
+        }
 
         /// <summary>
         /// This is used to parse HTML nodes
@@ -86,7 +128,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 case HtmlNodeType.Comment:
                     var commentNode = (HtmlCommentNode)node;
 
+                    // Only spell check actual comments.  Stuff like "<!DOCTYPE>" is also classified as a comment
+                    // by the node parser but we don't want to include them.
                     if(commentNode.OuterHtml.StartsWith("<!--", StringComparison.Ordinal))
+                    {
                         spans.Add(new SpellCheckSpan
                         {
                             Span = new Span(this.AdjustedOffset(this.GetOffset(commentNode.Line,
@@ -95,48 +140,202 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             Text = commentNode.OuterHtml,
                             Classification = RangeClassification.XmlFileComment
                         });
+                    }
                     break;
 
                 case HtmlNodeType.Text:
                     var textNode = (HtmlTextNode)node;
 
                     if(!HtmlNode.IsOverlappedClosingElement(textNode.Text) && textNode.Text.Trim().Length != 0)
-                        spans.Add(new SpellCheckSpan
-                        {
-                            Span = new Span(this.GetOffset(textNode.Line, textNode.LinePosition),
-                                textNode.Text.Length),
-                            Text = textNode.Text,
-                            Classification = RangeClassification.InnerText
-                        });
+                    {
+                        if(!this.DeterminePageLanguage(textNode.Text, this.GetOffset(textNode.Line, textNode.LinePosition), spans))
+                            this.ParseScriptBlocks(textNode.Text, this.GetOffset(textNode.Line, textNode.LinePosition), spans);
+                    }
                     break;
 
                 case HtmlNodeType.Element:
-                    // TODO: Ignore PHP script for now.  Need a separate parser for PHP files to return just
-                    // comments and string literals within PHP script blocks.  The agility pack doesn't know
-                    // about them so it doesn't extract them properly.
-                    if(node.Name != "<?")
-                        foreach(var attribute in node.Attributes)
-                            if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(attribute.Name) &&
-                              !String.IsNullOrWhiteSpace(attribute.Value))
-                                spans.Add(new SpellCheckSpan
-                                {
-                                    Span = new Span(this.AdjustedOffset(this.GetOffset(attribute.Line,
-                                        attribute.LinePosition + attribute.Name.Length + 1), attribute.Value),
-                                        attribute.Value.Length),
-                                    Text = attribute.Value,
-                                    Classification = RangeClassification.AttributeValue
-                                });
+                    foreach(var attribute in node.Attributes)
+                        if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(attribute.Name) &&
+                          !String.IsNullOrWhiteSpace(attribute.Value))
+                        {
+                            spans.Add(new SpellCheckSpan
+                            {
+                                Span = new Span(this.AdjustedOffset(this.GetOffset(attribute.Line,
+                                    attribute.LinePosition + attribute.Name.Length + 1), attribute.Value),
+                                    attribute.Value.Length),
+                                Text = attribute.Value,
+                                Classification = RangeClassification.AttributeValue
+                            });
+                        }
 
-                    // TODO: Parse script for comments and literal strings?  May need a separate parser for
-                    // ASP.NET and Razor inline code elements.
-                    if(node.Name != "script" && !this.SpellCheckConfiguration.IgnoredXmlElements.Contains(node.Name) &&
-                      node.HasChildNodes)
-                        foreach(HtmlNode subnode in node.ChildNodes)
-                            this.ParseNode(subnode, spans);
+                    if(!this.SpellCheckConfiguration.IgnoredXmlElements.Contains(node.Name) && node.HasChildNodes)
+                    {
+                        if(node.Name == "script")
+                            this.ParseScriptElement(node.OuterHtml, this.GetOffset(node.Line, node.LinePosition), spans);
+                        else
+                            foreach(HtmlNode subnode in node.ChildNodes)
+                                this.ParseNode(subnode, spans);
+                    }
                     break;
             }
         }
-        #endregion
 
+        /// <summary>
+        /// Check for directives that specify the page language.  We'll use this for script elements that don't
+        /// specify a language.
+        /// </summary>
+        /// <param name="text">The text to check</param>
+        /// <param name="offset">The starting offset of the text within the file content</param>
+        /// <param name="spans">The span collection used to contain literal text before and after the
+        /// directives.</param>
+        /// <returns>True if the page language was found, false if not</returns>
+        private bool DeterminePageLanguage(string text, int offset, List<SpellCheckSpan> spans)
+        {
+            Match m = rePageLanguage.Match(text);
+
+            if(m.Success)
+            {
+                pageLanguage = m.Groups["Language"].Value;
+
+                // Add any text before and after the match as inner text excluding other script blocks
+                if(m.Index != 0)
+                    this.ParseScriptBlocks(text.Substring(0, m.Index), offset, spans);
+
+                if(m.Index + m.Length < text.Length)
+                    this.ParseScriptBlocks(text.Substring(m.Index + m.Length), offset + m.Index + m.Length, spans);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Find script blocks within the text and parse any that are found.  If there are none or literal text
+        /// is found before, after, or between blocks, it is added as spell check spans.
+        /// </summary>
+        /// <param name="text">The text to check</param>
+        /// <param name="offset">The starting offset of the text within the file content</param>
+        /// <param name="spans">The span collection used to contain literal text between script blocks</param>
+        private void ParseScriptBlocks(string text, int offset, List<SpellCheckSpan> spans)
+        {
+            int lastPos = 0;
+
+            foreach(Match m in reScript.Matches(text))
+            {
+                // Add any literal text before the script
+                if(m.Index != lastPos)
+                {
+                    spans.Add(new SpellCheckSpan
+                    {
+                        Span = new Span(offset, m.Index - lastPos),
+                        Text = text.Substring(lastPos, m.Index - lastPos),
+                        Classification = RangeClassification.InnerText
+                    });
+
+                    offset += m.Index - lastPos;
+                }
+
+                // Ignore ASP.NET directives
+                if(!m.Value.StartsWith("\xFE%@", StringComparison.Ordinal))
+                {
+                    var classifier = this.GetClassifier(pageLanguage);
+
+                    // Convert the markers back to angle brackets for the code classifier
+                    classifier.SetText(m.Value.Replace('\xFE', '<').Replace('\xFF', '>'));
+
+                    foreach(var s in classifier.Parse())
+                    {
+                        // Adjust the span to set the position relative to the start of the block within this file
+                        s.Span = new Span(s.Span.Start + offset, s.Span.Length);
+
+                        System.Diagnostics.Debug.Assert(this.Text.Substring(s.Span.Start, s.Span.Length) ==
+                            s.Text.Replace('<', '\xFE').Replace('>', '\xFF'));
+
+                        spans.Add(s);
+                    }
+                }
+
+                offset += m.Length;
+                lastPos = m.Index + m.Length;
+            }
+
+            // Add any trailing literal text
+            if(lastPos < text.Length)
+                spans.Add(new SpellCheckSpan
+                {
+                    Span = new Span(offset, text.Length - lastPos),
+                    Text = text.Substring(lastPos),
+                    Classification = RangeClassification.InnerText
+                });
+        }
+
+        /// <summary>
+        /// This is used to parse the script in a <c>script</c> element using the appropriate classifier based
+        /// on the determined script language.
+        /// </summary>
+        /// <param name="script">The script to parse</param>
+        /// <param name="offset">The starting offset of the text within the file content</param>
+        /// <param name="spans">The span collection used to contain text to spell check extracted from the
+        /// script.</param>
+        private void ParseScriptElement(string script, int offset, List<SpellCheckSpan> spans)
+        {
+            Match scriptElement = reScriptElement.Match(script);
+
+            if(scriptElement.Success)
+            {
+                Match language = reScriptLanguage.Match(scriptElement.Value);
+
+                var classifier = this.GetClassifier(language.Success ? language.Groups["Language"].Value :
+                    pageLanguage ?? "JavaScript");
+
+                classifier.SetText(script.Substring(scriptElement.Index + scriptElement.Length));
+
+                foreach(var s in classifier.Parse())
+                {
+                    // Adjust the span to set the position relative to the start of the block within this file
+                    s.Span = new Span(s.Span.Start + offset + scriptElement.Index + scriptElement.Length, s.Span.Length);
+
+                    System.Diagnostics.Debug.Assert(this.Text.Substring(s.Span.Start, s.Span.Length) == s.Text);
+
+                    spans.Add(s);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This is used to get a classifier based on the script language
+        /// </summary>
+        /// <param name="language">The script language</param>
+        /// <returns>A classifier based on the script language</returns>
+        private TextClassifier GetClassifier(string language)
+        {
+            // Cache the script classifiers as there may be more than one script block on the page
+            if(!classifiers.TryGetValue(language ?? String.Empty, out TextClassifier c))
+            {
+                if(!String.IsNullOrWhiteSpace(language) &&
+                  language.IndexOf("vb", StringComparison.OrdinalIgnoreCase) != -1)
+                {
+                    c = ClassifierFactory.GetClassifier("~~.vb", this.SpellCheckConfiguration);
+                }
+                else
+                    if(!String.IsNullOrWhiteSpace(language) &&
+                      (language.IndexOf("JavaScript", StringComparison.OrdinalIgnoreCase) != -1 ||
+                      language.IndexOf("TypeScript", StringComparison.OrdinalIgnoreCase) != -1))
+                    {
+                        c = ClassifierFactory.GetClassifier("~~.js", this.SpellCheckConfiguration);
+                    }
+                    else
+                    {
+                        // Anything else is considered a C-style script language (C#, PHP, etc.).
+                        c = ClassifierFactory.GetClassifier("~~.cs", this.SpellCheckConfiguration);
+                    }
+
+                classifiers.Add(language ?? String.Empty, c);
+            }
+
+            return c;
+        }
+        #endregion
     }
 }

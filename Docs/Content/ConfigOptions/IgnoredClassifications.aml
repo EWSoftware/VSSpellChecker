@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="6a987caf-5ad9-4dab-a17c-c887881fec7a" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category lets you exclude specific classifications of text from being spell checked by
+content/file type.  This is more generic than the C#/C-Style language category options and can be applied to any
+language or file type for which Visual Studio or the solution/project spell checker can classify text.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<para>The options for this category are divided into two sections: one for Visual Studio text editor
+classifications and one for solution/project spell checking classifications.  Classifications can be ignored in
+either category or both as you see fit.  See the sections below for more information.</para>
+				
+				<para>For non-global settings, an option is available to inherit the ignored classifications from
+configurations above the current one.  If enabled, any additional ignored classifications in the current
+configuration are added to those.  If disabled, the settings in the current configuration will replace the
+inherited list of ignored classifications.  If not inherited and the list is left empty, it effectively clears
+the list of ignored classifications.</para>
+			
+			</content>
+
+			<sections>
+				<section>
+					<title>Visual Studio Classifications</title>
+					<content>
+						<para>Visual Studio text editor classifications are determined as needed.  When first opened, this
+page will only display content types and classifications that it knows about from the current configuration file.
+Select this configuration category page to enable classification tracking, open some files containing the content
+that you want to exclude, wait a few seconds to allow the spell checker to finish processing the files, and
+return to the configuration editor.  Click the <ui>Refresh Content Types</ui> button to make the new content
+types and related classifications available in the content type combo box and classification list box.</para>
+
+						<alert class="note">
+							<para>You will not see any classifications for C# files nor will you see any classifications for
+other C-style languages if you have enabled applying the C# options to all C-Style languages.  Use the C# options
+to control the spell checked classifications for those languages when it is enabled.  If the option is disabled,
+you will see classifications for non-C# C-style languages.</para>
+						</alert>
+
+						<para>Select a content type from the combo box and the related spell checked classifications that
+have been seen in the files that you opened will be displayed in the list box to the right of it.  Check the box
+next to each classification that you want to exclude or uncheck them to include them again.  The classifications
+shown are the internal ones from the language classifiers and vary from language to language.  Many are
+self-explanatory but others may not be.  You may need to experiment with the classifications to determine which
+ones to use to exclude the elements you are interested in ignoring.</para>
+					</content>
+				</section>
+
+				<section>
+					<title>Solution/Project Spell Check Classifications</title>
+					<content>
+						<para>Solution/project spell checking uses a separate process with a fixed set of possible
+classifications.  You can exclude classifications by file type or by individual file extension when performing
+solution/project spell checking.  Extension settings will override their corresponding file type settings if both
+are present in the list of classifications to ignore.  Note that not all classifiers use the full set of
+classifications.</para>
+
+						<para>To add exclusions, select a file type from the combo box.  When selected, the related set
+of file extensions can be found in the extension combo box.  The "All" option for file extension covers all
+extensions for the selected file type.  Click the <ui>Add</ui> button to add the selected file type or
+extension to the ignored set.  Note that many file types are quite similar but use different rules to classify
+their elements (i.e. XML and XAML).  If you want to exclude an element common to both such as XML comments, you
+will need to add each file type and exclude the related classification from both types.  Once added, the
+classifications can be found in the list box on the right.  Check the box next to each classification that you
+want to exclude or uncheck them to include them again.</para>
+
+						<para>Unlike the Visual Studio classifications, the solution/project spell checker uses a fixed set
+of well-known classification types.  The full set is always displayed for each file type or extension but not
+all are used by each.  The classification types are as follows:</para>
+
+						<table>
+							<tableHeader>
+								<row>
+									<entry>
+										<para>Classification Type</para>
+									</entry>
+									<entry>
+										<para>Description</para>
+									</entry>
+								</row>
+							</tableHeader>
+							<row>
+								<entry>
+									<para>AttributeValue</para>
+								</entry>
+								<entry>
+									<para>An XML/HTML element attribute value</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>DelimitedComments</para>
+								</entry>
+								<entry>
+									<para>Delimited comments in code, format varies by language (<codeInline>/* Comments */</codeInline>)</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>InnerText</para>
+								</entry>
+								<entry>
+									<para>The inner text of an XML/HTML element</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>InterpolatedStringLiteral</para>
+								</entry>
+								<entry>
+									<para>An interpolated string literal in code (<codeInline>$"Age: {age}"</codeInline>)</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>NormalStringLiteral</para>
+								</entry>
+								<entry>
+									<para>A normal string literal in code, format varies by language (<codeInline>"Some text"</codeInline>
+or 'SQL string literal')</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>PlainText</para>
+								</entry>
+								<entry>
+									<para>Run of the mill plain text.  This is typically only seen for actual plain text files and
+files not recognized as any other known file type.</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>QuadSlashComment</para>
+								</entry>
+								<entry>
+									<para>A quadruple slash comment in code, typically used to comment out code so that it is not
+included when spell checking, format varies by language (<codeInline>//// Comment</codeInline>)</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>RegionDirective</para>
+								</entry>
+								<entry>
+									<para>A region directive in code (<codeInline>#region Private data members</codeInline>)</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>SingleLineComment</para>
+								</entry>
+								<entry>
+									<para>A single-line comment in code, format varies by language (<codeInline>// Single-line comment</codeInline>)</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>VerbatimStringLiteral</para>
+								</entry>
+								<entry>
+									<para>A verbatim/raw string literal in code (<codeInline>@"C:\Path\File.txt" or
+R"(C:\Path\File.txt)"</codeInline>)</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>XmlCommentsInnerText</para>
+								</entry>
+								<entry>
+									<para>The inner text of an XML comments element in code (<codeInline>&lt;summary&gt;Member
+summary&lt;/summary&gt;</codeInline>)</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>XmlDocComments</para>
+								</entry>
+								<entry>
+									<para>XML documentation comments in code.  This is a general designation to classify an entire
+section as XML documentation comments in code.  If excluded, the entire set of XML documentation will be omitted
+from spell checking.  If not excluded, it will typically be classified further into attribute values if the
+attribute is spell checked and XML comments inner text.</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>XmlFileCData</para>
+								</entry>
+								<entry>
+									<para>A <codeInline>&lt;![CDATA[....]]&gt;</codeInline> section in an XML file</para>
+								</entry>
+							</row>
+							<row>
+								<entry>
+									<para>XmlFileComment</para>
+								</entry>
+								<entry>
+									<para>An XML/HTML file comment (<codeInline>&lt;!-- Comments --&gt;</codeInline>)</para>
+								</entry>
+							</row>
+						</table>
+					</content>
+				</section>
+
+			</sections>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

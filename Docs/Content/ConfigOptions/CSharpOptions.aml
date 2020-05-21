@@ -12,7 +12,7 @@ applied to all C-style code as applicable.</para>
 			<content>
 				<list class="bullet">
 					<listItem>
-						<para><ui>Ignore XML documentation comments (/// ... and /\*\* ... */)</ui> - If enabled, XML
+						<para><ui>Ignore XML documentation comments (/// ... and /** ... */)</ui> - If enabled, XML
 documentation comments will be excluded from spell checking.  Unless disabled with the option below, standard
 delimited comments will still be included for spell checking.</para>
 					</listItem>

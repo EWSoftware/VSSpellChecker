@@ -22,23 +22,23 @@
 			<GroupBox Grid.Row="0">
 				<StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboImportCADictionaries" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboImportCADictionaries" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="_Import project code analysis dictionaries if present" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboUnrecognizedWords" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboUnrecognizedWords" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Treat unrecognized words as misspelled words" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboDeprecatedTerms" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboDeprecatedTerms" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Treat deprecated terms as misspelled words" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboCompoundTerms" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboCompoundTerms" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Treat compound terms as misspelled words" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<ComboBox Name="cboCasingExceptions" Width="75" Margin="3" SelectionChanged="Property_Changed" />
+						<ComboBox Name="cboCasingExceptions" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Treat casing exceptions as ignored words" />
 					</StackPanel>
 				</StackPanel>

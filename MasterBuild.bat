@@ -1,18 +1,41 @@
 @ECHO OFF
-CLS
+
+SETLOCAL
 
 CD Source
 
-REM Use Visual Studio 2015 references if Visual Studio 2013 is not present
-IF NOT EXIST "%VS120COMNTOOLS%..\IDE\devenv.exe" SET VisualStudioVersion=14.0
-IF EXIST "%VS120COMNTOOLS%..\IDE\devenv.exe" SET VisualStudioVersion=12.0
+ECHO *
+ECHO * VS2017 and later package
+ECHO *
 
-..\Source\.nuget\NuGet restore "VSSpellChecker.sln"
+REM Use MSBuild from whatever edition of Visual Studio is installed
+IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\MSBuild\15.0" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\MSBuild\15.0\bin\MSBuild.exe"
+IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\MSBuild\15.0" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\bin\MSBuild.exe"
+IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\bin\MSBuild.exe"
+IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\MSBuild\Current" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\MSBuild\Current\bin\MSBuild.exe"
+IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Professional\MSBuild\Current" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Professional\MSBuild\Current\bin\MSBuild.exe"
+IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\bin\MSBuild.exe"
 
-"%ProgramFiles(x86)%\MSBuild\12.0\bin\MSBuild.exe" "VSSpellChecker.sln" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+IF NOT EXIST "%MSBUILD%" GOTO End
 
-CD ..\NuGet
+NuGet restore VSSpellChecker2017AndLater.sln
 
-..\Source\.nuget\NuGet Pack VSSpellChecker.nuspec -NoDefaultExcludes -NoPackageAnalysis -OutputDirectory ..\Deployment
+"%MSBUILD%" VSSpellChecker2017AndLater.sln /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+
+IF ERRORLEVEL 1 GOTO End
 
 CD ..\
+
+IF NOT "%SHFBROOT%"=="" "%MSBUILD%" /nologo /v:m "Docs\VSSpellCheckerDocs.sln" /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+
+IF "%SHFBROOT%"=="" ECHO **** Sandcastle help file builder not installed.  Skipping help build. ****
+
+CD NuGet
+
+NuGet Pack VSSpellChecker.nuspec -NoDefaultExcludes -NoPackageAnalysis -OutputDirectory ..\Deployment
+
+CD ..\
+
+:End
+
+ENDLOCAL

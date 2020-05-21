@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/11/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 10/05/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to load and save spell checker configuration files
@@ -18,6 +18,8 @@
 // 02/01/2015  EFW  Refactored configuration settings
 // 07/22/2015  EFW  Added support for selecting multiple languages
 //===============================================================================================================
+
+// Ignore spelling: proj
 
 using System;
 using System.ComponentModel;
@@ -40,8 +42,8 @@ namespace VisualStudio.SpellChecker.Configuration
         //=====================================================================
 
         private Dictionary<string, PropertyInfo> propertyCache;
-        private PropertyDescriptorCollection configCache, csoCache, cadCache;
-        private SpellCheckerConfiguration defaultConfig;
+        private readonly PropertyDescriptorCollection configCache, csoCache, cadCache;
+        private readonly SpellCheckerConfiguration defaultConfig;
 
         private XDocument document;
         private XElement root;
@@ -139,6 +141,9 @@ namespace VisualStudio.SpellChecker.Configuration
             if(String.IsNullOrWhiteSpace(filename))
                 throw new ArgumentNullException("filename", "Filename cannot be null or empty");
 
+            this.Filename = filename;
+            this.defaultConfig = defaultConfig;
+
             try
             {
                 // Get the property cache for finding current and default values
@@ -158,25 +163,24 @@ namespace VisualStudio.SpellChecker.Configuration
                 foreach(PropertyInfo property in typeof(CodeAnalysisDictionaryOptions).GetProperties(
                   BindingFlags.Public | BindingFlags.Instance))
                     propertyCache.Add(property.Name, property);
+
+                if(File.Exists(filename))
+                {
+                    document = XDocument.Load(filename);
+                    root = document.Root;
+
+                    // If it's an older configuration file, upgrade it to the new format
+                    if(root.Attribute("Format") == null || root.Attribute("Format").Value != AssemblyInfo.ConfigSchemaVersion)
+                        this.UpgradeConfiguration();
+                }
             }
-            catch
+            catch(Exception ex)
             {
-                // Ignore exceptions
+                // Ignore exceptions, we'll just use a blank configuration
+                System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            this.Filename = filename;
-            this.defaultConfig = defaultConfig;
-
-            if(File.Exists(filename))
-            {
-                document = XDocument.Load(filename);
-                root = document.Root;
-
-                // If it's an older configuration file, upgrade it to the new format
-                if(root.Attribute("Format") == null || root.Attribute("Format").Value != AssemblyInfo.ConfigSchemaVersion)
-                    this.UpgradeConfiguration();
-            }
-            else
+            if(document == null)
             {
                 root = new XElement("SpellCheckerConfiguration", new XAttribute("Format",
                     AssemblyInfo.ConfigSchemaVersion));
@@ -208,8 +212,13 @@ namespace VisualStudio.SpellChecker.Configuration
                 // editing the configuration file.
                 if(fileFormat < currentVersion)
                 {
-                    this.ConvertDefaultLanguage();
-                    this.ConvertExcludedExtensionsToIgnoredFilePatterns();
+                    if(fileFormat < new Version(2016, 3, 10))
+                    {
+                        this.ConvertDefaultLanguage();
+                        this.ConvertExcludedExtensionsToIgnoredFilePatterns();
+                    }
+
+                    this.ConvertCommentExclusions();
                 }
 
                 format.Value = AssemblyInfo.ConfigSchemaVersion;
@@ -419,6 +428,63 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// Convert ExcludedExtensions which got replaced by IgnoredFilePatterns in schema version 2016.3.10.0
+        /// </summary>
+        private void ConvertCommentExclusions()
+        {
+            var ignoredClassifications = new XElement(PropertyNames.IgnoredClassifications);
+            var ignoreComments = root.Element("IgnoreHtmlComments");
+
+            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value, CultureInfo.InvariantCulture))
+            {
+                ignoreComments.Remove();
+
+                ignoredClassifications.Add(
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, "HTML"),
+                        new XElement(PropertyNames.Classification, "html comment")),
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, "htmlx"),
+                        new XElement(PropertyNames.Classification, "html comment")),
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, PropertyNames.FileType + "HTML"),
+                        new XElement(PropertyNames.Classification, "XmlFileComment")));
+            }
+
+            ignoreComments = root.Element("IgnoreXmlComments");
+
+            if(ignoreComments != null && Convert.ToBoolean(ignoreComments.Value, CultureInfo.InvariantCulture))
+            {
+                ignoreComments.Remove();
+
+                ignoredClassifications.Add(
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, "XML"),
+                        new XElement(PropertyNames.Classification, "xml comment")),
+                    new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, PropertyNames.FileType + "XML"),
+                        new XElement(PropertyNames.Classification, "XmlFileComment")));
+            }
+
+            if(ignoredClassifications.HasElements)
+            {
+                // If downgraded and then upgraded, the element may already exist
+                var existing = root.Element(PropertyNames.IgnoredClassifications);
+
+                if(existing != null)
+                    existing.Remove();
+
+                foreach(var kv in SpellCheckerConfiguration.DefaultIgnoredClassifications)
+                    ignoredClassifications.Add(
+                        new XElement(PropertyNames.ContentType,
+                        new XAttribute(PropertyNames.ContentTypeName, kv.Key),
+                        kv.Value.Select(v => new XElement(PropertyNames.Classification, v))));
+
+                root.Add(ignoredClassifications);
+            }
+        }
+
+        /// <summary>
         /// Get the default value for the specified property
         /// </summary>
         /// <param name="propertyName">The property name</param>
@@ -465,9 +531,9 @@ namespace VisualStudio.SpellChecker.Configuration
                         }
                     }
 
-                    var defValue = prop.Attributes[typeof(DefaultValueAttribute)] as DefaultValueAttribute;
 
-                    return (defValue != null) ? defValue.Value : null;
+                    return (prop.Attributes[typeof(DefaultValueAttribute)] is DefaultValueAttribute defValue) ?
+                        defValue.Value : null;
                 }
                 catch
                 {
@@ -563,11 +629,10 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <returns>The requested <c>Boolean</c> value or the default if not found</returns>
         public bool ToBoolean(string propertyName)
         {
-            bool value;
             var property = this.GetPropertyElement(propertyName);
 
             if(property == null || String.IsNullOrWhiteSpace(property.Value) ||
-              !Boolean.TryParse(property.Value, out value))
+              !Boolean.TryParse(property.Value, out bool value))
             {
                 object defaultValue = this.DefaultValueFor(propertyName);
                 return (defaultValue != null) ? (bool)defaultValue : false;
@@ -604,11 +669,10 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <returns></returns>
         public TEnum ToEnum<TEnum>(string propertyName) where TEnum : struct
         {
-            TEnum value;
             var property = this.GetPropertyElement(propertyName);
 
             if(property == null || String.IsNullOrWhiteSpace(property.Value) ||
-              !Enum.TryParse<TEnum>(property.Value, true, out value))
+              !Enum.TryParse<TEnum>(property.Value, true, out TEnum value))
             {
                 object defaultValue = this.DefaultValueFor(propertyName);
                 value = (defaultValue != null) ? (TEnum)defaultValue : default(TEnum);
@@ -649,7 +713,6 @@ namespace VisualStudio.SpellChecker.Configuration
         {
             string match, options;
             Regex regex;
-            RegexOptions regexOpts;
 
             var property = this.GetPropertyElement(propertyName);
 
@@ -663,8 +726,11 @@ namespace VisualStudio.SpellChecker.Configuration
                         match = (string)value.Attribute("Match");
                         options = (string)value.Attribute("Options");
 
-                        if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options, out regexOpts))
+                        if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options,
+                          out RegexOptions regexOpts))
+                        {
                             regexOpts = RegexOptions.None;
+                        }
 
                         if(!String.IsNullOrWhiteSpace(match))
                             regex = new Regex(match, regexOpts, TimeSpan.FromMilliseconds(100));
@@ -681,9 +747,19 @@ namespace VisualStudio.SpellChecker.Configuration
         }
 
         /// <summary>
+        /// This returns the XML element from the configuration file that has the given name
+        /// </summary>
+        /// <param name="elementName">The element name to get</param>
+        /// <returns>The element to get or null if not found</returns>
+        public XElement Element(string elementName)
+        {
+            return root.Element(elementName);
+        }
+
+        /// <summary>
         /// Store a property in the configuration file or remove it if the value is null
         /// </summary>
-        /// <param name="prpertyName">The property name</param>
+        /// <param name="propertyName">The property name</param>
         /// <param name="value">The property value</param>
         public void StoreProperty(string propertyName, object value)
         {
@@ -706,7 +782,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// <summary>
         /// Stores an enumerable list of values in the configuration file or removes them if the list is null
         /// </summary>
-        /// <param name="prpertyName">The property name that will contain the items</param>
+        /// <param name="propertyName">The property name that will contain the items</param>
         /// <param name="itemName">The item name for the value elements</param>
         /// <param name="values">The enumerable list of values</param>
         public void StoreValues(string propertyName, string itemName, IEnumerable<string> values)
@@ -735,7 +811,7 @@ namespace VisualStudio.SpellChecker.Configuration
         /// Stores an enumerable list of regular expressions in the configuration file or removes them if the
         /// list is null.
         /// </summary>
-        /// <param name="prpertyName">The property name that will contain the expressions</param>
+        /// <param name="propertyName">The property name that will contain the expressions</param>
         /// <param name="itemName">The item name for the expression elements</param>
         /// <param name="values">The enumerable list of regular expressions</param>
         /// <remarks>The expressions are stored in the named item element with a <c>Match</c> attribute set to
@@ -764,6 +840,20 @@ namespace VisualStudio.SpellChecker.Configuration
                 if(property != null)
                     property.Remove();
             }
+        }
+
+        /// <summary>
+        /// Stores an XML element replacing it if it exists, adding it if it does not
+        /// </summary>
+        /// <param name="element">The XML element to store</param>
+        public void StoreElement(XElement element)
+        {
+            var existing = root.Element(element.Name);
+
+            if(existing != null)
+                existing.ReplaceWith(element);
+            else
+                root.Add(element);
         }
 
         /// <summary>

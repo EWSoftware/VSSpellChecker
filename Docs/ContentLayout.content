@@ -5,23 +5,15 @@
       <HelpKeyword index="K" term="Welcome" />
     </HelpKeywords>
   </Topic>
-  <Topic id="deeba4a0-5a5f-497c-a9c1-7dec64e9c2bf" visible="True" title="System Requirements and Building the Code">
-    <HelpKeywords>
-      <HelpKeyword index="K" term="requirements" />
-      <HelpKeyword index="K" term="building the code" />
-    </HelpKeywords>
-  </Topic>
-  <Topic id="847a2b53-6583-4198-80ef-0e537346e4a3" visible="True" title="Contributing">
-    <HelpKeywords>
-      <HelpKeyword index="K" term="contributing" />
-      <HelpKeyword index="K" term="coding style" />
-      <HelpKeyword index="K" term="submitting changes" />
-    </HelpKeywords>
-  </Topic>
   <Topic id="e339cac1-9783-4c2a-919f-88436c78fef8" visible="True" title="Installation Instructions and Usage Notes">
     <HelpKeywords>
       <HelpKeyword index="K" term="installation" />
       <HelpKeyword index="K" term="usage notes" />
+    </HelpKeywords>
+  </Topic>
+  <Topic id="63d5096c-6695-441d-886a-01a120f2894a" visible="True" title="Binding Spell Checker Options to Shortcut Keys">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="shortcut keys" />
     </HelpKeywords>
   </Topic>
   <Topic id="e8f67bc4-a8f8-4e50-ab5a-876599f3a645" visible="True" title="Spell Check as You Type">
@@ -34,7 +26,7 @@
       <HelpKeyword index="K" term="spell check, active document" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fa790577-88c0-4141-b8f4-d8b70f625cfd" visible="True" isExpanded="true" title="Solution/Project Spell Check Tool Window">
+  <Topic id="fa790577-88c0-4141-b8f4-d8b70f625cfd" visible="True" title="Solution/Project Spell Check Tool Window">
     <HelpKeywords>
       <HelpKeyword index="K" term="spell check, solution/project" />
     </HelpKeywords>
@@ -54,15 +46,25 @@
       </HelpKeywords>
     </Topic>
   </Topic>
+  <Topic id="3094ee74-88ae-4355-b702-23dcd55b4197" visible="True" title="Using the Ignore Spelling Directive">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="spell check, ignore spelling directive" />
+    </HelpKeywords>
+  </Topic>
   <Topic id="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" visible="True" title="Configuration Files">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration, configuration files" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isExpanded="true" title="Configuration Options">
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
+    <Topic id="b156d5ad-347f-4f63-89dc-4f945953ae41" visible="True" title="Import Settings">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="configuration, import settings" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="af34b863-6a1c-41ed-bcf2-48a714686519" visible="True" title="Dictionary Settings">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, dictionary settings" />
@@ -76,6 +78,11 @@
     <Topic id="09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d" visible="True" title="C# Options">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, C# options" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="6a987caf-5ad9-4dab-a17c-c887881fec7a" visible="True" title="Ignored Classifications">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="configuration, ignored classifications" />
       </HelpKeywords>
     </Topic>
     <Topic id="c592c4d8-7387-47fe-9b79-28bf0168f447" visible="True" title="Ignored Words">
@@ -103,6 +110,11 @@
         <HelpKeyword index="K" term="configuration, code analysis dictionaries" />
       </HelpKeywords>
     </Topic>
+    <Topic id="e23551ac-52f5-4505-b2d2-0728c7607fd3" visible="True" title="Visual Studio WPF Text Boxes">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="configuration, WPF text boxes" />
+      </HelpKeywords>
+    </Topic>
   </Topic>
   <Topic id="508e7e8f-e00f-43f1-ad4c-5439ddec84b8" visible="True" title="Adding Custom Dictionaries">
     <HelpKeywords>
@@ -124,16 +136,99 @@
       <HelpKeyword index="K" term="known issues" />
     </HelpKeywords>
   </Topic>
+  <Topic id="deeba4a0-5a5f-497c-a9c1-7dec64e9c2bf" visible="True" title="System Requirements and Building the Code">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="requirements" />
+      <HelpKeyword index="K" term="building the code" />
+    </HelpKeywords>
+  </Topic>
+  <Topic id="847a2b53-6583-4198-80ef-0e537346e4a3" visible="True" title="Contributing">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="contributing" />
+      <HelpKeyword index="K" term="coding style" />
+      <HelpKeyword index="K" term="submitting changes" />
+    </HelpKeywords>
+  </Topic>
   <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isExpanded="true" title="Version History">
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="d121753f-40ad-4bdb-93a6-04c996845b50" visible="True" isSelected="true" title="Version 2020.4.18.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2020.4.18.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="e4168091-4de6-4a6c-af01-70854d72959f" visible="True" title="Version 2020.3.28.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2020.3.28.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="791803a7-37d8-40a9-beba-bac4f0a74279" visible="True" title="Version 2019.7.8.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2019.7.8.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="904f5ad1-18d3-4615-ba34-9f9259f11776" visible="True" title="Version 2019.5.5.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2019.5.5.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="f9804039-6ccd-48b3-be55-789d78c00ca7" visible="True" title="Version 2019.4.14.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2019.4.14.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="875213fe-3e53-4bf3-acdc-7654d0c7756d" visible="True" title="Version 2018.10.27.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2018.10.27.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="67af1ab3-1e2b-43ee-81a0-588b0cb0d336" visible="True" title="Version 2018.8.25.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2018.8.25.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="5c8fdba1-adda-4aeb-9dc0-d5fb696c38c6" visible="True" title="Version 2018.8.3.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2018.8.3.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="0e32d501-0391-44ef-aaad-51c45c072ca1" visible="True" title="Version 2017.12.29.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.12.29.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="d050d252-b188-4eca-b7ab-b33f0b1b1b0a" visible="True" title="Version 2017.8.26.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.8.26.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="dfcecbc6-1e86-4076-b8c6-0d6e94aa1629" visible="True" title="Version 2017.3.26.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2017.3.26.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="d21e7d61-ad9b-4806-b759-bb82d3ce0333" visible="True" title="Version 2016.10.15.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2016.10.15.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="849b4568-2e2c-47a0-8a13-cb2b7640314b" visible="True" title="Version 2016.7.28.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2016.7.28.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="3f7ff8cc-5493-4f6d-a1f4-99f9e245f621" visible="True" title="Version 2016.5.28.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2016.5.28.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="a81683de-f3ea-4698-847a-d87c3f1e8477" visible="True" title="Version 2016.3.12.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2016.3.12.0" />
       </HelpKeywords>
     </Topic>
-    <Topic id="a3eaed0f-fcf3-4df8-8889-7073395601a5" visible="True" isSelected="true" title="Version 2015.11.8.0">
+    <Topic id="a3eaed0f-fcf3-4df8-8889-7073395601a5" visible="True" title="Version 2015.11.8.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2015.11.8.0" />
       </HelpKeywords>

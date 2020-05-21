@@ -58,6 +58,18 @@ be disabled for code analysis related misspellings (unrecognized word, deprecate
 the suggested replacements are what should replace the word and the term should not be added to the dictionary.</para>
 					</listItem>
 
+					<listItem>
+						<para><ui>Add Ignored</ui> - This will add the word to the ignored words file so that it is no longer
+flagged as a misspelled word.  Ignored words will not be presented as suggestions for other misspelled words.
+Edit the ignored words file to remove words from it.  The ignored words files can be specified in any
+configuration file.  The global configuration uses <localUri>IgnoredWords.dic</localUri> stored in the same
+location as the global configuration file.  The configuration file editor has an option to open the file for
+editing.  If ignored words files are specified in multiple configurations, the <ui>Add Ignored</ui> button will
+show a dropdown menu with an option for each available ignored words file.  Choosing an option will add the word
+to the selected file.  Note that this button will be disabled for code analysis related misspellings
+(unrecognized word, deprecated term, and compound term) since the suggested replacements are what should replace
+the word and the term should not be ignored.</para>
+					</listItem>
 				</list>
 
 				<para>As with the spell check as you type option, if you are spell checking against multiple languages,

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/10/2016
-// Note    : Copyright 2015-2016, Eric Woodruff, All rights reserved
+// Updated : 09/17/2018
+// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
@@ -66,8 +67,60 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         #endregion
 
+        #region Properties
+        //=====================================================================
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of classifier IDs
+        /// </summary>
+        public static IEnumerable<string> ClassifierIds
+        {
+            get
+            {
+                if(extensionMap == null)
+                    LoadClassifierConfiguration();
+
+                return definitions.Keys.OrderBy(k => k);
+            }
+        }
+        #endregion
+
         #region Helper methods
         //=====================================================================
+
+        /// <summary>
+        /// This is used to return an enumerable list of file extensions for the given classifier ID
+        /// </summary>
+        /// <param name="classifierId">The classifier ID for which to get file extensions</param>
+        /// <returns>An enumerable list of file extensions that use the given classifier ID</returns>
+        public static IEnumerable<string> ExtensionsFor(string classifierId)
+        {
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            return extensionMap.Where(kv => kv.Value == classifierId).Select(kv => kv.Key).OrderBy(v => v); ;
+        }
+
+        /// <summary>
+        /// This is used to get a classifier ID for the given filename extension
+        /// </summary>
+        /// <param name="extension">The filename for which to get a classifier ID</param>
+        /// <returns>The classifier ID for the given filename's extension</returns>
+        public static string ClassifierIdFor(string filename)
+        {
+            string extension = Path.GetExtension(filename);
+
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            if(!String.IsNullOrWhiteSpace(extension))
+                extension = extension.Substring(1);
+
+            if(!extensionMap.TryGetValue(extension, out string id))
+                id = FileIsXml(filename) ? "XML" : "PlainText";
+
+            return id;
+        }
 
         /// <summary>
         /// This is used to determine if the file contains C-style code based on its extension
@@ -78,7 +131,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(filename == null)
                 return false;
 
-            string id, extension = Path.GetExtension(filename);
+            string extension = Path.GetExtension(filename);
 
             if(extensionMap == null)
                 LoadClassifierConfiguration();
@@ -86,7 +139,27 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(extension))
                 extension = extension.Substring(1);
 
-            return (extensionMap.TryGetValue(extension, out id) && id == "CStyle");
+            return (extensionMap.TryGetValue(extension, out string id) && id.StartsWith("CStyle", StringComparison.Ordinal));
+        }
+
+        /// <summary>
+        /// This is used to determine if apostrophes are escaped such as in SQL literal strings
+        /// </summary>
+        /// <param name="filename">The filename to check</param>
+        public static bool EscapesApostrophes(string filename)
+        {
+            if(filename == null)
+                return false;
+
+            string extension = Path.GetExtension(filename);
+
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            if(!String.IsNullOrWhiteSpace(extension))
+                extension = extension.Substring(1);
+
+            return (extensionMap.TryGetValue(extension, out string id) && id == "SQL");
         }
 
         /// <summary>
@@ -99,8 +172,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             if(filename != null)
             {
-                ClassifierDefinition definition;
-                string id, extension = Path.GetExtension(filename);
+                string extension = Path.GetExtension(filename);
 
                 if(extensionMap == null)
                     LoadClassifierConfiguration();
@@ -108,10 +180,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 if(!String.IsNullOrWhiteSpace(extension))
                     extension = extension.Substring(1);
 
-                if(!extensionMap.TryGetValue(extension, out id))
+                if(!extensionMap.TryGetValue(extension, out string id))
                     id = FileIsXml(filename) ? "XML" : "PlainText";
 
-                if(id != "None" && definitions.TryGetValue(id, out definition) && (definition.Mnemonic == '&' ||
+                if(id != "None" && definitions.TryGetValue(id, out ClassifierDefinition definition) && (definition.Mnemonic == '&' ||
                   definition.Mnemonic == '_'))
                     return definition.Mnemonic;
             }
@@ -128,9 +200,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>The classifier to use or null if the file should not be processed</returns>
         public static TextClassifier GetClassifier(string filename, SpellCheckerConfiguration spellCheckConfiguration)
         {
-            ClassifierDefinition definition;
             TextClassifier classifier = null;
-            string id, extension = Path.GetExtension(filename);
+            string extension = Path.GetExtension(filename);
 
             if(extensionMap == null)
                 LoadClassifierConfiguration();
@@ -138,10 +209,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(extension))
                 extension = extension.Substring(1);
 
-            if(!extensionMap.TryGetValue(extension, out id))
+            if(!extensionMap.TryGetValue(extension, out string id))
                 id = FileIsXml(filename) ? "XML" : "PlainText";
 
-            if(id != "None" && definitions.TryGetValue(id, out definition))
+            if(id != "None" && definitions.TryGetValue(id, out ClassifierDefinition definition))
                 switch(definition.ClassifierType)
                 {
                     case "PlainTextClassifier":
@@ -162,6 +233,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     case "HtmlClassifier":
                         classifier = new HtmlClassifier(filename, spellCheckConfiguration);
+                        break;
+
+                    case "MarkdownClassifier":
+                        classifier = new MarkdownClassifier(filename, spellCheckConfiguration);
                         break;
 
                     case "CodeClassifier":
@@ -231,6 +306,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             try
             {
+                // If it doesn't exist, it won't matter as there won't be any content to classify
+                if(!File.Exists(filename))
+                    return false;
+
                 XDocument.Load(filename);
             }
             catch(Exception ex)
