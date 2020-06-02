@@ -108,9 +108,7 @@ namespace VisualStudio.SpellChecker.Tagging
                 classifiedSpans);
 
             foreach(var span in plainSpans)
-            {
                 yield return new TagSpan<NaturalTextTag>(span, new NaturalTextTag());
-            }
         }
 
 #pragma warning disable 67
