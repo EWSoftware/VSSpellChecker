@@ -72,6 +72,11 @@ namespace VisualStudio.SpellChecker.Tagging
                 if(buffer == null)
                     return null;
 
+                // Since VS 2019 PHP Tools for Visual Studio have PHPProjection content type based on HTLMX
+                // Return null here and let PhpTextTaggerProvider deal with it
+                if(buffer.ContentType.IsOfType("PHPProjection"))
+                    return null;
+
                 return new HtmlTextTagger(classifierAggregatorService.GetClassifier(buffer)) as ITagger<T>;
             }
         }
