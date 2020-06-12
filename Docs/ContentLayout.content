@@ -149,11 +149,16 @@
       <HelpKeyword index="K" term="submitting changes" />
     </HelpKeywords>
   </Topic>
-  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isExpanded="true" title="Version History">
+  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isSelected="true" title="Version History">
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="d121753f-40ad-4bdb-93a6-04c996845b50" visible="True" isSelected="true" title="Version 2020.4.18.0">
+    <Topic id="9e9ebccd-3b61-4890-8467-823dacc7af3f" visible="True" title="Version 2020.6.11.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2020.6.11.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="d121753f-40ad-4bdb-93a6-04c996845b50" visible="True" title="Version 2020.4.18.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2020.4.18.0" />
       </HelpKeywords>

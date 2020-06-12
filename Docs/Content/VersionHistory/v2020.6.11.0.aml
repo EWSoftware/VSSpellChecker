@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="9e9ebccd-3b61-4890-8467-823dacc7af3f" revisionNumber="1">
+	<!-- Ignore Spelling: Miloslav Beňo -->
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Ensured that at least the default global ignored words file is included in the global
+configuration when there is no saved configuration file.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed a crash in the solution/project spell check when an editor window does not have an
+available text view.</para>
+					</listItem>
+
+					<listItem>
+						<para>Merged change from Miloslav Beňo to prevent the HTML text tagger from classifying PHP
+projection buffers (PHP Tools for Visual Studio).</para>
+					</listItem>
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>
