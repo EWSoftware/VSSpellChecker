@@ -100,14 +100,17 @@ namespace VisualStudio.SpellChecker.Tagging
                 // Through the configuration options, we can also specify this tagger be used for all C-style
                 // code.  Not all configuration options will apply but the structure is similar enough to make
                 // most of them relevant.
+                string filename = buffer.GetFilename();
+
                 if(buffer.ContentType.IsOfType("csharp") || (config.CSharpOptions.ApplyToAllCStyleLanguages &&
-                  ClassifierFactory.IsCStyleCode(buffer.GetFilename())))
+                  ClassifierFactory.IsCStyleCode(filename)))
                 {
                     // The C# options are passed to the tagger for local use since it tracks the state of the
                     // lines in the buffer.  Changing the global options will require that any open editors be
                     // closed and reopened for the changes to take effect.
                     return new CSharpCommentTextTagger(buffer)
                     {
+                        SupportsOldStyleXmlDocComments = ClassifierFactory.SupportsOldStyleXmlDocComments(filename),
                         IgnoreXmlDocComments = config.CSharpOptions.IgnoreXmlDocComments,
                         IgnoreDelimitedComments = config.CSharpOptions.IgnoreDelimitedComments,
                         IgnoreStandardSingleLineComments = config.CSharpOptions.IgnoreStandardSingleLineComments,

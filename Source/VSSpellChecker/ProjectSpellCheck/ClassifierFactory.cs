@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/17/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 07/24/2020
+// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
 //
@@ -126,6 +125,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// This is used to determine if the file contains C-style code based on its extension
         /// </summary>
         /// <param name="filename">The filename to check</param>
+        /// <returns>True if it does, false if not</returns>
         public static bool IsCStyleCode(string filename)
         {
             if(filename == null)
@@ -143,9 +143,30 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         }
 
         /// <summary>
+        /// This is used to see if a C-style language support old style XML documentation comments (/** ... */)
+        /// </summary>
+        /// <param name="filename">The filename to check</param>
+        /// <returns>True if it does, false if not</returns>
+        public static bool SupportsOldStyleXmlDocComments(string filename)
+        {
+            string extension = Path.GetExtension(filename);
+
+            if(extensionMap == null)
+                LoadClassifierConfiguration();
+
+            if(!String.IsNullOrWhiteSpace(extension))
+                extension = extension.Substring(1);
+
+            return extensionMap.TryGetValue(extension, out string id) && id != "None" &&
+              definitions.TryGetValue(id, out ClassifierDefinition definition) &&
+              !String.IsNullOrWhiteSpace((string)definition.Configuration.Attribute("OldStyleDocCommentDelimiter"));
+        }
+
+        /// <summary>
         /// This is used to determine if apostrophes are escaped such as in SQL literal strings
         /// </summary>
         /// <param name="filename">The filename to check</param>
+        /// <returns>True if they are, false if not</returns>
         public static bool EscapesApostrophes(string filename)
         {
             if(filename == null)

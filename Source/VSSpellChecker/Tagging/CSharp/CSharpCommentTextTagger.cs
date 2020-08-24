@@ -2,10 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/08/2019
-// Note    : Copyright 2010-2019, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2019, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 07/24/2020
+// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for C# code
 //
@@ -63,6 +62,13 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         /// </summary>
         /// <value>The default is false to include XML documentation comments</value>
         public bool IgnoreXmlDocComments { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not the file might contain old style XML documentation comments
+        /// (/** ... */).
+        /// </summary>
+        /// <value>The default is true to assume they may be present</value>
+        public bool SupportsOldStyleXmlDocComments { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not to ignore delimited comments (<c>/* ... */</c>)
@@ -126,7 +132,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         public CSharpCommentTextTagger(ITextBuffer buffer)
         {
             this.buffer = buffer;
-            this.IgnoredXmlElements = this.SpellCheckedAttributes = new string[0];
+            this.IgnoredXmlElements = this.SpellCheckedAttributes = Array.Empty<string>();
+            this.SupportsOldStyleXmlDocComments = true;
 
             // Populate our cache initially
             ITextSnapshot snapshot = this.buffer.CurrentSnapshot;
@@ -364,7 +371,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     p.Advance(2);
 
                     // "/***" is just a regular multi-line comment, not a doc comment
-                    if(p.EndOfLine || p.Char() != '*' || p.NextChar() == '*')
+                    if(!this.SupportsOldStyleXmlDocComments || p.EndOfLine || p.Char() != '*' || p.NextChar() == '*')
                     {
                         p.State = State.MultiLineComment;
                         ScanMultiLineComment(p);
