@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/18/2020
-// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 01/21/2021
+// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that presents the spell checking options to the user
 //
@@ -47,6 +47,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
         #region Properties
         //=====================================================================
+
+        /// <summary>
+        /// This is used to get or set whether or not to check the "disabled in session" property in the tagger
+        /// </summary>
+        /// <remarks>This is only relevant when used in the interactive spell checking tool window</remarks>
+        public bool CheckDisabledInSession { get; set; }
 
         /// <summary>
         /// This read-only property returns the current spelling issue
@@ -176,15 +182,21 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 txtMisspelledWord.Text = null;
                 lbSuggestions.Items.Clear();
 
+                lblDisabledByConfig.Visibility = lblDisabledInSession.Visibility = Visibility.Collapsed;
+
                 this.CurrentIssue = currentIssue;
 
                 if(isDisabled)
                 {
-                    lblDisabled.Visibility = Visibility.Visible;
+                    lblDisabledByConfig.Visibility = Visibility.Visible;
                     return;
                 }
 
-                lblDisabled.Visibility = Visibility.Collapsed;
+                if(this.CheckDisabledInSession && SpellingTagger.DisabledInSession)
+                {
+                    lblDisabledInSession.Visibility = Visibility.Visible;
+                    return;
+                }
 
                 if(currentIssue == null)
                 {

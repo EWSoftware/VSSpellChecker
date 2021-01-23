@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/21/2020
-// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 01/20/2021
+// Note    : Copyright 2010-2021, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling tagger
 //
@@ -113,11 +113,29 @@ namespace VisualStudio.SpellChecker
         private readonly bool unescapeApostrophes;
 
         private DispatcherTimer timer;
+        private static bool disabledInSession;
 
         #endregion
 
         #region Properties
         //=====================================================================
+
+        /// <summary>
+        /// This is used to get or set whether or not interactive spell checking is enabled for the session
+        /// </summary>
+        public static bool DisabledInSession
+        {
+            get => disabledInSession;
+            set
+            {
+                if(disabledInSession != value)
+                {
+                    disabledInSession = value;
+
+                    GlobalDictionary.NotifyChangeOfStatus();
+                }
+            }
+        }
 
         /// <summary>
         /// This read-only property returns an enumerable list of the current misspellings
@@ -511,6 +529,8 @@ namespace VisualStudio.SpellChecker
         private async void CheckSpellings(IEnumerable<SnapshotSpan> spansToCheck)
 #pragma warning restore VSTHRD100
         {
+            bool isDisabled = DisabledInSession;
+
             try
             {
                 foreach(var dirtySpan in spansToCheck)
@@ -539,7 +559,8 @@ namespace VisualStudio.SpellChecker
 
                     int removed = currentMisspellings.RemoveAll(tag => tag.ToTagSpan(snapshot).Span.OverlapsWith(dirty));
 
-                    newMisspellings.AddRange(GetMisspellingsInSpans(naturalTextSpans));
+                    if(!isDisabled)
+                        newMisspellings.AddRange(GetMisspellingsInSpans(naturalTextSpans));
 
                     // Also remove empties
                     removed += currentMisspellings.RemoveAll(tag => tag.ToTagSpan(snapshot).Span.IsEmpty);

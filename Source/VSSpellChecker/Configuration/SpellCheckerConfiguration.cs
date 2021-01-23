@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/18/2020
-// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
+// Updated : 01/13/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
 //
@@ -508,10 +508,9 @@ namespace VisualStudio.SpellChecker.Configuration
 
             try
             {
-                // Nothing to do if the file doesn't exist
-                if(!File.Exists(filename))
-                    return;
-
+                // We go through the motions of loading the configuration file even if it doesn't exist.  This
+                // allows external files such as the default ignored words file to be loaded even if the default
+                // global configuration file does not exist.
                 var configuration = new SpellingConfigurationFile(filename, this);
 
                 loadedConfigFiles.Add(filename);

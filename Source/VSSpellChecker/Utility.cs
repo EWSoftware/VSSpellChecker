@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/10/2020
-// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 01/21/2021
+// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
 //
@@ -364,7 +364,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>The appropriate property value to store</returns>
         public static bool? ToPropertyValue(this PropertyState state)
         {
-            return (state == PropertyState.Inherited) ? (bool?)null : state == PropertyState.Yes ? true : false;
+            return (state == PropertyState.Inherited) ? (bool?)null : state == PropertyState.Yes;
         }
         #endregion
 
@@ -551,6 +551,7 @@ namespace VisualStudio.SpellChecker
         {
             IEnumerable<string> words = Enumerable.Empty<string>();
             string action = onlyAddedWords ? "Add" : "Ignore";
+            char[] escapedLetters = new[] { 'a', 'b', 'f', 'n', 'r', 't', 'v', 'x', 'u', 'U' };
 
             if(!File.Exists(filename))
                 return Enumerable.Empty<string>();
@@ -599,7 +600,12 @@ namespace VisualStudio.SpellChecker
                             wordList.AddRange(w.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
                         else
                             if(!onlyAddedWords)
-                                wordList.Add(w);
+                            {
+                                if(escapedLetters.Contains(w[1]))
+                                    wordList.Add(w);
+                                else
+                                    wordList.Add(w.Substring(1));
+                            }
                     }
                 }
 
@@ -648,7 +654,10 @@ namespace VisualStudio.SpellChecker
 
             if(dictionary == null)
             {
-                File.WriteAllLines(filename, words);
+                // Sort and write all the words to the file.  If under source control, this should minimize the
+                // number of merge conflicts that could result if multiple people added words and they were all
+                // written to the end of the file.
+                File.WriteAllLines(filename, words.OrderBy(w => w));
                 return;
             }
 

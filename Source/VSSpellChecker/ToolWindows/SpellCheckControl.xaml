@@ -38,15 +38,20 @@
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
 				<RowDefinition />
 			</Grid.RowDefinitions>
-			<TextBlock Grid.Row="0" Name="lblDisabled" Padding="3" TextWrapping="WrapWithOverflow" Style="{StaticResource NotificationText}">
+			<TextBlock Grid.Row="0" Name="lblDisabledByConfig" Padding="3" TextWrapping="WrapWithOverflow" Style="{StaticResource NotificationText}">
 No text editor is selected, the spell checker is currently disabled, or the file is excluded by filename extension.
 <LineBreak /><LineBreak />Select a text editor or edit the global configuration or the appropriate
 solution, project, folder, or file-specific configuration to enable spell checking or remove the excluded
 filename extension.</TextBlock>
-			<Label Grid.Row="1" Target="{Binding ElementName=lbSuggestions}">_Suggestions</Label>
-			<Grid Grid.Row="2">
+			<TextBlock Grid.Row="1" Name="lblDisabledInSession" Padding="3" TextWrapping="WrapWithOverflow" Style="{StaticResource NotificationText}">
+Interactive spell checking is disabled for this session.
+<LineBreak /><LineBreak />Enable it again with the <Bold>Tools</Bold>, <Bold>Spell Checker</Bold>, <Bold>Enable
+in Current Session</Bold> menu option.</TextBlock>
+			<Label Grid.Row="2" Target="{Binding ElementName=lbSuggestions}">_Suggestions</Label>
+			<Grid Grid.Row="3">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition />
 					<ColumnDefinition Width="Auto" />

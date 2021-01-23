@@ -69,6 +69,17 @@
 				</Strings>
 			</Button>
 
+			<Button guid="guidVSSpellCheckerCommandSet" id="EnableInCurrentSession" priority="0x0103">
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>TextChanges</CommandFlag>
+				<Strings>
+					<CommandName>cmdidEnableInCurrentSession</CommandName>
+					<ButtonText>Disable in Current Session</ButtonText>
+					<MenuText>Disable in Current Session</MenuText>
+					<ToolTipText>Enable or disable interactive spell checking in the current session</ToolTipText>
+				</Strings>
+			</Button>
+
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckEntireSolution" priority="0x0100">
 				<Strings>
 					<CommandName>cmdidSpellCheckEntireSolution</CommandName>
@@ -170,6 +181,9 @@
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
 		</CommandPlacement>
+		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="EnableInCurrentSession" priority="0x0103">
+			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerActions" />
+		</CommandPlacement>
 		<CommandPlacement guid="guidVSSpellCheckerCommandSet" id="SpellCheckerConfig" priority="0x0102">
 			<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" />
 		</CommandPlacement>
@@ -241,6 +255,7 @@
 			<IDSymbol name="SpellCheckInteractive" value="0x0007" />
 			<IDSymbol name="SpellCheckNextIssue" value="0x0015" />
 			<IDSymbol name="SpellCheckPriorIssue" value="0x0016" />
+			<IDSymbol name="EnableInCurrentSession" value="0x0018"/>
 			<IDSymbol name="SpellCheckerMenu" value="0x0002" />
 			<IDSymbol name="SpellCheckerSolution" value="0x0014" />
 			<IDSymbol name="AddSpellCheckerConfigForItem" value="0x0009" />

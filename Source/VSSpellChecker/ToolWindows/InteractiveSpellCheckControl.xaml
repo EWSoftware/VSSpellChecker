@@ -14,5 +14,5 @@
 		<CommandBinding Command="vssc:SpellCheckCommands.AddToDictionary" Executed="cmdAddToDictionary_Executed" />
 		<CommandBinding Command="ApplicationCommands.Help" Executed="cmdHelp_Executed" />
 	</UserControl.CommandBindings>
-	<vssc:SpellCheckControl x:Name="ucSpellCheck" />
+	<vssc:SpellCheckControl x:Name="ucSpellCheck" CheckDisabledInSession="True" />
 </UserControl>

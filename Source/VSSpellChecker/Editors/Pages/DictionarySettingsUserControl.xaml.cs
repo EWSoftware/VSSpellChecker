@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/21/2020
-// Note    : Copyright 2014-2020, Eric Woodruff, All rights reserved
+// Updated : 01/13/2021
+// Note    : Copyright 2014-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the spell checker dictionary settings
 //
@@ -889,7 +889,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         }
                     }
 
-                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, true, uniqueWords.OrderBy(w => w));
+                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, true, uniqueWords);
                 }
                 catch(Exception ex)
                 {

@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/09/2018
-// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
+// Updated : 01/22/2021
+// Note    : Copyright 2010-2021, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2021, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains a class that handles splitting spans of text up into individual words for spell checking
@@ -156,7 +156,7 @@ namespace VisualStudio.SpellChecker
                                     // Find the end of the word
                                     int wordEnd = end;
 
-                                    while(++wordEnd < text.Length && !this.IsWordBreakCharacter(text[wordEnd], true))
+                                    while(++wordEnd < text.Length && !this.IsWordBreakCharacter(text, wordEnd, true))
                                         ;
 
                                     if(this.Configuration.ShouldIgnoreWord(text.Substring(end - 1, --wordEnd - i + 1)))
@@ -413,13 +413,19 @@ namespace VisualStudio.SpellChecker
                 }
 
                 // Skip word separator
-                if(this.IsWordBreakCharacter(text[i], true))
+                if(this.IsWordBreakCharacter(text, i, true))
+                {
+                    // Skip the second half of a surrogate pair if necessary
+                    if(i + 1 < text.Length && Char.IsSurrogatePair(text[i], text[i + 1]))
+                        i++;
+
                     continue;
+                }
 
                 // Find the end of the word
                 end = i;
 
-                while(++end < text.Length && !this.IsWordBreakCharacter(text[end], false))
+                while(++end < text.Length && !this.IsWordBreakCharacter(text, end, false))
                     ;
 
                 // Special case if ignoring mnemonics.  If the word ends in what looks like an XML entity, break
@@ -478,11 +484,11 @@ namespace VisualStudio.SpellChecker
                     }
 
                     if(concatSeen && spanEnd + 1 < text.Length && text[spanEnd] == '\"' &&
-                      !this.IsWordBreakCharacter(text[spanEnd + 1], false))
+                      !this.IsWordBreakCharacter(text, spanEnd + 1, false))
                     {
                         spanEnd++;
 
-                        while(spanEnd < text.Length && !this.IsWordBreakCharacter(text[spanEnd], false))
+                        while(spanEnd < text.Length && !this.IsWordBreakCharacter(text, spanEnd, false))
                             spanEnd++;
 
                         if(spanEnd < text.Length)
@@ -559,19 +565,51 @@ namespace VisualStudio.SpellChecker
         }
 
         /// <summary>
-        /// See if the specified character is a word break character
+        /// See if the specified character in the given text is a word break character
         /// </summary>
-        /// <param name="c">The character to check</param>
+        /// <param name="text">The text containing the character</param>
+        /// <param name="index">The index of the character to check</param>
         /// <param name="includingMnemonic">True to also include the mnemonic character as a word break or false
         /// to ignore it.</param>
         /// <returns>True if the character is a word break, false if not</returns>
-        private bool IsWordBreakCharacter(char c, bool includingMnemonic)
+        private bool IsWordBreakCharacter(string text, int index, bool includingMnemonic)
         {
+            char c = text[index];
+            int length = text.Length, surrogate;
+
             if(c == mnemonic)
                 return (!this.Configuration.IgnoreMnemonics || includingMnemonic);
 
+            // Emoji checking.  This is done in broad ranges to avoid looking for all known characters
+            // individually.  These ranges typically don't include anything we'd want to include in a word
+            // so there shouldn't be any issues.
+
+            // Emoji key cap sequence.  Don't include the preceding digit as part of the word.
+            if(Char.IsDigit(c) && index + 1 < length && (text[index + 1] == 0x20E3 || text[index + 1] == 0xFE0F))
+                return true;
+
+            if(index + 1 < length && Char.IsSurrogatePair(c, text[index + 1]))
+            {
+                surrogate = Char.ConvertToUtf32(c, text[index + 1]);
+
+                if((surrogate >= 0x1F000 && surrogate <= 0x1FBFF) || (surrogate >= 0xE0062 && surrogate <= 0xE007F))
+                    return true;
+            }
+
+            // General work break character checks
             switch(c)
             {
+                case '\u200D':  // A few stray emoji characters
+                case '\u203C':
+                case '\u20E3':
+                case '\u3030':
+                case '\u303D':
+                case '\u3297':
+                case '\u3299':
+                case '\uFE0E':
+                case '\uFE0F':
+                    return true;
+
                 case '\'':      // These could be apostrophes
                 case '\u2019':
                     return false;
@@ -583,9 +621,9 @@ namespace VisualStudio.SpellChecker
                 case '_':
                     return this.Configuration.TreatUnderscoreAsSeparator;
 
-                default:
-                    return (Char.IsWhiteSpace(c) || Char.IsPunctuation(c) || Char.IsSymbol(c) ||
-                        Char.IsControl(c));
+                default:    // Another emoji range and general character categories
+                    return ((c >= '\u2070' && c <= '\u2BFF') || Char.IsWhiteSpace(c) ||
+                        Char.IsPunctuation(c) || Char.IsSymbol(c) || Char.IsControl(c));
             }
         }
 

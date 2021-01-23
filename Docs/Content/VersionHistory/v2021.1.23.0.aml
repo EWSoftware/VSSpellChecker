@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="bb88f7d5-2491-457e-9ba3-8d7d0bbc8615" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed loading of the default ignored words file in the absence of a default global configuration
+file.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed loading of ignored words files so that words starting with an invalid escape sequence
+have the leading backslash removed.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed saving words to the user dictionary file so that words added by other instances of Visual
+Studio are not lost.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the word splitter to split text on emoji characters.  This prevents them from being
+included as part of the preceding/following word and fixes a crash in NHunSpell that can occur if they are
+included as part of the word when using non-US dictionaries.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added the menu option <legacyBold>Tools</legacyBold>, <legacyBold>Spell Checker</legacyBold>,
+<legacyBold>Disable/Enable in Current Session</legacyBold> to temporarily disable and subsequently re-enable
+interactive spell checking in editors during the current Visual Studio session.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

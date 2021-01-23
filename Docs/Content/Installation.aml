@@ -41,15 +41,16 @@ them.</para>
 <linkText>Visual Studio 2017 or later</linkText>
 <linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2017andLater</linkUri>
 <linkTarget>_blank</linkTarget>
-</externalLink>) using the <ui>Tools | Extension and Updates</ui> option.  Select the online marketplace and
+</externalLink>) using the <ui>Tools | Extension and Updates</ui> option (Visual Studio 2017) or
+<ui>Extensions | Manage Extensions</ui> option (Visual Studio 2019 or later).  Select the online marketplace and
 search for "Visual Studio Spell Checker".  Include the quote marks for an exact match and find the one created by
 <legacyItalic>EWSoftware</legacyItalic>.  Once found, you can click the <ui>Download</ui> button to download and
 install it.</para>
 
 				<para>Once installed, you will find a new <ui>Spell Checker</ui> option on the <ui>Tools</ui> menu.
-Unless other packages have been installed that alter its position, it will be the fourth option from the bottom
-between the <ui>External Tools</ui> and the <ui>Import and Export Settings</ui> options.  Its submenu contains
-following options:</para>
+Unless other packages have been installed that alter its position, it will be the fourth or fifth option from the
+bottom between the <ui>External Tools</ui> and the <ui>Import and Export Settings</ui> options.  Its submenu
+contains following options:</para>
 
 				<list class="bullet">
 					<listItem>
@@ -63,6 +64,17 @@ used in text editors to move to the next/prior spelling issue in the file.  If t
 and used in conjunction with the Quick Actions shortcut key (<ui>Ctrl+.</ui>), it can be a quick and convenient
 way to find and resolve spelling issues without using the interactive spell checking tool window.  See the
 <link xlink:href="63d5096c-6695-441d-886a-01a120f2894a" /> topic for more information.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Disable in Current Session</ui>/<ui>Enable in Current Session</ui> - This option acts as a
+toggle to temporarily disable and subsequently re-enable interactive spell checking in editors during the current
+Visual Studio session.  This is separate from the <ui>Spell check as you type</ui> option in the configuration
+files.  If that option is disabled, this menu option will have no effect.</para>
+
+						<para>Use this option to temporarily suspend spell checking in the current session.  To turn it off
+on a more permanent basis either globally or for a solution, project, folder, or file, use the configuration file
+option instead.</para>
 					</listItem>
 
 					<listItem>

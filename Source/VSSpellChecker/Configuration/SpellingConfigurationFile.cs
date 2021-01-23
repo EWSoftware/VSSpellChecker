@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/05/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 01/13/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class used to load and save spell checker configuration files
@@ -41,12 +41,12 @@ namespace VisualStudio.SpellChecker.Configuration
         #region Private data members
         //=====================================================================
 
-        private Dictionary<string, PropertyInfo> propertyCache;
+        private readonly Dictionary<string, PropertyInfo> propertyCache;
         private readonly PropertyDescriptorCollection configCache, csoCache, cadCache;
         private readonly SpellCheckerConfiguration defaultConfig;
 
-        private XDocument document;
-        private XElement root;
+        private readonly XDocument document;
+        private readonly XElement root;
 
         #endregion
 
@@ -139,7 +139,7 @@ namespace VisualStudio.SpellChecker.Configuration
         public SpellingConfigurationFile(string filename, SpellCheckerConfiguration defaultConfig)
         {
             if(String.IsNullOrWhiteSpace(filename))
-                throw new ArgumentNullException("filename", "Filename cannot be null or empty");
+                throw new ArgumentNullException(nameof(filename), "Filename cannot be null or empty");
 
             this.Filename = filename;
             this.defaultConfig = defaultConfig;
@@ -635,7 +635,7 @@ namespace VisualStudio.SpellChecker.Configuration
               !Boolean.TryParse(property.Value, out bool value))
             {
                 object defaultValue = this.DefaultValueFor(propertyName);
-                return (defaultValue != null) ? (bool)defaultValue : false;
+                return (defaultValue != null) && (bool)defaultValue;
             }
 
             return value;
@@ -675,7 +675,7 @@ namespace VisualStudio.SpellChecker.Configuration
               !Enum.TryParse<TEnum>(property.Value, true, out TEnum value))
             {
                 object defaultValue = this.DefaultValueFor(propertyName);
-                value = (defaultValue != null) ? (TEnum)defaultValue : default(TEnum);
+                value = (defaultValue != null) ? (TEnum)defaultValue : default;
             }
 
             return value;

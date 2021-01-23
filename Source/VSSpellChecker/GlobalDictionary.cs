@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/21/2020
-// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 01/20/2021
+// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
 //
@@ -179,20 +179,42 @@ namespace VisualStudio.SpellChecker
             if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile))
                 return false;
 
+            bool multipleWordsAdded = false;
+
             lock(dictionaryWords)
             {
+                var currentDictionary = new HashSet<string>(Utility.LoadUserDictionary(dictionaryWordsFile, false,
+                    false), StringComparer.OrdinalIgnoreCase);
+
                 dictionaryWords.Add(word);
 
-                // Sort and write all the words to the file.  If under source control, this should minimize the
-                // number of merge conflicts that could result if multiple people added words and they were all
-                // written to the end of the file.
-                File.WriteAllLines(dictionaryWordsFile, dictionaryWords.OrderBy(w => w));
+                // The word may have been added by another instance of Visual Studio.  If so, don't save the change.
+                if(!currentDictionary.Contains(word))
+                {
+                    int wordCount = dictionaryWords.Count;
+
+                    // Add words added by other instances of Visual Studio not already in this copy of the
+                    // dictionary so that we don't lose them when the file is saved.  All new ones will be
+                    // added as suggestions below.
+                    dictionaryWords.UnionWith(currentDictionary);
+
+                    multipleWordsAdded = (wordCount != dictionaryWords.Count);
+
+                    // Sort and write all the words to the file.  If under source control, this should minimize the
+                    // number of merge conflicts that could result if multiple people added words and they were all
+                    // written to the end of the file.
+                    File.WriteAllLines(dictionaryWordsFile, dictionaryWords.OrderBy(w => w));
+                }
             }
 
-            this.AddSuggestion(word);
+            if(multipleWordsAdded)
+                this.AddSuggestions();
+            else
+                this.AddSuggestion(word);
 
-            // Must pass the original word with mnemonics as it must match the span text
-            this.NotifySpellingServicesOfChange(originalWord);
+            // Must pass the original word with mnemonics as it must match the span text.  If multiple words
+            // were added from other instances, pass null to respell all text.
+            this.NotifySpellingServicesOfChange(multipleWordsAdded ? null : originalWord);
 
             return true;
         }
@@ -444,6 +466,17 @@ namespace VisualStudio.SpellChecker
                 return g.IsInitialized;
 
             return true;
+        }
+
+        /// <summary>
+        /// This is used to notify all registered spelling dictionary services of a change in status
+        /// </summary>
+        /// <remarks>This is used when turning the interactive spell checking on and off for the session</remarks>
+        public static void NotifyChangeOfStatus()
+        {
+            if(globalDictionaries != null)
+                foreach(var g in globalDictionaries.Values)
+                    g.NotifySpellingServicesOfChange(null);
         }
 
         /// <summary>

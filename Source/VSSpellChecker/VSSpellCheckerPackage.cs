@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/02/2019
-// Note    : Copyright 2013-2019, Eric Woodruff, All rights reserved
+// Updated : 01/20/2021
+// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
@@ -96,7 +96,7 @@ namespace VisualStudio.SpellChecker
         /// Studio environment. The place to do all the other initialization is the Initialize method.</remarks>
         public VSSpellCheckerPackage()
         {
-            Trace.WriteLine($"Entering constructor for {this.ToString()}");
+            Trace.WriteLine($"Entering constructor for {this}");
         }
         #endregion
 
@@ -120,7 +120,7 @@ namespace VisualStudio.SpellChecker
         protected override async System.Threading.Tasks.Task InitializeAsync(
           System.Threading.CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            Trace.WriteLine($"Entering Initialize() of {this.ToString()}");
+            Trace.WriteLine($"Entering Initialize() of {this}");
 
             await base.InitializeAsync(cancellationToken, progress);
 
@@ -149,6 +149,11 @@ namespace VisualStudio.SpellChecker
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckPriorIssue);
                 menuItem = new OleMenuCommand(SpellCheckNextPriorIssueExecuteHandler, commandId);
+                mcs.AddCommand(menuItem);
+
+                commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.EnableInCurrentSession);
+                menuItem = new OleMenuCommand(EnableInCurrentSessionExecuteHandler, null,
+                    EnableInCurrentSessionQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
@@ -372,6 +377,27 @@ namespace VisualStudio.SpellChecker
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Enable or disable interactive spell checking in the current session
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void EnableInCurrentSessionExecuteHandler(object sender, EventArgs e)
+        {
+            SpellingTagger.DisabledInSession = !SpellingTagger.DisabledInSession;
+        }
+
+        /// <summary>
+        /// Check the status of the interactive spell checking state for the session
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void EnableInCurrentSessionQueryStatusHandler(object sender, EventArgs e)
+        {
+            if(sender is OleMenuCommand command)
+                command.Text = SpellingTagger.DisabledInSession ? "Enable in Current Session" : "Disable in Current Session";
         }
 
         /// <summary>

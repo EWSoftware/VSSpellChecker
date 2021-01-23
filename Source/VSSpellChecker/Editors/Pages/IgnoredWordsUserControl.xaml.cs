@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/19/2020
-// Note    : Copyright 2014-2020, Eric Woodruff, All rights reserved
+// Updated : 01/13/2021
+// Note    : Copyright 2014-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored words spell checker configuration settings
 //
@@ -342,7 +342,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         }
                     }
 
-                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, false, uniqueWords.OrderBy(w => w));
+                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, false, uniqueWords);
                 }
                 catch(Exception ex)
                 {
