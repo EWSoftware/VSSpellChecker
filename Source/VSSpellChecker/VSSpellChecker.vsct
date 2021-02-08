@@ -43,6 +43,7 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
+				<Icon guid="guidIconBitmap" id="checkDocIcon"/>
 				<Strings>
 					<CommandName>cmdidSpellCheckInteractive</CommandName>
 					<ButtonText>Spell Check Current Document</ButtonText>
@@ -52,6 +53,7 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0101">
+				<Icon guid="guidIconBitmap" id="nextIcon"/>
 				<Strings>
 					<CommandName>cmdidSpellCheckNextIssue</CommandName>
 					<ButtonText>Move to Next Spelling Issue</ButtonText>
@@ -61,6 +63,7 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
+				<Icon guid="guidIconBitmap" id="prevIcon"/>
 				<Strings>
 					<CommandName>cmdidSpellCheckPriorIssue</CommandName>
 					<ButtonText>Move to Prior Spelling Issue</ButtonText>
@@ -70,6 +73,7 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="EnableInCurrentSession" priority="0x0103">
+				<Icon guid="guidIconBitmap" id="disableIcon"/>
 				<CommandFlag>DontCache</CommandFlag>
 				<CommandFlag>TextChanges</CommandFlag>
 				<Strings>
@@ -155,6 +159,10 @@
 				</Strings>
 			</Button>
 		</Buttons>
+		
+		<Bitmaps>
+			<Bitmap guid="guidIconBitmap" href="Resources\command-strip.png" usedList="disableIcon,checkDocIcon,nextIcon,prevIcon"/>
+		</Bitmaps>
 
 		<Menus>
 			<Menu guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" type="Menu" priority="0x0100">
@@ -269,6 +277,13 @@
 			<IDSymbol name="SolutionExplorerAddCtx" value="0x000C" />
 			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />
 			<IDSymbol name="NewItemMenuGroup" value="0x000E" />
+		</GuidSymbol>
+	
+		<GuidSymbol name="guidIconBitmap" value="{5D3A0C64-BDE8-4016-97EC-3296EB2D4CAE}">
+			<IDSymbol name ="disableIcon" value="1"/>
+			<IDSymbol name="checkDocIcon" value="2"/>
+			<IDSymbol name="nextIcon" value="3"/>
+			<IDSymbol name="prevIcon" value="4"/>
 		</GuidSymbol>
 	</Symbols>
 
