@@ -140,15 +140,18 @@ namespace VisualStudio.SpellChecker
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckInteractive);
-                menuItem = new OleMenuCommand(SpellCheckInteractiveExecuteHandler, commandId);
+                menuItem = new OleMenuCommand(SpellCheckInteractiveExecuteHandler, null,
+                    SpellCheckActionsQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckNextIssue);
-                menuItem = new OleMenuCommand(SpellCheckNextPriorIssueExecuteHandler, commandId);
+                menuItem = new OleMenuCommand(SpellCheckNextPriorIssueExecuteHandler, null,
+                    SpellCheckActionsQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckPriorIssue);
-                menuItem = new OleMenuCommand(SpellCheckNextPriorIssueExecuteHandler, commandId);
+                menuItem = new OleMenuCommand(SpellCheckNextPriorIssueExecuteHandler, null,
+                    SpellCheckActionsQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.EnableInCurrentSession);
@@ -377,6 +380,12 @@ namespace VisualStudio.SpellChecker
                     }
                 }
             }
+        }
+
+        private void SpellCheckActionsQueryStatusHandler(object sender, EventArgs e)
+        {
+            if(sender is OleMenuCommand command)
+                command.Enabled = !SpellingTagger.DisabledInSession;
         }
 
         /// <summary>
