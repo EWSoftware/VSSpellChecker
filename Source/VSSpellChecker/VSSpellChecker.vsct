@@ -30,6 +30,9 @@
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerFileGroup" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="NewItemMenuGroup" priority="0x07B0"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup" priority="0x0c0d">
+				<Parent guid="guidStdEditor" id="IDM_VS_TOOL_TEXTEDITOR"/>
+			</Group>
 		</Groups>
 
 		<Buttons>
@@ -43,6 +46,7 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
 				<Icon guid="guidIconBitmap" id="checkDocIcon"/>
 				<Strings>
 					<CommandName>cmdidSpellCheckInteractive</CommandName>
@@ -52,7 +56,8 @@
 				</Strings>
 			</Button>
 
-			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0101">
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0102">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
 				<Icon guid="guidIconBitmap" id="nextIcon"/>
 				<Strings>
 					<CommandName>cmdidSpellCheckNextIssue</CommandName>
@@ -62,7 +67,8 @@
 				</Strings>
 			</Button>
 
-			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0101">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
 				<Icon guid="guidIconBitmap" id="prevIcon"/>
 				<Strings>
 					<CommandName>cmdidSpellCheckPriorIssue</CommandName>
@@ -73,6 +79,7 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="EnableInCurrentSession" priority="0x0103">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
 				<Icon guid="guidIconBitmap" id="disableIcon"/>
 				<CommandFlag>DontCache</CommandFlag>
 				<CommandFlag>TextChanges</CommandFlag>
@@ -277,6 +284,7 @@
 			<IDSymbol name="SolutionExplorerAddCtx" value="0x000C" />
 			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />
 			<IDSymbol name="NewItemMenuGroup" value="0x000E" />
+			<IDSymbol name="TextEditorToolbarGroup" value="0x0101"/>
 		</GuidSymbol>
 	
 		<GuidSymbol name="guidIconBitmap" value="{5D3A0C64-BDE8-4016-97EC-3296EB2D4CAE}">
