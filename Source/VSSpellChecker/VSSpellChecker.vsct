@@ -49,7 +49,7 @@
 				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
 				<Icon guid="guidIconBitmap" id="checkDocIcon"/>
 				<Strings>
-					<CommandName>cmdidSpellCheckInteractive</CommandName>
+					<CommandName>Spell Check Current Document</CommandName>
 					<ButtonText>Spell Check Current Document</ButtonText>
 					<MenuText>Spell Check Current Document</MenuText>
 					<ToolTipText>Spell check the current document</ToolTipText>
@@ -60,7 +60,7 @@
 				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
 				<Icon guid="guidIconBitmap" id="nextIcon"/>
 				<Strings>
-					<CommandName>cmdidSpellCheckNextIssue</CommandName>
+					<CommandName>Move to Next Spelling Issue</CommandName>
 					<ButtonText>Move to Next Spelling Issue</ButtonText>
 					<MenuText>Move to Next Spelling Issue</MenuText>
 					<ToolTipText>Move to the next spelling issue in the current document</ToolTipText>
@@ -71,7 +71,7 @@
 				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
 				<Icon guid="guidIconBitmap" id="prevIcon"/>
 				<Strings>
-					<CommandName>cmdidSpellCheckPriorIssue</CommandName>
+					<CommandName>Move to Prior Spelling Issue</CommandName>
 					<ButtonText>Move to Prior Spelling Issue</ButtonText>
 					<MenuText>Move to Prior Spelling Issue</MenuText>
 					<ToolTipText>Move to the prior spelling issue in the current document</ToolTipText>
@@ -84,7 +84,7 @@
 				<CommandFlag>DontCache</CommandFlag>
 				<CommandFlag>TextChanges</CommandFlag>
 				<Strings>
-					<CommandName>cmdidEnableInCurrentSession</CommandName>
+					<CommandName>Enable/Disable in Current Session</CommandName>
 					<ButtonText>Disable in Current Session</ButtonText>
 					<MenuText>Disable in Current Session</MenuText>
 					<ToolTipText>Enable or disable interactive spell checking in the current session</ToolTipText>
