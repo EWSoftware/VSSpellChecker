@@ -30,8 +30,13 @@
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerFileGroup" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="NewItemMenuGroup" priority="0x07B0"/>
-			<Group guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup" priority="0x0c0d">
+			<Group guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup" priority="0x0c0d"
+					Condition="Defined(USE_VS_TOOLBAR)">
 				<Parent guid="guidStdEditor" id="IDM_VS_TOOL_TEXTEDITOR"/>
+			</Group>
+			<Group guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup" priority="0x0c0d"
+					Condition="!Defined(USE_VS_TOOLBAR)">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerToolbar"/>
 			</Group>
 		</Groups>
 
@@ -180,6 +185,12 @@
 					<ToolTipText>Spell checker options</ToolTipText>
 				</Strings>
 			</Menu>
+			<Menu guid="guidVSSpellCheckerCommandSet" id="SpellCheckerToolbar" type="Toolbar" priority="0x0c00"
+					toolbarPriorityInBand="0xff00" Condition="!Defined(USE_VS_TOOLBAR)">
+				<Strings>
+					<ButtonText>Spell Checker</ButtonText>
+				</Strings>
+			</Menu>
 		</Menus>
 	</Commands>
 
@@ -285,6 +296,7 @@
 			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />
 			<IDSymbol name="NewItemMenuGroup" value="0x000E" />
 			<IDSymbol name="TextEditorToolbarGroup" value="0x0101"/>
+			<IDSymbol name="SpellCheckerToolbar" value="0x0102"/>
 		</GuidSymbol>
 	
 		<GuidSymbol name="guidIconBitmap" value="{5D3A0C64-BDE8-4016-97EC-3296EB2D4CAE}">
