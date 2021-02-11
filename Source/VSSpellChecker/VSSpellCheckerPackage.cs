@@ -155,7 +155,7 @@ namespace VisualStudio.SpellChecker
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.EnableInCurrentSession);
-                menuItem = new LatchingOleMenuCommand(EnableInCurrentSessionExecuteHandler, null,
+                menuItem = new classOleMenuCommand(EnableInCurrentSessionExecuteHandler, null,
                     EnableInCurrentSessionQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
@@ -405,10 +405,10 @@ namespace VisualStudio.SpellChecker
         /// <param name="e">The event arguments</param>
         private void EnableInCurrentSessionQueryStatusHandler(object sender, EventArgs e)
         {
-            if(sender is LatchingOleMenuCommand command)
+            if(sender is OleMenuCommand command)
             {
                 command.Text = SpellingTagger.DisabledInSession ? "Enable in Current Session" : "Disable in Current Session";
-                command.Latched = SpellingTagger.DisabledInSession;
+                command.Checked = SpellingTagger.DisabledInSession;
             }
         }
 
