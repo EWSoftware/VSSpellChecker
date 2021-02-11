@@ -125,6 +125,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="IgnoredCharacterClass.cs" />
+    <Compile Include="LatchingOleMenuCommand.cs" />
     <Compile Include="MultiLanguageSpellingSuggestion.cs" />
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="ProjectSpellCheck\ClassifierFactory.cs" />
