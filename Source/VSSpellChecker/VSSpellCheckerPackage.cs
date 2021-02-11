@@ -155,7 +155,7 @@ namespace VisualStudio.SpellChecker
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.EnableInCurrentSession);
-                menuItem = new classOleMenuCommand(EnableInCurrentSessionExecuteHandler, null,
+                menuItem = new OleMenuCommand(EnableInCurrentSessionExecuteHandler, null,
                     EnableInCurrentSessionQueryStatusHandler, commandId);
                 mcs.AddCommand(menuItem);
 
