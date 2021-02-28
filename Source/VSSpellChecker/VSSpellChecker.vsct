@@ -30,6 +30,14 @@
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerFileGroup" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="SolutionExplorerAddCtx" priority="0x07B0"/>
 			<Group guid="guidVSSpellCheckerCommandSet" id="NewItemMenuGroup" priority="0x07B0"/>
+			<Group guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup" priority="0x0c0d"
+					Condition="Defined(USE_VS_TOOLBAR)">
+				<Parent guid="guidStdEditor" id="IDM_VS_TOOL_TEXTEDITOR"/>
+			</Group>
+			<Group guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup" priority="0x0c0d"
+					Condition="!Defined(USE_VS_TOOLBAR)">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="SpellCheckerToolbar"/>
+			</Group>
 		</Groups>
 
 		<Buttons>
@@ -43,26 +51,32 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckInteractive" priority="0x0100">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
+				<Icon guid="guidIconBitmap" id="checkDocIcon"/>
 				<Strings>
-					<CommandName>cmdidSpellCheckInteractive</CommandName>
+					<CommandName>Spell Check Current Document</CommandName>
 					<ButtonText>Spell Check Current Document</ButtonText>
 					<MenuText>Spell Check Current Document</MenuText>
 					<ToolTipText>Spell check the current document</ToolTipText>
 				</Strings>
 			</Button>
 
-			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0101">
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckNextIssue" priority="0x0102">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
+				<Icon guid="guidIconBitmap" id="nextIcon"/>
 				<Strings>
-					<CommandName>cmdidSpellCheckNextIssue</CommandName>
+					<CommandName>Move to Next Spelling Issue</CommandName>
 					<ButtonText>Move to Next Spelling Issue</ButtonText>
 					<MenuText>Move to Next Spelling Issue</MenuText>
 					<ToolTipText>Move to the next spelling issue in the current document</ToolTipText>
 				</Strings>
 			</Button>
 
-			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0102">
+			<Button guid="guidVSSpellCheckerCommandSet" id="SpellCheckPriorIssue" priority="0x0101">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
+				<Icon guid="guidIconBitmap" id="prevIcon"/>
 				<Strings>
-					<CommandName>cmdidSpellCheckPriorIssue</CommandName>
+					<CommandName>Move to Prior Spelling Issue</CommandName>
 					<ButtonText>Move to Prior Spelling Issue</ButtonText>
 					<MenuText>Move to Prior Spelling Issue</MenuText>
 					<ToolTipText>Move to the prior spelling issue in the current document</ToolTipText>
@@ -70,10 +84,12 @@
 			</Button>
 
 			<Button guid="guidVSSpellCheckerCommandSet" id="EnableInCurrentSession" priority="0x0103">
+				<Parent guid="guidVSSpellCheckerCommandSet" id="TextEditorToolbarGroup"/>
+				<Icon guid="guidIconBitmap" id="disableIcon"/>
 				<CommandFlag>DontCache</CommandFlag>
 				<CommandFlag>TextChanges</CommandFlag>
 				<Strings>
-					<CommandName>cmdidEnableInCurrentSession</CommandName>
+					<CommandName>Enable/Disable in Current Session</CommandName>
 					<ButtonText>Disable in Current Session</ButtonText>
 					<MenuText>Disable in Current Session</MenuText>
 					<ToolTipText>Enable or disable interactive spell checking in the current session</ToolTipText>
@@ -155,6 +171,10 @@
 				</Strings>
 			</Button>
 		</Buttons>
+		
+		<Bitmaps>
+			<Bitmap guid="guidIconBitmap" href="Resources\command-strip.png" usedList="disableIcon,checkDocIcon,nextIcon,prevIcon"/>
+		</Bitmaps>
 
 		<Menus>
 			<Menu guid="guidVSSpellCheckerCommandSet" id="SpellCheckerMenu" type="Menu" priority="0x0100">
@@ -163,6 +183,12 @@
 					<ButtonText>Spell Checker</ButtonText>
 					<MenuText>Spell Checker</MenuText>
 					<ToolTipText>Spell checker options</ToolTipText>
+				</Strings>
+			</Menu>
+			<Menu guid="guidVSSpellCheckerCommandSet" id="SpellCheckerToolbar" type="Toolbar" priority="0x0c00"
+					toolbarPriorityInBand="0xff00" Condition="!Defined(USE_VS_TOOLBAR)">
+				<Strings>
+					<ButtonText>Spell Checker</ButtonText>
 				</Strings>
 			</Menu>
 		</Menus>
@@ -269,6 +295,15 @@
 			<IDSymbol name="SolutionExplorerAddCtx" value="0x000C" />
 			<IDSymbol name="SolutionExplorerFileGroup" value="0x000D" />
 			<IDSymbol name="NewItemMenuGroup" value="0x000E" />
+			<IDSymbol name="TextEditorToolbarGroup" value="0x0101"/>
+			<IDSymbol name="SpellCheckerToolbar" value="0x0102"/>
+		</GuidSymbol>
+	
+		<GuidSymbol name="guidIconBitmap" value="{5D3A0C64-BDE8-4016-97EC-3296EB2D4CAE}">
+			<IDSymbol name ="disableIcon" value="1"/>
+			<IDSymbol name="checkDocIcon" value="2"/>
+			<IDSymbol name="nextIcon" value="3"/>
+			<IDSymbol name="prevIcon" value="4"/>
 		</GuidSymbol>
 	</Symbols>
 
