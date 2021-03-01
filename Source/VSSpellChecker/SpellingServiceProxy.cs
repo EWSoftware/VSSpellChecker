@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceProxy.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/22/2020
-// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
+// Updated : 02/28/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling service interface to expose the spell checker to
 // third-party tagger providers.
@@ -32,6 +32,7 @@ using Microsoft.VisualStudio.Text;
 
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.ProjectSpellCheck;
 
 namespace VisualStudio.SpellChecker
 {
@@ -278,23 +279,11 @@ namespace VisualStudio.SpellChecker
                     // Load code analysis dictionaries if wanted
                     if(projectFilename != null && config.CadOptions.ImportCodeAnalysisDictionaries)
                     {
-                        // I'm not sure if there's a better way to do this but it does seem to work.  We need to
-                        // find one or more arbitrary files with an item type of "CodeAnalysisDictionary".  We
-                        // do so by getting the MSBuild project from the global project collection and using its
-                        // GetItems() method to find them.
-                        var loadedProject = Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.GetLoadedProjects(
-                            projectFilename).FirstOrDefault();
-
-                        if(loadedProject != null)
+                        // Typically there is only one but multiple files are supported
+                        foreach(var cad in SpellCheckFileInfo.ProjectCodeAnalysisDictionaries(projectFilename))
                         {
-                            // Typically there is only one but multiple files are supported
-                            foreach(var cad in loadedProject.GetItems("CodeAnalysisDictionary"))
-                            {
-                                filename = Path.Combine(Path.GetDirectoryName(projectFilename), cad.EvaluatedInclude);
-
-                                if(File.Exists(filename))
-                                    config.ImportCodeAnalysisDictionary(filename);
-                            }
+                            if(File.Exists(cad.CanonicalName))
+                                config.ImportCodeAnalysisDictionary(cad.CanonicalName);
                         }
                     }
 

@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/17/2020
-// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/28/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to hold information about a file that will be spell checked
 //
@@ -90,6 +89,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public string DependencyConfigurationFile { get; private set; }
 
         /// <summary>
+        /// This read-only property returns true if this item represents a code analysis dictionary, false if not
+        /// </summary>
+        public bool IsCodeAnalysisDictionary { get; private set; }
+
+        /// <summary>
         /// This returns a description of the item with the solution and relative path to the file
         /// </summary>
         public string Description
@@ -143,6 +147,18 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 Filename = Path.GetFileName(filename),
                 CanonicalName = filename
             };
+        }
+
+        /// <summary>
+        /// This is used to get the code analysis dictionaries from the named project
+        /// </summary>
+        /// <param name="projectName">The project from which to get code analysis dictionaries</param>
+        /// <returns>An enumerable list of the code analysis dictionary files if any</returns>
+        public static IEnumerable<SpellCheckFileInfo> ProjectCodeAnalysisDictionaries(string projectName)
+        {
+            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+
+            return AllProjectFiles(projectName).Where(f => f.IsCodeAnalysisDictionary);
         }
 
         /// <summary>
@@ -507,9 +523,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     result = hierarchy.GetProperty(itemId, (int)__VSHPROPID.VSHPROPID_FirstVisibleChild,
                         out object value);
 
-                    while(result == VSConstants.S_OK && value != null && value is int)
+                    while(result == VSConstants.S_OK && value != null && value is int nodeId)
                     {
-                        uint visibleChildNode = (uint)(int)value;
+                        uint visibleChildNode = (uint)nodeId;
 
                         if(visibleChildNode == VSConstants.VSITEMID_NIL)
                             break;
@@ -564,11 +580,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                       Path.IsPathRooted(canonicalName) && !canonicalName.EndsWith("\\", StringComparison.Ordinal) &&
                       !canonicalName.Equals(projectName, StringComparison.OrdinalIgnoreCase))
                     {
+                        result = hierarchy.GetProperty(itemId, (int)__VSHPROPID4.VSHPROPID_BuildAction, out value);
+
+                        bool isCodeAnalysisDictionary = (result == VSConstants.S_OK && value != null &&
+                            ((string)value).Equals("CodeAnalysisDictionary", StringComparison.OrdinalIgnoreCase));
+
                         return new SpellCheckFileInfo
                         {
                             ProjectFile = projectName,
                             Filename = name,
-                            CanonicalName = canonicalName
+                            CanonicalName = canonicalName,
+                            IsCodeAnalysisDictionary = isCodeAnalysisDictionary
                         };
                     }
                 }

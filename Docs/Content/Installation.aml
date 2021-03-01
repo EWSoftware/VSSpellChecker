@@ -112,6 +112,9 @@ global spell checker settings.</para>
 
 				</list>
 
+				<para>A spell checker toolbar is also available.  Right click anywhere in the Visual Studio toolbar area
+and select the Spell Checker option from the context menu to display it.</para>
+
 			</content>
 		</section>
 

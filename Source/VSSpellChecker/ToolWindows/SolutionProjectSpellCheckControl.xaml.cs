@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/18/2020
-// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
+// Updated : 02/28/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -503,8 +503,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             object docDataObj = Marshal.GetObjectForIUnknown(docDataUnk);
                             IVsTextLines buffer = null;
 
-                            if(docDataObj is IVsTextLines)
-                                buffer = (IVsTextLines)docDataObj;
+                            if(docDataObj is IVsTextLines lines)
+                                buffer = lines;
                             else
                                 if(docDataObj is IVsTextBufferProvider tp)
                                 {
@@ -997,31 +997,28 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             od => SpellCheckFileInfo.ForOpenDocument(od))).ToList();
             }
 
-            // I'm not sure if there's a better way to do this but it does seem to work.  We need to find one or
-            // more arbitrary files with an item type of "CodeAnalysisDictionary".  We do so by getting the
-            // MSBuild project from the global project collection and using its GetItems() method to find them.
-            foreach(var p in Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.LoadedProjects)
+            // Track the code analysis dictionaries used by each project and exclude them from being spell checked
+            foreach(var cad in SpellCheckFileInfo.ProjectCodeAnalysisDictionaries(null).GroupBy(f => f.ProjectFile))
             {
                 List<string> files = new List<string>();
 
                 // Typically there is only one but multiple files are supported
-                foreach(var cad in p.GetItems("CodeAnalysisDictionary"))
+                foreach(var c in cad)
                 {
-                    string filename = Path.Combine(Path.GetDirectoryName(p.FullPath), cad.EvaluatedInclude);
-
-                    if(File.Exists(filename))
-                        files.Add(filename);
+                    if(File.Exists(c.CanonicalName))
+                        files.Add(c.CanonicalName);
                 }
 
                 if(files.Count != 0)
-                {
-                    codeAnalysisFiles.Add(p.FullPath, files);
+                    codeAnalysisFiles.Add(cad.Key, files);
+            }
 
-                    var excludeFiles = new HashSet<string>(codeAnalysisFiles.Values.SelectMany(c => c).Distinct(),
-                        StringComparer.OrdinalIgnoreCase);
+            if(codeAnalysisFiles.Count != 0)
+            {
+                var excludeFiles = new HashSet<string>(codeAnalysisFiles.Values.SelectMany(c => c),
+                    StringComparer.OrdinalIgnoreCase);
 
-                    spellCheckFiles = spellCheckFiles.Where(s => !excludeFiles.Contains(s.CanonicalName)).ToList();
-                }
+                spellCheckFiles = spellCheckFiles.Where(s => !excludeFiles.Contains(s.CanonicalName)).ToList();
             }
 
             try

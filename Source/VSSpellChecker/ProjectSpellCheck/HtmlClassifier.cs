@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/17/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/28/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify HTML file content
 //
@@ -132,11 +131,19 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     // by the node parser but we don't want to include them.
                     if(commentNode.OuterHtml.StartsWith("<!--", StringComparison.Ordinal))
                     {
+#if DEBUG
+                        // The parser offsets changed in an update to the HtmlAgilityPack.  Catch any further
+                        // changes as we'll need to fix our computed offsets again.
+                        if(!this.Text.Substring(this.GetOffset(commentNode.Line, commentNode.LinePosition + 1),
+                          commentNode.OuterHtml.Length).Equals(commentNode.OuterHtml, StringComparison.OrdinalIgnoreCase))
+                        {
+                            System.Diagnostics.Debugger.Break();
+                        }
+#endif
                         spans.Add(new SpellCheckSpan
                         {
                             Span = new Span(this.AdjustedOffset(this.GetOffset(commentNode.Line,
-                                commentNode.LinePosition) - 1, commentNode.OuterHtml),
-                                commentNode.OuterHtml.Length),
+                                commentNode.LinePosition + 1), commentNode.OuterHtml), commentNode.OuterHtml.Length),
                             Text = commentNode.OuterHtml,
                             Classification = RangeClassification.XmlFileComment
                         });
@@ -148,8 +155,20 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     if(!HtmlNode.IsOverlappedClosingElement(textNode.Text) && textNode.Text.Trim().Length != 0)
                     {
-                        if(!this.DeterminePageLanguage(textNode.Text, this.GetOffset(textNode.Line, textNode.LinePosition), spans))
-                            this.ParseScriptBlocks(textNode.Text, this.GetOffset(textNode.Line, textNode.LinePosition), spans);
+                        if(!this.DeterminePageLanguage(textNode.Text, this.GetOffset(textNode.Line,
+                          textNode.LinePosition + 1), spans))
+                        {
+#if DEBUG
+                            // See above
+                            if(!this.Text.Substring(this.GetOffset(textNode.Line, textNode.LinePosition + 1),
+                              textNode.Text.Length).Equals(textNode.Text, StringComparison.OrdinalIgnoreCase))
+                            {
+                                System.Diagnostics.Debugger.Break();
+                            }
+#endif
+                            this.ParseScriptBlocks(textNode.Text, this.GetOffset(textNode.Line,
+                                textNode.LinePosition + 1), spans);
+                        }
                     }
                     break;
 
@@ -158,10 +177,19 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(attribute.Name) &&
                           !String.IsNullOrWhiteSpace(attribute.Value))
                         {
+#if DEBUG
+                            // See above
+                            if(!this.Text.Substring(this.GetOffset(attribute.Line, attribute.LinePosition +
+                              attribute.Name.Length + 3), attribute.Value.Length).Equals(attribute.Value,
+                              StringComparison.OrdinalIgnoreCase))
+                            {
+                                System.Diagnostics.Debugger.Break();
+                            }
+#endif
                             spans.Add(new SpellCheckSpan
                             {
                                 Span = new Span(this.AdjustedOffset(this.GetOffset(attribute.Line,
-                                    attribute.LinePosition + attribute.Name.Length + 1), attribute.Value),
+                                    attribute.LinePosition + attribute.Name.Length + 3), attribute.Value),
                                     attribute.Value.Length),
                                 Text = attribute.Value,
                                 Classification = RangeClassification.AttributeValue
@@ -171,7 +199,18 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     if(!this.SpellCheckConfiguration.IgnoredXmlElements.Contains(node.Name) && node.HasChildNodes)
                     {
                         if(node.Name == "script")
-                            this.ParseScriptElement(node.OuterHtml, this.GetOffset(node.Line, node.LinePosition), spans);
+                        {
+#if DEBUG
+                            // See above
+                            if(!this.Text.Substring(this.GetOffset(node.Line, node.LinePosition + 1),
+                              node.OuterHtml.Length).Equals(node.OuterHtml, StringComparison.OrdinalIgnoreCase))
+                            {
+                                System.Diagnostics.Debugger.Break();
+                            }
+#endif
+                            this.ParseScriptElement(node.OuterHtml, this.GetOffset(node.Line,
+                                node.LinePosition + 1), spans);
+                        }
                         else
                             foreach(HtmlNode subnode in node.ChildNodes)
                                 this.ParseNode(subnode, spans);
@@ -248,10 +287,15 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     {
                         // Adjust the span to set the position relative to the start of the block within this file
                         s.Span = new Span(s.Span.Start + offset, s.Span.Length);
-
-                        System.Diagnostics.Debug.Assert(this.Text.Substring(s.Span.Start, s.Span.Length) ==
-                            s.Text.Replace('<', '\xFE').Replace('>', '\xFF'));
-
+#if DEBUG
+                        // The parser offsets changed in an update to the HtmlAgilityPack.  Catch any further
+                        // changes as we'll need to fix our computed offsets again.
+                        if(!this.Text.Substring(s.Span.Start, s.Span.Length).Equals(
+                          s.Text.Replace('<', '\xFE').Replace('>', '\xFF'), StringComparison.OrdinalIgnoreCase))
+                        {
+                            System.Diagnostics.Debugger.Break();
+                        }
+#endif
                         spans.Add(s);
                     }
                 }
@@ -295,9 +339,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 {
                     // Adjust the span to set the position relative to the start of the block within this file
                     s.Span = new Span(s.Span.Start + offset + scriptElement.Index + scriptElement.Length, s.Span.Length);
-
-                    System.Diagnostics.Debug.Assert(this.Text.Substring(s.Span.Start, s.Span.Length) == s.Text);
-
+#if DEBUG
+                    // The parser offsets changed in an update to the HtmlAgilityPack.  Catch any further
+                    // changes as we'll need to fix our computed offsets again.
+                    if(!this.Text.Substring(s.Span.Start, s.Span.Length).Equals(s.Text, StringComparison.OrdinalIgnoreCase))
+                    {
+                        System.Diagnostics.Debugger.Break();
+                    }
+#endif
                     spans.Add(s);
                 }
             }
@@ -336,6 +385,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             return c;
         }
-        #endregion
+#endregion
     }
 }

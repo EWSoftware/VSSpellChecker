@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/28/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify source code file content using a set of regular expressions
 //
@@ -199,41 +198,73 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     var commentNode = (HtmlCommentNode)node;
 
                     if(commentNode.OuterHtml.StartsWith("<!--", StringComparison.Ordinal))
+                    {
+#if DEBUG
+                        // The parser offsets changed in an update to the HtmlAgilityPack.  Catch any further
+                        // changes as we'll need to fix our computed offsets again.
+                        if(!this.Text.Substring(this.GetOffset(commentNode.Line, commentNode.LinePosition + 1),
+                          commentNode.OuterHtml.Length).Equals(commentNode.OuterHtml, StringComparison.OrdinalIgnoreCase))
+                        {
+                            System.Diagnostics.Debugger.Break();
+                        }
+#endif
                         spans.Add(new SpellCheckSpan
                         {
                             Span = new Span(this.AdjustedOffset(this.GetOffset(commentNode.Line,
-                                commentNode.LinePosition) - 1, commentNode.OuterHtml),
+                                commentNode.LinePosition + 1), commentNode.OuterHtml),
                                 commentNode.OuterHtml.Length),
                             Text = commentNode.OuterHtml,
                             Classification = RangeClassification.XmlFileComment
                         });
+                    }
                     break;
 
                 case HtmlNodeType.Text:
                     var textNode = (HtmlTextNode)node;
 
                     if(!HtmlNode.IsOverlappedClosingElement(textNode.Text) && textNode.Text.Trim().Length != 0)
+                    {
+#if DEBUG
+                        // See above
+                        if(!this.Text.Substring(this.GetOffset(textNode.Line, textNode.LinePosition + 1),
+                          textNode.Text.Length).Equals(textNode.Text, StringComparison.OrdinalIgnoreCase))
+                        {
+                            System.Diagnostics.Debugger.Break();
+                        }
+#endif
                         spans.Add(new SpellCheckSpan
                         {
-                            Span = new Span(this.GetOffset(textNode.Line, textNode.LinePosition),
+                            Span = new Span(this.GetOffset(textNode.Line, textNode.LinePosition + 1),
                                 textNode.Text.Length),
                             Text = textNode.Text,
                             Classification = RangeClassification.XmlCommentsInnerText
                         });
+                    }
                     break;
 
                 case HtmlNodeType.Element:
                     foreach(var attribute in node.Attributes)
                         if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(attribute.Name) &&
                           !String.IsNullOrWhiteSpace(attribute.Value))
+                        {
+#if DEBUG
+                            // See above
+                            if(!this.Text.Substring(this.GetOffset(attribute.Line, attribute.LinePosition +
+                              attribute.Name.Length + 3), attribute.Value.Length).Equals(attribute.Value,
+                              StringComparison.OrdinalIgnoreCase))
+                            {
+                                System.Diagnostics.Debugger.Break();
+                            }
+#endif
                             spans.Add(new SpellCheckSpan
                             {
                                 Span = new Span(this.AdjustedOffset(this.GetOffset(attribute.Line,
-                                    attribute.LinePosition + attribute.Name.Length + 1), attribute.Value),
+                                    attribute.LinePosition + attribute.Name.Length + 3), attribute.Value),
                                     attribute.Value.Length),
                                 Text = attribute.Value,
                                 Classification = RangeClassification.AttributeValue
                             });
+                        }
 
                     if(!this.SpellCheckConfiguration.IgnoredXmlElements.Contains(node.Name) && node.HasChildNodes)
                         foreach(HtmlNode subnode in node.ChildNodes)

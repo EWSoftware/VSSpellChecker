@@ -2,9 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
-// Compiler: Microsoft Visual C#
+// Updated : 02/28/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify XML file content
 //
@@ -122,7 +121,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                                             if(!value.Equals(this.Text.Substring(this.GetOffset(lineInfo.LineNumber,
                                               lineInfo.LinePosition + reader.Settings.LinePositionOffset +
-                                              reader.Name.Length + 2)), StringComparison.Ordinal))
+                                              reader.Name.Length + 2), value.Length), StringComparison.Ordinal))
                                             {
                                                 value = WebUtility.HtmlEncode(value).Replace("&quot;", "\"").Replace(
                                                     "&#39;", "'");
