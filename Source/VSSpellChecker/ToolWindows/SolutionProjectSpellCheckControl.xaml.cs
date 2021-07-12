@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/28/2021
+// Updated : 07/12/2021
 // Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -267,11 +267,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // If spell checking is in progress, cancel it
             this.CancelSpellCheck(false);
 
-            if(cboSpellCheckTarget.Items.Count == 4 && projectNames.Contains(projectName))
+            string match = projectNames.FirstOrDefault(p => p.Equals(projectName, StringComparison.OrdinalIgnoreCase));
+
+            if(cboSpellCheckTarget.Items.Count == 4 && match != null)
                 this.UpdateProjects(Array.Empty<string>());
             else
             {
-                int idx = projectNames.IndexOf(projectName);
+                int idx = projectNames.IndexOf(match);
 
                 if(idx != -1)
                 {
@@ -281,25 +283,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     if(cboSpellCheckTarget.SelectedIndex == -1)
                         cboSpellCheckTarget.SelectedIndex = (idx - 1) < 0 ? 0 : idx - 1;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Rename a project in the list that can be spell checked
-        /// </summary>
-        /// <param name="oldName">The old project name</param>
-        /// <param name="newName">The new project name</param>
-        public void ProjectRenamed(string oldName, string newName)
-        {
-            // If spell checking is in progress, cancel it
-            this.CancelSpellCheck(false);
-
-            int idx = projectNames.IndexOf(oldName);
-
-            if(idx != -1)
-            {
-                projectNames[idx] = newName;
-                cboSpellCheckTarget.Items[idx] = Path.GetFileName(newName);
             }
         }
 

@@ -10,6 +10,7 @@ StyleCop.Cache
 _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
+launchSettings.json
 
 # Build results
 [Dd]ebug/
@@ -32,7 +33,10 @@ bld/
 *.vspx
 
 # Sandcastle Help File Builder is a documentation generator add-in
-Docs/Help/
+Documentation/**/Help/
+Documentation/WebHelp/
+**/Doc/Help/
+**/Docs/Help/
 *.shfbproj_*
 
 # Publish Web Output

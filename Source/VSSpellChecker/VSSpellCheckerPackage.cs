@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/20/2021
+// Updated : 07/12/2021
 // Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
 // Compiler: Microsoft Visual C#
 //
@@ -78,13 +78,6 @@ namespace VisualStudio.SpellChecker
     [ProvideBindingPath()]
     public class VSSpellCheckerPackage : AsyncPackage
     {
-        #region Private data members
-        //=====================================================================
-
-        private SolutionEvents solutionEvents;
-
-        #endregion
-
         #region Constructor
         //=====================================================================
 
@@ -199,13 +192,7 @@ namespace VisualStudio.SpellChecker
             }
 
             // Register for solution events so that we can clear the global dictionary cache when necessary
-            if(await this.GetServiceAsync(typeof(DTE)) is DTE dte && dte.Events != null)
-            {
-                solutionEvents = dte.Events.SolutionEvents;
-
-                if(solutionEvents != null)
-                    solutionEvents.AfterClosing += solutionEvents_AfterClosing;
-            }
+            Microsoft.VisualStudio.Shell.Events.SolutionEvents.OnAfterCloseSolution += this.SolutionEvents_OnAfterCloseSolution;
         }
         #endregion
 
@@ -215,11 +202,13 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This is used to clear the global dictionary cache whenever a solution is closed
         /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
         /// <remarks>The spelling service factory also contains code to clear the dictionary cache when it
         /// detects a change in solution.  This package will not load unless a configuration is edited.  This is
         /// needed to consistently clear the cache if editing configurations in different solutions without
         /// opening any spell checked files.</remarks>
-        private static void solutionEvents_AfterClosing()
+        private void SolutionEvents_OnAfterCloseSolution(object sender, EventArgs e)
         {
             WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
             GlobalDictionary.ClearDictionaryCache();

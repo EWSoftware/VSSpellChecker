@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/22/2020
-// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
+// Updated : 07/12/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the solution/project spell check tool window
 //
@@ -28,8 +28,10 @@ using System.Windows.Input;
 using EnvDTE;
 using EnvDTE80;
 
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using ShellSolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -45,9 +47,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         #region Private data members
         //=====================================================================
 
-        private SolutionProjectSpellCheckControl ucSpellCheck;
-        private SolutionEvents solutionEvents;
+        private readonly SolutionProjectSpellCheckControl ucSpellCheck;
         private object scope;
+        private bool solutionClosing, solutionOpen;
 
         #endregion
 
@@ -79,26 +81,17 @@ namespace VisualStudio.SpellChecker.ToolWindows
             ThreadHelper.ThrowIfNotOnUIThread();
 
             // Connect to solution events to find out when solutions are opened or closed, projects are
-            // added/removed, etc.
-            // Register for solution events so that we can clear the global dictionary cache when necessary
-            var dte = Utility.GetServiceFromPackage<DTE, DTE>(false);
+            // added/removed, etc. so that we can clear the global dictionary cache when necessary
+            ShellSolutionEvents.OnAfterOpenSolution += this.ShellSolutionEvents_OnAfterOpenCloseSolution;
+            ShellSolutionEvents.OnBeforeCloseSolution += this.ShellSolutionEvents_OnBeforeCloseSolution;
+            ShellSolutionEvents.OnAfterCloseSolution += this.ShellSolutionEvents_OnAfterCloseSolution;
+            ShellSolutionEvents.OnAfterOpenProject += this.ShellSolutionEvents_OnAfterOpenProject;
+            ShellSolutionEvents.OnBeforeCloseProject += this.ShellSolutionEvents_OnBeforeCloseProject;
+            ShellSolutionEvents.OnAfterChangeProjectParent += this.ShellSolutionEvents_OnAfterChangeProject;
+            ShellSolutionEvents.OnAfterRenameProject += this.ShellSolutionEvents_OnAfterChangeProject;
+            
 
-            if(dte != null && dte.Events != null)
-            {
-                solutionEvents = dte.Events.SolutionEvents;
-
-                if(solutionEvents != null)
-                {
-                    solutionEvents.Opened += solutionEvents_OpenedClosed;
-                    solutionEvents.BeforeClosing += solutionEvents_BeforeClosing;
-                    solutionEvents.AfterClosing += solutionEvents_OpenedClosed;
-                    solutionEvents.ProjectAdded += solutionEvents_ProjectAdded;
-                    solutionEvents.ProjectRemoved += solutionEvents_ProjectRemoved;
-                    solutionEvents.ProjectRenamed += solutionEvents_ProjectRenamed;
-
-                    this.solutionEvents_OpenedClosed();
-                }
-            }
+            this.ShellSolutionEvents_OnAfterOpenCloseSolution(this, null);
         }
 
         /// <summary>
@@ -107,15 +100,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if(solutionEvents != null)
-            {
-                solutionEvents.Opened -= solutionEvents_OpenedClosed;
-                solutionEvents.AfterClosing -= solutionEvents_OpenedClosed;
-                solutionEvents.ProjectRemoved -= solutionEvents_ProjectRemoved;
-                solutionEvents.ProjectRenamed -= solutionEvents_ProjectRenamed;
-
-                solutionEvents = null;
-            }
+            ShellSolutionEvents.OnAfterOpenSolution -= this.ShellSolutionEvents_OnAfterOpenCloseSolution;
+            ShellSolutionEvents.OnBeforeCloseSolution -= this.ShellSolutionEvents_OnBeforeCloseSolution;
+            ShellSolutionEvents.OnAfterCloseSolution -= this.ShellSolutionEvents_OnAfterCloseSolution;
+            ShellSolutionEvents.OnAfterOpenProject -= this.ShellSolutionEvents_OnAfterOpenProject;
+            ShellSolutionEvents.OnBeforeCloseProject -= this.ShellSolutionEvents_OnBeforeCloseProject;
+            ShellSolutionEvents.OnAfterChangeProjectParent -= this.ShellSolutionEvents_OnAfterChangeProject;
+            ShellSolutionEvents.OnAfterRenameProject -= this.ShellSolutionEvents_OnAfterChangeProject;
 
             base.Dispose(disposing);
         }
@@ -177,17 +168,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
         //=====================================================================
 
         /// <summary>
-        /// If spell checking, stop the process before a solution is closed
-        /// </summary>
-        private void solutionEvents_BeforeClosing()
-        {
-            ucSpellCheck.CancelSpellCheck(false);
-        }
-
-        /// <summary>
         /// Update the list of solutions/projects when a solution is opened or closed
         /// </summary>
-        private void solutionEvents_OpenedClosed()
+        private void ShellSolutionEvents_OnAfterOpenCloseSolution(object sender, Microsoft.VisualStudio.Shell.Events.OpenSolutionEventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -199,11 +182,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(solution != null && !String.IsNullOrWhiteSpace(solution.FullName))
                 {
-                    // Only add this event after the solution is opened.  For solutions with subprojects, the
-                    // ProjectAdded event fires before this one which makes it look like we're ready to start
-                    // before everything is fully loaded.
-                    solutionEvents.ProjectAdded -= solutionEvents_ProjectAdded;
-
                     List<string> names = new List<string>();
 
                     foreach(Project p in solution.EnumerateProjects())
@@ -212,12 +190,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 
                     SpellingServiceProxy.LastSolutionName = solution.FullName;
+                    solutionOpen = true;
                 }
                 else
                 {
-                    // Disconnect when closed (see above)
-                    solutionEvents.ProjectAdded -= solutionEvents_ProjectAdded;
-
                     ucSpellCheck.UpdateProjects(null);
                     SpellingServiceProxy.LastSolutionName = null;
                 }
@@ -227,37 +203,62 @@ namespace VisualStudio.SpellChecker.ToolWindows
         }
 
         /// <summary>
-        /// Update the list of solutions/projects when a project is added
+        /// If spell checking, stop the process before a solution is closed
         /// </summary>
-        /// <param name="Project">The project that was added</param>
-        private void solutionEvents_ProjectAdded(Project Project)
+        private void ShellSolutionEvents_OnBeforeCloseSolution(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-
-            ucSpellCheck.AddProject(Project.FullName);
+            ucSpellCheck.CancelSpellCheck(false);
+            solutionClosing = true;
         }
 
         /// <summary>
-        /// Update the list of solutions/projects when a project is removed
+        /// Clear the project list when the solution is closed
         /// </summary>
-        /// <param name="Project">The project that was removed</param>
-        private void solutionEvents_ProjectRemoved(Project Project)
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void ShellSolutionEvents_OnAfterCloseSolution(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-
-            ucSpellCheck.RemoveProject(Project.FullName);
+            this.ShellSolutionEvents_OnAfterOpenCloseSolution(sender, null);
+            solutionOpen = solutionClosing = false;
         }
 
         /// <summary>
-        /// Update the list of solutions/projects when a project is added or removed
+        /// Update the project list when one is opened
         /// </summary>
-        /// <param name="OldName">The old project name</param>
-        /// <param name="Project">The project that was renamed</param>
-        private void solutionEvents_ProjectRenamed(Project Project, string OldName)
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void ShellSolutionEvents_OnAfterOpenProject(object sender, Microsoft.VisualStudio.Shell.Events.OpenProjectEventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            ucSpellCheck.ProjectRenamed(OldName, Project.FullName);
+            if(solutionOpen && e.Hierarchy.GetCanonicalName((uint)VSConstants.VSITEMID.Root, out string projectName) == VSConstants.S_OK)
+                ucSpellCheck.AddProject(projectName);
+        }
+
+        /// <summary>
+        /// Update the project list when one is closed
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void ShellSolutionEvents_OnBeforeCloseProject(object sender, Microsoft.VisualStudio.Shell.Events.CloseProjectEventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            
+            if(!solutionClosing && e.Hierarchy.GetCanonicalName((uint)VSConstants.VSITEMID.Root, out string projectName) == VSConstants.S_OK)
+                ucSpellCheck.RemoveProject(projectName);
+        }
+
+        /// <summary>
+        /// Update the project list when one is moved or renamed
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void ShellSolutionEvents_OnAfterChangeProject(object sender, Microsoft.VisualStudio.Shell.Events.HierarchyEventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+            this.ShellSolutionEvents_OnAfterOpenCloseSolution(sender, null);
         }
         #endregion
     }
