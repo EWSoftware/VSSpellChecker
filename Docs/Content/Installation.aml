@@ -14,8 +14,8 @@ installing this package.  To install this package:</para>
 <linkText>Releases</linkText>
 <linkUri>https://GitHub.com/EWSoftware/VSSpellChecker/releases</linkUri>
 <linkTarget>_blank</linkTarget>
-</externalLink> page of this project site.  Separate packages are available for Visual Studio 2013/2015 and
-Visual Studio 2017 and later.</para>
+</externalLink> page of this project site.  Separate packages are available for Visual Studio 2013/2015,
+Visual Studio 2017/2019, and Visual Studio 2022 and later.</para>
 					</listItem>
 
 					<listItem>
@@ -38,7 +38,7 @@ them.</para>
 <linkTarget>_blank</linkTarget>
 </externalLink> and
 <externalLink>
-<linkText>Visual Studio 2017 or later</linkText>
+<linkText>Visual Studio 2017/2019</linkText>
 <linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2017andLater</linkUri>
 <linkTarget>_blank</linkTarget>
 </externalLink>) using the <ui>Tools | Extension and Updates</ui> option (Visual Studio 2017) or

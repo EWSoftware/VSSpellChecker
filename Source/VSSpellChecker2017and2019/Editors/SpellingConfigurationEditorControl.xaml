@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.Editors.SpellingConfigurationEditorControl"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
+	mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="700"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<UserControl.CommandBindings>
+		<CommandBinding Command="ApplicationCommands.Help" Executed="cmdHelp_Executed" />
+	</UserControl.CommandBindings>
+	<Grid KeyboardNavigation.TabNavigation="Local">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition />
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+		<StackPanel Grid.Row="0" Orientation="Horizontal">
+			<TextBlock Name="lblTitle" Margin="3" TextTrimming="CharacterEllipsis" Style="{StaticResource TitleText}" />
+		</StackPanel>
+		<Grid Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition MinWidth="150" />
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition MinWidth="250" Width="3*" />
+			</Grid.ColumnDefinitions>
+			<TreeView Grid.Column="0" Name="tvPages" Margin="3" SelectedItemChanged="tvPages_SelectedItemChanged"
+				KeyboardNavigation.TabIndex="0" />
+			<GridSplitter Grid.Column="1" Width="3" VerticalAlignment="Stretch" HorizontalAlignment="Center"
+        ShowsPreview="False" TabIndex="4" />
+			<Border Grid.Column="2" Margin="3" BorderThickness="0.5" BorderBrush="{StaticResource LightBorderBrushKey}">
+				<DockPanel Name="pnlPages" Margin="3">
+				</DockPanel>
+			</Border>
+		</Grid>
+		<Grid Grid.Row="2" Margin="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition />
+			</Grid.ColumnDefinitions>
+			<StackPanel Orientation="Horizontal" Grid.Column="0">
+				<Button Name="btnReset" Content="Reset" MinWidth="80"
+					ToolTip="Reset the configuration to its defaults" Click="btnReset_Click" />
+			</StackPanel>
+			<TextBlock Margin="3" Grid.Column="1" ToolTip="View project website">
+				<Hyperlink Name="lnkProjectSite" NavigateUri="https://github.com/EWSoftware/VSSpellChecker"
+						Click="lnkProjectSite_Click">https://github.com/EWSoftware/VSSpellChecker</Hyperlink>
+			</TextBlock>
+			<StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+				<Button Name="btnHelp" Content="Help" MinWidth="80" Command="ApplicationCommands.Help"
+					ToolTip="Show help for the selected category" />
+			</StackPanel>
+		</Grid>
+	</Grid>
+</UserControl>

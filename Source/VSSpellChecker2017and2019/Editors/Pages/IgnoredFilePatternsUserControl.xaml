@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.Editors.Pages.IgnoredFilePatternsUserControl"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	mc:Ignorable="d" d:DesignHeight="375" d:DesignWidth="500"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<TextBlock TextWrapping="Wrap" Margin="3" Grid.Row="0">This option allows you to excluded entire sets of
+files from spell checking based a wildcard file pattern.</TextBlock>
+		<CheckBox Name="chkInheritIgnoredFilePatterns" Grid.Row="1" Margin="3" Checked="Property_Changed"
+			Unchecked="Property_Changed">
+			<TextBlock TextWrapping="Wrap">
+				Inherit ignored file patterns.  Any file pattern below will be added to the inherited list of ignored
+file patterns.
+			</TextBlock>
+		</CheckBox>
+		<StackPanel Orientation="Horizontal" Grid.Row="2" Margin="3">
+			<TextBox Name="txtFilePattern" MinWidth="250" Margin="0, 0, 3, 0" />
+			<Button Name="btnAddFilePattern" Content="Add" MinWidth="50" ToolTip="Add new ignored file pattern"
+				Click="btnAddFilePattern_Click" />
+		</StackPanel>
+		<ListBox Name="lbIgnoredFilePatterns" Grid.Row="3" Margin="3" />
+		<StackPanel Orientation="Horizontal" Grid.Row="4" Margin="3">
+			<Button Name="btnRemoveFilePattern" Content="Remove" MinWidth="80" Margin="0, 0, 3, 0"
+				ToolTip="Remove selected file pattern" Click="btnRemoveFilePattern_Click" />
+			<Button Name="btnClearFilePatterns" Content="Clear" MinWidth="80" Margin="0, 0, 3, 0"
+				ToolTip="Clear all ignored file patterns" Click="btnClearFilePatterns_Click" />
+			<Button Name="btnDefaultFilePatterns" Content="Default" MinWidth="80"
+				ToolTip="Reset to default list of ignored file patterns" Click="btnDefaultFilePatterns_Click" />
+		</StackPanel>
+	</Grid>
+</UserControl>

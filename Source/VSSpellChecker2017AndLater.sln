@@ -1,23 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DA5D2B74-541A-41CE-AB16-47E6CC33EC62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker2017and2019", "VSSpellChecker2017and2019\VSSpellChecker2017and2019.csproj", "{E6356BF9-4333-446E-BF02-13D09EBFBB3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellCheckerDefinitions2017and2019", "VSSpellCheckerDefinitions2017and2019\VSSpellCheckerDefinitions2017and2019.csproj", "{A9303943-D23D-4570-9792-56667F0DD928}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{4FBCC3D4-AABB-4961-9208-04730F7F567A}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E3133345-A230-4CE0-95A5-32077DB5EFF5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5DDF48B2-3B28-4DA1-9482-D7E2F11D769A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		SpellChecker.ruleset = SpellChecker.ruleset
 		VSSpellChecker2017AndLater.sln.vsspell = VSSpellChecker2017AndLater.sln.vsspell
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker2017AndLater", "VSSpellChecker\VSSpellChecker2017AndLater.csproj", "{F460D725-7970-4A16-8CD5-EAE719F7BD1F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellCheckerDefinitions2017AndLater", "VSSpellCheckerDefinitions\VSSpellCheckerDefinitions2017AndLater.csproj", "{07122622-A8CA-495D-9A15-D980D69F7EF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,19 +24,19 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F460D725-7970-4A16-8CD5-EAE719F7BD1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F460D725-7970-4A16-8CD5-EAE719F7BD1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F460D725-7970-4A16-8CD5-EAE719F7BD1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F460D725-7970-4A16-8CD5-EAE719F7BD1F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{07122622-A8CA-495D-9A15-D980D69F7EF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07122622-A8CA-495D-9A15-D980D69F7EF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07122622-A8CA-495D-9A15-D980D69F7EF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07122622-A8CA-495D-9A15-D980D69F7EF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9303943-D23D-4570-9792-56667F0DD928}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9303943-D23D-4570-9792-56667F0DD928}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9303943-D23D-4570-9792-56667F0DD928}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9303943-D23D-4570-9792-56667F0DD928}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8BF45E4E-C489-457E-85A0-7B736CC2ADF1}
+		SolutionGuid = {CE46EE70-19DC-4E5A-92BA-C3E033CDB29A}
 	EndGlobalSection
 EndGlobal

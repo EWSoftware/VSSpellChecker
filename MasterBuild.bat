@@ -18,15 +18,13 @@ IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\MSBuild\Cu
 
 IF NOT EXIST "%MSBUILD%" GOTO End
 
-NuGet restore VSSpellChecker2017AndLater.sln
-
-"%MSBUILD%" VSSpellChecker2017AndLater.sln /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+"%MSBUILD%" /r /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU" VSSpellChecker2017AndLater.sln
 
 IF ERRORLEVEL 1 GOTO End
 
 CD ..\
 
-IF NOT "%SHFBROOT%"=="" "%MSBUILD%" /nologo /v:m "Docs\VSSpellCheckerDocs.sln" /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU"
+IF NOT "%SHFBROOT%"=="" "%MSBUILD%" /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU" "Docs\VSSpellCheckerDocs.sln"
 
 IF "%SHFBROOT%"=="" ECHO **** Sandcastle help file builder not installed.  Skipping help build. ****
 
