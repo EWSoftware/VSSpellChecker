@@ -1581,12 +1581,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         {
                             words.Add(wordToIgnore);
 
+#pragma warning disable VSTHRD010
                             if(!ignoredWordsFile.CanWriteToUserWordsFile(null))
                             {
                                 MessageBox.Show("Ignored words file is read-only or could not be checked out",
                                     PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                                 return;
                             }
+#pragma warning restore VSTHRD010
 
                             Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
                         }
@@ -1716,11 +1718,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(word.Length != 0)
                 {
+#pragma warning disable VSTHRD010
                     // If the parameter is a CultureInfo instance, the word will be added to the dictionary for
                     // that culture.  If null, it's added to the first available dictionary.
                     currentIssue.Dictionary.AddWordToDictionary(word, e.Parameter as CultureInfo);
 
-#pragma warning disable VSTHRD010
                     // If adding a modified word, replace the word in the file too and remove only this issue
                     if(!word.Equals(currentIssue.Word, StringComparison.OrdinalIgnoreCase))
                         cmdReplace_Executed(sender, e);

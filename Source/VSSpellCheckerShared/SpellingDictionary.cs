@@ -159,7 +159,9 @@ namespace VisualStudio.SpellChecker
             if(dictionary == null)
                 dictionary = this.Dictionaries.First();
 
+#pragma warning disable VSTHRD010
             return (this.ShouldIgnoreWord(word) || dictionary.AddWordToDictionary(word));
+#pragma warning restore VSTHRD010
         }
 
         /// <summary>

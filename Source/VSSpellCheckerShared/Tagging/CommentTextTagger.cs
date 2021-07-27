@@ -85,7 +85,6 @@ namespace VisualStudio.SpellChecker.Tagging
 
 #pragma warning disable VSTHRD010
                 var config = SpellingServiceProxy.GetConfiguration(buffer);
-#pragma warning restore VSTHRD010
 
                 if(config == null)
                     return null;
@@ -101,6 +100,7 @@ namespace VisualStudio.SpellChecker.Tagging
                 // code.  Not all configuration options will apply but the structure is similar enough to make
                 // most of them relevant.
                 string filename = buffer.GetFilename();
+#pragma warning restore VSTHRD010
 
                 if(buffer.ContentType.IsOfType("csharp") || (config.CSharpOptions.ApplyToAllCStyleLanguages &&
                   ClassifierFactory.IsCStyleCode(filename)))

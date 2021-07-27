@@ -320,12 +320,14 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     if(File.Exists(dlg.FileName))
                     {
+#pragma warning disable VSTHRD010
                         if(!dlg.FileName.CanWriteToUserWordsFile(null))
                         {
                             MessageBox.Show("File is read-only or could not be checked out",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                             return;
                         }
+#pragma warning restore VSTHRD010
 
                         MessageBoxResult result = MessageBox.Show("Do you want to replace the words in the " +
                           "existing file?  Click Yes to replace them, No to merge the new words into the " +

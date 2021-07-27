@@ -95,8 +95,10 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                     break;
 
                 default:
+#pragma warning disable VSTHRD010
                     succeeded = dictionary.AddWordToDictionary(this.Span.GetText(
                         this.Span.TextBuffer.CurrentSnapshot), culture);
+#pragma warning restore VSTHRD010
                     break;
             }
 

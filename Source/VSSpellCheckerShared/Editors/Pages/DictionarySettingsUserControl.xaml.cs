@@ -738,6 +738,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             try
             {
+#pragma warning disable VSTHRD010
                 if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
                   selectedDictionary.DictionaryFilePath))
                 {
@@ -753,6 +754,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     MessageBox.Show("Unable to save user dictionary.  The file could not be added to the " +
                         "project, could not be checked out, or is read-only", PackageResources.PackageTitle,
                         MessageBoxButton.OK, MessageBoxImage.Exclamation);
+#pragma warning restore VSTHRD010
             }
             catch(Exception ex)
             {
@@ -810,6 +812,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     try
                     {
+#pragma warning disable VSTHRD010
                         if(selectedDictionary.UserDictionaryFilePath.CanWriteToUserWordsFile(
                           selectedDictionary.DictionaryFilePath))
                         {
@@ -824,6 +827,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                             MessageBox.Show("Unable to save user dictionary.  The file could not be added to " +
                                 "the project, could not be checked out, or is read-only.",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+#pragma warning restore VSTHRD010
                     }
                     catch(Exception ex)
                     {
@@ -867,12 +871,14 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                     if(File.Exists(dlg.FileName))
                     {
+#pragma warning disable VSTHRD010
                         if(!dlg.FileName.CanWriteToUserWordsFile(null))
                         {
                             MessageBox.Show("File is read-only or could not be checked out",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                             return;
                         }
+#pragma warning restore VSTHRD010
 
                         MessageBoxResult result = MessageBox.Show("Do you want to replace the words in the " +
                           "existing file?  Click Yes to replace them, No to merge the new words into the " +

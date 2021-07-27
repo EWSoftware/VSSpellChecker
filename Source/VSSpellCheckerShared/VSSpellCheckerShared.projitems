@@ -1,0 +1,222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3674333f-e963-461d-b118-889bf3f13aed</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>VSSpellCheckerShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\CodeAnalysisDictionaryOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\ConfigurationType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\CSharpOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\PropertyNames.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\RecognizedWordHandling.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SpellCheckerConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SpellCheckerDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SpellingConfigurationFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\CommandTargetArguments.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\ICommonCommandSupport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\ISpellCheckerConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalysisUserControl.xaml.cs">
+      <DependentUpon>CodeAnalysisUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\CSharpOptionsUserControl.xaml.cs">
+      <DependentUpon>CSharpOptionsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\DictionarySettingsUserControl.xaml.cs">
+      <DependentUpon>DictionarySettingsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\ExclusionExpressionAddEditForm.xaml.cs">
+      <DependentUpon>ExclusionExpressionAddEditForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\ExclusionExpressionsUserControl.xaml.cs">
+      <DependentUpon>ExclusionExpressionsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\FileInfoUserControl.xaml.cs">
+      <DependentUpon>FileInfoUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\GeneralSettingsUserControl.xaml.cs">
+      <DependentUpon>GeneralSettingsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredClassificationsUserControl.xaml.cs">
+      <DependentUpon>IgnoredClassificationsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredFilePatternsUserControl.xaml.cs">
+      <DependentUpon>IgnoredFilePatternsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredWordsUserControl.xaml.cs">
+      <DependentUpon>IgnoredWordsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\ImportSettingsUserControl.xaml.cs">
+      <DependentUpon>ImportSettingsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\VisualStudioUserControl.xaml.cs">
+      <DependentUpon>VisualStudioUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\XmlFilesUserControl.xaml.cs">
+      <DependentUpon>XmlFilesUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\PropertyState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\SimpleEditorFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\SimpleEditorPane.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\SpellingConfigurationEditorControl.xaml.cs">
+      <DependentUpon>SpellingConfigurationEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\SpellingConfigurationEditorFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\SpellingConfigurationEditorPane.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Guids.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IgnoredCharacterClass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MultiLanguageSpellingSuggestion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PkgCmdID.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\ClassifierFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\CodeClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\FileMisspelling.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\HtmlClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\InlineIgnoredWord.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\MarkdownClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\PlainTextClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\RangeClassification.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\RegexClassification.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\RegexClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\ReportingServicesClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\ResourceFileClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\SpellCheckFileInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\SpellCheckSpan.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\TextClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\XmlClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpellingDictionary.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpellingEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpellingServiceProxy.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpellingSuggestion.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpellingTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SpellingTaggerProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Squiggles\SpellSquiggleTag.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Squiggles\SquiggleTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\DictionaryAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\DoubledWordSuggestedAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\IgnoredWordsSuggestedAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\MultiLanguageSpellSuggestedAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SpellDictionarySuggestedAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SpellSuggestedAction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SpellSuggestedActionSource.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SuggestedActionBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SuggestedActionSubmenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\ClassificationCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\CommentTextTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\CSharp\CSharpCommentTextTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\CSharp\LineProgress.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\CSharp\State.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\HtmlTextTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\MarkdownTextTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\MisspellingTag.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\NaturalTextTag.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\PhpTextTaggerProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\PlainTextTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tagging\RMarkdownTextTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Theme\TeamFoundationColors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Theme\ThemeColorId.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Theme\ThemeColors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\InteractiveSpellCheckControl.xaml.cs">
+      <DependentUpon>InteractiveSpellCheckControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\InteractiveSpellCheckToolWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SolutionProjectSpellCheckControl.xaml.cs">
+      <DependentUpon>SolutionProjectSpellCheckControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SolutionProjectSpellCheckToolWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SpellCheckCommands.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SpellCheckControl.xaml.cs">
+      <DependentUpon>SpellCheckControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SpellCheckTarget.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SpinnerControl.xaml.cs">
+      <DependentUpon>SpinnerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Utility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSSpellCheckerPackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)VSSpellCheckEverywherePackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WordSplitter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WpfTextBox\MenuCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WpfTextBox\SpellingErrorAdorner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WpfTextBox\WpfTextBoxSpellChecker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalysisUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\CSharpOptionsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\DictionarySettingsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\ExclusionExpressionAddEditForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\ExclusionExpressionsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\FileInfoUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\GeneralSettingsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredClassificationsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredFilePatternsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredWordsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\ImportSettingsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\VisualStudioUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\XmlFilesUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\SpellingConfigurationEditorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)ToolWindows\InteractiveSpellCheckControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)ToolWindows\SolutionProjectSpellCheckControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)ToolWindows\SpellCheckControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)ToolWindows\SpinnerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+</Project>

@@ -190,7 +190,9 @@ namespace VisualStudio.SpellChecker
             misspellings = new List<MisspellingTag>();
             inlineIgnoredWords = new List<InlineIgnoredWord>();
 
+#pragma warning disable VSTHRD010
             string filename = buffer.GetFilename();
+#pragma warning restore VSTHRD010
 
             wordSplitter = new WordSplitter
             {

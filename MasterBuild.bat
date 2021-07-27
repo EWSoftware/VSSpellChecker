@@ -5,10 +5,11 @@ SETLOCAL
 CD Source
 
 ECHO *
-ECHO * VS2017 and later package
+ECHO * VS2017/2019 and VS2022 and Later packages
 ECHO *
 
 REM Use MSBuild from whatever edition of Visual Studio is installed
+IF EXIST "%ProgramFiles%\Microsoft Visual Studio\2022\Preview\MSBuild\Current" SET "MSBUILD=%ProgramFiles%\Microsoft Visual Studio\2022\Preview\MSBuild\Current\bin\MSBuild.exe"
 IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\MSBuild\15.0" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Community\MSBuild\15.0\bin\MSBuild.exe"
 IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\MSBuild\15.0" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\bin\MSBuild.exe"
 IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0" SET "MSBUILD=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\bin\MSBuild.exe"
@@ -18,7 +19,7 @@ IF EXIST "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\MSBuild\Cu
 
 IF NOT EXIST "%MSBUILD%" GOTO End
 
-"%MSBUILD%" /r /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU" VSSpellChecker2017AndLater.sln
+"%MSBUILD%" /r /nologo /v:m /m /t:Clean;Build "/p:Configuration=Release;Platform=Any CPU" VSSpellChecker.sln
 
 IF ERRORLEVEL 1 GOTO End
 
@@ -30,7 +31,7 @@ IF "%SHFBROOT%"=="" ECHO **** Sandcastle help file builder not installed.  Skipp
 
 CD NuGet
 
-NuGet Pack VSSpellChecker.nuspec -NoDefaultExcludes -NoPackageAnalysis -OutputDirectory ..\Deployment
+NuGet Pack VSSpellChecker.nuspec -OutputDirectory ..\Deployment
 
 CD ..\
 

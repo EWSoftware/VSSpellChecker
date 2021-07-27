@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/20/2021
+// Updated : 07/27/2021
 // Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
@@ -176,8 +176,10 @@ namespace VisualStudio.SpellChecker
             if(this.ShouldIgnoreWord(word) || this.IsSpelledCorrectly(word))
                 return true;
 
+#pragma warning disable VSTHRD010
             if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile))
                 return false;
+#pragma warning restore VSTHRD010
 
             bool multipleWordsAdded = false;
 
@@ -412,13 +414,16 @@ namespace VisualStudio.SpellChecker
         /// <param name="service">The dictionary service to register</param>
         public void RegisterSpellingDictionaryService(SpellingDictionary service)
         {
-            // Clear out ones that have been disposed of
-            foreach(var svc in registeredServices.Where(s => !s.IsAlive).ToArray())
-                registeredServices.Remove(svc);
+            lock(syncRoot)
+            {
+                // Clear out ones that have been disposed of
+                foreach(var svc in registeredServices.Where(s => !s.IsAlive).ToArray())
+                    registeredServices.Remove(svc);
 
-            System.Diagnostics.Debug.WriteLine("Registered services count: {0}", registeredServices.Count);
+                System.Diagnostics.Debug.WriteLine("Registered services count: {0}", registeredServices.Count);
 
-            registeredServices.Add(new WeakReference(service));
+                registeredServices.Add(new WeakReference(service));
+            }
         }
 
         /// <summary>
@@ -428,16 +433,19 @@ namespace VisualStudio.SpellChecker
         /// <param name="word">The word that triggered the change</param>
         private void NotifySpellingServicesOfChange(string word)
         {
-            // Clear out ones that have been disposed of
-            foreach(var service in registeredServices.Where(s => !s.IsAlive).ToArray())
-                registeredServices.Remove(service);
-
-            System.Diagnostics.Debug.WriteLine("Registered services count: {0}", registeredServices.Count);
-
-            foreach(var service in registeredServices)
+            lock(syncRoot)
             {
-                if(service.Target is SpellingDictionary target)
-                    target.GlobalDictionaryUpdated(word);
+                // Clear out ones that have been disposed of
+                foreach(var service in registeredServices.Where(s => !s.IsAlive).ToArray())
+                    registeredServices.Remove(service);
+
+                System.Diagnostics.Debug.WriteLine("Registered services count: {0}", registeredServices.Count);
+
+                foreach(var service in registeredServices)
+                {
+                    if(service.Target is SpellingDictionary target)
+                        target.GlobalDictionaryUpdated(word);
+                }
             }
         }
 

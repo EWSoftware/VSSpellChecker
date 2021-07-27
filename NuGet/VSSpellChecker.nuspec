@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>EWSoftware.VSSpellChecker</id>
-		<version>2017.1.8.0</version>
+		<version>2021.7.27.0</version>
 		<title>EWSoftware Visual Studio Spell Checker Definitions</title>
 		<authors>Eric Woodruff</authors>
 		<owners>Eric Woodruff</owners>
@@ -11,13 +11,19 @@
 		<iconUrl>https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/NuGet/VSSpellChecker.png</iconUrl>
 		<projectUrl>https://github.com/EWSoftware/VSSpellChecker</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<description>This package contains the definitions assembly used to create third party taggers that can be integrated with the EWSoftware Visual Studio Spell Checker.</description>
+		<description>This package contains the definitions assembly used to create third party taggers that can be integrated with the EWSoftware Visual Studio Spell Checker (.NET 4.6 - VS 2017/2019, .NET 4.7 - VS 2022 and later).</description>
 		<copyright>Eric Woodruff (c) 2013-2019</copyright>
 		<tags>Visual Studio spell checker integration</tags>
+		<dependencies>
+			<group targetFramework=".NETFramework4.6" />
+			<group targetFramework=".NETFramework4.7" />
+		</dependencies>
 	</metadata>
 	<files>
 		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net46" />
 		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net46" />
+		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net47" />
+		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net47" />
 		<file src="ReadMe.txt" target="ReadMe.txt" />
 		<file src="VSSpellChecker.png" target="VSSpellChecker.png" />
 	</files>

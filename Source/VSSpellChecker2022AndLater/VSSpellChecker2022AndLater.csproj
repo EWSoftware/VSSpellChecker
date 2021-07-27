@@ -19,7 +19,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
-    <DeployExtension>False</DeployExtension>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug2022|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug2022\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -27,12 +32,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{E6356BF9-4333-446E-BF02-13D09EBFBB3A}</ProjectGuid>
+    <ProjectGuid>{3201406B-0114-4C8A-A64A-632D546517B8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>VisualStudio.SpellChecker</RootNamespace>
     <AssemblyName>VisualStudio.SpellChecker</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -54,6 +59,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DeployExtension>False</DeployExtension>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -69,155 +75,194 @@
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
+    <Compile Include="..\VSSpellChecker2017And2019\Properties\Resources.Designer.cs">
+      <Link>Properties\Resources.Designer.cs</Link>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Classifications.config">
+    <Content Include="..\VSSpellChecker2017And2019\Classifications.config">
+      <Link>Classifications.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Hunspellx64.dll">
+    <Content Include="..\VSSpellChecker2017And2019\Hunspellx64.dll">
+      <Link>Hunspellx64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Hunspellx86.dll">
+    <Content Include="..\VSSpellChecker2017And2019\Hunspellx86.dll">
+      <Link>Hunspellx86.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="License.rtf">
+    <Content Include="..\VSSpellChecker2017And2019\License.rtf">
+      <Link>License.rtf</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\de_DE.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\de_DE.aff">
+      <Link>NHunspell\de_DE.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\de_DE.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\de_DE.dic">
+      <Link>NHunspell\de_DE.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_AU.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_AU.aff">
+      <Link>NHunspell\en_AU.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_AU.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_AU.dic">
+      <Link>NHunspell\en_AU.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_CA.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_CA.aff">
+      <Link>NHunspell\en_CA.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_CA.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_CA.dic">
+      <Link>NHunspell\en_CA.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_GB.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_GB.aff">
+      <Link>NHunspell\en_GB.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_GB.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_GB.dic">
+      <Link>NHunspell\en_GB.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_NZ.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_NZ.aff">
+      <Link>NHunspell\en_NZ.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_NZ.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_NZ.dic">
+      <Link>NHunspell\en_NZ.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_US.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_US.aff">
+      <Link>NHunspell\en_US.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_US.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_US.dic">
+      <Link>NHunspell\en_US.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_ZA.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_ZA.aff">
+      <Link>NHunspell\en_ZA.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_ZA.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\en_ZA.dic">
+      <Link>NHunspell\en_ZA.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\es_ES.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\es_ES.aff">
+      <Link>NHunspell\es_ES.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\es_ES.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\es_ES.dic">
+      <Link>NHunspell\es_ES.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\fr_FR.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\fr_FR.aff">
+      <Link>NHunspell\fr_FR.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\fr_FR.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\fr_FR.dic">
+      <Link>NHunspell\fr_FR.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\it_IT.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\it_IT.aff">
+      <Link>NHunspell\it_IT.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\it_IT.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\it_IT.dic">
+      <Link>NHunspell\it_IT.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <None Include="NHunspell\NHunspell.vsspell" />
-    <Content Include="NHunspell\pt_BR.aff">
+    <None Include="..\VSSpellChecker2017And2019\NHunspell\NHunspell.vsspell">
+      <Link>NHunspell\NHunspell.vsspell</Link>
+    </None>
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\pt_BR.aff">
+      <Link>NHunspell\pt_BR.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\pt_BR.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\pt_BR.dic">
+      <Link>NHunspell\pt_BR.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\pt_PT.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\pt_PT.aff">
+      <Link>NHunspell\pt_PT.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\pt_PT.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\pt_PT.dic">
+      <Link>NHunspell\pt_PT.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\ru_RU.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\ru_RU.aff">
+      <Link>NHunspell\ru_RU.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\ru_RU.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\ru_RU.dic">
+      <Link>NHunspell\ru_RU.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sl_SI.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\sl_SI.aff">
+      <Link>NHunspell\sl_SI.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sl_SI.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\sl_SI.dic">
+      <Link>NHunspell\sl_SI.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr-Latn.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\sr-Latn.aff">
+      <Link>NHunspell\sr-Latn.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr-Latn.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\sr-Latn.dic">
+      <Link>NHunspell\sr-Latn.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr.aff">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\sr.aff">
+      <Link>NHunspell\sr.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr.dic">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\sr.dic">
+      <Link>NHunspell\sr.dic</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -244,97 +289,116 @@
       <Version>1.11.34</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense">
-      <Version>15.5.27130</Version>
+      <Version>17.0.191-preview-gdb4a0010f6</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="15.0.1" ExcludeAssets="runtime">
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.0-previews-2-31512-422" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Threading">
-      <Version>15.3.83</Version>
+      <Version>17.0.26-alpha</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.10.1055">
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.2155-preview2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NHunspell">
       <Version>1.2.5554.16953</Version>
     </PackageReference>
-    <PackageReference Include="System.ValueTuple">
-      <Version>4.5.0</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NHunspell\README_de_DE.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_de_DE.txt">
+      <Link>NHunspell\README_de_DE.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_AU.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_en_AU.txt">
+      <Link>NHunspell\README_en_AU.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_CA.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_en_CA.txt">
+      <Link>NHunspell\README_en_CA.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_GB.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_en_GB.txt">
+      <Link>NHunspell\README_en_GB.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_NZ.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_en_NZ.txt">
+      <Link>NHunspell\README_en_NZ.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_US.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_en_US.txt">
+      <Link>NHunspell\README_en_US.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_ZA.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_en_ZA.txt">
+      <Link>NHunspell\README_en_ZA.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_es_ES.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_es_ES.txt">
+      <Link>NHunspell\README_es_ES.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_fr_FR.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_fr_FR.txt">
+      <Link>NHunspell\README_fr_FR.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_it_IT.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_it_IT.txt">
+      <Link>NHunspell\README_it_IT.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_pt_BR.TXT">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_pt_BR.TXT">
+      <Link>NHunspell\README_pt_BR.TXT</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_pt_PT.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_pt_PT.txt">
+      <Link>NHunspell\README_pt_PT.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_ru_RU.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_ru_RU.txt">
+      <Link>NHunspell\README_ru_RU.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_sl_SI.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_sl_SI.txt">
+      <Link>NHunspell\README_sl_SI.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_sr.txt">
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\README_sr.txt">
+      <Link>NHunspell\README_sr.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Resources\command-strip.png" />
-    <Resource Include="Resources\Package.ico" />
-    <Content Include="VSIXPackage.png">
+    <Content Include="..\VSSpellChecker2017And2019\Resources\command-strip.png">
+      <Link>Resources\command-strip.png</Link>
+    </Content>
+    <Resource Include="..\VSSpellChecker2017And2019\Resources\Package.ico">
+      <Link>Resources\Package.ico</Link>
+    </Resource>
+    <Content Include="..\VSSpellChecker2017And2019\VSIXPackage.png">
+      <Link>VSIXPackage.png</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="VSIXPreview.png">
+    <Content Include="..\VSSpellChecker2017And2019\VSIXPreview.png">
+      <Link>VSIXPreview.png</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <VSCTCompile Include="VSSpellChecker.vsct">
+    <VSCTCompile Include="..\VSSpellChecker2017And2019\VSSpellChecker.vsct">
+      <Link>VSSpellChecker.vsct</Link>
       <ResourceName>Menus.ctmenu</ResourceName>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -342,24 +406,27 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Include="..\VSSpellChecker2017And2019\Properties\Resources.resx">
+      <Link>Properties\Resources.resx</Link>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="VSPackage.resx">
+    <EmbeddedResource Include="..\VSSpellChecker2017And2019\VSPackage.resx">
+      <Link>VSPackage.resx</Link>
       <MergeWithCTO>true</MergeWithCTO>
       <ManifestResourceName>VSPackage</ManifestResourceName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VSSpellCheckerDefinitions2017And2019\VSSpellCheckerDefinitions2017And2019.csproj">
+    <ProjectReference Include="..\VSSpellCheckerDefinitions2022AndLater\VSSpellCheckerDefinitions2022AndLater.csproj">
       <Project>{a9303943-d23d-4570-9792-56667f0dd928}</Project>
-      <Name>VSSpellCheckerDefinitions2017And2019</Name>
+      <Name>VSSpellCheckerDefinitions2022AndLater</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Resources\VisualStudioThemeResources.xaml">
+    <Page Include="..\VSSpellChecker2017And2019\Resources\VisualStudioThemeResources.xaml">
+      <Link>Resources\VisualStudioThemeResources.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -372,12 +439,12 @@
 
 IF NOT EXIST "$(SolutionDir)..\Deployment\" MD "$(SolutionDir)..\Deployment\"
 
-Copy "$(TargetDir)$(TargetName).vsix" "$(SolutionDir)..\Deployment\$(TargetName).VS2017And2019.vsix"
+Copy "$(TargetDir)$(TargetName).vsix" "$(SolutionDir)..\Deployment\$(TargetName).VS2022AndLater.vsix"
 
 :Exit
 </PostBuildEvent>
   </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

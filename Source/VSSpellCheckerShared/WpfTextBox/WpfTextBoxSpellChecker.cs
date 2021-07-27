@@ -449,6 +449,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
                 commands.Add(new Separator());
 
+#pragma warning disable VSTHRD010
                 foreach(var d in dictionary.Dictionaries)
                     commands.Add(new MenuItem
                     {
@@ -462,6 +463,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                     Header = "Add to Ignored Words File (Global)",
                     Command = new MenuCommand(o => this.AddIgnoredWord())
                 });
+#pragma warning restore VSTHRD010
 
                 commands.Add(new MenuItem
                 {
@@ -497,7 +499,9 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         /// <param name="culture">The culture of the dictionary to which the word is added</param>
         private void AddToDictionary(CultureInfo culture)
         {
+#pragma warning disable VSTHRD010
             dictionary.AddWordToDictionary(selectedMisspelling.Word, culture);
+#pragma warning restore VSTHRD010
             textBox.RaiseEvent(new TextChangedEventArgs(TextBoxBase.TextChangedEvent, UndoAction.None));
         }
 
@@ -534,8 +538,10 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                     {
                         words.Add(selectedMisspelling.Word);
 
+#pragma warning disable VSTHRD010
                         if(ignoredWordsFile.CanWriteToUserWordsFile(null))
                             Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+#pragma warning restore VSTHRD010
                     }
                 }
                 catch(Exception ex)
@@ -644,6 +650,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                 foreach(var m in textBox.ContextMenu.Items.OfType<FrameworkElement>().Where(m => m.Tag == this).ToArray())
                     textBox.ContextMenu.Items.Remove(m);
 
+#pragma warning disable VSTHRD010
             if(selectedMisspelling != null && selectedMisspelling != lastSelectedMisspelling)
             {
                 foreach(var item in this.MenuActions())
@@ -654,6 +661,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
                 textBox.ContextMenu.Items.Insert(idx++, new Separator { Tag = this });
             }
+#pragma warning restore VSTHRD010
 
             if(Keyboard.IsKeyDown(Key.LeftCtrl) && (selectedMisspelling != lastSelectedMisspelling ||
               !textBox.ContextMenu.Items.OfType<FrameworkElement>().Any(m => m.Tag == this)))

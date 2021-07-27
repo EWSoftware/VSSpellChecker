@@ -96,7 +96,6 @@ namespace VisualStudio.SpellChecker
 #pragma warning disable VSTHRD010
                 // Generate the configuration settings unique to the file
                 config = GenerateConfiguration(buffer);
-#pragma warning restore VSTHRD010
 
                 if(config == null || !config.SpellCheckAsYouType || config.ShouldExcludeFile(buffer.GetFilename()))
                 {
@@ -106,6 +105,7 @@ namespace VisualStudio.SpellChecker
                 }
                 else
                     buffer.Properties[typeof(SpellCheckerConfiguration)] = config;
+#pragma warning restore VSTHRD010
             }
 
             return config;
