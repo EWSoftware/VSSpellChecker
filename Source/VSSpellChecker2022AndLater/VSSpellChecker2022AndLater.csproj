@@ -88,12 +88,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\VSSpellChecker2017And2019\Hunspellx64.dll">
+    <Content Include="$(PkgNHunspell)\Content\Hunspellx64.dll">
       <Link>Hunspellx64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="..\VSSpellChecker2017And2019\Hunspellx86.dll">
+    <Content Include="$(PkgNHunspell)\Content\Hunspellx86.dll">
       <Link>Hunspellx86.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -206,6 +206,11 @@
     <None Include="..\VSSpellChecker2017And2019\NHunspell\NHunspell.vsspell">
       <Link>NHunspell\NHunspell.vsspell</Link>
     </None>
+    <Content Include="..\VSSpellChecker2017And2019\NHunspell\LGPL-License.txt">
+      <Link>NHunspell\LGPL-License.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="..\VSSpellChecker2017And2019\NHunspell\pt_BR.aff">
       <Link>NHunspell\pt_BR.aff</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -301,7 +306,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NHunspell">
+    <PackageReference Include="NHunspell" GeneratePathProperty="true">
       <Version>1.2.5554.16953</Version>
     </PackageReference>
   </ItemGroup>

@@ -80,11 +80,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Hunspellx64.dll">
+    <Content Include="$(PkgNHunspell)\Content\Hunspellx64.dll">
+      <Link>Hunspellx64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Hunspellx86.dll">
+    <Content Include="$(PkgNHunspell)\Content\Hunspellx86.dll">
+      <Link>Hunspellx86.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -173,6 +175,10 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="NHunspell\NHunspell.vsspell" />
+    <Content Include="NHunspell\LGPL-License.txt">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="NHunspell\pt_BR.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -256,7 +262,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NHunspell">
+    <PackageReference Include="NHunspell" GeneratePathProperty="true">
       <Version>1.2.5554.16953</Version>
     </PackageReference>
     <PackageReference Include="System.ValueTuple">

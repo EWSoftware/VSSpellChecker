@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31424.327
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31825.309
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker2017And2019", "VSSpellChecker2017And2019\VSSpellChecker2017And2019.csproj", "{E6356BF9-4333-446E-BF02-13D09EBFBB3A}"
 EndProject
@@ -25,6 +25,9 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VSSpellCheckerShared", "VSSpellCheckerShared\VSSpellCheckerShared.shproj", "{3674333F-E963-461D-B118-889BF3F13AED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker2022AndLater", "VSSpellChecker2022AndLater\VSSpellChecker2022AndLater.csproj", "{3201406B-0114-4C8A-A64A-632D546517B8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840} = {B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
