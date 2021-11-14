@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 01/22/2020
-// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 11/13/2021
+// Note    : Copyright 2010-2021, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for source code files of any type
 //
@@ -315,6 +315,12 @@ namespace VisualStudio.SpellChecker.Tagging
                         }
 
                         preprocessorKeywordSeen = false;
+
+                        // The Python classifier tends to tag general code elements, variables, etc. as text.
+                        // Ignore them as we don't want to flag that stuff.  I'm not sure if this will stop it
+                        // spell checking stuff that it really should.  Guess we'll have to wait and see.
+                        if(name == "text" && classificationSpan.Span.Snapshot.ContentType.IsOfType("Python"))
+                            continue;
 
                         // Track and ignore classifications by original name to allow the user to be more
                         // selective if necessary.
