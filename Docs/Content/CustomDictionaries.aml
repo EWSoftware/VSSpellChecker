@@ -4,31 +4,22 @@
 		<introduction>
 			<para>The package uses NHunspell to perform spell checking and comes with several dictionaries for various
 languages.  Since NHunspell makes use of Open Office dictionaries, you can download additional dictionaries for
-other languages.  To make them available to the spell checker, do the following:
+other languages from
+				<externalLink
+					      ><linkText>LibreOffice dictionary repository</linkText
+					><linkUri
+						  >https://cgit.freedesktop.org/libreoffice/dictionaries/tree/</linkUri></externalLink>.
+				To make them available to the spell checker, do the following:
 			</para>
 		</introduction>
 
 		<section>
 			<content>
 				<list class="bullet">
-					<listItem>
-						<para>Go to the Open Office Extensions <externalLink>
-	<linkText>dictionary page</linkText>
-	<linkAlternateText>Search for OpenOffice dictionaries</linkAlternateText>
-	<linkUri>http://extensions.services.openoffice.org/dictionary</linkUri>
-	<linkTarget>_blank</linkTarget>
-</externalLink> and download the dictionaries for the languages you need.  Dictionaries for OpenOffice versions
-2, 3, and 4 are supported.</para>
-					</listItem>
 
 					<listItem>
-						<para>If the downloaded file has a <localUri>.oxt</localUri> extension, rename it to have a
-<localUri>.zip</localUri> extension.</para>
-					</listItem>
-
-					<listItem>
-						<para>Extract the content of the file and locate the <localUri>.aff</localUri> and
-<localUri>.dic</localUri> dictionary files.</para>
+						<para>Locate and download the <localUri>.aff</localUri> and
+<localUri>.dic</localUri> dictionary files for your language!</para>
 					</listItem>
 
 					<listItem>
@@ -69,13 +60,13 @@ project to which they will apply.</para>
 							<listItem>
 								<para>Add a solution, project, folder, or file-specific
 <link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab">spell checker configuration file</link> based on how you
-want the dictionaries to be made available and used.</para>
+want the dictionaries to be made available and used!</para>
 							</listItem>
 
 							<listItem>
 								<para>In the configuration file, add the folder location to the <ui>Additional Dictionary Folders</ui>
-list in the <ui>Dictionary Settings</ui> category.  When prompted, make the path relative to the configuration
-file so that the dictionary files can be found if the project is moved.</para>
+list in the <ui>Dictionary Settings</ui> category!  When prompted, make the path relative to the configuration
+file so that the dictionary files can be found if the project is moved!</para>
 							</listItem>
 
 						</list>
@@ -84,7 +75,7 @@ file so that the dictionary files can be found if the project is moved.</para>
 					<listItem>
 						<para>Note that the <localUri>.aff</localUri> and <localUri>.dic</localUri> files must be named after
 the language they represent with no other text in the filename and the language parts must be separated with an
-underscore or a dash.  If necessary, rename the files to match the required format.  For example:</para>
+underscore or a dash!  If necessary, rename the files to match the required format!  For example:</para>
 
 						<list class="bullet">
 							<listItem>
