@@ -19,7 +19,7 @@ other languages from
 
 					<listItem>
 						<para>Locate and download the <localUri>.aff</localUri> and
-<localUri>.dic</localUri> dictionary files for your language!</para>
+<localUri>.dic</localUri> dictionary files for your language.</para>
 					</listItem>
 
 					<listItem>
@@ -60,13 +60,13 @@ project to which they will apply.</para>
 							<listItem>
 								<para>Add a solution, project, folder, or file-specific
 <link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab">spell checker configuration file</link> based on how you
-want the dictionaries to be made available and used!</para>
+want the dictionaries to be made available and used.</para>
 							</listItem>
 
 							<listItem>
 								<para>In the configuration file, add the folder location to the <ui>Additional Dictionary Folders</ui>
-list in the <ui>Dictionary Settings</ui> category!  When prompted, make the path relative to the configuration
-file so that the dictionary files can be found if the project is moved!</para>
+list in the <ui>Dictionary Settings</ui> category.  When prompted, make the path relative to the configuration
+file so that the dictionary files can be found if the project is moved.</para>
 							</listItem>
 
 						</list>
@@ -75,7 +75,7 @@ file so that the dictionary files can be found if the project is moved!</para>
 					<listItem>
 						<para>Note that the <localUri>.aff</localUri> and <localUri>.dic</localUri> files must be named after
 the language they represent with no other text in the filename and the language parts must be separated with an
-underscore or a dash!  If necessary, rename the files to match the required format!  For example:</para>
+underscore or a dash.  If necessary, rename the files to match the required format.  For example:</para>
 
 						<list class="bullet">
 							<listItem>
