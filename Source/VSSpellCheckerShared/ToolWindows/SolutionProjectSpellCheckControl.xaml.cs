@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/12/2021
+// Updated : 11/24/2021
 // Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -1078,7 +1078,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var cf in issue.FileInfo.ConfigurationFiles)
                 {
-                    switch(cf.Key)
+                    switch(cf.ConfigType)
                     {
                         case ConfigurationType.Global:
                             item = new MenuItem
@@ -1092,7 +1092,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             item = new MenuItem
                             {
                                 Header = "Solution Configuration File",
-                                Tag = cf.Value
+                                Tag = cf.ConfigFile
                             };
                             break;
 
@@ -1100,12 +1100,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             item = new MenuItem
                             {
                                 Header = issue.ProjectName + " Configuration File",
-                                Tag = cf.Value
+                                Tag = cf.ConfigFile
                             };
                             break;
 
                         case ConfigurationType.Folder:
-                            item = new MenuItem { Tag = cf.Value };
+                            item = new MenuItem { Tag = cf.ConfigFile };
 
                             item.Header = Path.GetFileName(Path.GetDirectoryName(issue.CanonicalName));
 
@@ -1136,7 +1136,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             item = new MenuItem
                             {
                                 Header = issue.Filename + " Configuration File",
-                                Tag = cf.Value
+                                Tag = cf.ConfigFile
                             };
                             break;
                     }

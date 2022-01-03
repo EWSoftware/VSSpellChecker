@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="e791c561-0d79-4476-b31a-1f337e295d63" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Added support for Visual Studio 2022 in July 2021.  Since it was the only change, no
+help update was published for that release.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added <localUri>.tsx</localUri> as a recognized file extension for solution/project spell
+checking.  Both it and <localUri>.jsx</localUri> files are now handled by their own parser that takes into
+account HTML elements that may be embedded in the code for spell checking.  Because of the mix of code an HTML,
+those two file types are now handled by the general tagger in the editor rather than the C# tagger.  As such, the
+C-style configuration options are not applied to those file types anymore.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added a case to the general tagger to ignore the <codeInline>text</codeInline> classification
+for Python files when the Python workload is installed.  When it is, the classifier for Python files flags many
+elements as text even when they are not (variables etc.)</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the HTML tagger so that it is used for Razor file content.</para>
+					</listItem>
+
+					<listItem>
+						<para>Made several changes to the solution/project spell checking code to avoid responsiveness issues
+in Visual Studio caused by garbage collections triggered by the code in prior releases.</para>
+					</listItem>
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

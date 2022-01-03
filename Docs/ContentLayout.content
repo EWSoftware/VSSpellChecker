@@ -153,12 +153,17 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="e791c561-0d79-4476-b31a-1f337e295d63" visible="True" isSelected="true" title="Version 2022.1.3.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2022.1.3.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="e1588046-393b-4864-a3c1-6771b73bf124" visible="True" title="Version 2021.3.1.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2021.3.1.0" />
       </HelpKeywords>
     </Topic>
-    <Topic id="bb88f7d5-2491-457e-9ba3-8d7d0bbc8615" visible="True" isSelected="true" title="Version 2021.1.23.0">
+    <Topic id="bb88f7d5-2491-457e-9ba3-8d7d0bbc8615" visible="True" title="Version 2021.1.23.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2021.1.23.0" />
       </HelpKeywords>

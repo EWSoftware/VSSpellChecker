@@ -74,6 +74,13 @@ from the removed spans.</para>
 					</listItem>
 
 					<listItem>
+						<para><codeInline>ScriptWithHtmlClassifier</codeInline> - This classifier is similar to the
+<codeInline>CodeClassifier</codeInline> described above but is specific to JavaScript and TypeScript files that
+contain embedded HTML elements.  It will parse the code and also the HTML elements to include the wanted HTML
+element parts such as inner text and exclude the unwanted HTML elements parts such as ignored attribute values.</para>
+					</listItem>
+
+					<listItem>
 						<para><codeInline>RegexClassifier</codeInline> - This is a general classifier that uses a series of
 regular expressions to classify file content as code comments or string literals.  This is useful for non-code
 files such as style sheets or SQL scripts that do not require the extra classification steps performed by the

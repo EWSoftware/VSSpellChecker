@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/07/2018
-// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
+// Updated : 12/30/2021
+// Note    : Copyright 2010-2021, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for HTML files
 //
@@ -20,6 +20,8 @@
 // 02/23/2014  EFW  Added support for project files using the derived HTML type "htmlx"
 // 06/06/2014  EFW  Added support for excluding from spell checking by filename extension
 //===============================================================================================================
+
+// Ignore Spelling: cshtml
 
 using System;
 using System.Collections.Generic;
@@ -52,10 +54,11 @@ namespace VisualStudio.SpellChecker.Tagging
         /// HTML text tagger provider
         /// </summary>
         /// <remarks>The content types for this provider are "html" which covers regular HTML, "htmlx" which
-        /// covers derived types such as HTML files in Razor projects, and "code++.PHP" and "code++.Markdown"
-        /// which cover PHP and markdown files when no extension is present that handles them.</remarks>
+        /// covers derived HTML content types in certain other web project types, "code++.PHP" and "code++.Markdown"
+        /// which cover PHP and markdown files when no extension is present that handles them, and "Razor" which
+        /// covers cshtml files.</remarks>
         [Export(typeof(ITaggerProvider)), ContentType("html"), ContentType("htmlx"), ContentType("code++.PHP"),
-          ContentType("code++.Markdown"), TagType(typeof(NaturalTextTag))]
+          ContentType("code++.Markdown"), ContentType("Razor"), TagType(typeof(NaturalTextTag))]
         internal class HtmlTextTaggerProvider : ITaggerProvider
         {
             [Import]
@@ -107,6 +110,12 @@ namespace VisualStudio.SpellChecker.Tagging
             NormalizedSnapshotSpanCollection plainSpans = NormalizedSnapshotSpanCollection.Difference(spans,
                 classifiedSpans);
 
+            // NOTE: The Razor classifier works rather oddly.  It seems to classify parts of the file but
+            // not others and then goes back and does the bits it missed.  As such, you may see code, attributes,
+            // and attribute values here but they go away on the next pass.  On occasion, it seems to not
+            // classify everything when the file is opened and those noted elements aren't syntax highlighted
+            // correctly and may show up as misspellings.  However, if you wait a few seconds, it catches up,
+            // reclassifies everything properly and the incorrect misspellings go away.
             foreach(var span in plainSpans)
                 yield return new TagSpan<NaturalTextTag>(span, new NaturalTextTag());
         }

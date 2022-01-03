@@ -36,10 +36,14 @@ them.</para>
 <linkText>Visual Studio 2013/2015</linkText>
 <linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellChecker</linkUri>
 <linkTarget>_blank</linkTarget>
-</externalLink> and
+</externalLink>,
 <externalLink>
 <linkText>Visual Studio 2017/2019</linkText>
 <linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2017andLater</linkUri>
+<linkTarget>_blank</linkTarget>
+</externalLink>, and <externalLink>
+<linkText>Visual Studio 2022 and Later</linkText>
+<linkUri>https://marketplace.visualstudio.com/items?itemName=EWoodruff.VisualStudioSpellCheckerVS2022andLater</linkUri>
 <linkTarget>_blank</linkTarget>
 </externalLink>) using the <ui>Tools | Extension and Updates</ui> option (Visual Studio 2017) or
 <ui>Extensions | Manage Extensions</ui> option (Visual Studio 2019 or later).  Select the online marketplace and

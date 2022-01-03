@@ -6,7 +6,7 @@
     <SharedGUID>3674333f-e963-461d-b118-889bf3f13aed</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>VSSpellCheckerShared</Import_RootNamespace>
+    <Import_RootNamespace>VisualStudio.SpellChecker</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Configuration\CodeAnalysisDictionaryOptions.cs" />
@@ -84,6 +84,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\RegexClassifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\ReportingServicesClassifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\ResourceFileClassifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\ScriptWithHtmlClassifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\SpellCheckFileInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\SpellCheckSpan.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\TextClassifier.cs" />

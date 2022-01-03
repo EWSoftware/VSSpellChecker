@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/24/2020
-// Note    : Copyright 2015-2020, Eric Woodruff, All rights reserved
+// Updated : 12/29/2021
+// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
 //
@@ -266,6 +266,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     case "RegexClassifier":
                         classifier = new RegexClassifier(filename, spellCheckConfiguration, definition.Configuration);
+                        break;
+
+                    case "ScriptWithHtmlClassifier":
+                        classifier = new ScriptWithHtmlClassifier(filename, spellCheckConfiguration, definition.Configuration);
                         break;
 
                     default:

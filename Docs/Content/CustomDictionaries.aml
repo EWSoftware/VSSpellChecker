@@ -4,7 +4,8 @@
 		<introduction>
 			<para>The package uses NHunspell to perform spell checking and comes with several dictionaries for various
 languages.  Since NHunspell makes use of Open Office dictionaries, you can download additional dictionaries for
-other languages.  To make them available to the spell checker, do the following:
+other languages.  Dictionaries for OpenOffice versions 2, 3, and 4 are supported.  To make them available to the
+spell checker, do the following:
 			</para>
 		</introduction>
 
@@ -17,18 +18,19 @@ other languages.  To make them available to the spell checker, do the following:
 	<linkAlternateText>Search for OpenOffice dictionaries</linkAlternateText>
 	<linkUri>http://extensions.services.openoffice.org/dictionary</linkUri>
 	<linkTarget>_blank</linkTarget>
-</externalLink> and download the dictionaries for the languages you need.  Dictionaries for OpenOffice versions
-2, 3, and 4 are supported.</para>
+</externalLink> and download the dictionaries for the languages you need.  If the downloaded file has a
+<localUri>.oxt</localUri> extension, rename it to have a <localUri>.zip</localUri> extension.  Extract the
+content of the file and locate the <localUri>.aff</localUri> and <localUri>.dic</localUri> dictionary files.</para>
 					</listItem>
 
 					<listItem>
-						<para>If the downloaded file has a <localUri>.oxt</localUri> extension, rename it to have a
-<localUri>.zip</localUri> extension.</para>
-					</listItem>
-
-					<listItem>
-						<para>Extract the content of the file and locate the <localUri>.aff</localUri> and
-<localUri>.dic</localUri> dictionary files.</para>
+						<para>Another source for Open Office dictionaries is the <externalLink>
+							<linkText>LibreOffice dictionary repository</linkText>
+							<linkAlternateText>LibreOffice dictionary repository</linkAlternateText>
+							<linkUri>http://extensions.services.openoffice.org/dictionary</linkUri>
+							<linkTarget>_blank</linkTarget>
+						</externalLink>.  Locate the language you want to use and download the <localUri>.aff</localUri> and
+<localUri>.dic</localUri> dictionary files for it.</para>
 					</listItem>
 
 					<listItem>
