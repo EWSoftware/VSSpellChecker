@@ -27,7 +27,7 @@ content of the file and locate the <localUri>.aff</localUri> and <localUri>.dic<
 						<para>Another source for Open Office dictionaries is the <externalLink>
 							<linkText>LibreOffice dictionary repository</linkText>
 							<linkAlternateText>LibreOffice dictionary repository</linkAlternateText>
-							<linkUri>http://extensions.services.openoffice.org/dictionary</linkUri>
+							<linkUri>https://cgit.freedesktop.org/libreoffice/dictionaries/tree</linkUri>
 							<linkTarget>_blank</linkTarget>
 						</externalLink>.  Locate the language you want to use and download the <localUri>.aff</localUri> and
 <localUri>.dic</localUri> dictionary files for it.</para>
