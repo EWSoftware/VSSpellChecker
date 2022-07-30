@@ -18,9 +18,25 @@
     <HtmlHelpName>VSSpellChecker</HtmlHelpName>
     <Language>en-US</Language>
     <TransformComponentArguments>
-      <Argument Key="maxVersionParts" Value="" />
-      <Argument Key="includeEnumValues" Value="true" />
-      <Argument Key="baseSourceCodeUrl" Value="https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/" />
+      <Argument Key="RobotsMetadata" Value="" />
+      <Argument Key="BibliographyDataFile" Value="" />
+      <Argument Key="RootBreadcrumbTitleText" Value="Spell Checker" />
+      <Argument Key="CollapsibleSections" Value="True" />
+      <Argument Key="LogoFile" Value="" />
+      <Argument Key="LogoHeight" Value="" />
+      <Argument Key="LogoWidth" Value="" />
+      <Argument Key="LogoAltText" Value="" />
+      <Argument Key="LogoPlacement" Value="Left" />
+      <Argument Key="LogoAlignment" Value="Left" />
+      <Argument Key="LogoUrl" Value="" />
+      <Argument Key="MaxVersionParts" Value="" />
+      <Argument Key="DefaultLanguage" Value="cs" />
+      <Argument Key="IncludeEnumValues" Value="True" />
+      <Argument Key="EnumMemberSortOrder" Value="Value" />
+      <Argument Key="FlagsEnumValueFormat" Value="IntegerValue" />
+      <Argument Key="FlagsEnumSeparatorSize" Value="0" />
+      <Argument Key="BaseSourceCodeUrl" Value="https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/" />
+      <Argument Key="RequestExampleUrl" Value="" />
     </TransformComponentArguments>
     <DocumentationSources>
       <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions2017and2019\VSSpellCheckerDefinitions2017and2019.csproj" xmlns="" />
@@ -36,7 +52,7 @@
     <SyntaxFilters>Standard</SyntaxFilters>
     <SdkLinkTarget>Blank</SdkLinkTarget>
     <RootNamespaceContainer>False</RootNamespaceContainer>
-    <PresentationStyle>VS2013</PresentationStyle>
+    <PresentationStyle>Default2022</PresentationStyle>
     <Preliminary>False</Preliminary>
     <NamingMethod>Guid</NamingMethod>
     <HelpTitle>Visual Studio Spell Checker Documentation</HelpTitle>
@@ -74,7 +90,7 @@
     <ProjectSummary>Visual Studio Spell Checker.  Written by Eric Woodruff %28&amp;lt%3ba href=&amp;quot%3bmailto:Eric%40EWoodruff.us%3fSubject=Visual Studio Spell Checker&amp;quot%3b&amp;gt%3bEric%40EWoodruff.us&amp;lt%3b/a&amp;gt%3b%29.  For the latest version visit &amp;lt%3ba href=&amp;quot%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;lt%3b/a&amp;gt%3b.</ProjectSummary>
     <VisibleItems>InheritedMembers, InheritedFrameworkMembers, Protected, ProtectedInternalAsProtected, NonBrowsable</VisibleItems>
     <PlugInConfigurations>
-      <PlugInConfig id="Output Deployment" enabled="True" xmlns="">
+      <PlugInConfig id="Output Deployment" enabled="True">
         <configuration deleteAfterDeploy="true" verboseLogging="false">
           <deploymentLocation id="help1x" location="">
             <userCredentials useDefault="true" userName="" password="" />

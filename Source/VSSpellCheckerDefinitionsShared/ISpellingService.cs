@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Definitions
 // File    : ISpellingService.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/07/2015
-// Note    : Copyright 2015, Microsoft Corporation, All rights reserved
+// Updated : 07/29/2022
+// Note    : Copyright 2015-2022, Microsoft Corporation, All rights reserved
 //
 // This file contains the interface used to expose the spell checker to third-party tagger providers
 //
@@ -24,8 +24,6 @@ namespace VisualStudio.SpellChecker.Definitions
     /// <summary>
     /// This is used to retrieve the spelling service
     /// </summary>
-    /// <preliminary>This interface is under development and may be expanded in the future to provide more access
-    /// to necessary spell checker features.</preliminary>
     /// <example>
     /// This is a MEF component, and should be imported with the following code:
     /// <code language="cs">
