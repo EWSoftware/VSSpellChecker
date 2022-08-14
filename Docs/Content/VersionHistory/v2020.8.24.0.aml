@@ -9,7 +9,7 @@
 			<content>
 				<list class="bullet">
 					<listItem>
-						<para>Adjusted the classifier definitions so that "<codeinline>/** */</codeinline>" comments are not
+						<para>Adjusted the classifier definitions so that "<codeInline>/** */</codeInline>" comments are not
 treated like XML documentation comments in script languages such as TypeScript which uses them for markdown
 comments.</para>
 					</listItem>
