@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 11/24/2021
-// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
+// Updated : 09/04/2022
+// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -440,10 +440,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 while(documents.Next(1, docCookie, out uint fetched) == VSConstants.S_OK && fetched == 1)
                 {
-                    rdt.GetDocumentInfo(docCookie[0], out _, out _, out _, out string moniker, out _, out _, out _);
+                    rdt.GetDocumentInfo(docCookie[0], out uint flags, out _, out _, out string moniker, out _, out _, out _);
 
-                    // Some monikers are not actual filenames so we ignore them
-                    if(moniker.IndexOf("::", StringComparison.Ordinal) == -1 &&
+                    // Ignore virtual documents related to the solution or project (e.g. *.filters for C++ projects).
+                    // Some monikers are not actual filenames so we ignore them.
+                    if((flags & (uint)(_VSRDTFLAGS.RDT_VirtualDocument | _VSRDTFLAGS.RDT_ProjSlnDocument)) == 0 &&
+                      moniker.IndexOf("::", StringComparison.Ordinal) == -1 &&
                       moniker.IndexOfAny(Path.GetInvalidPathChars()) == -1)
                     {
                         yield return moniker;
@@ -1105,9 +1107,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             break;
 
                         case ConfigurationType.Folder:
-                            item = new MenuItem { Tag = cf.ConfigFile };
-
-                            item.Header = Path.GetFileName(Path.GetDirectoryName(issue.CanonicalName));
+                            item = new MenuItem
+                            {
+                                Tag = cf.ConfigFile,
+                                Header = Path.GetFileName(Path.GetDirectoryName(issue.CanonicalName))
+                            };
 
                             try
                             {

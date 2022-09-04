@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceProxy.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/28/2021
-// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
+// Updated : 09/04/2022
+// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling service interface to expose the spell checker to
 // third-party tagger providers.
@@ -186,6 +186,13 @@ namespace VisualStudio.SpellChecker
                     // See if there is a solution configuration
                     filename = solution.FullName + ".vsspell";
                     projectItem = solution.FindProjectItemForFile(filename);
+
+                    // Allow for solution configuration files to be named ".vsspell"
+                    if(projectItem == null)
+                    {
+                        filename = Path.Combine(Path.GetDirectoryName(filename), ".vsspell");
+                        projectItem = solution.FindProjectItemForFile(filename);
+                    }
 
                     if(projectItem != null)
                         config.Load(filename);

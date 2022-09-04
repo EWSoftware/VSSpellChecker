@@ -26,8 +26,8 @@ in the absence of, and inherited by, solution, project, folder, and file-specifi
 
 					<listItem>
 						<para>Solution settings are stored in the solution's <localUri>Solution Items</localUri> folder and
-are named after the solution.  Options that are set in this configuration will override the global settings and
-will be inherited by projects, folders, and files.</para>
+are named after the solution, or optionally, just ".vsspell".  Options that are set in this configuration will
+override the global settings and will be inherited by projects, folders, and files.</para>
 					</listItem>
 
 					<listItem>

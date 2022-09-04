@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/05/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 09/04/2022
+// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit spell checker configuration settings files
 //
@@ -224,6 +224,10 @@ namespace VisualStudio.SpellChecker.Editors
 
                 if(dte2 != null && dte2.Solution != null && !String.IsNullOrWhiteSpace(dte2.Solution.FullName))
                 {
+                    // For a .vsspell solution configuration file, use the solution name
+                    if(configFilename[configFilename.Length - 1] == '\\')
+                        configFilename = dte2.Solution.FullName;
+
                     configFilename = configFilename.ToRelativePath(Path.GetDirectoryName(dte2.Solution.FullName));
 
                     if(String.IsNullOrWhiteSpace(configFilename))

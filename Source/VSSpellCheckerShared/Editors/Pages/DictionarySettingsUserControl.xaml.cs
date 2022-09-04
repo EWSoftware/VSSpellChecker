@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/13/2021
-// Note    : Copyright 2014-2021, Eric Woodruff, All rights reserved
+// Updated : 09/04/2022
+// Note    : Copyright 2014-2022, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the spell checker dictionary settings
 //
@@ -104,6 +104,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             configFilePath = Path.GetDirectoryName(configuration.Filename);
             isGlobal = configuration.ConfigurationType == ConfigurationType.Global;
 
+            if(relatedFilename.Length == 0)
+                relatedFilename = ".vsspell";
+
             if(isGlobal)
             {
                 chkInheritAdditionalFolders.IsChecked = false;
@@ -148,6 +151,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             relatedFilename = Path.GetFileNameWithoutExtension(configuration.Filename);
             configFilePath = Path.GetDirectoryName(configuration.Filename);
             isGlobal = configuration.ConfigurationType == ConfigurationType.Global;
+
+            if(relatedFilename.Length == 0)
+                relatedFilename = ".vsspell";
 
             if(lbAdditionalFolders.Items.Count != 0)
                 newList = new HashSet<string>(lbAdditionalFolders.Items.Cast<string>(),
@@ -317,6 +323,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     // See if there is a solution configuration
                     filename = solution.FullName + ".vsspell";
                     projectItem = solution.FindProjectItemForFile(filename);
+
+                    // Allow for solution configuration files to be named ".vsspell"
+                    if(projectItem == null)
+                    {
+                        filename = Path.Combine(Path.GetDirectoryName(filename), ".vsspell");
+                        projectItem = solution.FindProjectItemForFile(filename);
+                    }
 
                     if(projectItem != null)
                         config.Load(filename);

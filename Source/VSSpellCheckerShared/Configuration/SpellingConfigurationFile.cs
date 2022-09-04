@@ -113,10 +113,10 @@ namespace VisualStudio.SpellChecker.Configuration
                 string relatedFile = Path.GetFileNameWithoutExtension(filename),
                     folder = Path.GetDirectoryName(filename);
 
-                if(folder.EndsWith(relatedFile, StringComparison.OrdinalIgnoreCase))
+                if(relatedFile.Length != 0 && folder.EndsWith(relatedFile, StringComparison.OrdinalIgnoreCase))
                     return ConfigurationType.Folder;
 
-                if(relatedFile.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
+                if(relatedFile.Length == 0 || relatedFile.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
                     return ConfigurationType.Solution;
 
                 if(Path.GetExtension(relatedFile).EndsWith("proj", StringComparison.OrdinalIgnoreCase))
