@@ -153,6 +153,11 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="d671e91a-9945-4d1f-9d5c-6035037990d8" visible="True" title="Version 2022.9.6.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2022.9.6.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="e791c561-0d79-4476-b31a-1f337e295d63" visible="True" isSelected="true" title="Version 2022.1.3.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2022.1.3.0" />
