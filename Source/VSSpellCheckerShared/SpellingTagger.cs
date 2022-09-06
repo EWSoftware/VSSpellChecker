@@ -32,6 +32,8 @@
 // 08/20/2018  EFW  Added support for the inline ignore spelling directive
 //===============================================================================================================
 
+// Ignore Spelling: Versicherungs Vertrag
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -771,7 +773,7 @@ namespace VisualStudio.SpellChecker
                         // Handle code analysis dictionary checks first as they may be not be recognized as
                         // correctly spelled words but have alternate handling.
                         if(configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
-                            configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
+                          configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
                         {
                             yield return new MisspellingTag(MisspellingType.DeprecatedTerm, errorSpan,
                                 new[] { new SpellingSuggestion(null, preferredTerm) });
@@ -779,7 +781,7 @@ namespace VisualStudio.SpellChecker
                         }
 
                         if(configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
-                            configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
+                          configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
                         {
                             yield return new MisspellingTag(MisspellingType.CompoundTerm, errorSpan,
                                 new[] { new SpellingSuggestion(null, preferredTerm) });
@@ -787,7 +789,7 @@ namespace VisualStudio.SpellChecker
                         }
 
                         if(configuration.CadOptions.TreatUnrecognizedWordsAsMisspelled &&
-                            configuration.UnrecognizedWords.TryGetValue(textToCheck, out IList<string> spellingAlternates))
+                          configuration.UnrecognizedWords.TryGetValue(textToCheck, out IList<string> spellingAlternates))
                         {
                             yield return new MisspellingTag(MisspellingType.UnrecognizedWord, errorSpan,
                                 spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
@@ -800,27 +802,40 @@ namespace VisualStudio.SpellChecker
                             // word without the "'s".  If ignored or correct without it, don't flag it.  This
                             // appears to be caused by the definitions in the dictionary rather than Hunspell.
                             if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase) ||
-                                textToCheck.EndsWith("\u2019s", StringComparison.OrdinalIgnoreCase))
+                              textToCheck.EndsWith("\u2019s", StringComparison.OrdinalIgnoreCase))
                             {
                                 string aposEss = textToCheck.Substring(textToCheck.Length - 2);
 
                                 textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
                                 if(this.Dictionary.ShouldIgnoreWord(textToCheck) ||
-                                    this.Dictionary.IsSpelledCorrectly(textToCheck))
+                                  this.Dictionary.IsSpelledCorrectly(textToCheck))
+                                {
                                     continue;
+                                }
 
                                 textToCheck += aposEss;
                             }
 
                             // Some dictionaries include a trailing period on certain words such as "etc." which
                             // we don't include.  If the word is followed by a period, try it with the period to
-                            // see if we get a match.  If so, consider it valid.
-                            if(word.Start + word.Length < textToSplit.Length && textToSplit[word.Start + word.Length] == '.')
+                            // see if we get a match.  If so, consider it valid.  Similarly, some languages like
+                            // German may include a trailing hyphen on certain words which we split on that makes
+                            // them correct if included (Versicherungs-Vertrag).
+                            if(word.Start + word.Length < textToSplit.Length)
                             {
-                                if(this.Dictionary.ShouldIgnoreWord(textToCheck + ".") ||
-                                    this.Dictionary.IsSpelledCorrectly(textToCheck + "."))
-                                    continue;
+                                char trailingChar = textToSplit[word.Start + word.Length];
+
+                                if(trailingChar == '.' || trailingChar == '-')
+                                {
+                                    string withTrailingChar = textToCheck + trailingChar;
+
+                                    if(this.Dictionary.ShouldIgnoreWord(withTrailingChar) ||
+                                      this.Dictionary.IsSpelledCorrectly(withTrailingChar))
+                                    {
+                                        continue;
+                                    }
+                                }
                             }
 
                             yield return new MisspellingTag(errorSpan) { EscapeApostrophes = unescapeApostrophes };
