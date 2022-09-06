@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedActionSource.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2020
-// Note    : Copyright 2016-2020, Eric Woodruff, All rights reserved
+// Updated : 09/06/2022
+// Note    : Copyright 2016-2022, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to implement the suggestion source for spelling light bulbs
 //
@@ -33,6 +33,7 @@ using Microsoft.VisualStudio.Utilities;
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.Tagging;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace VisualStudio.SpellChecker.SuggestedActions
 {
@@ -353,6 +354,32 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             };
 
             actionSets.Add(new SuggestedActionSet(null, doubledWordActions, null, SuggestedActionSetPriority.Low));
+
+            var ignoredWordsFileActions = new List<ISuggestedAction>();
+
+            if(ignoredWordsFiles.Count() == 1)
+            {
+                var file = ignoredWordsFiles.First();
+
+                ignoredWordsFileActions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary,
+                    file.ConfigType, file.Filename, "Add to Ignored Words File"));
+
+                actionSets.Add(new SuggestedActionSet(null, ignoredWordsFileActions, null,
+                    SuggestedActionSetPriority.Low));
+            }
+            else
+            {
+                // If there are multiple ignored words files, put them in a submenu
+                foreach(var iwf in ignoredWordsFiles)
+                {
+                    ignoredWordsFileActions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary,
+                        iwf.ConfigType, iwf.Filename, String.Empty));
+                }
+
+                actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(
+                    "Add to Ignored Words File", new[] { new SuggestedActionSet(null,
+                    ignoredWordsFileActions) }) }, null, SuggestedActionSetPriority.Low));
+            }
 
             return actionSets;
         }

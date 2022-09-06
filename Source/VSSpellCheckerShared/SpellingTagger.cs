@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 01/20/2021
-// Note    : Copyright 2010-2021, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2021, Eric Woodruff, All rights reserved
+// Updated : 09/06/2022
+// Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling tagger
 //
@@ -739,6 +739,16 @@ namespace VisualStudio.SpellChecker
                     {
                         errorSpan = new SnapshotSpan(span.Start + word.Start, word.Length);
 
+                        // If the word is being ignored either in the ignored word lists or in the current
+                        // location, skip it.  This goes for doubled words as well.
+                        if(this.Dictionary.ShouldIgnoreWord(textToCheck) || wordsIgnoredOnce.Any(
+                          w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
+                          StringComparison.OrdinalIgnoreCase)))
+                        {
+                            lastWord = word;
+                            continue;
+                        }
+
                         // Check for a doubled word.  This isn't perfect as it won't detected doubled words
                         // across a line break.
                         if(configuration.DetectDoubledWords && lastWord.Length != 0 &&
@@ -746,85 +756,74 @@ namespace VisualStudio.SpellChecker
                           StringComparison.OrdinalIgnoreCase) && String.IsNullOrWhiteSpace(textToSplit.Substring(
                           lastWord.Start + lastWord.Length, word.Start - lastWord.Start - lastWord.Length)))
                         {
-                            // If the doubled word is not being ignored at the current location, return it
-                            if(!wordsIgnoredOnce.Any(w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
-                              StringComparison.OrdinalIgnoreCase)))
-                            {
-                                // Delete the whitespace ahead of it too
-                                deleteWordSpan = new SnapshotSpan(span.Start + lastWord.Start + lastWord.Length,
-                                    word.Length + word.Start - lastWord.Start - lastWord.Length);
+                            // Delete the whitespace ahead of it too
+                            deleteWordSpan = new SnapshotSpan(span.Start + lastWord.Start + lastWord.Length,
+                                word.Length + word.Start - lastWord.Start - lastWord.Length);
 
-                                yield return new MisspellingTag(errorSpan, deleteWordSpan);
+                            yield return new MisspellingTag(errorSpan, deleteWordSpan);
 
-                                lastWord = word;
-                                continue;
-                            }
+                            lastWord = word;
+                            continue;
                         }
 
                         lastWord = word;
 
-                        // If the word is not being ignored, perform the other checks
-                        if(!this.Dictionary.ShouldIgnoreWord(textToCheck) && !wordsIgnoredOnce.Any(
-                          w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
-                          StringComparison.OrdinalIgnoreCase)))
+                        // Handle code analysis dictionary checks first as they may be not be recognized as
+                        // correctly spelled words but have alternate handling.
+                        if(configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
+                            configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
                         {
-                            // Handle code analysis dictionary checks first as they may be not be recognized as
-                            // correctly spelled words but have alternate handling.
-                            if(configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
-                              configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
+                            yield return new MisspellingTag(MisspellingType.DeprecatedTerm, errorSpan,
+                                new[] { new SpellingSuggestion(null, preferredTerm) });
+                            continue;
+                        }
+
+                        if(configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
+                            configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
+                        {
+                            yield return new MisspellingTag(MisspellingType.CompoundTerm, errorSpan,
+                                new[] { new SpellingSuggestion(null, preferredTerm) });
+                            continue;
+                        }
+
+                        if(configuration.CadOptions.TreatUnrecognizedWordsAsMisspelled &&
+                            configuration.UnrecognizedWords.TryGetValue(textToCheck, out IList<string> spellingAlternates))
+                        {
+                            yield return new MisspellingTag(MisspellingType.UnrecognizedWord, errorSpan,
+                                spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
+                            continue;
+                        }
+
+                        if(!this.Dictionary.IsSpelledCorrectly(textToCheck))
+                        {
+                            // Sometimes it flags a word as misspelled if it ends with "'s".  Try checking the
+                            // word without the "'s".  If ignored or correct without it, don't flag it.  This
+                            // appears to be caused by the definitions in the dictionary rather than Hunspell.
+                            if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase) ||
+                                textToCheck.EndsWith("\u2019s", StringComparison.OrdinalIgnoreCase))
                             {
-                                yield return new MisspellingTag(MisspellingType.DeprecatedTerm, errorSpan,
-                                    new[] { new SpellingSuggestion(null, preferredTerm) });
-                                continue;
+                                string aposEss = textToCheck.Substring(textToCheck.Length - 2);
+
+                                textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
+
+                                if(this.Dictionary.ShouldIgnoreWord(textToCheck) ||
+                                    this.Dictionary.IsSpelledCorrectly(textToCheck))
+                                    continue;
+
+                                textToCheck += aposEss;
                             }
 
-                            if(configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
-                              configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
+                            // Some dictionaries include a trailing period on certain words such as "etc." which
+                            // we don't include.  If the word is followed by a period, try it with the period to
+                            // see if we get a match.  If so, consider it valid.
+                            if(word.Start + word.Length < textToSplit.Length && textToSplit[word.Start + word.Length] == '.')
                             {
-                                yield return new MisspellingTag(MisspellingType.CompoundTerm, errorSpan,
-                                    new[] { new SpellingSuggestion(null, preferredTerm) });
-                                continue;
+                                if(this.Dictionary.ShouldIgnoreWord(textToCheck + ".") ||
+                                    this.Dictionary.IsSpelledCorrectly(textToCheck + "."))
+                                    continue;
                             }
 
-                            if(configuration.CadOptions.TreatUnrecognizedWordsAsMisspelled &&
-                              configuration.UnrecognizedWords.TryGetValue(textToCheck, out IList<string> spellingAlternates))
-                            {
-                                yield return new MisspellingTag(MisspellingType.UnrecognizedWord, errorSpan,
-                                    spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
-                                continue;
-                            }
-
-                            if(!this.Dictionary.IsSpelledCorrectly(textToCheck))
-                            {
-                                // Sometimes it flags a word as misspelled if it ends with "'s".  Try checking the
-                                // word without the "'s".  If ignored or correct without it, don't flag it.  This
-                                // appears to be caused by the definitions in the dictionary rather than Hunspell.
-                                if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase) ||
-                                  textToCheck.EndsWith("\u2019s", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    string aposEss = textToCheck.Substring(textToCheck.Length - 2);
-
-                                    textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
-
-                                    if(this.Dictionary.ShouldIgnoreWord(textToCheck) ||
-                                      this.Dictionary.IsSpelledCorrectly(textToCheck))
-                                        continue;
-
-                                    textToCheck += aposEss;
-                                }
-
-                                // Some dictionaries include a trailing period on certain words such as "etc." which
-                                // we don't include.  If the word is followed by a period, try it with the period to
-                                // see if we get a match.  If so, consider it valid.
-                                if(word.Start + word.Length < textToSplit.Length && textToSplit[word.Start + word.Length] == '.')
-                                {
-                                    if(this.Dictionary.ShouldIgnoreWord(textToCheck + ".") ||
-                                      this.Dictionary.IsSpelledCorrectly(textToCheck + "."))
-                                        continue;
-                                }
-
-                                yield return new MisspellingTag(errorSpan) { EscapeApostrophes = unescapeApostrophes };
-                            }
+                            yield return new MisspellingTag(errorSpan) { EscapeApostrophes = unescapeApostrophes };
                         }
                     }
                 }
