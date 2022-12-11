@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 07/24/2020
-// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 11/23/2022
+// Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for C# code
 //
@@ -50,6 +50,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         private readonly ITextBuffer buffer;
         private ITextSnapshot lineCacheSnapshot;
         private readonly List<State> lineCache;
+        private string endQuotes;
+        private int quoteSize;
 
         #endregion
 
@@ -384,9 +386,12 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 }
                 else if(((p.Char() == '@' || p.Char() == 'R') && p.NextChar() == '"') ||
                   (p.Char() == '$' && p.NextChar() == '@' && p.NextNextChar() == '"') ||
-                  (p.Char() == '@' && p.NextChar() == '$' && p.NextNextChar() == '"')) // Verbatim, raw, or interpolated verbatim string
+                  (p.Char() == '@' && p.NextChar() == '$' && p.NextNextChar() == '"') ||
+                  (p.Char() == '"' && p.NextSegment(3) == "\"\"\"") ||
+                  (p.Char() == '$' && p.NextSegment(4) == "$\"\"\"")) // Verbatim, raw, or interpolated verbatim string
                 {
                     // Keep the leading text so that we can handle escape sequences properly
+                    quoteSize = 0;
                     p.State = State.MultiLineString;
                     ScanMultiLineString(p, true);
                 }
@@ -635,11 +640,47 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
             // For verbatim/raw/interpolated strings, skip the leading format identifier.  We keep it so that we
             // can skip escape sequence checking and properties in them.
             if(isVerbatimString)
-                p.Advance((p.NextChar() == '$' || p.NextChar() == '@') ? 3 : 2);
+            {
+                if(p.NextSegment(3) == "\"\"\"")
+                {
+                    while(!p.EndOfLine && p.Char() == '"')
+                    {
+                        quoteSize++;
+                        p.Advance();
+                    }
+
+                    endQuotes = new String('"', quoteSize);
+                }
+                else if(p.NextSegment(4) == "$\"\"\"")
+                {
+                    p.Advance();
+
+                    while(!p.EndOfLine && p.Char() == '"')
+                    {
+                        quoteSize++;
+                        p.Advance();
+                    }
+
+                    endQuotes = new String('"', quoteSize);
+                }
+                else
+                    p.Advance((p.NextChar() == '$' || p.NextChar() == '@') ? 3 : 2);
+            }
 
             while(!p.EndOfLine)
             {
-                if(p.Char() == '"' && p.NextChar() == '"') // "" is allowed within multi-line string.
+                if(quoteSize != 0 && p.NextSegment(quoteSize) == endQuotes)
+                {
+                    // End raw string literal
+                    if(markText)
+                        p.EndNaturalText();
+
+                    p.Advance(quoteSize);
+                    p.State = State.Default;
+                    quoteSize = 0;
+                    return;
+                }
+                else if(p.Char() == '"' && p.NextChar() == '"') // "" is allowed within multi-line string.
                 {
                     p.Advance(2);
                 }

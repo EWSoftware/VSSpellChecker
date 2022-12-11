@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 01/03/2022
+// Updated : 11/23/2022
 // Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
 //
@@ -90,7 +90,7 @@ namespace VisualStudio.SpellChecker.Tagging
                     return null;
 
                 // Markdown has its own tagger
-                if(buffer.ContentType.IsOfType("Markdown"))
+                if(buffer.ContentType.IsOfType("Markdown") || buffer.ContentType.IsOfType("code++.Markdown"))
                     return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
                         config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
 
