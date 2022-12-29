@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/06/2022
+// Updated : 12/29/2022
 // Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
 //
@@ -58,7 +58,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// which cover PHP and markdown files when no extension is present that handles them, "Razor" which
         /// covers cshtml files, and "WebForms" which handles files opened with the Web Forms editor.</remarks>
         [Export(typeof(ITaggerProvider)), ContentType("html"), ContentType("htmlx"), ContentType("code++.PHP"),
-          ContentType("code++.Markdown"), ContentType("Razor"), ContentType("WebForms"),
+          ContentType("Markdown"), ContentType("code++.Markdown"), ContentType("Razor"), ContentType("WebForms"),
           TagType(typeof(NaturalTextTag))]
         internal class HtmlTextTaggerProvider : ITaggerProvider
         {

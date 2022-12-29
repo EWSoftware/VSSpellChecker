@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 08/21/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 12/29/2022
+// Note    : Copyright 2016-2022, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for markdown files when the Markdown Editor extension by Mads
 // Kristensen is installed (https://github.com/madskristensen/MarkdownEditor).
@@ -86,12 +86,9 @@ namespace VisualStudio.SpellChecker.Tagging
 
                     switch(name)
                     {
-                        case "md_bold":     // Markers only, these contain nothing that can be spell checked
-                        case "md_header":
-                        case "md_html":
-                        case "md_italic":
-                        case "md_quote":
-                        case "keyword":
+                        case "keyword":     // Markers only, these contain nothing that can be spell checked
+                        case "markup node":
+                        case "operator":
                             break;
 
                         default:

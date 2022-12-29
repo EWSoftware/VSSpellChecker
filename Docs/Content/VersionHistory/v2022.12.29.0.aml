@@ -2,7 +2,8 @@
 <topic id="c3044e18-d35c-445d-b24b-646f26056f82" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>Changes in this release:</para>
+			<para>This is an update to the 2022.12.11.0 release that fixes a couple of issues with the changes made
+in it:</para>
 		</introduction>
 
 		<section>
@@ -10,7 +11,7 @@
 
 				<list class="bullet">
 					<listItem>
-						<para>Added support for the content type used by the Markdown Editor v2 extension.</para>
+						<para>Added support for the Markdown Editor v2 extension.</para>
 					</listItem>
 
 					<listItem>

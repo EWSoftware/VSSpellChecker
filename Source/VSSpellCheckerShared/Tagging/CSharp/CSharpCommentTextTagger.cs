@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 11/23/2022
+// Updated : 12/29/2022
 // Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
 //
@@ -684,7 +684,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                 {
                     p.Advance(2);
                 }
-                else if(p.Char() == '"') // End of multi-line string
+                else if(quoteSize == 0 && p.Char() == '"') // End of multi-line string (but not a raw one)
                 {
                     if(markText)
                         p.EndNaturalText();
