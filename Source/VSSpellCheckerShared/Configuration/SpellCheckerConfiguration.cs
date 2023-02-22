@@ -546,10 +546,10 @@ namespace VisualStudio.SpellChecker.Configuration
                 else
                 {
                     // These only apply to the global configuration
+                    this.EnableWpfTextBoxSpellChecking = configuration.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking);
+
                     if(configuration.HasProperty(PropertyNames.VisualStudioIdExclusions))
                     {
-                        this.EnableWpfTextBoxSpellChecking = configuration.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking);
-
                         visualStudioExclusions = new List<Regex>(configuration.ToRegexes(PropertyNames.VisualStudioIdExclusions,
                             PropertyNames.VisualStudioIdExclusionItem));
                     }
