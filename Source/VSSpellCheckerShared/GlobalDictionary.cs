@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/27/2021
-// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
+// Updated : 03/02/2023
+// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
 //
@@ -16,6 +16,8 @@
 //===============================================================================================================
 // 04/14/2013  EFW  Created the code
 //===============================================================================================================
+
+// Ignore Spelling: Resharper Hunspellx
 
 using System;
 using System.Collections.Generic;
@@ -280,7 +282,16 @@ namespace VisualStudio.SpellChecker
 
                 if(spellEngine == null)
                 {
-                    Hunspell.NativeDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    // If other packages are installed that use NHunSpell (Resharper for instance), don't set
+                    // the native DLL path again if we see the native Hunspell DLLs in the existing path or it
+                    // tries to load them a second time and fails.  We'll just use their copy which should be
+                    // fine since it hasn't changed in a long time (I know, never say never).
+                    if(String.IsNullOrWhiteSpace(Hunspell.NativeDllPath) || !Directory.EnumerateFiles(
+                      Hunspell.NativeDllPath, "Hunspellx*.dll").Any())
+                    {
+                        Hunspell.NativeDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    }
+
                     spellEngine = new SpellEngine();
                 }
 
