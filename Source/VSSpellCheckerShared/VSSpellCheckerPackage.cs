@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/12/2021
-// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
+// Updated : 03/20/2023
+// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
 //
@@ -69,6 +69,9 @@ namespace VisualStudio.SpellChecker
     [ProvideToolWindow(typeof(SolutionProjectSpellCheckToolWindow),
       Orientation = ToolWindowOrientation.Right, Style = VsDockStyle.Float, MultiInstances = false,
       Transient = false, PositionX = 100, PositionY = 100, Width = 300, Height = 300)]
+    [ProvideToolWindow(typeof(ConvertConfigurationToolWindow),
+      Orientation = ToolWindowOrientation.Right, Style = VsDockStyle.MDI, MultiInstances = false,
+      Transient = true, PositionX = 100, PositionY = 100, Width = 800, Height = 600)]
     // This attribute lets the shell know we provide a spelling configuration file editor
     [ProvideEditorFactory(typeof(SpellingConfigurationEditorFactory), 112,
       TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
@@ -119,6 +122,10 @@ namespace VisualStudio.SpellChecker
             // When initialized asynchronously, we *may* be on a background thread at this point.  Do any
             // initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            // Replace the writable user words file check with one that checks for inclusion in the project and
+            // source control.
+            GlobalDictionary.CanWriteToUserWordsFile = Utility.CanWriteToUserWordsFile;
 
             // Register the spelling configuration file editor factory
             this.RegisterEditorFactory(new SpellingConfigurationEditorFactory());
@@ -247,8 +254,7 @@ namespace VisualStudio.SpellChecker
             {
                 var doc = dte.ItemOperations.OpenFile(configFile, EnvDTE.Constants.vsViewKindPrimary);
 
-                if(doc != null)
-                    doc.Activate();
+                doc?.Activate();
             }
         }
 
@@ -300,6 +306,7 @@ namespace VisualStudio.SpellChecker
                         var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
 
                         if(editorAdapterFactoryService != null)
+                        {
                             try
                             {
                                 var wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
@@ -335,8 +342,10 @@ namespace VisualStudio.SpellChecker
                                         if(idx < 0)
                                             idx = allIssues.Count - 1;
                                         else
+                                        {
                                             if(idx >= allIssues.Count)
                                                 idx = 0;
+                                        }
 
                                         issue = allIssues[idx];
 
@@ -350,9 +359,13 @@ namespace VisualStudio.SpellChecker
                                             var outliningManager = outliningManagerService.GetOutliningManager(wpfTextView);
 
                                             if(outliningManager != null)
+                                            {
                                                 foreach(var region in outliningManager.GetCollapsedRegions(span, false))
+                                                {
                                                     if(region.IsCollapsed)
                                                         outliningManager.Expand(region);
+                                                }
+                                            }
                                         }
 
                                         wpfTextView.Caret.MoveTo(span.Start);
@@ -365,6 +378,7 @@ namespace VisualStudio.SpellChecker
                             {
                                 // Not an IWpfTextView so ignore it
                             }
+                        }
                     }
                 }
             }
@@ -408,6 +422,7 @@ namespace VisualStudio.SpellChecker
         private void AddSpellCheckerConfigQueryStatusHandler(object sender, EventArgs e)
         {
             if(sender is OleMenuCommand command)
+            {
                 try
                 {
 #pragma warning disable VSTHRD010
@@ -421,6 +436,7 @@ namespace VisualStudio.SpellChecker
                     Debug.WriteLine(ex);
                     command.Visible = command.Enabled = false;
                 }
+            }
         }
 
         /// <summary>
@@ -469,11 +485,8 @@ namespace VisualStudio.SpellChecker
                                 // of the folder.  It's not a project so it won't be found that way.  Just search
                                 // the project collection.  It'll be at the root level if it exists.
                                 var siProject = dte2.Solution.Projects.Cast<Project>().FirstOrDefault(
-                                    p => p.Name == "Solution Items");
+                                    p => p.Name == "Solution Items") ?? ((Solution2)dte2.Solution).AddSolutionFolder("Solution Items");
 #pragma warning restore VSTHRD010
-
-                                if(siProject == null)
-                                    siProject = ((Solution2)dte2.Solution).AddSolutionFolder("Solution Items");
 
                                 existingItem = siProject.ProjectItems.AddFromFile(settingsFilename);
                             }
@@ -483,10 +496,7 @@ namespace VisualStudio.SpellChecker
                         {
                             try
                             {
-                                var window = existingItem.Open();
-
-                                if(window != null)
-                                    window.Activate();
+                                existingItem.Open()?.Activate();
                             }
                             catch(Exception ex)
                             {
@@ -702,6 +712,7 @@ namespace VisualStudio.SpellChecker
                 }
             }
             else
+            {
                 if(item.ProjectItem == null || item.ProjectItem.ContainingProject == null)
                 {
                     // Looks like a solution
@@ -709,6 +720,7 @@ namespace VisualStudio.SpellChecker
                         settingsFilename = dte2.Solution.FullName;
                 }
                 else
+                {
                     if(item.ProjectItem.Properties != null)
                     {
                         // Looks like a folder or file item
@@ -747,11 +759,15 @@ namespace VisualStudio.SpellChecker
                         }
                     }
                     else
+                    {
                         if(item.ProjectItem.Kind == EnvDTE.Constants.vsProjectItemKindSolutionItems)
                         {
                             // Looks like a solution item
                             settingsFilename = item.ProjectItem.get_FileNames(1);
                         }
+                    }
+                }
+            }
             
             if(settingsFilename != null)
             {
@@ -762,6 +778,7 @@ namespace VisualStudio.SpellChecker
                     settingsFilename = null;
                 }
                 else
+                {
                     if(folderName == null)
                     {
                         if(SpellCheckFileInfo.IsBinaryFile(settingsFilename))
@@ -771,6 +788,7 @@ namespace VisualStudio.SpellChecker
                     }
                     else
                         settingsFilename += ".vsspell";
+                }
             }
 
             return (settingsFilename != null);

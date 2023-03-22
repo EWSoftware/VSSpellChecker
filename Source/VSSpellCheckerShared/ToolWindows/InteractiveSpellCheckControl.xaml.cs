@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 03/18/2020
-// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 03/15/2023
+// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -286,7 +286,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private void cmdIgnoreOnce_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             if(ucSpellCheck.CurrentIssue is MisspellingTag currentIssue && currentIssue.Word.Length != 0)
-                currentTagger.Dictionary.IgnoreWordOnce(currentIssue.Span);
+            {
+                var start = currentIssue.Span.GetStartPoint(currentIssue.Span.TextBuffer.CurrentSnapshot);
+                var span = currentIssue.Span.GetSpan(currentIssue.Span.TextBuffer.CurrentSnapshot);
+
+                currentTagger.Dictionary.IgnoreWordOnce(
+                    currentIssue.Span.GetText(currentIssue.Span.TextBuffer.CurrentSnapshot), start.Position,
+                    span.Start, span.End);
+            }
         }
 
         /// <summary>

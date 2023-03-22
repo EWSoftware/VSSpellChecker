@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/12/2021
+// Updated : 03/16/2023
 // Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the solution/project spell check tool window
@@ -190,12 +190,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     ucSpellCheck.UpdateProjects(names.OrderBy(n => Path.GetFileName(n)));
 
                     SpellingServiceProxy.LastSolutionName = solution.FullName;
+                    SpellingServiceProxy.CheckForOldConfigurationFiles = true;
                     solutionOpen = true;
                 }
                 else
                 {
                     ucSpellCheck.UpdateProjects(null);
+
                     SpellingServiceProxy.LastSolutionName = null;
+                    SpellingServiceProxy.CheckForOldConfigurationFiles = true;
                 }
             }
             else

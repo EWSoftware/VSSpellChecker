@@ -1,0 +1,95 @@
+<UserControl x:Class="VisualStudio.SpellChecker.ToolWindows.ConvertConfigurationControl"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:vssc="clr-namespace:VisualStudio.SpellChecker.ToolWindows"
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
+	mc:Ignorable="d" d:DesignHeight="500" d:DesignWidth="800"
+	Name="ucConvertConfiguration"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<UserControl.CommandBindings>
+		<CommandBinding Command="ApplicationCommands.Help" Executed="cmdHelp_Executed" />
+	</UserControl.CommandBindings>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="1.5*"/>
+			<RowDefinition />
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<Grid Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition />
+				<ColumnDefinition />
+			</Grid.ColumnDefinitions>
+
+			<Grid Grid.Column="0">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition />
+					<RowDefinition Height="Auto" />
+				</Grid.RowDefinitions>
+
+				<Label Grid.Row="0" Margin="3" Content="Spell Checker Configuration Files" />
+				<ListBox Grid.Row="1" Name="lbSpellCheckerConfigs" Margin="3" SelectionMode="Extended"
+					SelectionChanged="lbSpellCheckerConfigs_SelectionChanged"/>
+				<StackPanel Grid.Row="2" Orientation="Horizontal">
+					<Button Name="btnConvertSelected" Content="Convert Selected" Margin="3" MinWidth="120"
+						HorizontalAlignment="Left" ToolTip="Convert the selected configuration files to .editorconfig settings"
+						Click="btnConvertSelected_Click" />
+					<Button Name="btnConvertAll" Content="Convert All" Margin="3" MinWidth="120"
+						HorizontalAlignment="Left" ToolTip="Convert all configuration files to .editorconfig settings"
+						Click="btnConvertAll_Click" />
+				</StackPanel>
+			</Grid>
+
+			<Grid Grid.Column="1">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition />
+				</Grid.RowDefinitions>
+
+				<Label Grid.Row="0" Margin="3" Content=".editorconfig Files" />
+				<ListBox Grid.Row="1" Name="lbEditorConfigFiles" Margin="3"
+					SelectionChanged="lbEditorConfigFiles_SelectionChanged" />
+			</Grid>
+		</Grid>
+		
+		<Grid Grid.Row="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition />
+			</Grid.RowDefinitions>
+			<Label Grid.Row="0" Margin="3" Content=".editorconfig File Changes" />
+			<FlowDocumentScrollViewer Grid.Row="1" Name="fdConfiguration" Margin="3">
+				<FlowDocument PagePadding="10" TextAlignment="Left"
+					Foreground="{DynamicResource ToolWindowTextBrushKey}"
+					FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+					FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}" />
+			</FlowDocumentScrollViewer>
+		</Grid>
+
+		<StackPanel Grid.Row="2" Orientation="Horizontal">
+			<Button Name="btnRefresh" Content="Refresh" Margin="3" MinWidth="100"
+				ToolTip="Refresh the configuration conversion information"
+				Click="btnRefresh_Click" />
+			<Button Name="btnHelp" Content="Help" Margin="3" MinWidth="80" Command="ApplicationCommands.Help"
+					ToolTip="Show help for converting configurations" />
+			<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="3" x:Name="spSpinner"
+        HorizontalAlignment="Left"/>
+			<Label Name="tbProgress" Visibility="Hidden" VerticalAlignment="Center" Margin="3"
+				Content="Searching for spell checker configuration files to convert" />
+		</StackPanel>
+	</Grid>
+</UserControl>

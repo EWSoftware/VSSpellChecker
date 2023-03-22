@@ -24,10 +24,9 @@
 using System;
 using System.Globalization;
 
-using Microsoft.VisualStudio.Text;
-
 using VisualStudio.SpellChecker.Definitions;
 
+// TODO: Delete this file and replace all references with the one in VisualStudio.SpellChecker.Common
 namespace VisualStudio.SpellChecker
 {
     /// <summary>
@@ -59,10 +58,22 @@ namespace VisualStudio.SpellChecker
         public string ReplacementWord { get; }
 
         /// <summary>
-        /// This read-only property returns the tracking span related to the event
+        /// This read-only property returns the position related to the event
         /// </summary>
-        /// <value>This will be null if not applicable</value>
-        public ITrackingSpan Span { get; }
+        /// <value>This will be -1 if not applicable</value>
+        public int Position { get; } = -1;
+
+        /// <summary>
+        /// This read-only property returns the start index related to the event
+        /// </summary>
+        /// <value>This will be -1 if not applicable</value>
+        public int StartIndex { get; } = -1;
+
+        /// <summary>
+        /// This read-only property returns the end index related to the event
+        /// </summary>
+        /// <value>This will be -1 if not applicable</value>
+        public int EndIndex { get; } = -1;
 
         #endregion
 
@@ -103,11 +114,16 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="span">The tracking span related to the event</param>
-        public SpellingEventArgs(ITrackingSpan span)
+        /// <param name="word">The word related to the event</param>
+        /// <param name="position">The position related to the event</param>
+        /// <param name="startIndex">The start index related to the event</param>
+        /// <param name="endIndex">The end index related to the event</param>
+        public SpellingEventArgs(string word, int position, int startIndex, int endIndex)
         {
-            this.Word = span.GetText(span.TextBuffer.CurrentSnapshot);
-            this.Span = span;
+            this.Word = word;
+            this.Position = position;
+            this.StartIndex = startIndex;
+            this.EndIndex = endIndex;
         }
         #endregion
     }

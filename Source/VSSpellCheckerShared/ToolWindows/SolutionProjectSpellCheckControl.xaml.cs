@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/06/2022
-// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
+// Updated : 03/16/2022
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -38,6 +38,8 @@ using EnvDTE80;
 
 using Microsoft.Win32;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
@@ -47,8 +49,6 @@ using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
-using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.Editor;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -308,8 +308,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                   MessageBoxResult.No) == MessageBoxResult.No)
                     return false;
 
-                if(cancellationTokenSource != null)
-                    cancellationTokenSource.Cancel();
+                cancellationTokenSource?.Cancel();
             }
 
             return true;
@@ -468,7 +467,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // way to switch contexts in Visual Studio now.  Since we aren't asynchronous here, this runs an
             // asynchronous delegate and waits for it to finish.
 #pragma warning disable VSTHRD102
-            var result = ThreadHelper.JoinableTaskFactory.Run(async delegate
+            var (content, ignored) = ThreadHelper.JoinableTaskFactory.Run(async delegate
 #pragma warning restore VSTHRD102
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -570,11 +569,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     }
                 }
 
-                return Tuple.Create(text, ignoredSpans);
+                return (text, ignoredSpans);
             });
 
-            ignoredWordSpans = result.Item2;
-            return result.Item1;
+            ignoredWordSpans = ignored;
+
+            return content;
         }
         #endregion
 
@@ -831,6 +831,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                       !rangeExclusions.Any(match => word.Start >= match.Index &&
                       word.Start <= match.Index + match.Length - 1)))
                     {
+                        // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                         // If the word is being ignored, skip it.  This goes for doubled words as well.
                         if(dictionary.ShouldIgnoreWord(textToCheck))
                         {
@@ -896,9 +897,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                                 textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
+                                // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                                 if(dictionary.ShouldIgnoreWord(textToCheck) ||
-                                    dictionary.IsSpelledCorrectly(textToCheck))
+                                  dictionary.IsSpelledCorrectly(textToCheck))
+                                {
                                     continue;
+                                }
 
                                 textToCheck += aposEss;
                             }
@@ -1868,13 +1872,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             {
                 var dte = Utility.GetServiceFromPackage<DTE, SDTE>(true);
 
-                if(dte != null)
-                {
-                    var doc = dte.ItemOperations.OpenFile((string)item.Tag, EnvDTE.Constants.vsViewKindPrimary);
-
-                    if(doc != null)
-                        doc.Activate();
-                }
+                dte?.ItemOperations.OpenFile((string)item.Tag, EnvDTE.Constants.vsViewKindPrimary)?.Activate();
             }
         }
         #endregion

@@ -36,6 +36,7 @@ namespace VisualStudio.SpellChecker
     /// <summary>
     /// This class is used to split spans of text up into individual words for spell checking
     /// </summary>
+    // TODO: [Obsolete("Replace with TaggerWordSplitter once the new .editorconfig-based configuration is in use")]
     internal sealed class WordSplitter
     {
         #region Private data members

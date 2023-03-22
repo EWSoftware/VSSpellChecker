@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31825.309
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33328.57
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker2017And2019", "VSSpellChecker2017And2019\VSSpellChecker2017And2019.csproj", "{E6356BF9-4333-446E-BF02-13D09EBFBB3A}"
 EndProject
@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSSpellChecker2022AndLater"
 		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840} = {B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VSSpellCheckerCommon", "VSSpellCheckerCommon\VSSpellCheckerCommon.csproj", "{4C23D550-7D6D-439B-A464-65C8419CC8CA}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		VSSpellCheckerShared\VSSpellCheckerShared.projitems*{3201406b-0114-4c8a-a64a-632d546517b8}*SharedItemsImports = 4
@@ -39,35 +41,52 @@ Global
 		VSSpellCheckerShared\VSSpellCheckerShared.projitems*{e6356bf9-4333-446e-bf02-13d09ebfbb3a}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug2019|Any CPU = Debug2019|Any CPU
 		Debug2022|Any CPU = Debug2022|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug|Any CPU.ActiveCfg = Debug2022|Any CPU
+		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug|Any CPU.Build.0 = Debug2022|Any CPU
 		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug2019|Any CPU.ActiveCfg = Debug2019|Any CPU
 		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug2019|Any CPU.Build.0 = Debug2019|Any CPU
 		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug2022|Any CPU.ActiveCfg = Debug2022|Any CPU
 		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Debug2022|Any CPU.Build.0 = Debug2022|Any CPU
 		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6356BF9-4333-446E-BF02-13D09EBFBB3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9303943-D23D-4570-9792-56667F0DD928}.Debug|Any CPU.ActiveCfg = Debug2022|Any CPU
+		{A9303943-D23D-4570-9792-56667F0DD928}.Debug|Any CPU.Build.0 = Debug2022|Any CPU
 		{A9303943-D23D-4570-9792-56667F0DD928}.Debug2019|Any CPU.ActiveCfg = Debug2019|Any CPU
 		{A9303943-D23D-4570-9792-56667F0DD928}.Debug2019|Any CPU.Build.0 = Debug2019|Any CPU
 		{A9303943-D23D-4570-9792-56667F0DD928}.Debug2022|Any CPU.ActiveCfg = Debug2022|Any CPU
 		{A9303943-D23D-4570-9792-56667F0DD928}.Debug2022|Any CPU.Build.0 = Debug2022|Any CPU
 		{A9303943-D23D-4570-9792-56667F0DD928}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9303943-D23D-4570-9792-56667F0DD928}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Debug|Any CPU.ActiveCfg = Debug2022|Any CPU
+		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Debug|Any CPU.Build.0 = Debug2022|Any CPU
 		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Debug2019|Any CPU.ActiveCfg = Debug2019|Any CPU
 		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Debug2019|Any CPU.Build.0 = Debug2019|Any CPU
 		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Debug2022|Any CPU.ActiveCfg = Debug2022|Any CPU
 		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Debug2022|Any CPU.Build.0 = Debug2022|Any CPU
 		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1A99B3A-6BE9-430E-91A8-F4C5C7BD6840}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3201406B-0114-4C8A-A64A-632D546517B8}.Debug|Any CPU.ActiveCfg = Debug2022|Any CPU
+		{3201406B-0114-4C8A-A64A-632D546517B8}.Debug|Any CPU.Build.0 = Debug2022|Any CPU
 		{3201406B-0114-4C8A-A64A-632D546517B8}.Debug2019|Any CPU.ActiveCfg = Debug2019|Any CPU
 		{3201406B-0114-4C8A-A64A-632D546517B8}.Debug2019|Any CPU.Build.0 = Debug2019|Any CPU
 		{3201406B-0114-4C8A-A64A-632D546517B8}.Debug2022|Any CPU.ActiveCfg = Debug2022|Any CPU
 		{3201406B-0114-4C8A-A64A-632D546517B8}.Debug2022|Any CPU.Build.0 = Debug2022|Any CPU
 		{3201406B-0114-4C8A-A64A-632D546517B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3201406B-0114-4C8A-A64A-632D546517B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Debug2019|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Debug2019|Any CPU.Build.0 = Debug|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Debug2022|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Debug2022|Any CPU.Build.0 = Debug|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C23D550-7D6D-439B-A464-65C8419CC8CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

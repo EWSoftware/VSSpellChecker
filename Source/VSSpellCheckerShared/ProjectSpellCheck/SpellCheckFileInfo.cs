@@ -244,7 +244,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         // Remove spell checker configuration files
                         var configFiles = projectFiles.Where(p => p.Filename.EndsWith(".vsspell",
                             StringComparison.OrdinalIgnoreCase)).ToList();
-
+                        
                         projectFiles = projectFiles.Except(configFiles).OrderBy(
                             p => Path.GetFileName(p.ProjectFile)).ThenBy(p => p.Filename).ToList();
 

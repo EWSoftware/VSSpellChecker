@@ -389,6 +389,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
                     lastWord = word;
 
+                    // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                     // If the word is not being ignored, perform the other checks
                     if(!dictionary.ShouldIgnoreWord(textToCheck))
                     {
@@ -404,9 +405,12 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
                                 textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
+                                // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                                 if(dictionary.ShouldIgnoreWord(textToCheck) ||
                                   dictionary.IsSpelledCorrectly(textToCheck))
+                                {
                                     continue;
+                                }
 
                                 textToCheck += aposEss;
                             }

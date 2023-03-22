@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingSuggestion.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 03/15/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to represents a spelling suggestion that can be used to replace a misspelled
 // word.
@@ -23,6 +23,7 @@ using System.Globalization;
 
 using VisualStudio.SpellChecker.Definitions;
 
+// TODO: Delete this file and replace all references with the one in VisualStudio.SpellChecker.Common
 namespace VisualStudio.SpellChecker
 {
     /// <summary>

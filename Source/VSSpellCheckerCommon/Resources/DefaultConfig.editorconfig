@@ -1,0 +1,138 @@
+﻿# Visual Studio Spell Checker extension global configuration file [https://github.com/EWSoftware/VSSpellChecker]
+#
+# This file should only contain spell checker settings.  All other settings will be ignored.  Use the spell
+# checker configuration editor in Visual Studio to modify the settings.
+[*]
+
+[**/bin/*]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+vsspell_code_analyzer_enabled = false
+
+[**/obj/*]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+vsspell_code_analyzer_enabled = false
+
+[*.min.cs]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+vsspell_code_analyzer_enabled = false
+
+[*.min.js]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[*.resx]
+# VSSPELL: Ignored resource file specific keywords
+vsspell_section_id = 1C663502B9244D4DB52510C55DF2AB99
+vsspell_ignored_keywords_1C663502B9244D4DB52510C55DF2AB99 = microsoft|mimetype|mscorlib|resheader|resx|utf
+
+[*.rproj]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[CodeAnalysisLog.xml]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[GlobalSuppressions.*]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+vsspell_code_analyzer_enabled = false
+
+[Resources.Designer.*]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+vsspell_code_analyzer_enabled = false
+
+[Settings.Designer.cs]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+vsspell_code_analyzer_enabled = false
+
+[Settings.settings]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[UpgradeLog.htm]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[bootstrap*.css]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[bootstrap*.js]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[html5shiv.js]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[jquery*.d.ts]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[jquery*.js]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[respond*.js]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[robots.txt]
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+
+[*.{c,cc,cpp,cu,cuh,cxx,h,hh,hpp,hxx,ii,ipp,inl,rc,xpp}]
+# VSSPELL: Ignored C/C++ language-specific keywords
+vsspell_section_id = 2ED8EEE5E7BB4650A5DF3D504B15A4E5
+vsspell_ignored_keywords_2ED8EEE5E7BB4650A5DF3D504B15A4E5 = alignas|alignof|asm|assert|atomic|auto|based|bool|break|case|cdecl|char|complex|const|continue|declspec|default|dllexport|dllimport|do|double|else|enum|except|extern|fastcall|finally|float|for|generic|goto|if|imaginary|inline|int|leave|local|long|naked|noreturn|register|restrict|return|short|signed|sizeof|static|stdcall|struct|switch|thread|try|typedef|union|unsigned|void|volatile|while|
+
+[*.{cs}]
+# VSSPELL: Ignored C# language-specific keywords
+vsspell_section_id = 1A9CD7DD3DAB4A7DB21EDCFB6351977A
+vsspell_ignored_keywords_1A9CD7DD3DAB4A7DB21EDCFB6351977A = abstract|add|alias|and|args|as|ascending|async|await|base|bool|break|by|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|descending|do|double|dynamic|else|enum|equals|event|explicit|extern|false|file|finally|fixed|float|for|foreach|from|get|global|goto|group|if|implicit|in|init|int|interface|internal|into|is|join|let|lock|long|managed|nameof|namespace|new|nint|not|notnull|nuint|null|object|on|operator|or|orderby|out|override|params|partial|private|protected|public|readonly|record|ref|remove|required|return|sbyte|scoped|sealed|select|set|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unmanaged|unsafe|ushort|using|value|var|virtual|void|volatile|when|where|while|with|yield
+
+[*.{js,jsx,ts,tsx}]
+# VSSPELL: Ignored JavaScript language-specific keywords
+vsspell_section_id = 28E97F311818410D8C5176623E437EA2
+vsspell_ignored_keywords_28E97F311818410D8C5176623E437EA2 = abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield
+
+[*.{bas,vb,vbs}]
+# VSSPELL: Ignored Basic language-specific keywords
+vsspell_section_id = F531D305056B4ECEA61D26F43B92F3B2
+vsspell_ignored_keywords_F531D305056B4ECEA61D26F43B92F3B2 = add|addhandler|address|addressof|aggregate|alias|also|and|andalso|ansi|array|as|assembly|async|auto|await|base|binary|boolean|by|byref|byval|byte|cbool|cbyte|cchar|cdate|cdbl|cdec|cint|clng|cobj|csbyte|cshort|csng|cstr|ctype|cuint|culng|cushort|call|case|cast|catch|char|class|compare|const|continue|custom|date|decimal|declare|default|delegate|dim|direct|directcast|distinct|do|double|each|else|elseif|end|endif|enum|equals|erase|error|event|events|exit|explicit|external|externalsource|false|finally|for|friend|function|get|gettype|getxmlnamespace|global|go|gosub|goto|group|handler|handles|if|implements|imports|in|inherit|inheritable|inherits|integer|interface|into|is|isfalse|isnot|istrue|iterator|join|key|let|lib|like|lock|long|loop|me|mid|mod|module|must|mustinherit|mustoverride|my|mybase|myclass|namespace|narrowing|new|next|not|notinheritable|notoverridable|nothing|object|of|off|on|only|operator|option|optional|or|orelse|order|out|overloads|overridable|overridable|override|overrides|param|paramarray|partial|preserve|private|property|protected|public|rem|raise|raiseevent|re|redim|read|readonly|ref|remove|removehandler|resume|return|sbyte|select|set|shadows|shared|short|single|skip|source|static|step|stop|strict|string|structure|sub|sync|synclock|take|text|then|throw|to|true|try|trycast|type|typeof|uinteger|ulong|ushort|unicode|until|using|val|variant|wend|when|where|while|widening|with|withevents|write|writeonly|xml|xor|yield
+
+[*.fs]
+# VSSPELL: Ignored F# language-specific keywords
+vsspell_section_id = 682873E0B661460281E01E3D62DC583B
+vsspell_ignored_keywords_682873E0B661460281E01E3D62DC583B = abstract|and|as|asr|assert|atomic|base|begin|break|checked|class|component|const|constraint|constructor|continue|default|delegate|do|done|downcast|downto|eager|elif|else|end|event|exception|extern|external|false|finally|fixed|for|fun|function|functor|global|if|in|include|inherit|inline|interface|internal|land|lazy|let|lor|lsl|lsr|lxor|match|measure|member|method|mixin|mod|module|mutable|namespace|new|not|null|object|of|open|or|override|parallel|private|process|protected|public|pure|rec|recursive|return|sealed|select|sig|static|struct|tailcall|then|to|trait|true|try|type|upcast|use|val|virtual|void|volatile|when|while|with|yield
+
+[*.sql]
+# VSSPELL: Ignored SQL language-specific keywords
+vsspell_section_id = 5389845B166345E6A2E98E2F3DE8C5B1
+vsspell_ignored_keywords_5389845B166345E6A2E98E2F3DE8C5B1 = ABSOLUTE|ACTION|ADA|ADD|ADMIN|AFTER|AGGREGATE|ALIAS|ALL|ALLOCATE|ALTER|AND|ANY|ARE|ARRAY|AS|ASC|ASENSITIVE|ASSERTION|ASYMMETRIC|AT|ATOMIC|AUTHORIZATION|AVG|AVGX|AVGY|BACKUP|BEFORE|BEGIN|BETWEEN|BINARY|BIT|BLOB|BOOLEAN|BOTH|BREADTH|BREAK|BROWSE|BUCKET|BULK|BY|CALL|CALLED|CARDINALITY|CASCADE|CASCADED|CASE|CAST|CATALOG|CHAR|CHARACTER|CHECK|CHECKPOINT|CLASS|CLOB|CLOSE|CLUSTERED|COALESCE|COLLATE|COLLATION|COLLECT|COLUMN|COMMIT|COMPLETION|COMPUTE|CONDITION|CONNECT|CONNECTION|CONSTRAINT|CONSTRAINTS|CONSTRUCTOR|CONT|CONTAINS|CONTAINSTABLE|CONTINUE|CONVERT|CORR|CORRESPONDING|COUNT|COVAR|CREATE|CROSS|CUBE|CUME|CURRENT|CURSOR|CYCLE|DATA|DATABASE|DATE|DAY|DBCC|DEALLOCATE|DEC|DECIMAL|DECLARE|DEFAULT|DEFERRABLE|DEFERRED|DELETE|DENY|DEPTH|DEREF|DESC|DESCRIBE|DESCRIPTOR|DESTROY|DESTRUCTOR|DETERMINISTIC|DIAGNOSTICS|DICTIONARY|DISC|DISCONNECT|DISK|DIST|DISTINCT|DISTRIBUTED|DOMAIN|DOUBLE|DROP|DUMP|DYNAMIC|EACH|ELEMENT|ELSE|END|EQUALS|ERRLVL|ESCAPE|EVERY|EXCEPT|EXCEPTION|EXEC|EXECUTE|EXISTS|EXIT|EXTERNAL|EXTRACT|FALSE|FETCH|FILE|FILLFACTOR|FILTER|FIRST|FLOAT|FOR|FOREIGN|FORTRAN|FOUND|FREE|FREETEXT|FREETEXTTABLE|FROM|FULL|FULLTEXTTABLE|FUNCTION|FUSION|GENERAL|GET|GLOBAL|GO|GOTO|GRANT|GROUP|GROUPING|HAVING|HOLD|HOLDLOCK|HOST|HOUR|IDENTITY|IDENTITYCOL|IF|IGNORE|IMMEDIATE|IN|INCLUDE|INDEX|INDICATOR|INITIALIZE|INITIALLY|INNER|INOUT|INPUT|INSENSITIVE|INSERT|INT|INTEGER|INTERCEPT|INTERSECT|INTERSECTION|INTERVAL|INTO|IS|ISOLATION|ITERATE|JOIN|KEY|KILL|LABEL|LANGUAGE|LARGE|LAST|LATERAL|LEADING|LEFT|LENGTH|LESS|LEVEL|LIKE|LIMIT|LINENO|LN|LOAD|LOCAL|LOCALTIME|LOCALTIMESTAMP|LOCATOR|LOWER|MAP|MATCH|MAX|MEMBER|MERGE|METHOD|MIN|MINUTE|MOD|MODIFIES|MODIFY|MODULE|MONTH|MULTISET|NAMES|NATIONAL|NATURAL|NCHAR|NCLOB|NEW|NEXT|NO|NOCHECK|NONCLUSTERED|NONE|NORMALIZE|NOT|NULL|NULLIF|NUMERIC|OBJECT|OCCURRENCES|OCTET|OF|OFF|OFFSETS|OLD|ON|ONLY|OPEN|OPENDATASOURCE|OPENQUERY|OPENROWSET|OPENXML|OPERATION|OPTION|OR|ORDER|ORDINALITY|OUT|OUTER|OUTPUT|OVER|OVERLAPS|OVERLAY|PAD|PARAMETER|PARAMETERS|PARTIAL|PARTITION|PASCAL|PATH|PERCENT|PERCENTILE|PIVOT|PLAN|POP|POSITION|POSTFIX|PRECISION|PREFIX|PREORDER|PREPARE|PRESERVE|PRIMARY|PRINT|PRIOR|PRIVILEGES|PROC|PROCEDURE|PUBLIC|RAISERROR|RANGE|RANK|READ|READS|READTEXT|REAL|RECONFIGURE|RECURSIVE|REF|REFERENCES|REFERENCING|REGEX|REGR|RELATIVE|RELEASE|REPLICATION|RESTORE|RESTRICT|RESULT|RETURN|RETURNS|REVERT|REVOKE|RIGHT|ROLE|ROLLBACK|ROLLUP|ROUTINE|ROW|ROWCOUNT|ROWGUIDCOL|ROWS|RULE|SAMP|SAVE|SAVEPOINT|SCHEMA|SCOPE|SCROLL|SEARCH|SECOND|SECTION|SECURITYAUDIT|SELECT|SEMANTICKEYPHRASETABLE|SEMANTICSIMILARITYDETAILSTABLE|SEMANTICSIMILARITYTABLE|SENSITIVE|SEQUENCE|SESSION|SET|SETS|SETUSER|SHUTDOWN|SIMILAR|SIZE|SLOPE|SMALLINT|SOME|SPACE|SPECIFIC|SPECIFICTYPE|SQL|SQLCA|SQLCODE|SQLERROR|SQLEXCEPTION|SQLSTATE|SQLWARNING|START|STATE|STATEMENT|STATIC|STATISTICS|STDDEV|STRUCTURE|SUBMULTISET|SUBSTRING|SUM|SXX|SXY|SYMMETRIC|SYSTEM|SYY|TABLE|TABLESAMPLE|TEMPORARY|TERMINATE|TEXTSIZE|THAN|THEN|TIME|TIMESTAMP|TIMEZONE|TO|TOP|TRAILING|TRAN|TRANSACTION|TRANSFORM|TRANSLATE|TRANSLATION|TREAT|TRIGGER|TRIM|TRUE|TRUNCATE|TRY|TSEQUAL|TYPE|UESCAPE|UNDER|UNION|UNIQUE|UNKNOWN|UNNEST|UNPIVOT|UPDATE|UPDATETEXT|UPPER|USAGE|USE|USER|USING|VALUE|VALUES|VAR|VARCHAR|VARIABLE|VARYING|VIEW|WAITFOR|WHEN|WHENEVER|WHERE|WHILE|WIDTH|WINDOW|WITH|WITHIN|WITHOUT|WORK|WRITE|WRITETEXT|XMLAGG|XMLATTRIBUTES|XMLBINARY|XMLCAST|XMLCOMMENT|XMLCONCAT|XMLDOCUMENT|XMLELEMENT|XMLEXISTS|XMLFOREST|XMLITERATE|XMLNAMESPACES|XMLPARSE|XMLPI|XMLQUERY|XMLSERIALIZE|XMLTABLE|XMLTEXT|XMLVALIDATE|YEAR|ZONE
+
+[*.{ps,ps1}]
+# VSSPELL: Ignored PowerShell language-specific keywords
+vsspell_section_id = 5C2EC7F983864DC695FE8B3A3A583864
+vsspell_ignored_keywords_5C2EC7F983864DC695FE8B3A3A583864 = begin|break|catch|class|continue|data|define|do|dynamicparam|else|elseif|end|enum|exit|filter|finally|for|foreach|from|function|hidden|if|in|inlinescript|parallel|param|process|return|sequence|static|switch|throw|trap|try|until|using|var|while|workflow
+
+[*.{py,pyw,r}]
+# VSSPELL: Ignored Python language-specific keywords
+vsspell_section_id = 79296B314146488F9277579FCF4C533B
+vsspell_ignored_keywords_79296B314146488F9277579FCF4C533B = and|as|assert|async|await|break|class|continue|def|del|elif|else|except|false|finally|for|from|global|if|import|in|is|lambda|none|nonlocal|not|or|pass|raise|return|true|try|while|with|yield
+
+[*.{bas,c,cc,cpp,cs,cu,cuh,cxx,fs,h,hh,hpp,hxx,ii,ipp,inl,js,jsx,ps,ps1,py,r,rc,ts,tsx,vb,vbs,xpp}]
+# VSSPELL: Ignored common programming identifiers/prefixes/suffixes
+vsspell_section_id = C448172CBC8E41ABA3F82B9B052F9E78
+vsspell_ignored_keywords_C448172CBC8E41ABA3F82B9B052F9E78 = addr|asm|arg|args|attr|bn|btn|by|byte|cb|cbl|cbo|char|chk|cms|cms|config|configs|cr|cref|ctor|cur|curr|cx|decl|dgv|dl|dlg|dll|dn|ds|dtp|dtor|dw|dword|ep|ex|exp|expr|flp|fn|fsw|func|grd|grp|guid|handle|hinstance|hkey|hmenu|hwnd|idx|il|int|lb|lbl|li|ll|long|lp|lparam|lpcb|lpcw|lpstr|lpsz|lptstr|lpvoid|lv|max|mi|min|mnu|ms|nbr|ndx|nil|ns|nul|null|num|param|pb|pbyte|pdword|pfn|phk|pg|pg|pnl|pos|ppbyte|ppdword|ppqword|ppword|pqword|prev|psz|ptr|pword|qword|rb|rb|regex|rtb|sb|sc|short|si|src|str|sz|tab|tb|tchar|tm|tmr|ts|ts|tsb|tsc|tsc|tsl|tss|tstr|tt|tv|tv|txt|uc|ucb|udp|ui|ul|url|urls|wb|word|wparam|wpf|xaml|xpath
+
+[*.{c,cc,cpp,cs,cu,cuh,cxx,h,hh,hpp,hxx,ii,ipp,inl,markdown,md,mdown,mdwn,mkd,mkdn,mmd,rmd,rst,rc,xpp}]
+# VSSPELL: Ignored Doxygen-specific keywords
+vsspell_section_id = FAEC2371F6C847FC8F04F026B92BA001
+vsspell_ignored_keywords_FAEC2371F6C847FC8F04F026B92BA001 = \addindex|\addtogroup|\anchor|\arg|\attention|\author|\authors|\brief|\bug|callergraph|callgraph|category|cite|class|code|concept|cond|copybrief|copydetails|copydoc|copyright|date|def|defgroup|deprecated|details|diafile|dir|docbookinclude|docbookonly|dontinclude|dot|dotfile|else|elseif|em|emoji|endcode|endcond|enddocbookonly|enddot|endhtmlonly|endif|endinternal|endlatexonly|endlink|endmanonly|endmsc|endparblock|endrtfonly|endsecreflist|enduml|endverbatim|endxmlonly|enum|example|exception|extends|\file|\fileinfo|\fn|headerfile|hidecallergraph|hidecallgraph|hideinitializer|hiderefby|hiderefs|htmlinclude|htmlonly|idlexcept|if|ifnot|image|implements|include|includedoc|includelineno|ingroup|interface|internal|invariant|latexinclude|latexonly|li|line|lineinfo|link|mainpage|maninclude|manonly|memberof|msc|mscfile|\name|\namespace|\noop|\nosubgrouping|\note|overload|package|page|par|paragraph|param|parblock|post|pre|private|privatesection|property|protected|protectedsection|protocol|public|publicsection|pure|qualifier|\raisewarning|\ref|\refitem|\related|\relatedalso|\relates|\relatesalso|\remark|\remarks|\result|\return|\returns|\retval|\rtfinclude|\rtfonly|sa|secreflist|section|see|short|showdate|showinitializer|showrefby|showrefs|since|skip|skipline|snippet|snippetdoc|snippetlineno|startuml|static|struct|subpage|subsection|subsubsection|\tableofcontents|\test|\throw|\throws|\todo|\tparam|\typedef|union|until|\var|\verbatim|\verbinclude|\version|\vhdlflow|warning|weakgroup|xmlinclude|xmlonly|xrefitem

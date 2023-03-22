@@ -56,7 +56,12 @@
       <HelpKeyword index="K" term="configuration, configuration files" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
+  <Topic id="d9dc230f-ae34-464b-a3c2-4a7778907fc9" visible="True" isSelected="true" title="Converting to .editorconfig Files">
+    <HelpKeywords>
+      <HelpKeyword index="K" term="configuration options, conversion" />
+    </HelpKeywords>
+  </Topic>
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isExpanded="true" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
@@ -149,11 +154,16 @@
       <HelpKeyword index="K" term="submitting changes" />
     </HelpKeywords>
   </Topic>
-  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isExpanded="true" title="Version History">
+  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" title="Version History">
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="94c633b4-5924-4a67-8e82-a0e731d6daaa" visible="True" isSelected="true" title="Version 2023.3.4.0">
+    <Topic id="0374de80-9512-4b10-928f-ec3ba6caf018" visible="True" title="Version vNext">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, vNext" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="94c633b4-5924-4a67-8e82-a0e731d6daaa" visible="True" title="Version 2023.3.4.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2023.3.4.0" />
       </HelpKeywords>

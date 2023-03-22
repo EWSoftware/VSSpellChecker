@@ -107,6 +107,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SpellSuggestedActionSource.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SuggestedActionBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SuggestedActions\SuggestedActionSubmenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaggerWordSplitter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tagging\ClassificationCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tagging\CommentTextTagger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Tagging\CSharp\CSharpCommentTextTagger.cs" />
@@ -122,8 +123,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Theme\TeamFoundationColors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Theme\ThemeColorId.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Theme\ThemeColors.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\ConvertConfigurationToolWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\ConvertedConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\InteractiveSpellCheckControl.xaml.cs">
       <DependentUpon>InteractiveSpellCheckControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\ConvertConfigurationControl.xaml.cs">
+      <DependentUpon>ConvertConfigurationControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\InteractiveSpellCheckToolWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SolutionProjectSpellCheckControl.xaml.cs">
@@ -138,6 +144,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\SpinnerControl.xaml.cs">
       <DependentUpon>SpinnerControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)ToolWindows\ConvertConfigurationInfoBar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSSpellCheckerPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSSpellCheckEverywherePackage.cs" />
@@ -207,6 +214,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="$(MSBuildThisFileDirectory)ToolWindows\ConvertConfigurationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)ToolWindows\SolutionProjectSpellCheckControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -219,5 +230,8 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />
   </ItemGroup>
 </Project>

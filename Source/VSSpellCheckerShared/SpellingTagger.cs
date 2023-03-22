@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/06/2022
-// Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
+// Updated : 03/15/2023
+// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling tagger
 //
@@ -69,14 +69,19 @@ namespace VisualStudio.SpellChecker
         private class IgnoredOnceWord
         {
             /// <summary>
-            /// The span containing the word's location
+            /// The word's position
             /// </summary>
-            public ITrackingSpan Span { get; }
+            public int Position { get; }
 
             /// <summary>
-            /// Get the starting point of the span
+            /// The span start
             /// </summary>
-            public SnapshotPoint StartPoint => this.Span.GetStartPoint(this.Span.TextBuffer.CurrentSnapshot);
+            public int StartIndex { get; }
+
+            /// <summary>
+            /// The span end
+            /// </summary>
+            public int EndIndex { get; }
 
             /// <summary>
             /// The word at the span location when it was ignored
@@ -87,10 +92,12 @@ namespace VisualStudio.SpellChecker
             /// Constructor
             /// </summary>
             /// <param name="span">The span containing the word's location</param>
-            public IgnoredOnceWord(ITrackingSpan span)
+            public IgnoredOnceWord(string word, int position, int startIndex, int endIndex)
             {
-                this.Span = span;
-                this.Word = span.GetText(span.TextBuffer.CurrentSnapshot);
+                this.Word = word;
+                this.Position = position;
+                this.StartIndex = startIndex;
+                this.EndIndex = endIndex;
             }
         }
         #endregion
@@ -161,7 +168,7 @@ namespace VisualStudio.SpellChecker
         /// This is used to get an enumerable list of ignore once word spans
         /// </summary>
         public IEnumerable<Span> IgnoredOnceSpans => wordsIgnoredOnce.Select(
-            s => (Span)s.Span.GetSpan(s.Span.TextBuffer.CurrentSnapshot)).ToList();
+            s => Span.FromBounds(s.StartIndex, s.EndIndex)).ToList();
 
         #endregion
 
@@ -235,17 +242,13 @@ namespace VisualStudio.SpellChecker
         {
             isClosed = true;
 
-            if(timer != null)
-                timer.Stop();
+            timer?.Stop();
 
             if(buffer != null)
                 buffer.Changed -= BufferChanged;
 
-            if(naturalTextAggregator != null)
-                naturalTextAggregator.Dispose();
-
-            if(urlAggregator != null)
-                urlAggregator.Dispose();
+            naturalTextAggregator?.Dispose();
+            urlAggregator?.Dispose();
 
             if(this.Dictionary != null)
             {
@@ -372,13 +375,14 @@ namespace VisualStudio.SpellChecker
         {
             if(!isClosed)
             {
-                wordsIgnoredOnce.Enqueue(new IgnoredOnceWord(e.Span));
+                wordsIgnoredOnce.Enqueue(new IgnoredOnceWord(e.Word, e.Position, e.StartIndex, e.EndIndex));
+
                 var currentMisspellings = misspellings;
 
                 // Raise the TagsChanged event to get rid of the tags on the ignored word
                 foreach(var misspelling in currentMisspellings)
-                    if(misspelling.Span.GetStartPoint(misspelling.Span.TextBuffer.CurrentSnapshot) ==
-                      e.Span.GetStartPoint(e.Span.TextBuffer.CurrentSnapshot))
+                {
+                    if(misspelling.Span.GetStartPoint(misspelling.Span.TextBuffer.CurrentSnapshot).Position == e.Position)
                     {
                         this.AddDirtySpan(misspelling.Span.GetSpan(misspelling.Span.TextBuffer.CurrentSnapshot));
 
@@ -387,6 +391,7 @@ namespace VisualStudio.SpellChecker
 
                         break;
                     }
+                }
             }
         }
 
@@ -741,10 +746,11 @@ namespace VisualStudio.SpellChecker
                     {
                         errorSpan = new SnapshotSpan(span.Start + word.Start, word.Length);
 
+                        // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                         // If the word is being ignored either in the ignored word lists or in the current
                         // location, skip it.  This goes for doubled words as well.
                         if(this.Dictionary.ShouldIgnoreWord(textToCheck) || wordsIgnoredOnce.Any(
-                          w => w.StartPoint == errorSpan.Start && w.Word.Equals(actualWord,
+                          w => w.Position == errorSpan.Start.Position && w.Word.Equals(actualWord,
                           StringComparison.OrdinalIgnoreCase)))
                         {
                             lastWord = word;
@@ -808,6 +814,7 @@ namespace VisualStudio.SpellChecker
 
                                 textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
+                                // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                                 if(this.Dictionary.ShouldIgnoreWord(textToCheck) ||
                                   this.Dictionary.IsSpelledCorrectly(textToCheck))
                                 {

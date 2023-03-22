@@ -270,6 +270,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="PresentationFramework.Aero" />
@@ -285,18 +286,18 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack">
-      <Version>1.11.34</Version>
+      <Version>1.11.46</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense">
-      <Version>17.0.191-preview-gdb4a0010f6</Version>
+      <Version>17.0.487</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.0-previews-2-31512-422" ExcludeAssets="runtime">
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.31902.203" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Threading">
-      <Version>17.0.26-alpha</Version>
+      <Version>17.0.64</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.2155-preview2">
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5232">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -418,6 +419,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\VSSpellCheckerCommon\VSSpellCheckerCommon.csproj">
+      <Project>{4c23d550-7d6d-439b-a464-65c8419cc8ca}</Project>
+      <Name>VSSpellCheckerCommon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VSSpellCheckerDefinitions2022AndLater\VSSpellCheckerDefinitions2022AndLater.csproj">
       <Project>{a9303943-d23d-4570-9792-56667f0dd928}</Project>
       <Name>VSSpellCheckerDefinitions2022AndLater</Name>

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckEverywherePackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/29/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 03/20/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class that defines the Visual Studio Spell Check Everywhere package
 //
@@ -117,6 +117,10 @@ namespace VisualStudio.SpellChecker
             // When initialized asynchronously, we *may* be on a background thread at this point.  Do any
             // initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            // Replace the writable user words file check with one that checks for inclusion in the project and
+            // source control.
+            GlobalDictionary.CanWriteToUserWordsFile = Utility.CanWriteToUserWordsFile;
 
             Instance = this;
 

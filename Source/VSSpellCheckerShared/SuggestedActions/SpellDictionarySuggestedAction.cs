@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellDictionarySuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 03/20/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide suggested actions for ignoring words or adding new words to the
 // dictionary.
@@ -86,7 +86,11 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             switch(action)
             {
                 case DictionaryAction.IgnoreOnce:
-                    dictionary.IgnoreWordOnce(this.Span);
+                    var start = this.Span.GetStartPoint(this.Span.TextBuffer.CurrentSnapshot);
+                    var span = this.Span.GetSpan(this.Span.TextBuffer.CurrentSnapshot);
+
+                    dictionary.IgnoreWordOnce(this.Span.GetText(this.Span.TextBuffer.CurrentSnapshot),
+                        start.Position, span.Start, span.End);
                     succeeded = true;
                     break;
 
@@ -102,7 +106,11 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                     break;
             }
 
-            Debug.Assert(succeeded, "Call to modify dictionary was unsuccessful");
+            if(!succeeded)
+            {
+                Debug.WriteLine("Call to modify dictionary was unsuccessful");
+                Debugger.Break();
+            }
         }
         #endregion
     }

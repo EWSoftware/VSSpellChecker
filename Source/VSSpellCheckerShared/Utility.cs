@@ -157,7 +157,9 @@ namespace VisualStudio.SpellChecker
         private static string FilenameFromScriptBlock(ITextBuffer buffer)
         {
             if(buffer.ContentType.TypeName == "TypeScript")
+            {
                 foreach(var p in buffer.Properties.PropertyList)
+                {
                     if(p.Key is Type t && t.FullName == "Microsoft.VisualStudio.LanguageServices.TypeScript.ScriptContexts.ScriptBlock")
                     {
                         var filename = t.GetProperty("FileName");
@@ -165,13 +167,17 @@ namespace VisualStudio.SpellChecker
                         if(filename != null)
                             return filename.GetValue(p.Value) as string;
                     }
+                }
+            }
 
             if(buffer.ContentType.TypeName == "JavaScript")
+            {
                 foreach(var p in buffer.Properties.PropertyList)
                 {
                     if(p.Value is System.Collections.IDictionary d)
                     {
                         foreach(var v in d.Values)
+                        {
                             if(v != null)
                             {
                                 Type t = v.GetType();
@@ -209,8 +215,10 @@ namespace VisualStudio.SpellChecker
                                     }
                                 }
                             }
+                        }
                     }
                 }
+            }
 
             return null;
         }
@@ -261,11 +269,15 @@ namespace VisualStudio.SpellChecker
 
             // Just in case, make sure the path is absolute
             if(!Path.IsPathRooted(absolutePath))
+            {
                 if(!absolutePath.Contains("*") && !absolutePath.Contains("?"))
                     absolutePath = Path.GetFullPath(absolutePath);
                 else
+                {
                     absolutePath = Path.Combine(Path.GetFullPath(Path.GetDirectoryName(absolutePath)),
                         Path.GetFileName(absolutePath));
+                }
+            }
 
             if(absolutePath.Length > 1 && absolutePath[absolutePath.Length - 1] == '\\')
             {
@@ -497,7 +509,9 @@ namespace VisualStudio.SpellChecker
             // If under source control, check it out
             if(dte.SourceControl.IsItemUnderSCC(dictionaryWordsFile) &&
               !dte.SourceControl.IsItemCheckedOut(dictionaryWordsFile))
+            {
                 return dte.SourceControl.CheckOutItem(dictionaryWordsFile);
+            }
 
             return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
         }

@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 02/04/2020
-// Note    : Copyright 2010-2020, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 03/15/2023
+// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling dictionary service
 //
@@ -27,10 +27,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-using Microsoft.VisualStudio.Text;
-
 using VisualStudio.SpellChecker.Definitions;
 
+// TODO: Delete this file and replace all references with the one in VisualStudio.SpellChecker.Common
 namespace VisualStudio.SpellChecker
 {
     /// <summary>
@@ -107,7 +106,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>An enumerable list of zero or more suggested correct spellings.  Each suggestion contains
         /// the dictionary culture with which it is associated.  If the word contains a mnemonic, it is removed
         /// in order to find the suggestions.  Each word in the returned list of suggestions will contain the
-        /// mnemonic if it contains a matching letter.</remarks>
+        /// mnemonic if it contains a matching letter.</returns>
         public IEnumerable<SpellingSuggestion> SuggestCorrections(string word)
         {
             char mnemonicCharacter = '\x0', mnemonicLetter = '\x0';
@@ -173,10 +172,13 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// Ignore the given word once, but don't add it to the dictionary
         /// </summary>
-        /// <param name="span">The tracking span used to locate the word to ignore once</param>
-        public void IgnoreWordOnce(ITrackingSpan span)
+        /// <param name="word">The word to ignore</param>
+        /// <param name="position">The position of the word</param>
+        /// <param name="startIndex">The start index of the word</param>
+        /// <param name="endIndex">The end index of the word</param>
+        public void IgnoreWordOnce(string word, int position, int startIndex, int endIndex)
         {
-            IgnoreOnce?.Invoke(this, new SpellingEventArgs(span));
+            IgnoreOnce?.Invoke(this, new SpellingEventArgs(word, position, startIndex, endIndex));
         }
 
         /// <summary>

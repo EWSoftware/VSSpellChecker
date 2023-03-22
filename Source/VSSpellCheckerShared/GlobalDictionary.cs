@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/02/2023
+// Updated : 03/20/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
@@ -31,6 +31,7 @@ using NHunspell;
 
 using VisualStudio.SpellChecker.Configuration;
 
+// TODO: Delete this file and replace all references with the one in VisualStudio.SpellChecker.Common
 namespace VisualStudio.SpellChecker
 {
     /// <summary>
@@ -66,6 +67,14 @@ namespace VisualStudio.SpellChecker
         /// This read-only property indicates whether or not the dictionary is initialized
         /// </summary>
         public bool IsInitialized { get; private set; }
+
+        /// <summary>
+        /// This can be used to assign a function that checks to see if the user words file is writable
+        /// </summary>
+        /// <remarks>The default implementation only checks to see if the file is writable.  It does not take
+        /// source control status into consideration and will not add it to the active project.  Assign a
+        /// different function to this property that implements that functionality if necessary.</remarks>
+        public static Func<string, string, bool> CanWriteToUserWordsFile { get; set; } = CanWriteToUserWordsFileDefault;
 
         #endregion
 
@@ -178,10 +187,8 @@ namespace VisualStudio.SpellChecker
             if(this.ShouldIgnoreWord(word) || this.IsSpelledCorrectly(word))
                 return true;
 
-#pragma warning disable VSTHRD010
-            if(!dictionaryWordsFile.CanWriteToUserWordsFile(dictionaryFile))
+            if(!(CanWriteToUserWordsFile ?? CanWriteToUserWordsFileDefault)(dictionaryWordsFile, dictionaryFile))
                 return false;
-#pragma warning restore VSTHRD010
 
             bool multipleWordsAdded = false;
 
@@ -262,6 +269,37 @@ namespace VisualStudio.SpellChecker
         //=====================================================================
 
         /// <summary>
+        /// This is used to determine if the given user dictionary words file can be written to
+        /// </summary>
+        /// <param name="dictionaryWordsFile">The user dictionary words file</param>
+        /// <param name="dictionaryFile">The related dictionary file or null if there isn't one</param>
+        /// <returns>True if it can, false if not.</returns>
+        /// <remarks>This only checks to see if the file is writable.  It does not take source control status
+        /// into consideration and will not add it to the active project.  Use the
+        /// <see cref="CanWriteToUserWordsFile"/> property to assign a different function that does if necessary.</remarks>
+        private static bool CanWriteToUserWordsFileDefault(string dictionaryWordsFile, string dictionaryFile)
+        {
+            if(String.IsNullOrWhiteSpace(dictionaryWordsFile))
+                throw new ArgumentException("Dictionary words file cannot be null or empty", nameof(dictionaryWordsFile));
+
+            if(dictionaryFile != null && dictionaryFile.Trim().Length == 0)
+                throw new ArgumentException("Dictionary file cannot be empty", nameof(dictionaryFile));
+
+            // The file must exist
+            if(!File.Exists(dictionaryWordsFile))
+                File.WriteAllText(dictionaryWordsFile, String.Empty);
+
+            // If it's in the global configuration folder, we can write to it if not read-only
+            if(Path.GetDirectoryName(dictionaryWordsFile).StartsWith(
+              SpellingConfigurationFile.GlobalConfigurationFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+            }
+
+            return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+        }
+
+        /// <summary>
         /// Create a global dictionary for the specified culture
         /// </summary>
         /// <param name="culture">The language to use for the dictionary.</param>
@@ -269,9 +307,12 @@ namespace VisualStudio.SpellChecker
         /// other dictionaries.</param>
         /// <param name="recognizedWords">An optional list of recognized words that will be added to the
         /// dictionary (i.e. from a code analysis dictionary).</param>
+        /// <param name="initializeAsynchronously">True to initialize the dictionary asynchronously, false to
+        /// wait for it to initialize before returning.</param>
         /// <returns>The global dictionary to use or null if one could not be created.</returns>
         public static GlobalDictionary CreateGlobalDictionary(CultureInfo culture,
-          IEnumerable<string> additionalDictionaryFolders, IEnumerable<string> recognizedWords)
+          IEnumerable<string> additionalDictionaryFolders, IEnumerable<string> recognizedWords,
+          bool initializeAsynchronously = true)
         {
             GlobalDictionary globalDictionary = null;
 
@@ -307,8 +348,13 @@ namespace VisualStudio.SpellChecker
                 {
                     globalDictionary = new GlobalDictionary(culture, recognizedWords);
 
-                    // Initialize the dictionaries asynchronously.  We don't care about the result here.
-                    _ = Task.Run(() => globalDictionary.InitializeDictionary(additionalDictionaryFolders));
+                    if(initializeAsynchronously)
+                    {
+                        // Initialize the dictionaries asynchronously.  We don't care about the result here.
+                        _ = Task.Run(() => globalDictionary.InitializeDictionary(additionalDictionaryFolders));
+                    }
+                    else
+                        globalDictionary.InitializeDictionary(additionalDictionaryFolders);
 
                     globalDictionaries.Add(culture.Name, globalDictionary);
                 }

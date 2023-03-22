@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceProxy.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/04/2022
-// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
+// Updated : 03/15/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling service interface to expose the spell checker to
 // third-party tagger providers.
@@ -33,6 +33,7 @@ using Microsoft.VisualStudio.Text;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
+using VisualStudio.SpellChecker.ToolWindows;
 
 namespace VisualStudio.SpellChecker
 {
@@ -60,6 +61,11 @@ namespace VisualStudio.SpellChecker
         /// be cleared.
         /// </summary>
         internal static string LastSolutionName { get; set; }
+
+        /// <summary>
+        /// This is used to set the flag used to check for old configuration files that might need converting
+        /// </summary>
+        internal static bool CheckForOldConfigurationFiles { get; set; }
 
         #endregion
 
@@ -129,6 +135,11 @@ namespace VisualStudio.SpellChecker
 
                 if(config != null)
                 {
+                    // Replace the writable user words file check with one that checks for inclusion in the
+                    // project and source control.
+                    if(GlobalDictionary.CanWriteToUserWordsFile != Utility.CanWriteToUserWordsFile)
+                        GlobalDictionary.CanWriteToUserWordsFile = Utility.CanWriteToUserWordsFile;
+
                     // Create a dictionary for each configuration dictionary language ignoring any that are
                     // invalid and duplicates caused by missing languages which return the en-US dictionary.
                     var globalDictionaries = config.DictionaryLanguages.Select(l =>
@@ -181,6 +192,7 @@ namespace VisualStudio.SpellChecker
                         WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
                         GlobalDictionary.ClearDictionaryCache();
                         LastSolutionName = solution.FullName;
+                        CheckForOldConfigurationFiles = true;
                     }
 
                     // See if there is a solution configuration
@@ -236,6 +248,7 @@ namespace VisualStudio.SpellChecker
                                 // Then check subfolders.  No need to check the root folder as the project
                                 // settings cover it.
                                 if(filename.Length > projectPath.Length)
+                                {
                                     foreach(string folder in filename.Substring(projectPath.Length + 1).Split('\\'))
                                     {
                                         projectPath = Path.Combine(projectPath, folder);
@@ -245,6 +258,7 @@ namespace VisualStudio.SpellChecker
                                         if(projectItem != null)
                                             config.Load(filename);
                                     }
+                                }
                             }
 
                             // If the item looks like a dependent file item, look for a settings file related to
@@ -271,15 +285,17 @@ namespace VisualStudio.SpellChecker
                                 config.Load(filename);
                         }
                         else
-                            if(projectItem.Kind == EnvDTE.Constants.vsProjectItemKindSolutionItems)
                         {
-                            // Looks like a solution item, see if a related setting file exists
-                            filename = bufferFilename + ".vsspell";
+                            if(projectItem.Kind == EnvDTE.Constants.vsProjectItemKindSolutionItems)
+                            {
+                                // Looks like a solution item, see if a related setting file exists
+                                filename = bufferFilename + ".vsspell";
 
-                            projectItem = solution.FindProjectItemForFile(filename);
+                                projectItem = solution.FindProjectItemForFile(filename);
 
-                            if(projectItem != null)
-                                config.Load(filename);
+                                if(projectItem != null)
+                                    config.Load(filename);
+                            }
                         }
                     }
 
@@ -318,13 +334,23 @@ namespace VisualStudio.SpellChecker
                     }
                 }
                 else
-                    if(LastSolutionName != null)
                 {
-                    // A solution was closed and a file has been opened outside of a solution so clear the
-                    // cache and use the global dictionaries.
-                    WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
-                    GlobalDictionary.ClearDictionaryCache();
-                    LastSolutionName = null;
+                    if(LastSolutionName != null)
+                    {
+                        // A solution was closed and a file has been opened outside of a solution so clear the
+                        // cache and use the global dictionaries.
+                        WpfTextBox.WpfTextBoxSpellChecker.ClearCache();
+                        GlobalDictionary.ClearDictionaryCache();
+                        LastSolutionName = null;
+                        CheckForOldConfigurationFiles = true;
+                    }
+                }
+
+                // Offer to convert old configuration files if any are found
+                if(CheckForOldConfigurationFiles)
+                {
+                    CheckForOldConfigurationFiles = false;
+                    SearchForOldConfigurationFiles();
                 }
             }
             catch(Exception ex)
@@ -335,6 +361,47 @@ namespace VisualStudio.SpellChecker
 
             return config;
         }
+
+#pragma warning disable VSTHRD100, VSTHRD010
+        /// <summary>
+        /// Check for old configuration files and show the info bar to offer conversion if necessary
+        /// </summary>
+        private static async void SearchForOldConfigurationFiles()
+        {
+            string solutionFolder = null;
+
+            if(!String.IsNullOrWhiteSpace(LastSolutionName))
+                solutionFolder = Path.GetDirectoryName(LastSolutionName);
+
+            bool conversionNeeded = await System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    if(File.Exists(Common.Configuration.Legacy.SpellCheckerLegacyConfiguration.GlobalConfigurationFilename) &&
+                      !File.Exists(Common.Configuration.SpellCheckerConfiguration.GlobalConfigurationFilename))
+                    {
+                        return true;
+                    }
+
+                    if(!String.IsNullOrWhiteSpace(solutionFolder))
+                    {
+                        return Directory.EnumerateFiles(solutionFolder, "*.vsspell", SearchOption.AllDirectories).Any();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    // Ignore exceptions.  We'll try again later.
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+
+                return false;
+
+            }).ConfigureAwait(true);
+
+            if(conversionNeeded)
+                ConvertConfigurationInfoBar.Instance.ShowInfoBar();
+        }
+#pragma warning restore VSTHRD100, VSTHRD010
         #endregion
     }
 }
