@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceProxy.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/15/2023
+// Updated : 03/22/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling service interface to expose the spell checker to
@@ -19,19 +19,22 @@
 //===============================================================================================================
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 
 using EnvDTE;
+
 using EnvDTE80;
 
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Definitions;
-using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
 using VisualStudio.SpellChecker.ToolWindows;
 
@@ -103,7 +106,7 @@ namespace VisualStudio.SpellChecker
                 // Generate the configuration settings unique to the file
                 config = GenerateConfiguration(buffer);
 
-                if(config == null || !config.SpellCheckAsYouType || config.ShouldExcludeFile(buffer.GetFilename()))
+                if(config == null || !config.SpellCheckAsYouType)
                 {
                     // Mark it as disabled so that we don't have to check again
                     buffer.Properties[SpellCheckerDisabledKey] = true;
@@ -168,16 +171,14 @@ namespace VisualStudio.SpellChecker
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            ProjectItem projectItem, fileItem;
-            string bufferFilename, filename, projectPath, projectFilename = null;
+            ProjectItem projectItem;
+            string bufferFilename, projectFilename = null;
 
             // Start with the global configuration
-            var config = new SpellCheckerConfiguration();
+            SpellCheckerConfiguration config = null;
 
             try
             {
-                config.Load(SpellingConfigurationFile.GlobalConfigurationFilename);
-
                 if(Package.GetGlobalService(typeof(SDTE)) is DTE2 dte2 && dte2.Solution != null &&
                   !String.IsNullOrWhiteSpace(dte2.Solution.FullName))
                 {
@@ -195,146 +196,87 @@ namespace VisualStudio.SpellChecker
                         CheckForOldConfigurationFiles = true;
                     }
 
-                    // See if there is a solution configuration
-                    filename = solution.FullName + ".vsspell";
-                    projectItem = solution.FindProjectItemForFile(filename);
-
-                    // Allow for solution configuration files to be named ".vsspell"
-                    if(projectItem == null)
-                    {
-                        filename = Path.Combine(Path.GetDirectoryName(filename), ".vsspell");
-                        projectItem = solution.FindProjectItemForFile(filename);
-                    }
-
-                    if(projectItem != null)
-                        config.Load(filename);
-
                     // Find the project item for the file we are opening
                     bufferFilename = buffer.GetFilename();
                     projectItem = solution.FindProjectItemForFile(bufferFilename);
 
-                    if(projectItem != null)
+                    // If we have a project (we should), get the project filename for later
+                    if(projectItem != null && projectItem.ContainingProject != null &&
+                      !String.IsNullOrWhiteSpace(projectItem.ContainingProject.FullName))
                     {
-                        fileItem = projectItem;
+                        projectFilename = projectItem.ContainingProject.FullName;
+                    }
 
-                        // If we have a project (we should), see if it has settings
-                        if(projectItem.ContainingProject != null &&
-                          !String.IsNullOrWhiteSpace(projectItem.ContainingProject.FullName))
+                    if(bufferFilename == null)
+                        bufferFilename = projectFilename ?? solution.FullName;
+
+                    if(bufferFilename != null)
+                    {
+                        List<string> additionalGlobalConfigs = new List<string>(),
+                            additionalEditorConfigs = new List<string>(),
+                            codeAnalysisDictionaries = new List<string>();
+
+                        foreach(var addConfig in SpellCheckFileInfo.ProjectAdditionalConfigurationFiles(projectFilename))
                         {
-                            projectFilename = projectItem.ContainingProject.FullName;
-
-                            // Website projects are named after the folder
-                            if(projectFilename.Length > 1 && projectFilename[projectFilename.Length - 1] == '\\')
-                            {
-                                filename = Path.GetFileName(projectFilename.Substring(0, projectFilename.Length - 1));
-                                filename = projectFilename + filename + ".vsspell";
-                            }
+                            if(addConfig.IsGlobalConfigItem)
+                                additionalGlobalConfigs.Add(addConfig.CanonicalName);
                             else
-                                filename = projectFilename + ".vsspell";
-
-                            projectItem = solution.FindProjectItemForFile(filename);
-
-                            if(projectItem != null)
-                                config.Load(filename);
-
-                            // Get the full path based on the project.  The buffer filename will refer to the actual
-                            // path which may be to a linked file outside the project's folder structure.
-                            projectPath = Path.GetDirectoryName(filename);
-                            filename = Path.GetDirectoryName((string)fileItem.Properties.Item("FullPath").Value);
-
-                            // Search for folder-specific configuration files
-                            if(filename.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
                             {
-                                // Then check subfolders.  No need to check the root folder as the project
-                                // settings cover it.
-                                if(filename.Length > projectPath.Length)
-                                {
-                                    foreach(string folder in filename.Substring(projectPath.Length + 1).Split('\\'))
-                                    {
-                                        projectPath = Path.Combine(projectPath, folder);
-                                        filename = Path.Combine(projectPath, folder + ".vsspell");
-                                        projectItem = solution.FindProjectItemForFile(filename);
-
-                                        if(projectItem != null)
-                                            config.Load(filename);
-                                    }
-                                }
+                                if(addConfig.IsEditorConfigItem)
+                                    additionalEditorConfigs.Add(addConfig.CanonicalName);
+                                else
+                                    codeAnalysisDictionaries.Add(addConfig.CanonicalName);
                             }
-
-                            // If the item looks like a dependent file item, look for a settings file related to
-                            // the parent file item.
-                            if(fileItem.Collection != null && fileItem.Collection.Parent != null)
-                            {
-                                projectItem = fileItem.Collection.Parent as ProjectItem;
-
-                                if(projectItem != null && projectItem.Kind == EnvDTE.Constants.vsProjectItemKindPhysicalFile)
-                                {
-                                    filename = (string)projectItem.Properties.Item("FullPath").Value + ".vsspell";
-                                    projectItem = solution.FindProjectItemForFile(filename);
-
-                                    if(projectItem != null)
-                                        config.Load(filename);
-                                }
-                            }
-
-                            // And finally, look for file-specific settings for the item itself
-                            filename = (string)fileItem.Properties.Item("FullPath").Value + ".vsspell";
-                            projectItem = solution.FindProjectItemForFile(filename);
-
-                            if(projectItem != null)
-                                config.Load(filename);
                         }
-                        else
+
+                        config = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(bufferFilename,
+                            additionalGlobalConfigs, additionalEditorConfigs);
+
+                        // Load code analysis dictionaries if wanted
+                        if(projectFilename != null && config.CadOptions.ImportCodeAnalysisDictionaries)
                         {
-                            if(projectItem.Kind == EnvDTE.Constants.vsProjectItemKindSolutionItems)
+                            // Typically there is only one but multiple files are supported
+                            foreach(var cad in codeAnalysisDictionaries)
                             {
-                                // Looks like a solution item, see if a related setting file exists
-                                filename = bufferFilename + ".vsspell";
+                                if(File.Exists(cad))
+                                    config.ImportCodeAnalysisDictionary(cad);
+                            }
+                        }
 
-                                projectItem = solution.FindProjectItemForFile(filename);
+                        if(config.DetermineResourceFileLanguageFromName &&
+                          Path.GetExtension(bufferFilename).Equals(".resx", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Localized resource files are expected to have filenames in the format
+                            // BaseName.Language.resx (i.e. LocalizedForm.de-DE.resx).
+                            bufferFilename = Path.GetExtension(Path.GetFileNameWithoutExtension(bufferFilename));
 
-                                if(projectItem != null)
-                                    config.Load(filename);
+                            if(bufferFilename.Length > 1)
+                            {
+                                bufferFilename = bufferFilename.Substring(1);
+
+                                if(SpellCheckerDictionary.AvailableDictionaries(
+                                  config.AdditionalDictionaryFolders).TryGetValue(bufferFilename,
+                                  out SpellCheckerDictionary match))
+                                {
+                                    // Clear any existing dictionary languages and use just the one that matches the
+                                    // file's language.
+                                    config.DictionaryLanguages.Clear();
+                                    config.DictionaryLanguages.Add(match.Culture);
+                                }
                             }
                         }
                     }
-
-                    // Load code analysis dictionaries if wanted
-                    if(projectFilename != null && config.CadOptions.ImportCodeAnalysisDictionaries)
+                    else
                     {
-                        // Typically there is only one but multiple files are supported
-                        foreach(var cad in SpellCheckFileInfo.ProjectCodeAnalysisDictionaries(projectFilename))
-                        {
-                            if(File.Exists(cad.CanonicalName))
-                                config.ImportCodeAnalysisDictionary(cad.CanonicalName);
-                        }
-                    }
-
-                    if(bufferFilename != null && config.DetermineResourceFileLanguageFromName &&
-                      Path.GetExtension(bufferFilename).Equals(".resx", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Localized resource files are expected to have filenames in the format
-                        // BaseName.Language.resx (i.e. LocalizedForm.de-DE.resx).
-                        bufferFilename = Path.GetExtension(Path.GetFileNameWithoutExtension(bufferFilename));
-
-                        if(bufferFilename.Length > 1)
-                        {
-                            bufferFilename = bufferFilename.Substring(1);
-
-                            if(SpellCheckerDictionary.AvailableDictionaries(
-                              config.AdditionalDictionaryFolders).TryGetValue(bufferFilename,
-                              out SpellCheckerDictionary match))
-                            {
-                                // Clear any existing dictionary languages and use just the one that matches the
-                                // file's language.
-                                config.DictionaryLanguages.Clear();
-                                config.DictionaryLanguages.Add(match.Culture);
-                            }
-                        }
+                        // Create a configuration from the global settings alone if we can't determine a filename
+                        config = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(null, null, null);
                     }
                 }
                 else
                 {
+                    // Create a configuration from the global settings alone if we can't determine a filename
+                    config = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(null, null, null);
+
                     if(LastSolutionName != null)
                     {
                         // A solution was closed and a file has been opened outside of a solution so clear the

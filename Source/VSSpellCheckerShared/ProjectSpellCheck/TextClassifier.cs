@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains an abstract base class used to implement text classification for the content of various
 // file types.
@@ -27,7 +27,7 @@ using System.Text;
 
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {
@@ -127,11 +127,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!String.IsNullOrWhiteSpace(ext))
                 ext = ext.Substring(1);
 
-            var exclusions = spellCheckConfiguration.IgnoredClassificationsFor(PropertyNames.Extension + ext);
+            var exclusions = spellCheckConfiguration.IgnoredClassificationsFor(
+                SpellCheckerConfiguration.Extension + ext);
 
             if(!exclusions.Any())
-                exclusions = spellCheckConfiguration.IgnoredClassificationsFor(PropertyNames.FileType +
+            {
+                exclusions = spellCheckConfiguration.IgnoredClassificationsFor(SpellCheckerConfiguration.FileType +
                     ClassifierFactory.ClassifierIdFor(filename));
+            }
 
             foreach(string exclusion in exclusions)
                 if(Enum.TryParse(exclusion, out RangeClassification rangeType))
@@ -140,10 +143,12 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(!File.Exists(filename))
                 this.SetText(String.Empty);
             else
+            {
                 using(StreamReader sr = new StreamReader(filename, Encoding.Default, true))
                 {
                     this.SetText(sr.ReadToEnd());
                 }
+            }
         }
         #endregion
 
@@ -316,11 +321,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             SpellCheckSpan firstSpan = spans[firstSpanIdx], secondSpan = spans[secondSpanIdx];
 
             if(secondSpanIdx < firstSpanIdx)
-            {
-                int i = firstSpanIdx;
-                firstSpanIdx = secondSpanIdx;
-                secondSpanIdx = i;
-            }
+                (secondSpanIdx, firstSpanIdx) = (firstSpanIdx, secondSpanIdx);
 
             spans.RemoveAt(secondSpanIdx);
             spans.RemoveAt(firstSpanIdx);

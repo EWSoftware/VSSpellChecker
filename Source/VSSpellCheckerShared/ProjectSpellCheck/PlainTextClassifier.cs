@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PlainTextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/18/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify plain text file content
 //
@@ -22,7 +22,7 @@ using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {

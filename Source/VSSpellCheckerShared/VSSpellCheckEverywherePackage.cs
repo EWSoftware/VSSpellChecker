@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckEverywherePackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/20/2023
+// Updated : 03/22/2023
 // Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class that defines the Visual Studio Spell Check Everywhere package
@@ -25,7 +25,8 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker
 {
@@ -126,8 +127,8 @@ namespace VisualStudio.SpellChecker
 
             try
             {
-                var configuration = new SpellCheckerConfiguration();
-                configuration.Load(SpellingConfigurationFile.GlobalConfigurationFilename);
+                // No filename here.  We're only loading properties for the global configuration.
+                var configuration = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(null, null, null);
 
                 if(configuration.EnableWpfTextBoxSpellChecking)
                     this.ConnectSpellChecker();
@@ -147,6 +148,7 @@ namespace VisualStudio.SpellChecker
             ThreadHelper.ThrowIfNotOnUIThread();
 
             if(selectionMonitorCookie == 0)
+            {
                 try
                 {
                     if(!(this.GetService(typeof(SVsShellMonitorSelection)) is IVsMonitorSelection ms) ||
@@ -163,6 +165,7 @@ namespace VisualStudio.SpellChecker
                     // Ignore any exceptions
                     Debug.WriteLine(ex);
                 }
+            }
         }
         #endregion
 

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/13/2021
-// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
 //
@@ -30,6 +30,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
+
+using VisualStudio.SpellChecker.Common;
 
 namespace VisualStudio.SpellChecker.Configuration
 {
@@ -664,7 +666,7 @@ namespace VisualStudio.SpellChecker.Configuration
                     }
 
                     if(File.Exists(ignoredWordsFile))
-                        ignoredWords.UnionWith(Utility.LoadUserDictionary(ignoredWordsFile, false, false));
+                        ignoredWords.UnionWith(CommonUtilities.LoadUserDictionary(ignoredWordsFile, false, false));
 
                     if(!ignoredWordsFiles.Any(f => f.Filename.Equals(ignoredWordsFile, StringComparison.OrdinalIgnoreCase)))
                         ignoredWordsFiles.Add((configuration.ConfigurationType, ignoredWordsFile));

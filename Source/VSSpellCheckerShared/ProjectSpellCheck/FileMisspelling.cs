@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 03/21/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that represents a misspelling withing a project file
 //
@@ -24,6 +24,7 @@ using System.Windows;
 
 using Microsoft.VisualStudio.Text;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck

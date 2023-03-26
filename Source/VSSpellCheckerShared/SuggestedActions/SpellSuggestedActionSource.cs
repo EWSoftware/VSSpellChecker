@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedActionSource.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/06/2022
-// Note    : Copyright 2016-2022, Eric Woodruff, All rights reserved
+// Updated : 03/21/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to implement the suggestion source for spelling light bulbs
 //
@@ -30,10 +30,10 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.Tagging;
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace VisualStudio.SpellChecker.SuggestedActions
 {
@@ -46,7 +46,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         //=====================================================================
 
         private readonly SpellingDictionary dictionary;
-        private readonly IEnumerable<(ConfigurationType ConfigType, string Filename)> ignoredWordsFiles;
+        private readonly IEnumerable<string> ignoredWordsFiles;
         private ITagAggregator<MisspellingTag> misspellingAggregator;
         private bool disposed;
 
@@ -95,7 +95,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 #pragma warning restore VSTHRD010
 
                 return new SpellSuggestedActionSource(dictionary,
-                    config?.IgnoredWordsFiles ?? Enumerable.Empty<(ConfigurationType ConfigType, string Filename)>(),
+                    config?.IgnoredWordsFiles ?? Enumerable.Empty<string>(),
                     tagAggregatorFactory.CreateTagAggregator<MisspellingTag>(textView));
             }
         }
@@ -108,9 +108,9 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         /// Constructor
         /// </summary>
         /// <param name="dictionary">The spelling dictionary</param>
+        /// <param name="ignoredWordsFiles">An enumerable list of the ignored words files to use</param>
         /// <param name="misspellingAggregator">The misspelling aggregator</param>
-        public SpellSuggestedActionSource(SpellingDictionary dictionary,
-          IEnumerable<(ConfigurationType ConfigType, string Filename)> ignoredWordsFiles,
+        public SpellSuggestedActionSource(SpellingDictionary dictionary, IEnumerable<string> ignoredWordsFiles,
           ITagAggregator<MisspellingTag> misspellingAggregator)
         {
             this.dictionary = dictionary;
@@ -308,7 +308,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                 {
                     var file = ignoredWordsFiles.First();
 
-                    actions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary, file.ConfigType, file.Filename,
+                    actions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary, file,
                         "Add to Ignored Words File"));
 
                     actionSets.Add(new SuggestedActionSet(null, actions, null, SuggestedActionSetPriority.Low));
@@ -317,10 +317,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                 {
                     // If there are multiple ignored words files, put them in a submenu
                     foreach(var iwf in ignoredWordsFiles)
-                    {
-                        actions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary, iwf.ConfigType,
-                            iwf.Filename, String.Empty));
-                    }
+                        actions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary, iwf, String.Empty));
 
                     actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(
                         "Add to Ignored Words File", new[] { new SuggestedActionSet(null, actions) }) }, null,
@@ -361,8 +358,8 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             {
                 var file = ignoredWordsFiles.First();
 
-                ignoredWordsFileActions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary,
-                    file.ConfigType, file.Filename, "Add to Ignored Words File"));
+                ignoredWordsFileActions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary, file,
+                    "Add to Ignored Words File"));
 
                 actionSets.Add(new SuggestedActionSet(null, ignoredWordsFileActions, null,
                     SuggestedActionSetPriority.Low));
@@ -373,7 +370,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                 foreach(var iwf in ignoredWordsFiles)
                 {
                     ignoredWordsFileActions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary,
-                        iwf.ConfigType, iwf.Filename, String.Empty));
+                        iwf, String.Empty));
                 }
 
                 actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ResourceFileClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/10/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify XML resource file content
 //
@@ -22,7 +22,7 @@
 using System;
 using System.Xml;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/18/2020
-// Note    : Copyright 2020, Eric Woodruff, All rights reserved
+// Updated : 03/26/2023
+// Note    : Copyright 2020-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide suggested actions for adding words to an ignored words file
 //
@@ -26,7 +26,9 @@ using System.Windows;
 
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
+
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 
 namespace VisualStudio.SpellChecker.SuggestedActions
@@ -52,19 +54,30 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         /// </summary>
         /// <param name="span">The span containing the word to ignore.</param>
         /// <param name="dictionary">The dictionary used to ignore the word or add the word.</param>
-        /// <param name="configurationType">The configuration file type associated with the ignored words file.</param>
         /// <param name="ignoredWordsFile">The ignored words file to which the word is added</param>
         /// <param name="displayText">The display text for the suggested action.</param>
         public IgnoredWordsSuggestedAction(ITrackingSpan span, SpellingDictionary dictionary,
-          ConfigurationType configurationType, string ignoredWordsFile, string displayText) : base(displayText, span)
+          string ignoredWordsFile, string displayText) : base(displayText, span)
         {
             this.dictionary = dictionary;
             this.ignoredWordsFile = ignoredWordsFile;
 
-            if(configurationType == ConfigurationType.Global)
+            if(ignoredWordsFile.Equals(SpellCheckerConfiguration.GlobalConfigurationFilename, StringComparison.OrdinalIgnoreCase))
                 this.DisplayTextSuffix = "Global";
             else
-                this.DisplayTextSuffix = $"{configurationType} ({Path.GetFileName(ignoredWordsFile)})";
+            {
+                string basePath = Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName);
+
+                if(basePath != null && ignoredWordsFile.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
+                    this.DisplayTextSuffix = ignoredWordsFile.ToRelativePath(basePath);
+                else
+                {
+                    if(ignoredWordsFile.Length < 51)
+                        this.DisplayTextSuffix = ignoredWordsFile;
+                    else
+                        this.DisplayTextSuffix = "..." + ignoredWordsFile.Substring(ignoredWordsFile.Length - 47);
+                }
+            }
 
             if(String.IsNullOrWhiteSpace(this.DisplayText))
             {
@@ -86,7 +99,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 
             try
             {
-                var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                var words = new HashSet<string>(CommonUtilities.LoadUserDictionary(ignoredWordsFile, false, false),
                     StringComparer.OrdinalIgnoreCase);
 
                 if(!words.Contains(wordToIgnore))
@@ -102,7 +115,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                     }
 #pragma warning restore VSTHRD010
 
-                    Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                    CommonUtilities.SaveCustomDictionary(ignoredWordsFile, false, false, words);
                 }
             }
             catch(Exception ex)

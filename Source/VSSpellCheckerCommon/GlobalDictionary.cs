@@ -194,7 +194,7 @@ namespace VisualStudio.SpellChecker.Common
 
             lock(dictionaryWords)
             {
-                var currentDictionary = new HashSet<string>(Utility.LoadUserDictionary(dictionaryWordsFile, false,
+                var currentDictionary = new HashSet<string>(CommonUtilities.LoadUserDictionary(dictionaryWordsFile, false,
                     false), StringComparer.OrdinalIgnoreCase);
 
                 dictionaryWords.Add(word);

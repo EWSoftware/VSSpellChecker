@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/16/2022
+// Updated : 03/25/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -45,7 +45,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
@@ -63,7 +64,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         private readonly List<string> projectNames;
         private CancellationTokenSource cancellationTokenSource;
         private readonly IProgress<string> spellCheckProgress;
-        private WordSplitter wordSplitter;
+        private TaggerWordSplitter wordSplitter;
         private bool unescapeApostrophes;
 
         #endregion
@@ -595,12 +596,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// </summary>
         /// <param name="maxIssues">The maximum number of issues to report.</param>
         /// <param name="spellCheckFiles">The files to spell check.</param>
-        /// <param name="codeAnalysisFiles">The code analysis dictionaries from each project that may be used in
-        /// the configurations used for spell checking.</param>
+        /// <param name="additionalConfigFiles">The additional global configuration, editor configuration, and
+        /// code analysis dictionaries from each project that may be used in the configurations used for spell
+        /// checking.</param>
         /// <param name="openDocuments">A list of documents open in the IDE.  For these files, we'll get the
         /// content from the editor if possible rather than the file on disk.</param>
         private IEnumerable<FileMisspelling> SpellCheckFiles(int maxIssues,
-          IEnumerable<SpellCheckFileInfo> spellCheckFiles, Dictionary<string, List<string>> codeAnalysisFiles,
+          IEnumerable<SpellCheckFileInfo> spellCheckFiles, Dictionary<string, (List<string> GlobalConfigs,
+          List<string> EditorConfigs, List<string> CodeAnalysisDictionaries)> additionalConfigFiles,
           HashSet<string> openDocuments)
         {
             BindingList<FileMisspelling> issues = new BindingList<FileMisspelling>();
@@ -612,7 +615,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             try
             {
                 if(wordSplitter == null)
-                    wordSplitter = new WordSplitter { DetectWordsSpanningStringLiterals = true };
+                    wordSplitter = new TaggerWordSplitter { DetectWordsSpanningStringLiterals = true };
 
                 foreach(var file in spellCheckFiles)
                 {
@@ -620,10 +623,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     // Get the code analysis files for the related project.  These may be used to generate the
                     // spell checking configuration.
-                    if(!codeAnalysisFiles.TryGetValue(file.ProjectFile, out List<string> cadFiles))
-                        cadFiles = null;
+                    if(!additionalConfigFiles.TryGetValue(file.ProjectFile,
+                      out (List<string> GlobalConfigs, List<string> EditorConfigs,
+                      List<string> CodeAnalysisDictionaries) additionalConfigs))
+                    {
+                        additionalConfigs = (null, null, null);
+                    }
 
-                    wordSplitter.Configuration = file.GenerateConfiguration(cadFiles);
+                    wordSplitter.Configuration = file.GenerateConfiguration(additionalConfigs.GlobalConfigs,
+                        additionalConfigs.EditorConfigs, additionalConfigs.CodeAnalysisDictionaries);
 
                     if(wordSplitter.Configuration != null)
                     {
@@ -791,11 +799,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 textToSplit = span.Text;
 
                 // Always ignore URLs
-                rangeExclusions = WordSplitter.Url.Matches(textToSplit).Cast<Match>().ToList();
+                rangeExclusions = CommonUtilities.Url.Matches(textToSplit).Cast<Match>().ToList();
 
                 // Note the location of all XML elements if needed
                 if(wordSplitter.Configuration.IgnoreXmlElementsInText)
-                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).Cast<Match>());
+                    rangeExclusions.AddRange(CommonUtilities.XmlElement.Matches(textToSplit).Cast<Match>());
 
                 // Add exclusions from the configuration if any
                 foreach(var exclude in wordSplitter.Configuration.ExclusionExpressions)
@@ -815,7 +823,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var word in wordSplitter.GetWordsInText(textToSplit))
                 {
-                    actualWord = WordSplitter.ActualWord(textToSplit, word);
+                    actualWord = wordSplitter.ActualWord(textToSplit, word);
                     mnemonicPos = actualWord.IndexOf(wordSplitter.Mnemonic);
 
                     if(mnemonicPos == -1)
@@ -831,9 +839,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                       !rangeExclusions.Any(match => word.Start >= match.Index &&
                       word.Start <= match.Index + match.Length - 1)))
                     {
-                        // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                         // If the word is being ignored, skip it.  This goes for doubled words as well.
-                        if(dictionary.ShouldIgnoreWord(textToCheck))
+                        if(dictionary.ShouldIgnoreWord(textToCheck) ||
+                          wordSplitter.Configuration.ShouldIgnoreWord(textToCheck))
                         {
                             lastWord = word;
                             continue;
@@ -897,8 +905,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                                 textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
-                                // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                                 if(dictionary.ShouldIgnoreWord(textToCheck) ||
+                                  wordSplitter.Configuration.ShouldIgnoreWord(textToCheck) ||
                                   dictionary.IsSpelledCorrectly(textToCheck))
                                 {
                                     continue;
@@ -953,7 +961,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 return;
             }
 
-            Dictionary<string, List<string>> codeAnalysisFiles = new Dictionary<string, List<string>>(
+            Dictionary<string, (List<string> GlobalConfigs, List<string> EditorConfigs,
+                List<string> CodeAnalysisDictionaries)> additionalConfigFiles = new Dictionary<string,
+                (List<string> GlobalConfigs, List<string> EditorConfigs, List<string> CodeAnalysisDictionaries)>(
                 StringComparer.OrdinalIgnoreCase);
             List<SpellCheckFileInfo> spellCheckFiles;
 
@@ -1003,25 +1013,36 @@ namespace VisualStudio.SpellChecker.ToolWindows
             }
 
             // Track the code analysis dictionaries used by each project and exclude them from being spell checked
-            foreach(var cad in SpellCheckFileInfo.ProjectCodeAnalysisDictionaries(null).GroupBy(f => f.ProjectFile))
+            foreach(var addFiles in SpellCheckFileInfo.ProjectAdditionalConfigurationFiles(null).GroupBy(f => f.ProjectFile))
             {
-                List<string> files = new List<string>();
+                List<string> additionalGlobalConfigs = new List<string>(),
+                    additionalEditorConfigs = new List<string>(),
+                    cadFiles = new List<string>();
 
                 // Typically there is only one but multiple files are supported
-                foreach(var c in cad)
+                foreach(var c in addFiles)
                 {
                     if(File.Exists(c.CanonicalName))
-                        files.Add(c.CanonicalName);
+                    {
+                        if(c.IsGlobalConfigItem)
+                            additionalGlobalConfigs.Add(c.CanonicalName);
+                        else
+                        {
+                            if(c.IsEditorConfigItem)
+                                additionalEditorConfigs.Add(c.CanonicalName);
+                            else
+                                cadFiles.Add(c.CanonicalName);
+                        }
+                    }
                 }
 
-                if(files.Count != 0)
-                    codeAnalysisFiles.Add(cad.Key, files);
+                additionalConfigFiles.Add(addFiles.Key, (additionalGlobalConfigs, additionalEditorConfigs, cadFiles));
             }
 
-            if(codeAnalysisFiles.Count != 0)
+            if(additionalConfigFiles.Count != 0)
             {
-                var excludeFiles = new HashSet<string>(codeAnalysisFiles.Values.SelectMany(c => c),
-                    StringComparer.OrdinalIgnoreCase);
+                var excludeFiles = new HashSet<string>(additionalConfigFiles.Values.SelectMany(
+                    c => c.CodeAnalysisDictionaries), StringComparer.OrdinalIgnoreCase);
 
                 spellCheckFiles = spellCheckFiles.Where(s => !excludeFiles.Contains(s.CanonicalName)).ToList();
             }
@@ -1031,7 +1052,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 cancellationTokenSource = new CancellationTokenSource();
 
                 var issues = await System.Threading.Tasks.Task.Run(() => this.SpellCheckFiles(maxIssues,
-                    spellCheckFiles, codeAnalysisFiles, openDocuments), cancellationTokenSource.Token).ConfigureAwait(true);
+                    spellCheckFiles, additionalConfigFiles, openDocuments), cancellationTokenSource.Token).ConfigureAwait(true);
 
                 dgIssues.ItemsSource = issues;
 
@@ -1098,75 +1119,30 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 // the file containing the current issue).
                 miEditConfig.Items.Clear();
 
-                foreach(var cf in issue.FileInfo.ConfigurationFiles)
+                item = new MenuItem
                 {
-                    switch(cf.ConfigType)
+                    Header = "Global Configuration File",
+                    Tag = SpellCheckerConfiguration.GlobalConfigurationFilename
+                };
+
+                item.Click += openConfigFile_Click;
+                miEditConfig.Items.Add(item);
+
+                if(issue.FileInfo.ConfigurationFiles != null)
+                {
+                    string solutionRoot = Path.GetDirectoryName(issue.FileInfo.SolutionFile);
+
+                    foreach(var cf in issue.FileInfo.ConfigurationFiles.OrderBy(f => f))
                     {
-                        case ConfigurationType.Global:
-                            item = new MenuItem
-                            {
-                                Header = "Global Configuration File",
-                                Tag = SpellingConfigurationFile.GlobalConfigurationFilename
-                            };
-                            break;
+                        item = new MenuItem
+                        {
+                            Header = cf.ToRelativePath(solutionRoot),
+                            Tag = cf
+                        };
 
-                        case ConfigurationType.Solution:
-                            item = new MenuItem
-                            {
-                                Header = "Solution Configuration File",
-                                Tag = cf.ConfigFile
-                            };
-                            break;
-
-                        case ConfigurationType.Project:
-                            item = new MenuItem
-                            {
-                                Header = issue.ProjectName + " Configuration File",
-                                Tag = cf.ConfigFile
-                            };
-                            break;
-
-                        case ConfigurationType.Folder:
-                            item = new MenuItem
-                            {
-                                Tag = cf.ConfigFile,
-                                Header = Path.GetFileName(Path.GetDirectoryName(issue.CanonicalName))
-                            };
-
-                            try
-                            {
-                                // Try to get the directory name with proper casing.  There doesn't seem to be an
-                                // easier way.
-                                string path = Path.GetDirectoryName(Path.GetDirectoryName(issue.CanonicalName));
-
-                                if(path != null)
-                                {
-                                    DirectoryInfo dirInfo = new DirectoryInfo(path);
-                                    DirectoryInfo[] subDirs = dirInfo.GetDirectories((string)item.Header);
-
-                                    if(subDirs.Length > 0)
-                                        item.Header = subDirs[0].Name;
-                                }
-                            }
-                            catch
-                            {
-                                // Ignore errors, just show the name we've got
-                            }
-
-                            item.Header += " Folder Configuration File";
-                            break;
-
-                        default:
-                            item = new MenuItem
-                            {
-                                Header = issue.Filename + " Configuration File",
-                                Tag = cf.ConfigFile
-                            };
-                            break;
+                        item.Click += openConfigFile_Click;
+                        miEditConfig.Items.Add(item);
                     }
-
-                    item.Click += openConfigFile_Click;
-                    miEditConfig.Items.Add(item);
                 }
             }
         }
@@ -1598,7 +1574,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     try
                     {
-                        var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                        var words = new HashSet<string>(CommonUtilities.LoadUserDictionary(ignoredWordsFile, false, false),
                             StringComparer.OrdinalIgnoreCase);
 
                         if(!words.Contains(wordToIgnore))
@@ -1614,7 +1590,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             }
 #pragma warning restore VSTHRD010
 
-                            Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                            CommonUtilities.SaveCustomDictionary(ignoredWordsFile, false, false, words);
                         }
                     }
                     catch(Exception ex)
@@ -1870,9 +1846,18 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             if(sender is MenuItem item && item.Tag != null && File.Exists((string)item.Tag))
             {
-                var dte = Utility.GetServiceFromPackage<DTE, SDTE>(true);
+                if(Utility.GetServiceFromPackage<IVsUIShellOpenDocument, IVsUIShellOpenDocument>(false) is
+                  IVsUIShellOpenDocument shellOpenDocument)
+                {
+                    Guid logicalViewGuid = VSConstants.LOGVIEWID_Primary;
+                    var guid = new Guid(GuidList.guidSpellingConfigurationEditorFactoryString);
 
-                dte?.ItemOperations.OpenFile((string)item.Tag, EnvDTE.Constants.vsViewKindPrimary)?.Activate();
+                    shellOpenDocument.OpenDocumentViaProjectWithSpecific((string)item.Tag,
+                        (uint)__VSSPECIFICEDITORFLAGS.VSSPECIFICEDITOR_DoOpen, ref guid, null, ref logicalViewGuid,
+                        out _, out _, out _, out IVsWindowFrame ppWindowFrame);
+
+                    ppWindowFrame?.Show();
+                }
             }
         }
         #endregion

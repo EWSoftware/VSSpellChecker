@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IdentifierSplitter.cs
 // Author  : Eric Woodruff
-// Updated : 03/12/2023
+// Updated : 03/22/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that handles splitting identifiers up into individual words for spell checking
@@ -79,10 +79,13 @@ namespace VisualStudio.SpellChecker.Common
                 {
                     // Check for mixed/camel case words.  Split those up into individual spans.
                     string word = identifier.Substring(i, end - i);
+                    bool isAllUppercase = word.All(c => Char.IsUpper(c));
 
-                    // TODO: Add a configuration option to skip spell checking of all uppercase identifiers?
-                    if(word.All(c => Char.IsUpper(c)) || !word.Skip(1).Any(c => Char.IsUpper(c)))
-                        yield return this.CreateSpan(i, end);
+                    if(isAllUppercase || !word.Skip(1).Any(c => Char.IsUpper(c)))
+                    {
+                        if(!isAllUppercase || !this.Configuration.CodeAnalyzerOptions.IgnoreIdentifierIfAllUppercase)
+                            yield return this.CreateSpan(i, end);
+                    }
                     else
                     {
                         // An exception is if it appears in the code analysis dictionary options.  These may

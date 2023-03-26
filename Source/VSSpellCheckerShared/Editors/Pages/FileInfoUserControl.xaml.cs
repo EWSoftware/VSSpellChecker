@@ -76,12 +76,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             this.LoadConfiguration(configuration);
         }
 
-        /// <inheritdoc />
-        public bool AppliesTo(ConfigurationType configurationType)
-        {
-            return true;
-        }
-
 #pragma warning disable 67
         /// <inheritdoc />
         /// <remarks>This event is not used by this page</remarks>

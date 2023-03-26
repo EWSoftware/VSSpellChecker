@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeAnalyzerOptions.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/26/2023
+// Updated : 03/22/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the code analyzer configuration settings
@@ -41,6 +41,21 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         public bool IgnoreIdentifierIfInternal { get; set; }
 
         /// <summary>
+        /// This is used to get or set whether or not to ignore identifiers in all uppercase
+        /// </summary>
+        /// <value>The default is false to include them</value>
+        [DefaultValue(false), EditorConfigProperty("vsspell_code_analyzer_ignore_identifier_if_all_uppercase")]
+        public bool IgnoreIdentifierIfAllUppercase { get; set; }
+
+        /// <summary>
+        /// This is used to get or set whether or not to ignore identifiers within member bodies such as
+        /// variable declarations local to a method.
+        /// </summary>
+        /// <value>The default is false to include them</value>
+        [DefaultValue(false), EditorConfigProperty("vsspell_code_analyzer_ignore_identifiers_within_member_bodies")]
+        public bool IgnoreIdentifiersWithinMemberBodies { get; set; }
+
+        /// <summary>
         /// This is used to get or set whether or not to ignore type parameters (e.g. TKey, TValue)
         /// </summary>
         /// <value>The default is false to include them.  If the first two letters are capitalized, the
@@ -54,14 +69,6 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// <value>The default is false to include them</value>
         [DefaultValue(false), EditorConfigProperty("vsspell_code_analyzer_ignore_if_compiler_generated")]
         public bool IgnoreIfCompilerGenerated { get; set; }
-
-        /// <summary>
-        /// This is used to get or set whether or not to ignore identifiers within member bodies such as
-        /// variable declarations local to a method.
-        /// </summary>
-        /// <value>The default is false to include them</value>
-        [DefaultValue(false), EditorConfigProperty("vsspell_code_analyzer_ignore_identifiers_within_member_bodies")]
-        public bool IgnoreIdentifiersWithinMemberBodies { get; set; }
 
         /// <summary>
         /// This is used to get or set whether or not to ignore XML documentation comments

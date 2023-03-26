@@ -145,9 +145,9 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<CommandName>cmdidAddSpellCheckerConfigForItem</CommandName>
-					<ButtonText>Add Spell Checker Configuration File</ButtonText>
-					<MenuText>Add Spell Checker Configuration File</MenuText>
-					<ToolTipText>Add a spell checker configuration file</ToolTipText>
+					<ButtonText>Spell Checker Configuration</ButtonText>
+					<MenuText>Spell Checker Configuration</MenuText>
+					<ToolTipText>Add or edit a spell checker configuration</ToolTipText>
 				</Strings>
 			</Button>
 
@@ -155,9 +155,9 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<CommandName>cmdidAddSpellCheckerConfigForSelItem</CommandName>
-					<ButtonText>Spell Checker Configuration File for Selected Item</ButtonText>
-					<MenuText>Spell Checker Configuration File for Selected Item</MenuText>
-					<ToolTipText>Add spell checker configuration file for the selected item</ToolTipText>
+					<ButtonText>Spell Checker Configuration for Selected Item</ButtonText>
+					<MenuText>Spell Checker Configuration for Selected Item</MenuText>
+					<ToolTipText>Add a spell checker configuration for the selected item</ToolTipText>
 				</Strings>
 			</Button>
 
@@ -165,9 +165,9 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<CommandName>cmdidAddSpellCheckerConfigCtx</CommandName>
-					<ButtonText>Spell Checker Configuration File</ButtonText>
-					<MenuText>Spell Checker Configuration File</MenuText>
-					<ToolTipText>Add a spell checker configuration file</ToolTipText>
+					<ButtonText>Spell Checker Configuration</ButtonText>
+					<MenuText>Spell Checker Configuration</MenuText>
+					<ToolTipText>Add a spell checker configuration</ToolTipText>
 				</Strings>
 			</Button>
 		</Buttons>

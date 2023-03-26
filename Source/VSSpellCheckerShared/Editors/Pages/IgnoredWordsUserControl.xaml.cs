@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/13/2021
-// Note    : Copyright 2014-2021, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored words spell checker configuration settings
 //
@@ -31,6 +31,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Configuration;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
@@ -131,12 +132,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             configuration.StoreValues(PropertyNames.IgnoredWords, PropertyNames.IgnoredWordsItem, newList);
             configuration.StoreProperty(PropertyNames.IgnoredWordsFile, txtIgnoredWordsFile.Text.Trim());
-        }
-
-        /// <inheritdoc />
-        public bool AppliesTo(ConfigurationType configurationType)
-        {
-            return true;
         }
 
         /// <inheritdoc />
@@ -255,7 +250,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             {
                 try
                 {
-                    var uniqueWords = new HashSet<string>(Utility.LoadUserDictionary(dlg.FileName, false, false),
+                    var uniqueWords = new HashSet<string>(CommonUtilities.LoadUserDictionary(dlg.FileName, false, false),
                         StringComparer.OrdinalIgnoreCase);
 
                     if(uniqueWords.Count == 0)
@@ -339,12 +334,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                         if(result == MessageBoxResult.No)
                         {
-                            uniqueWords.UnionWith(Utility.LoadUserDictionary(dlg.FileName, false, true));
+                            uniqueWords.UnionWith(CommonUtilities.LoadUserDictionary(dlg.FileName, false, true));
                             replaceWords = false;
                         }
                     }
 
-                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, false, uniqueWords);
+                    CommonUtilities.SaveCustomDictionary(dlg.FileName, replaceWords, false, uniqueWords);
                 }
                 catch(Exception ex)
                 {
@@ -425,8 +420,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                   out _, out _, out _, out IVsWindowFrame ppWindowFrame) == VSConstants.S_OK)
                 {
                     // On occasion, the call above is successful but we get a null frame for some reason
-                    if(ppWindowFrame != null)
-                        ppWindowFrame.Show();
+                    ppWindowFrame?.Show();
                 }
             }
             catch(Exception ex)

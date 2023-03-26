@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/21/2021
-// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
+// Updated : 03/26/2023
+// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that presents the spell checking options to the user
 //
@@ -28,7 +28,9 @@ using System.Windows.Automation.Provider;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using VisualStudio.SpellChecker.Configuration;
+
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.ToolWindows
@@ -140,7 +142,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// ignored words files are in use.
         /// </summary>
         /// <param name="ignoredWordsFiles">An enumerable list of ignored words files or null</param>
-        public void SetAddIgnoredContextMenuFiles(IEnumerable<(ConfigurationType ConfigType, string Filename)> ignoredWordsFiles)
+        public void SetAddIgnoredContextMenuFiles(IEnumerable<string> ignoredWordsFiles)
         {
             ctxAddIgnored.Items.Clear();
             btnAddIgnored.Tag = null;
@@ -148,16 +150,36 @@ namespace VisualStudio.SpellChecker.ToolWindows
             if(ignoredWordsFiles != null)
             {
                 if(ignoredWordsFiles.Count() == 1)
-                    btnAddIgnored.Tag = ignoredWordsFiles.First().Filename;
+                    btnAddIgnored.Tag = ignoredWordsFiles.First();
                 else
                 {
                     foreach(var file in ignoredWordsFiles)
+                    {
+                        string displayText;
+
+                        if(file.Equals(SpellCheckerConfiguration.GlobalConfigurationFilename, StringComparison.OrdinalIgnoreCase))
+                            displayText = "Global";
+                        else
+                        {
+                            string basePath = Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName);
+
+                            if(basePath != null && file.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
+                                displayText = file.ToRelativePath(basePath);
+                            else
+                            {
+                                if(file.Length < 51)
+                                    displayText = file;
+                                else
+                                    displayText = "..." + file.Substring(file.Length - 47);
+                            }
+                        }
+
                         ctxAddIgnored.Items.Add(new MenuItem()
                         {
-                            Header = (file.ConfigType == ConfigurationType.Global) ? "Global" :
-                                $"{file.ConfigType} ({Path.GetFileName(file.Filename)})",
-                            Tag = file.Filename
+                            Header = displayText,
+                            Tag = file
                         });
+                    }
                 }
             }
         }

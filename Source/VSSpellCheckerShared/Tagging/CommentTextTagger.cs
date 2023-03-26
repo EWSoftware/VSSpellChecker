@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 11/23/2022
-// Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for source code files of any type
 //
@@ -102,7 +102,7 @@ namespace VisualStudio.SpellChecker.Tagging
                 string filename = buffer.GetFilename();
 #pragma warning restore VSTHRD010
 
-                if(buffer.ContentType.IsOfType("csharp") || (config.CSharpOptions.ApplyToAllCStyleLanguages &&
+                if(buffer.ContentType.IsOfType("csharp") || (config.CodeAnalyzerOptions.ApplyToAllCStyleLanguages &&
                   ClassifierFactory.IsCStyleCode(filename)))
                 {
                     // The C# options are passed to the tagger for local use since it tracks the state of the
@@ -111,13 +111,13 @@ namespace VisualStudio.SpellChecker.Tagging
                     return new CSharpCommentTextTagger(buffer)
                     {
                         SupportsOldStyleXmlDocComments = ClassifierFactory.SupportsOldStyleXmlDocComments(filename),
-                        IgnoreXmlDocComments = config.CSharpOptions.IgnoreXmlDocComments,
-                        IgnoreDelimitedComments = config.CSharpOptions.IgnoreDelimitedComments,
-                        IgnoreStandardSingleLineComments = config.CSharpOptions.IgnoreStandardSingleLineComments,
-                        IgnoreQuadrupleSlashComments = config.CSharpOptions.IgnoreQuadrupleSlashComments,
-                        IgnoreNormalStrings = config.CSharpOptions.IgnoreNormalStrings,
-                        IgnoreVerbatimStrings = config.CSharpOptions.IgnoreVerbatimStrings,
-                        IgnoreInterpolatedStrings = config.CSharpOptions.IgnoreInterpolatedStrings,
+                        IgnoreXmlDocComments = config.CodeAnalyzerOptions.IgnoreXmlDocComments,
+                        IgnoreDelimitedComments = config.CodeAnalyzerOptions.IgnoreDelimitedComments,
+                        IgnoreStandardSingleLineComments = config.CodeAnalyzerOptions.IgnoreStandardSingleLineComments,
+                        IgnoreQuadrupleSlashComments = config.CodeAnalyzerOptions.IgnoreQuadrupleSlashComments,
+                        IgnoreNormalStrings = config.CodeAnalyzerOptions.IgnoreNormalStrings,
+                        IgnoreVerbatimStrings = config.CodeAnalyzerOptions.IgnoreVerbatimStrings,
+                        IgnoreInterpolatedStrings = config.CodeAnalyzerOptions.IgnoreInterpolatedStrings,
                         IgnoredXmlElements = config.IgnoredXmlElements,
                         SpellCheckedAttributes = config.SpellCheckedXmlAttributes
 

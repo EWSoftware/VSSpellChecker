@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MisspellingTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 09/02/2018
-// Note    : Copyright 2010-2018, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2018, Eric Woodruff, All rights reserved
+// Updated : 03/21/2023
+// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that represents a misspelling tag
 //
@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.Tagging

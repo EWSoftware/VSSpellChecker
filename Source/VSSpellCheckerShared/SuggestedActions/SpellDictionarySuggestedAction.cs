@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellDictionarySuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/20/2023
+// Updated : 03/21/2023
 // Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide suggested actions for ignoring words or adding new words to the
@@ -27,6 +27,8 @@ using System.Globalization;
 using System.Threading;
 
 using Microsoft.VisualStudio.Text;
+
+using VisualStudio.SpellChecker.Common;
 
 namespace VisualStudio.SpellChecker.SuggestedActions
 {

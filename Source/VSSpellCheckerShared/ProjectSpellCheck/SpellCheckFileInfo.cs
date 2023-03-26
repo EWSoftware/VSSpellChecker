@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/04/2022
-// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
+// Updated : 03/25/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to hold information about a file that will be spell checked
 //
@@ -30,7 +30,7 @@ using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {
@@ -68,29 +68,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         public string CanonicalName { get; private set; }
 
         /// <summary>
-        /// This read-only property returns the potential name of the solution configuration file
+        /// This read-only property returns true if this item represents a .globalconfig file item, false if not
         /// </summary>
-        public string SolutionConfigurationFile { get; private set; }
+        public bool IsGlobalConfigItem { get; private set; }
 
         /// <summary>
-        /// This read-only property returns the potential name of the project configuration file
+        /// This read-only property returns true if this item represents an .editorconfig file item, false if not
         /// </summary>
-        public string ProjectConfigurationFile { get; private set; }
+        public bool IsEditorConfigItem { get; private set; }
 
         /// <summary>
-        /// This read-only property returns the potential name of the related configuration file for the spell
-        /// checked file.
-        /// </summary>
-        public string RelatedConfigurationFile { get; private set; }
-
-        /// <summary>
-        /// This read-only property returns the name of a dependency configuration file if there is one or null
-        /// if there is not.
-        /// </summary>
-        public string DependencyConfigurationFile { get; private set; }
-
-        /// <summary>
-        /// This read-only property returns true if this item represents a code analysis dictionary, false if not
+        /// This read-only property returns true if this item represents a code analysis dictionary item, false if not
         /// </summary>
         public bool IsCodeAnalysisDictionary { get; private set; }
 
@@ -118,16 +106,15 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         }
 
         /// <summary>
-        /// This read-only property returns any folder configuration files that should be used
+        /// This read-only property returns the configuration files used to load the spell checker settings
         /// </summary>
-        /// <value>The configuration files are in order from parent to child folders</value>
-        public IEnumerable<string> FolderConfigurationFiles { get; private set; }
+        public IEnumerable<string> ConfigurationFiles { get; private set; }
 
         /// <summary>
         /// This read-only property returns an enumerable list of ignored words files that were loaded by the
         /// configuration.
         /// </summary>
-        public IEnumerable<(ConfigurationType ConfigType, string Filename)> IgnoredWordsFiles { get; private set; }
+        public IEnumerable<string> IgnoredWordsFiles { get; private set; }
 
         #endregion
 
@@ -150,11 +137,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         }
 
         /// <summary>
-        /// This is used to get the code analysis dictionaries from the named project
+        /// This is used to get the additional global configuration, editor configuration, and code analysis
+        /// dictionaries from the named project.
         /// </summary>
-        /// <param name="projectName">The project from which to get code analysis dictionaries</param>
-        /// <returns>An enumerable list of the code analysis dictionary files if any</returns>
-        public static IEnumerable<SpellCheckFileInfo> ProjectCodeAnalysisDictionaries(string projectName)
+        /// <param name="projectName">The project from which to get the files</param>
+        /// <returns>An enumerable list of the additional global configuration, editor configuration, and code
+        /// analysis dictionary files if any.</returns>
+        public static IEnumerable<SpellCheckFileInfo> ProjectAdditionalConfigurationFiles(string projectName)
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -183,7 +172,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            return projectFiles.Where(f => f.IsCodeAnalysisDictionary);
+            return projectFiles.Where(f => f.IsGlobalConfigItem || f.IsEditorConfigItem || f.IsCodeAnalysisDictionary);
         }
 
         /// <summary>
@@ -204,116 +193,26 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                 if(solution != null && solution.GetSolutionInfo(out _, out string solutionFile, out _) == VSConstants.S_OK)
                 {
-                    string solutionConfigFile = solutionFile + ".vsspell";
-
-                    // Allow for solution configuration files to be named ".vsspell"
-                    if(!File.Exists(solutionConfigFile))
-                        solutionConfigFile = Path.Combine(Path.GetDirectoryName(solutionFile), ".vsspell");
-
                     // Use the IVsHierarchy interface as it is reportedly significantly faster than using the
                     // automation interfaces for very large projects.
                     var hierarchy = (IVsHierarchy)solution;
 
-                    if(projectName != null)
+                    if(projectName != null && solution.GetProjectOfUniqueName(projectName,
+                      out hierarchy) != VSConstants.S_OK)
                     {
-                        // See if there is a solution configuration.  We need to look for it separately as
-                        // we won't see it when getting the files for a single project.
-                        var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(false);
-
-                        if(dte2 != null)
-                        {
-                            var projectItem = dte2.Solution.FindProjectItemForFile(solutionConfigFile);
-
-                            if(projectItem != null)
-                                projectFiles.Add(new SpellCheckFileInfo
-                                {
-                                    ProjectFile = "Solution Items",
-                                    Filename = Path.GetFileName(solutionConfigFile),
-                                    CanonicalName = solutionConfigFile
-                                });
-                        }
-
-                        if(solution.GetProjectOfUniqueName(projectName, out hierarchy) != VSConstants.S_OK)
-                            hierarchy = null;
+                        hierarchy = null;
                     }
 
                     if(hierarchy != null)
                     {
                         ProcessHierarchyNodeRecursively(hierarchy, VSConstants.VSITEMID_ROOT, projectFiles);
 
-                        // Remove spell checker configuration files
-                        var configFiles = projectFiles.Where(p => p.Filename.EndsWith(".vsspell",
-                            StringComparison.OrdinalIgnoreCase)).ToList();
-                        
-                        projectFiles = projectFiles.Except(configFiles).OrderBy(
+                        projectFiles = projectFiles.OrderBy(
                             p => Path.GetFileName(p.ProjectFile)).ThenBy(p => p.Filename).ToList();
 
-                        // Determine folder configuration files
-                        var configNames = new HashSet<string>(configFiles.Select(p => p.CanonicalName),
-                            StringComparer.OrdinalIgnoreCase);
-                        List<(string ConfigPath, string ConfigFile)> folderConfigFiles = configNames.Where(f =>
-                        {
-                            int pos = f.LastIndexOf('\\');
-
-                            if(pos > 0)
-                            {
-                                // If the subfolder name preceding the filename matches the filename without the
-                                // .vsspell extension, it's a folder configuration file.
-                                int subFolderPos = f.LastIndexOf('\\', pos - 1);
-                                return subFolderPos != -1 && String.Compare(f, subFolderPos, f, pos,
-                                    pos - subFolderPos, StringComparison.OrdinalIgnoreCase) == 0 &&
-                                    f.Length - 8 == pos + (pos - subFolderPos);
-                            }
-
-                            return false;
-
-                        }).Select(f => (f.Substring(0, f.LastIndexOf('\\') + 1), f)).OrderBy(f => f.Item1).ToList();
-
-                        // Set the solution and configuration file info for each project file
+                        // Set the solution file for each project file
                         foreach(var file in projectFiles)
-                        {
                             file.SolutionFile = solutionFile;
-                            file.SolutionConfigurationFile = solutionConfigFile;
-                            file.ProjectConfigurationFile = file.ProjectFile + ".vsspell";
-                            file.RelatedConfigurationFile = file.CanonicalName + ".vsspell";
-
-                            var folderConfigs = new List<string>();
-
-                            file.FolderConfigurationFiles = folderConfigs;
-
-                            // Dependency configurations are a bit of a problem as we don't know for sure if
-                            // this is the dependency of another here.  We'll assume that if there's a
-                            // configuration for a file that starts with its name but not for this one, it's
-                            // the parent's configuration file and use it.  Should be true for most cases.
-                            int idx = file.CanonicalName.LastIndexOf('\\');
-
-                            if(idx != -1)
-                            {
-                                // Look for the first period, not the last, as we want to look for parent
-                                // filenames (i.e. Form.cs for Form.Designer.cs).  Add one to the index as
-                                // we don't want to match one for another file such as Form2.cs.
-                                int extIdx = file.CanonicalName.IndexOf('.', idx) + 1;
-
-                                // Ignore it if not found or the filename starts with a period like .editorconfig
-                                if(extIdx > idx + 2 && extIdx < file.CanonicalName.Length)
-                                {
-                                    file.DependencyConfigurationFile = configNames.FirstOrDefault(n =>
-                                        String.Compare(n, 0, file.CanonicalName, 0, extIdx,
-                                            StringComparison.OrdinalIgnoreCase) == 0 &&
-                                        !n.StartsWith(solutionFile, StringComparison.OrdinalIgnoreCase) &&
-                                        !n.StartsWith(file.ProjectFile, StringComparison.OrdinalIgnoreCase) &&
-                                        !n.StartsWith(file.CanonicalName, StringComparison.OrdinalIgnoreCase));
-                                }
-                            }
-
-                            // Add any folder-specific configuration files that apply
-                            if(folderConfigFiles.Count != 0)
-                            {
-                                folderConfigs.AddRange(folderConfigFiles.Where(f =>
-                                    file.CanonicalName.StartsWith(f.ConfigPath,
-                                    StringComparison.OrdinalIgnoreCase)).Select(f => f.ConfigFile));
-                            }
-                        }
                     }
                 }
             }
@@ -609,6 +508,11 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     {
                         result = hierarchy.GetProperty(itemId, (int)__VSHPROPID4.VSHPROPID_BuildAction, out value);
 
+
+                        bool isGlobalConfigItem = (result == VSConstants.S_OK && value != null &&
+                            ((string)value).Equals("GlobalAnalyzerConfigFiles", StringComparison.OrdinalIgnoreCase));
+                        bool isEditorConfigItem = (result == VSConstants.S_OK && value != null &&
+                            ((string)value).Equals("EditorConfgFiles ", StringComparison.OrdinalIgnoreCase));
                         bool isCodeAnalysisDictionary = (result == VSConstants.S_OK && value != null &&
                             ((string)value).Equals("CodeAnalysisDictionary", StringComparison.OrdinalIgnoreCase));
 
@@ -617,6 +521,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             ProjectFile = projectName,
                             Filename = name,
                             CanonicalName = canonicalName,
+                            IsGlobalConfigItem = isGlobalConfigItem,
+                            IsEditorConfigItem = isEditorConfigItem,
                             IsCodeAnalysisDictionary = isCodeAnalysisDictionary
                         };
                     }
@@ -627,76 +533,62 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         }
 
         /// <summary>
-        /// This read-only property returns an enumerable list of the configuration files that will be loaded to
-        /// create the configuration used to spell check the file.
-        /// </summary>
-        /// <returns>An enumerable list of tuples containing the configuration file type and the configuration
-        /// filename.</returns>
-        public IEnumerable<(ConfigurationType ConfigType, string ConfigFile)> ConfigurationFiles
-        {
-            get
-            {
-                // Start with the global configuration and work down
-                yield return (ConfigurationType.Global, SpellingConfigurationFile.GlobalConfigurationFilename);
-
-                if(this.SolutionConfigurationFile != null && File.Exists(this.SolutionConfigurationFile))
-                    yield return (ConfigurationType.Solution, this.SolutionConfigurationFile);
-
-                if(this.ProjectConfigurationFile != null && File.Exists(this.ProjectConfigurationFile))
-                    yield return (ConfigurationType.Project, this.ProjectConfigurationFile);
-
-                foreach(string cf in this.FolderConfigurationFiles.Where(c => File.Exists(c)))
-                    yield return (ConfigurationType.Folder, cf);
-
-                if(this.DependencyConfigurationFile != null && File.Exists(this.DependencyConfigurationFile))
-                    yield return (ConfigurationType.File, this.DependencyConfigurationFile);
-
-                if(this.RelatedConfigurationFile != null && File.Exists(this.RelatedConfigurationFile))
-                    yield return (ConfigurationType.File, this.RelatedConfigurationFile);
-            }
-        }
-
-        /// <summary>
         /// This is used to generate the configuration for the instance
         /// </summary>
+        /// <param name="additionalGlobalConfigFiles">An optional enumerable list of additional global
+        /// configuration files.</param>
+        /// <param name="additionalEditorConfigFiles">An optional enumerable list of additional editor
+        /// configuration files.</param>
+        /// <param name="codeAnalysisFiles">An optional enumerable list of code analysis dictionaries.</param>
         /// <returns>The configuration to use or null if the file should not be spell checked (disabled or not a
         /// type of file that can be spell checked such as a binary file).</returns>
-        public SpellCheckerConfiguration GenerateConfiguration(IEnumerable<string> codeAnalysisFiles)
+        public SpellCheckerConfiguration GenerateConfiguration(IEnumerable<string> additionalGlobalConfigFiles,
+          IEnumerable<string> additionalEditorConfigFiles, IEnumerable<string> codeAnalysisFiles)
         {
-            var config = new SpellCheckerConfiguration();
+            SpellCheckerConfiguration config = null;
 
             try
             {
-                foreach(var c in this.ConfigurationFiles)
-                    config.Load(c.ConfigFile);
+                config = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(this.CanonicalName,
+                    additionalGlobalConfigFiles, additionalEditorConfigFiles);
 
-                // Merge any code analysis dictionary settings
-                if(codeAnalysisFiles != null)
-                    foreach(string cad in codeAnalysisFiles)
-                        if(File.Exists(cad))
-                            config.ImportCodeAnalysisDictionary(cad);
-
-                // If wanted, set the language based on the resource filename
-                if(config.DetermineResourceFileLanguageFromName &&
-                  Path.GetExtension(this.Filename).Equals(".resx", StringComparison.OrdinalIgnoreCase))
+                if(config.IncludeInProjectSpellCheck && !IsBinaryFile(this.CanonicalName))
                 {
-                    // Localized resource files are expected to have filenames in the format
-                    // BaseName.Language.resx (i.e. LocalizedForm.de-DE.resx).
-                    string ext = Path.GetExtension(Path.GetFileNameWithoutExtension(this.Filename));
-
-                    if(ext.Length > 1)
+                    // Merge any code analysis dictionary settings
+                    if(codeAnalysisFiles != null)
                     {
-                        ext = ext.Substring(1);
-
-                        if(SpellCheckerDictionary.AvailableDictionaries(
-                          config.AdditionalDictionaryFolders).TryGetValue(ext, out SpellCheckerDictionary match))
+                        foreach(string cad in codeAnalysisFiles)
                         {
-                            // Clear any existing dictionary languages and use just the one that matches the
-                            // file's language.
-                            config.DictionaryLanguages.Clear();
-                            config.DictionaryLanguages.Add(match.Culture);
+                            if(File.Exists(cad))
+                                config.ImportCodeAnalysisDictionary(cad);
                         }
                     }
+
+                    // If wanted, set the language based on the resource filename
+                    if(config.DetermineResourceFileLanguageFromName &&
+                      Path.GetExtension(this.Filename).Equals(".resx", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Localized resource files are expected to have filenames in the format
+                        // BaseName.Language.resx (i.e. LocalizedForm.de-DE.resx).
+                        string ext = Path.GetExtension(Path.GetFileNameWithoutExtension(this.Filename));
+
+                        if(ext.Length > 1)
+                        {
+                            ext = ext.Substring(1);
+
+                            if(SpellCheckerDictionary.AvailableDictionaries(
+                              config.AdditionalDictionaryFolders).TryGetValue(ext, out SpellCheckerDictionary match))
+                            {
+                                // Clear any existing dictionary languages and use just the one that matches the
+                                // file's language.
+                                config.DictionaryLanguages.Clear();
+                                config.DictionaryLanguages.Add(match.Culture);
+                            }
+                        }
+                    }
+
+                    this.ConfigurationFiles = config.LoadedConfigurationFiles;
+                    this.IgnoredWordsFiles = config.IgnoredWordsFiles;
                 }
             }
             catch(Exception ex)
@@ -705,13 +597,6 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            if(!config.IncludeInProjectSpellCheck || config.ShouldExcludeFile(this.CanonicalName) ||
-              IsBinaryFile(this.CanonicalName))
-            {
-                return null;
-            }
-
-            this.IgnoredWordsFiles = config.IgnoredWordsFiles;
             return config;
         }
 

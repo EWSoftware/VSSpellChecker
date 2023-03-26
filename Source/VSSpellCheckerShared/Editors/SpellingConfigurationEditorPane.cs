@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationEditorPane.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/07/2015
-// Note    : Copyright 2015, Eric Woodruff, All rights reserved
+// Updated : 03/25/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to host the spelling configuration file editor control
 //
@@ -29,6 +29,16 @@ namespace VisualStudio.SpellChecker.Editors
     public class SpellingConfigurationEditorPane : SimpleEditorPane<SpellingConfigurationEditorFactory,
       SpellingConfigurationEditorControl>
     {
+        #region Properties
+        //=====================================================================
+
+        /// <summary>
+        /// This is used to get or set the default file glob (section) to select when the file is opened
+        /// </summary>
+        public static string DefaultFileGlob { get; set; }
+        
+        #endregion
+
         #region Constructor
         //=====================================================================
 
@@ -47,7 +57,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// <inheritdoc />
         protected override string GetFileExtension()
         {
-            return ".vsspell";
+            return ".editorconfig";
         }
 
         /// <inheritdoc />
@@ -62,6 +72,7 @@ namespace VisualStudio.SpellChecker.Editors
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
 #pragma warning disable VSTHRD010
+            // TODO: Pass the default file glob to the load method then clear it
             this.UIControl.LoadConfiguration(fileName);
 #pragma warning restore VSTHRD010
         }
@@ -69,12 +80,13 @@ namespace VisualStudio.SpellChecker.Editors
         /// <inheritdoc />
         protected override void SaveFile(string fileName)
         {
+            /* TODO: Add this back once it's actually editing the .editorconfig files
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SetWaitCursor();
 
             if(this.IsDirty || !fileName.Equals(this.UIControl.Filename, StringComparison.OrdinalIgnoreCase))
-                this.UIControl.SaveConfiguration(fileName);
+                this.UIControl.SaveConfiguration(fileName);*/
         }
         #endregion
 

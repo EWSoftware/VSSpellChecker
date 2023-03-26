@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellingSuggestion.cs
 // Author  : Franz Alex Gaisie-Essilfie
-// Updated : 10/05/2018
+// Updated : 03/21/2023
 //
 // This file contains a class used to represent spelling suggestions from multiple dictionaries that can be used
 // to replace a misspelled word.
@@ -21,6 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+
+using VisualStudio.SpellChecker.Common;
 
 namespace VisualStudio.SpellChecker
 {

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 03/15/2023
+// Updated : 03/22/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -21,6 +21,7 @@
 //===============================================================================================================
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
@@ -28,15 +29,15 @@ using System.Windows.Controls;
 using System.Windows.Input;
 
 using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Outlining;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Definitions;
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using VisualStudio.SpellChecker.Tagging;
-using Microsoft.VisualStudio.Shell;
-using System.Collections.Generic;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -315,7 +316,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                     try
                     {
-                        var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                        var words = new HashSet<string>(CommonUtilities.LoadUserDictionary(ignoredWordsFile, false, false),
                             StringComparer.OrdinalIgnoreCase);
 
                         if(!words.Contains(wordToIgnore))
@@ -331,7 +332,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             }
 #pragma warning restore VSTHRD010
 
-                            Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                            CommonUtilities.SaveCustomDictionary(ignoredWordsFile, false, false, words);
                         }
                     }
                     catch(Exception ex)

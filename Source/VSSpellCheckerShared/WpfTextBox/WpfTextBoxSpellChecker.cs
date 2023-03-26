@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/19/2020
-// Note    : Copyright 2016-2020, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
 //
@@ -35,7 +35,8 @@ using System.Windows.Input;
 using TextSpan = Microsoft.VisualStudio.Text.Span;
 using Microsoft.VisualStudio.Threading;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
 
@@ -62,7 +63,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         private static bool isRegistered;
 
         private readonly TextBox textBox;
-        private readonly WordSplitter wordSplitter;
+        private readonly TaggerWordSplitter wordSplitter;
         private readonly SpellingErrorAdorner adorner;
         private Timer timer;
         private readonly List<FileMisspelling> misspelledWords;
@@ -87,7 +88,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
             lock(syncRoot)
             {
-                wordSplitter = new WordSplitter
+                wordSplitter = new TaggerWordSplitter
                 {
                     Configuration = configuration,
                     Classification = RangeClassification.PlainText
@@ -211,8 +212,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                     textBox.ContextMenu.Items.Remove(m);
             }
 
-            if(adorner != null)
-                adorner.Disconnect();
+            adorner?.Disconnect();
 
             if(timer != null)
             {
@@ -240,8 +240,8 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                     // Create the shared configuration and dictionary on first use
                     if(configuration == null)
                     {
-                        configuration = new SpellCheckerConfiguration();
-                        configuration.Load(SpellingConfigurationFile.GlobalConfigurationFilename);
+                        // No filename here.  We're only loading properties for the global configuration.
+                        configuration = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(null, null, null);
 
                         var globalDictionaries = configuration.DictionaryLanguages.Select(l =>
                             GlobalDictionary.CreateGlobalDictionary(l, configuration.AdditionalDictionaryFolders,
@@ -253,9 +253,11 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                     // Ignore it if disabled or it's an excluded text box
                     string name = ElementName(textBox);
 
-                    if(!configuration.EnableWpfTextBoxSpellChecking || configuration.VisualStudioExclusions.Any(
+                    if(!configuration.EnableWpfTextBoxSpellChecking || configuration.VisualStudioIdExclusions.Any(
                       v => v.IsMatch(name)))
+                    {
                         return;
+                    }
                 }
 
                 var wsc = new WpfTextBoxSpellChecker(textBox);
@@ -334,11 +336,11 @@ namespace VisualStudio.SpellChecker.WpfTextBox
             misspelledWords.Clear();
 
             // Always ignore URLs
-            rangeExclusions = WordSplitter.Url.Matches(textToSplit).Cast<Match>().ToList();
+            rangeExclusions = CommonUtilities.Url.Matches(textToSplit).Cast<Match>().ToList();
 
             // Note the location of all XML elements if needed
             if(wordSplitter.Configuration.IgnoreXmlElementsInText)
-                rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).Cast<Match>());
+                rangeExclusions.AddRange(CommonUtilities.XmlElement.Matches(textToSplit).Cast<Match>());
 
             // Add exclusions from the configuration if any
             foreach(var exclude in wordSplitter.Configuration.ExclusionExpressions)
@@ -389,44 +391,44 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
                     lastWord = word;
 
-                    // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                     // If the word is not being ignored, perform the other checks
-                    if(!dictionary.ShouldIgnoreWord(textToCheck))
+                    if(!dictionary.ShouldIgnoreWord(textToCheck) &&
+                       !wordSplitter.Configuration.ShouldIgnoreWord(textToCheck) &&
+                       !dictionary.IsSpelledCorrectly(textToCheck))
                     {
-                        if(!dictionary.IsSpelledCorrectly(textToCheck))
+                        // Sometimes it flags a word as misspelled if it ends with "'s".  Try checking the
+                        // word without the "'s".  If ignored or correct without it, don't flag it.  This
+                        // appears to be caused by the definitions in the dictionary rather than Hunspell.
+                        if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase) ||
+                           textToCheck.EndsWith("\u2019s", StringComparison.OrdinalIgnoreCase))
                         {
-                            // Sometimes it flags a word as misspelled if it ends with "'s".  Try checking the
-                            // word without the "'s".  If ignored or correct without it, don't flag it.  This
-                            // appears to be caused by the definitions in the dictionary rather than Hunspell.
-                            if(textToCheck.EndsWith("'s", StringComparison.OrdinalIgnoreCase) ||
-                              textToCheck.EndsWith("\u2019s", StringComparison.OrdinalIgnoreCase))
+                            string aposEss = textToCheck.Substring(textToCheck.Length - 2);
+
+                            textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
+
+                            if(dictionary.ShouldIgnoreWord(textToCheck) ||
+                              wordSplitter.Configuration.ShouldIgnoreWord(textToCheck) ||
+                              dictionary.IsSpelledCorrectly(textToCheck))
                             {
-                                string aposEss = textToCheck.Substring(textToCheck.Length - 2);
-
-                                textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
-
-                                // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
-                                if(dictionary.ShouldIgnoreWord(textToCheck) ||
-                                  dictionary.IsSpelledCorrectly(textToCheck))
-                                {
-                                    continue;
-                                }
-
-                                textToCheck += aposEss;
+                                continue;
                             }
 
-                            // Some dictionaries include a trailing period on certain words such as "etc." which
-                            // we don't include.  If the word is followed by a period, try it with the period to
-                            // see if we get a match.  If so, consider it valid.
-                            if(word.Start + word.Length < textToSplit.Length && textToSplit[word.Start + word.Length] == '.')
-                            {
-                                if(dictionary.ShouldIgnoreWord(textToCheck + ".") ||
-                                  dictionary.IsSpelledCorrectly(textToCheck + "."))
-                                    continue;
-                            }
-
-                            misspelledWords.Add(new FileMisspelling(errorSpan, actualWord));
+                            textToCheck += aposEss;
                         }
+
+                        // Some dictionaries include a trailing period on certain words such as "etc." which
+                        // we don't include.  If the word is followed by a period, try it with the period to
+                        // see if we get a match.  If so, consider it valid.
+                        if(word.Start + word.Length < textToSplit.Length && textToSplit[word.Start + word.Length] == '.')
+                        {
+                            if(dictionary.ShouldIgnoreWord(textToCheck + ".") ||
+                               dictionary.IsSpelledCorrectly(textToCheck + "."))
+                            {
+                                continue;
+                            }
+                        }
+
+                        misspelledWords.Add(new FileMisspelling(errorSpan, actualWord));
                     }
                 }
             }
@@ -526,16 +528,13 @@ namespace VisualStudio.SpellChecker.WpfTextBox
             dictionary.IgnoreWord(selectedMisspelling.Word);
             textBox.RaiseEvent(new TextChangedEventArgs(TextBoxBase.TextChangedEvent, UndoAction.None));
 
-            string ignoredWordsFile = null;
-
-            if(configuration.IgnoredWordsFiles.Any())
-                ignoredWordsFile = configuration.IgnoredWordsFiles.First().Filename;
+            string ignoredWordsFile = configuration.IgnoredWordsFiles.FirstOrDefault();
 
             if(!String.IsNullOrWhiteSpace(ignoredWordsFile))
             {
                 try
                 {
-                    var words = new HashSet<string>(Utility.LoadUserDictionary(ignoredWordsFile, false, false),
+                    var words = new HashSet<string>(CommonUtilities.LoadUserDictionary(ignoredWordsFile, false, false),
                         StringComparer.OrdinalIgnoreCase);
 
                     if(!words.Contains(selectedMisspelling.Word))
@@ -544,7 +543,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
 #pragma warning disable VSTHRD010
                         if(ignoredWordsFile.CanWriteToUserWordsFile(null))
-                            Utility.SaveCustomDictionary(ignoredWordsFile, false, false, words);
+                            CommonUtilities.SaveCustomDictionary(ignoredWordsFile, false, false, words);
 #pragma warning restore VSTHRD010
                     }
                 }

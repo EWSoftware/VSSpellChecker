@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/10/2019
-// Note    : Copyright 2016-2019, Eric Woodruff, All rights reserved
+// Updated : 03/21/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide a suggested action for inserting spelling suggestions
 //
@@ -25,6 +25,7 @@ using System.Windows.Input;
 
 using Microsoft.VisualStudio.Text;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.SuggestedActions

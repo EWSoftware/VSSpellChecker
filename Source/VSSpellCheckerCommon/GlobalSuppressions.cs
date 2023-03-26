@@ -5,9 +5,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:VisualStudio.SpellChecker.Common.Utility.ToRegexes(System.String)~System.Collections.Generic.IEnumerable{System.Text.RegularExpressions.Regex}")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:VisualStudio.SpellChecker.Common.Utility.LoadUserDictionary(System.String,System.Boolean,System.Boolean)~System.Collections.Generic.IEnumerable{System.String}")]
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:VisualStudio.SpellChecker.Common.Utility.SaveCustomDictionary(System.String,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.String})")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:VisualStudio.SpellChecker.Common.CommonUtilities.ToRegexes(System.String)~System.Collections.Generic.IEnumerable{System.Text.RegularExpressions.Regex}")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:VisualStudio.SpellChecker.Common.CommonUtilities.LoadUserDictionary(System.String,System.Boolean,System.Boolean)~System.Collections.Generic.IEnumerable{System.String}")]
+[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "<Pending>", Scope = "member", Target = "~M:VisualStudio.SpellChecker.Common.CommonUtilities.SaveCustomDictionary(System.String,System.Boolean,System.Boolean,System.Collections.Generic.IEnumerable{System.String})")]
 [assembly: SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>", Scope = "type", Target = "~T:GlobExpressions.GlobPatternException")]
 [assembly: SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "<Pending>", Scope = "type", Target = "~T:VisualStudio.SpellChecker.Common.Configuration.SpellCheckerDictionary")]
 [assembly: SuppressMessage("Design", "CA1002:Do not expose generic lists", Justification = "<Pending>", Scope = "member", Target = "~P:VisualStudio.SpellChecker.Common.Configuration.Legacy.SpellCheckerLegacyConfiguration.DictionaryLanguages")]

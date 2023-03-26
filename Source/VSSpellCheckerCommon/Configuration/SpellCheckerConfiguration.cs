@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/19/2023
+// Updated : 03/26/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -56,8 +56,18 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// </summary>
         public const string PropertyPrefix = "vsspell_";
 
+        /// <summary>
+        /// File type classification prefix
+        /// </summary>
+        public const string FileType = "File Type: ";
+
+        /// <summary>
+        /// Extension classification prefix
+        /// </summary>
+        public const string Extension = "Extension: ";
+
         private readonly HashSet<string> ignoredWords, ignoredWordsFiles, ignoredKeywords, recognizedWords,
-            ignoredXmlElements, spellCheckedXmlAttributes;
+            ignoredXmlElements, spellCheckedXmlAttributes, loadedConfigurationFiles;
         private readonly List<CultureInfo> dictionaryLanguages;
         private readonly List<string> additionalDictionaryFolders;
         private readonly List<Regex> exclusionExpressions, visualStudioIdExclusions;
@@ -162,7 +172,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         public bool IncludeInProjectSpellCheck { get; set; } = true;
 
         /// <summary>
-        /// This is used to get or set whether or not the Roslyn-based code analyzers are enabled
+        /// This is used to get or set whether or not the Roslyn-based spell check code analyzers are enabled
         /// </summary>
         /// <value>The default is true to enable them</value>
         [DefaultValue(true), EditorConfigProperty("vsspell_code_analyzers_enabled")]
@@ -385,6 +395,13 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         public IEnumerable<Regex> VisualStudioIdExclusions => visualStudioIdExclusions;
 
         /// <summary>
+        /// This read-only property returns an enumerable list of the loaded configuration files used to obtain
+        /// spell checker configuration settings.
+        /// </summary>
+        /// <remarks>This is only used by the taggers</remarks>
+        public IEnumerable<string> LoadedConfigurationFiles => loadedConfigurationFiles;
+
+        /// <summary>
         /// This read-only property returns the default list of ignored classifications
         /// </summary>
         public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> DefaultIgnoredClassifications =>
@@ -459,6 +476,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
             recognizedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             ignoredWordsFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            loadedConfigurationFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             additionalDictionaryFolders = new List<string>();
             exclusionExpressions = new List<Regex>();
             visualStudioIdExclusions = new List<Regex>(DefaultVisualStudioIdExclusions.Select(p => new Regex(p)));
@@ -598,6 +616,23 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         //=====================================================================
 
         /// <summary>
+        /// This is used to create the default configuration file if it does not exist
+        /// </summary>
+        public static void CreateDefaultConfigurationFile()
+        {
+            if(!File.Exists(GlobalConfigurationFilename))
+            {
+                var editorConfig = EditorConfigFile.FromText(Properties.Resources.DefaultConfig);
+
+                if(!Directory.Exists(GlobalConfigurationFilePath))
+                    Directory.CreateDirectory(GlobalConfigurationFilePath);
+
+                editorConfig.Filename = GlobalConfigurationFilename;
+                editorConfig.Save();
+            }
+        }
+
+        /// <summary>
         /// This is used to generate an enumerable list of spell checking properties for the given file loaded
         /// from the global spell checker configuration file.
         /// </summary>
@@ -609,9 +644,14 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         {
             var editorConfigProperties = new List<SectionLine>();
             var replaceValues = new Dictionary<string, SectionLine>();
-            var editorConfig = EditorConfigFile.FromFile(GlobalConfigurationFilename);
+            EditorConfigFile editorConfig;
 
-            foreach(var section in editorConfig.Sections.Where(s => s.IsMatchForFile(filename)))
+            if(File.Exists(GlobalConfigurationFilename))
+                editorConfig = EditorConfigFile.FromFile(GlobalConfigurationFilename);
+            else
+                editorConfig = EditorConfigFile.FromText(Properties.Resources.DefaultConfig);
+
+            foreach(var section in editorConfig.Sections.Where(s => s.IsMatchForFile(filename ?? "NoFile")))
             {
                 foreach(var property in section.SpellCheckerProperties)
                 {
@@ -633,19 +673,16 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             string ignoredWordsPropName = EditorConfigSettingsFor(nameof(IgnoredWords)).PropertyName;
             string file = Path.Combine(GlobalConfigurationFilePath, "IgnoredWords.dic");
 
-            if(File.Exists(file))
-            {
-                var iwp = editorConfigProperties.FirstOrDefault(p => p.PropertyName.StartsWith(ignoredWordsPropName,
-                    StringComparison.OrdinalIgnoreCase)) ??
-                    new SectionLine { PropertyName = ignoredWordsPropName, PropertyValue = String.Empty };
+            var iwp = editorConfigProperties.FirstOrDefault(p => p.PropertyName.StartsWith(ignoredWordsPropName,
+                StringComparison.OrdinalIgnoreCase)) ??
+                new SectionLine { PropertyName = ignoredWordsPropName, PropertyValue = String.Empty };
 
-                if(iwp.PropertyValue.IndexOf("File:", StringComparison.OrdinalIgnoreCase) == -1)
-                {
-                    if(!String.IsNullOrWhiteSpace(iwp.PropertyValue))
-                        iwp.PropertyValue = "File:" + file + "|" + iwp.PropertyValue;
-                    else
-                        iwp.PropertyValue = "File:" + file;
-                }
+            if(iwp.PropertyValue.IndexOf("File:", StringComparison.OrdinalIgnoreCase) == -1)
+            {
+                if(!String.IsNullOrWhiteSpace(iwp.PropertyValue))
+                    iwp.PropertyValue = "File:" + file + "|" + iwp.PropertyValue;
+                else
+                    iwp.PropertyValue = "File:" + file;
             }
 
             return editorConfigProperties.Select(p => (p.PropertyName, p.PropertyValue));
@@ -660,6 +697,8 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// from <c>GlobalAnalyzerConfigFiles</c> project items.</param>
         /// <param name="additionalEditorConfigFiles">Additional .editorconfig files to include such as those
         /// from <c>EditorConfigFiles</c> project items.</param>
+        /// <returns>An enumerable list of tuples containing the spell checker properties found in the files
+        /// (source file, property name, and property value).</returns>
         /// <remarks><para>Settings from the global spell checker configuration will not be returned.  They will
         /// be included when an actual configuration is generated.</para>
         /// 
@@ -676,9 +715,13 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// config file is in the folder hierarchy.  If a folder is present in the glob, subfolders in the
         /// filename being compared will be taken into consideration along with the filename.</para>
         /// </remarks>
-        public static IEnumerable<(string PropertyName, string Value)> SpellCheckingPropertiesFor(string filename,
-          IEnumerable<string> additionalGlobalConfigFiles, IEnumerable<string> additionalEditorConfigFiles)
+        private static IEnumerable<(string Source, string PropertyName, string Value)> SpellCheckingPropertiesFor(
+          string filename, IEnumerable<string> additionalGlobalConfigFiles,
+          IEnumerable<string> additionalEditorConfigFiles)
         {
+            if(String.IsNullOrWhiteSpace(filename))
+                return Enumerable.Empty<(string Source, string PropertyName, string Value)>();
+
             if(additionalGlobalConfigFiles == null)
                 additionalGlobalConfigFiles = Enumerable.Empty<string>();
 
@@ -702,6 +745,9 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                 {
                     foreach(var property in globalConfig.Sections[0].SpellCheckerProperties)
                     {
+                        // Track the source of the property
+                        property.Tag = file;
+
                         // If it's not there, add it
                         if(!globalProperties.TryGetValue(property.PropertyName, out var existingProperty))
                             globalProperties.Add(property.PropertyName, (property, globalConfig.GlobalLevel));
@@ -749,6 +795,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                 // to the global set.
                 if(addedProperties && editorConfig.IsRoot)
                 {
+                    addedProperties = false;
                     editorConfigProperties.Clear();
                     replaceValues.Clear();
 
@@ -767,19 +814,65 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         // If it doesn't exist, add it
                         if(!replaceValues.TryGetValue(property.PropertyName, out var existingProperty))
                         {
+                            property.Tag = file;
                             editorConfigProperties.Add(property);
                             replaceValues.Add(property.PropertyName, property);
                         }
                         else
                         {
                             // If it does exist, replace the value
+                            existingProperty.Tag = file;
                             existingProperty.PropertyValue = property.PropertyValue;
                         }
                     }
                 }
             }
 
-            return editorConfigProperties.Select(p => (p.PropertyName, p.PropertyValue));
+            return editorConfigProperties.Select(p => ((string)p.Tag, p.PropertyName, p.PropertyValue));
+        }
+
+        /// <summary>
+        /// This is used to generate a spell checker configuration from all .globalconfig and .editorconfig files
+        /// found within the folders from the file location to the root plus the additional files specified, if
+        /// any.
+        /// </summary>
+        /// <param name="filename">The filename for which to generate the configuration</param>
+        /// <param name="additionalGlobalConfigFiles">Additional .globalconfig files to include such as those
+        /// from <c>GlobalAnalyzerConfigFiles</c> project items or null if there are none.</param>
+        /// <param name="additionalEditorConfigFiles">Additional .editorconfig files to include such as those
+        /// from <c>EditorConfigFiles</c> project items or null if there are none.</param>
+        /// <returns>A spell checker configuration instance</returns>
+        public static SpellCheckerConfiguration CreateSpellCheckerConfigurationFor(string filename,
+          IEnumerable<string> additionalGlobalConfigFiles, IEnumerable<string> additionalEditorConfigFiles)
+        {
+            filename = Path.GetFullPath(filename);
+
+            var configuration = new SpellCheckerConfiguration(filename ?? "NoFile");
+            var globalProperties = GlobalConfigurationPropertiesFor(filename);
+            var properties = new List<(string PropertyName, string Value)>();
+
+            foreach(var p in SpellCheckingPropertiesFor(filename, additionalGlobalConfigFiles,
+              additionalEditorConfigFiles))
+            {
+                configuration.loadedConfigurationFiles.Add(p.Source);
+                properties.Add((p.PropertyName, p.Value));
+            }
+
+            configuration.ApplyProperties(Path.GetDirectoryName(filename), globalProperties.Concat(properties));
+
+            // Always add the Ignore Spelling directive expression as we don't want the directive words included
+            // when spell checking with non-English dictionaries.
+            string directiveExp = CommonUtilities.IgnoreSpellingDirectiveRegex.ToString();
+
+            if(!configuration.exclusionExpressions.Any(e => e.ToString().Equals(directiveExp, StringComparison.Ordinal)))
+                configuration.exclusionExpressions.Add(new Regex(directiveExp, CommonUtilities.IgnoreSpellingDirectiveRegex.Options));
+
+            // Always ensure we have at least the default language if none are specified in the global
+            // configuration file.
+            if(configuration.dictionaryLanguages.Count == 0)
+                configuration.dictionaryLanguages.Add(new CultureInfo("en-US"));
+
+            return configuration;
         }
 
         /// <summary>
@@ -796,17 +889,16 @@ namespace VisualStudio.SpellChecker.Common.Configuration
 
             var configuration = new SpellCheckerConfiguration(filename);
             var globalProperties = GlobalConfigurationPropertiesFor(filename);
-            var importedConfigFiles = new HashSet<string>();
 
-            configuration.ApplyProperties(Path.GetDirectoryName(filename), importedConfigFiles,
-                globalProperties.Concat(properties));
+            configuration.ApplyProperties(Path.GetDirectoryName(filename),
+                globalProperties.Concat(properties ?? Enumerable.Empty<(string PropertyName, string Value)>()));
 
             // Always add the Ignore Spelling directive expression as we don't want the directive words included
             // when spell checking with non-English dictionaries.
-            string directiveExp = Utility.IgnoreSpellingDirectiveRegex.ToString();
+            string directiveExp = CommonUtilities.IgnoreSpellingDirectiveRegex.ToString();
 
             if(!configuration.exclusionExpressions.Any(e => e.ToString().Equals(directiveExp, StringComparison.Ordinal)))
-                configuration.exclusionExpressions.Add(new Regex(directiveExp, Utility.IgnoreSpellingDirectiveRegex.Options));
+                configuration.exclusionExpressions.Add(new Regex(directiveExp, CommonUtilities.IgnoreSpellingDirectiveRegex.Options));
 
             // Always ensure we have at least the default language if none are specified in the global
             // configuration file.
@@ -821,11 +913,8 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// </summary>
         /// <param name="basePath">The base path used to resolve relative paths in the configuration options
         /// for ignored words files and imported configuration files.</param>
-        /// <param name="importedConfigFiles">This is used to track previously imported configuration files
-        /// to prevent circular references.</param>
         /// <param name="properties">The properties used to create the configuration</param>
-        private void ApplyProperties(string basePath, HashSet<string> importedConfigFiles,
-          IEnumerable<(string PropertyName, string Value)> properties)
+        private void ApplyProperties(string basePath, IEnumerable<(string PropertyName, string Value)> properties)
         {
             foreach(var p in properties)
             {
@@ -921,7 +1010,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                 switch(configProperty.Name)
                 {
                     case nameof(ImportSettingsFile):
-                        this.ImportSettingsFrom(p.Value, basePath, importedConfigFiles);
+                        this.ImportSettingsFrom(p.Value, basePath);
                         break;
 
                     case nameof(VisualStudioIdExclusions):
@@ -970,9 +1059,17 @@ namespace VisualStudio.SpellChecker.Common.Configuration
 
                                     if(ignoredWordsFile != null)
                                     {
-                                        ignoredWords.UnionWith(Utility.LoadUserDictionary(ignoredWordsFile, false, false));
+                                        ignoredWords.UnionWith(CommonUtilities.LoadUserDictionary(ignoredWordsFile, false, false));
+                                        ignoredWordsFiles.Add(ignoredWordsFile);
+                                    }
+                                    else
+                                    {
+                                        // If the ignored words file doesn't exist and the path is relative, we
+                                        // can't say for sure where it is supposed to go and can't use it.  If
+                                        // it's a full path though, we can use it.
+                                        ignoredWordsFile = word.Substring(5);
 
-                                        if(!ignoredWordsFiles.Contains(ignoredWordsFile))
+                                        if(Path.IsPathRooted(ignoredWordsFile))
                                             ignoredWordsFiles.Add(ignoredWordsFile);
                                     }
                                 }
@@ -1101,7 +1198,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             if(filename.IndexOf('%') != -1)
                 filename = Environment.ExpandEnvironmentVariables(filename);
 
-            if(!Path.IsPathRooted(filename))
+            if(!Path.IsPathRooted(filename) && !String.IsNullOrWhiteSpace(basePath))
             {
                 string path = basePath, file;
 
@@ -1156,15 +1253,14 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// <param name="configFile">The starting configuration file from which to import settings</param>
         /// <param name="basePath">The base path to use when searching for configuration files with a relative
         /// path</param>
-        /// <param name="importedConfigFiles">A list of previously imported configuration files use to prevent
-        /// circular references</param>
-        private void ImportSettingsFrom(string configFile, string basePath, HashSet<string> importedConfigFiles)
+        /// <remarks>If the file has already been loaded, it is ignored to avoid a potential circular reference</remarks>
+        private void ImportSettingsFrom(string configFile, string basePath)
         {
             configFile = ResolveFilePath(configFile, basePath);
 
-            if(configFile != null && !importedConfigFiles.Contains(configFile))
+            if(configFile != null && !loadedConfigurationFiles.Contains(configFile))
             {
-                importedConfigFiles.Add(configFile);
+                loadedConfigurationFiles.Add(configFile);
 
                 var editorConfigProperties = new List<SectionLine>();
                 var replaceValues = new Dictionary<string, SectionLine>();
@@ -1190,7 +1286,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
 
                 if(editorConfigProperties.Count != 0)
                 {
-                    this.ApplyProperties(Path.GetDirectoryName(configFile), importedConfigFiles,
+                    this.ApplyProperties(Path.GetDirectoryName(configFile),
                         editorConfigProperties.Select(p => (p.PropertyName, p.PropertyValue)));
                 }
             }

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MultiLanguageSpellSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/05/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 03/21/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide a suggested action for inserting multi-language spelling
 // suggestions.
@@ -25,6 +25,7 @@ using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Definitions;
 
 namespace VisualStudio.SpellChecker.SuggestedActions

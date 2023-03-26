@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/29/2021
-// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
 //
@@ -24,7 +24,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {
@@ -293,7 +293,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             { 
                 Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     "Classifications.config"),
-                Path.Combine(SpellingConfigurationFile.GlobalConfigurationFilePath, "Classifications.config")
+                Path.Combine(SpellCheckerConfiguration.GlobalConfigurationFilePath, "Classifications.config")
             };
 
             try

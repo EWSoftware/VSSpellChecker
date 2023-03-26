@@ -78,9 +78,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             // Will be null if resetting to default ID list
             if(configuration != null)
             {
-                if(!this.AppliesTo(configuration.ConfigurationType))
-                    return;
-
                 chkEnableWpfTextBoxSpellChecking.IsChecked = configuration.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking);
 
                 if(configuration.HasProperty(PropertyNames.VisualStudioIdExclusions))
@@ -109,28 +106,19 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <inheritdoc />
         public void SaveConfiguration(SpellingConfigurationFile configuration)
         {
-            if(this.AppliesTo(configuration.ConfigurationType))
+            configuration.StoreProperty(PropertyNames.EnableWpfTextBoxSpellChecking, chkEnableWpfTextBoxSpellChecking.IsChecked);
+
+            var newList = new HashSet<string>(lbExclusionExpressions.Items.Cast<string>(),
+                StringComparer.OrdinalIgnoreCase);
+
+            if(newList.SetEquals(SpellCheckerConfiguration.DefaultVisualStudioExclusions))
             {
-                configuration.StoreProperty(PropertyNames.EnableWpfTextBoxSpellChecking, chkEnableWpfTextBoxSpellChecking.IsChecked);
-
-                var newList = new HashSet<string>(lbExclusionExpressions.Items.Cast<string>(),
-                    StringComparer.OrdinalIgnoreCase);
-
-                if(newList.SetEquals(SpellCheckerConfiguration.DefaultVisualStudioExclusions))
-                {
-                    configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
-                        PropertyNames.VisualStudioIdExclusionItem, null);
-                }
-                else
-                    configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
-                        PropertyNames.VisualStudioIdExclusionItem, expressions.Count == 0 ? null : expressions);
+                configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
+                    PropertyNames.VisualStudioIdExclusionItem, null);
             }
-        }
-
-        /// <inheritdoc />
-        public bool AppliesTo(ConfigurationType configurationType)
-        {
-            return (configurationType == ConfigurationType.Global);
+            else
+                configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
+                    PropertyNames.VisualStudioIdExclusionItem, expressions.Count == 0 ? null : expressions);
         }
 
         /// <inheritdoc />

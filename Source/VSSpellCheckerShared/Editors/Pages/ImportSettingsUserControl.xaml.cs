@@ -95,12 +95,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <inheritdoc />
-        public bool AppliesTo(ConfigurationType configurationType)
-        {
-            return true;
-        }
-
-        /// <inheritdoc />
         public event EventHandler ConfigurationChanged;
 
         #endregion

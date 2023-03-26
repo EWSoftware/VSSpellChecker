@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify text file content using a set of regular expressions
 //
@@ -27,7 +27,7 @@ using System.Xml.Linq;
 
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {
@@ -125,12 +125,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     var matches = rc.Expression.Matches(this.Text);
 
                     foreach(Match m in matches)
+                    {
                         spans.Add(new SpellCheckSpan
                         {
                             Span = new Span(m.Index, m.Length),
                             Text = m.Value,
                             Classification = rc.Classification
                         });
+                    }
                 }
                 catch(RegexMatchTimeoutException ex)
                 {
@@ -170,6 +172,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             idx--;
                         }
                         else
+                        {
                             if(next.Span.Contains(current.Span))
                             {
                                 if(current.Classification == RangeClassification.Undefined ||
@@ -183,6 +186,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                 idx--;
                             }
                             else
+                            {
                                 if(current.Classification == next.Classification)
                                 {
                                     current.Span = new Span(current.Span.Start, next.Span.Start + next.Span.Length -
@@ -194,6 +198,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                     idx--;
                                 }
                                 else
+                                {
                                     if((current.Classification == RangeClassification.NormalStringLiteral ||
                                       current.Classification == RangeClassification.VerbatimStringLiteral ||
                                       current.Classification == RangeClassification.InterpolatedStringLiteral) &&
@@ -208,8 +213,12 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                                         spans.Remove(next);
                                         idx--;
                                     }
+                                }
+                            }
+                        }
                     }
                     else
+                    {
                         if(current.Classification == next.Classification)
                         {
                             // The spans are of the same type and are adjacent so combine them
@@ -220,8 +229,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             spans.Remove(next);
                             idx--;
                         }
+                    }
                 }
                 else
+                {
                     if(current.Classification.ConsecutiveStringLiterals(next.Classification))
                     {
                         // See if two string literals of the same type are being concatenated that contain what
@@ -263,6 +274,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                             idx--;
                         }
                     }
+                }
             }
 
             return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MarkdownClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/22/2018
-// Note    : Copyright 2017-2018, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2017-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify markdown file content
 //
@@ -20,7 +20,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {

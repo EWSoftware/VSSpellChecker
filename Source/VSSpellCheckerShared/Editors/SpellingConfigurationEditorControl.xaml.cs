@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/04/2022
-// Note    : Copyright 2015-2022, Eric Woodruff, All rights reserved
+// Updated : 03/26/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit spell checker configuration settings files
 //
@@ -28,8 +28,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-using EnvDTE80;
-using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Shell;
 
 using VisualStudio.SpellChecker.Configuration;
 using VisualStudio.SpellChecker.Editors.Pages;
@@ -38,26 +37,17 @@ using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 namespace VisualStudio.SpellChecker.Editors
 {
     /// <summary>
-    /// This user control is used to edit spell checker configuration settings files
+    /// This user control is used to edit spell checker configuration settings in .editorconfig files
     /// </summary>
-    /// <remarks>Since all settings files are XML files, this can be used to edit the global configuration as
-    /// well as any project-specific settings files.</remarks>
+    /// <remarks>Since all settings files are .editorconfig files, this can be used to edit the global
+    /// configuration as well as any project-specific settings files.</remarks>
     public partial class SpellingConfigurationEditorControl : UserControl
     {
         #region Private data members
         //=====================================================================
 
         private SpellingConfigurationFile configFile;
-
-        #endregion
-
-        #region Properties
-        //=====================================================================
-
-        /// <summary>
-        /// This read-only property returns the filename
-        /// </summary>
-        public string Filename => (configFile == null) ? String.Empty : configFile.Filename;
+        private bool isGlobalConfig;
 
         #endregion
 
@@ -153,15 +143,16 @@ namespace VisualStudio.SpellChecker.Editors
         {
             configFile = new SpellingConfigurationFile(configurationFile, null);
 
-#pragma warning disable VSTHRD010
+            isGlobalConfig = configurationFile.Equals(Common.Configuration.SpellCheckerConfiguration.GlobalConfigurationFilename,
+                StringComparison.OrdinalIgnoreCase);
+
             this.SetTitle();
-#pragma warning restore VSTHRD010
 
             foreach(TreeViewItem item in tvPages.Items)
             {
                 ISpellCheckerConfiguration page = ((ISpellCheckerConfiguration)item.Tag);
 
-                if(page.AppliesTo(configFile.ConfigurationType))
+                if(!(page is VisualStudioUserControl) || !isGlobalConfig)
                 {
                     item.Visibility = Visibility.Visible;
                     page.LoadConfiguration(configFile);
@@ -177,22 +168,23 @@ namespace VisualStudio.SpellChecker.Editors
         /// <param name="configurationFile">The configuration filename</param>
         public void SaveConfiguration(string configurationFile)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             configFile.Filename = configurationFile;
 
-#pragma warning disable VSTHRD010
             this.SetTitle();
 
             foreach(TreeViewItem item in tvPages.Items)
             {
                 ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
 
-                if(page.AppliesTo(configFile.ConfigurationType))
+                if(item.Visibility == Visibility.Visible)
                     page.SaveConfiguration(configFile);
             }
 
             if(configFile.Save())
             {
-                if(configFile.ConfigurationType == ConfigurationType.Global)
+                if(isGlobalConfig)
                 {
                     if(configFile.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking))
                         VSSpellCheckEverywherePackage.Instance?.ConnectSpellChecker();
@@ -203,7 +195,6 @@ namespace VisualStudio.SpellChecker.Editors
             else
                 MessageBox.Show("Unable to save spell checking configuration", PackageResources.PackageTitle,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
-#pragma warning restore VSTHRD010
         }
 
         /// <summary>
@@ -211,45 +202,21 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         private void SetTitle()
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-
             string configFilename = configFile.Filename;
 
-            if(configFilename.EndsWith(".vsspell", StringComparison.OrdinalIgnoreCase))
-                configFilename = configFilename.Substring(0, configFilename.Length - 8);
-
-            if(configFile.ConfigurationType != ConfigurationType.Global)
+            if(isGlobalConfig)
+                lblTitle.Text = "Global Spell Checker Configuration Settings";
+            else
             {
-                var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(true);
-
-                if(dte2 != null && dte2.Solution != null && !String.IsNullOrWhiteSpace(dte2.Solution.FullName))
+                if(!String.IsNullOrWhiteSpace(SpellingServiceProxy.LastSolutionName))
+                    configFilename = configFilename.ToRelativePath(Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName));
+                else
                 {
-                    // For a .vsspell solution configuration file, use the solution name
-                    if(configFilename[configFilename.Length - 1] == '\\')
-                        configFilename = dte2.Solution.FullName;
-
-                    configFilename = configFilename.ToRelativePath(Path.GetDirectoryName(dte2.Solution.FullName));
-
-                    if(String.IsNullOrWhiteSpace(configFilename))
-                        configFilename = ".\\";
+                    if(configFilename.Length > 50)
+                        configFilename = "..." + configFilename.Substring(50);
                 }
-            }
 
-            switch(configFile.ConfigurationType)
-            {
-                case ConfigurationType.Global:
-                    lblTitle.Text = "Global Spell Checker Configuration Settings";
-                    break;
-
-                case ConfigurationType.Folder:
-                    lblTitle.Text = String.Format(CultureInfo.CurrentCulture, "Settings for Folder {0}\\",
-                        Path.GetDirectoryName(configFilename));
-                    break;
-
-                default:
-                    lblTitle.Text = String.Format(CultureInfo.CurrentCulture, "Settings for {0} {1}",
-                        configFile.ConfigurationType, configFilename);
-                    break;
+                lblTitle.Text = String.Format(CultureInfo.CurrentCulture, "Spell Checker Settings from {0}", configFilename);
             }
         }
         #endregion
@@ -335,7 +302,7 @@ namespace VisualStudio.SpellChecker.Editors
                     {
                         ISpellCheckerConfiguration page = (ISpellCheckerConfiguration)item.Tag;
 
-                        if(page.AppliesTo(configFile.ConfigurationType))
+                        if(item.Visibility == Visibility.Visible)
                             page.LoadConfiguration(newConfigFile);
                     }
 

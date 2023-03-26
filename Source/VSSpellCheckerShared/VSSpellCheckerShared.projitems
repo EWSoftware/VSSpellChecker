@@ -67,7 +67,6 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Editors\SpellingConfigurationEditorFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editors\SpellingConfigurationEditorPane.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)GlobalDictionary.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Guids.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IgnoredCharacterClass.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MultiLanguageSpellingSuggestion.cs" />
@@ -90,10 +89,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\TextClassifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ProjectSpellCheck\XmlClassifier.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Properties\AssemblyInfo.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SpellingDictionary.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SpellingEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SpellingServiceProxy.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SpellingSuggestion.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SpellingTagger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SpellingTaggerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Squiggles\SpellSquiggleTag.cs" />
@@ -148,7 +144,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSSpellCheckerPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)VSSpellCheckEverywherePackage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)WordSplitter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WpfTextBox\MenuCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WpfTextBox\SpellingErrorAdorner.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)WpfTextBox\WpfTextBoxSpellChecker.cs" />

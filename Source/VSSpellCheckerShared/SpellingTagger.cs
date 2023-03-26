@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/15/2023
+// Updated : 03/22/2023
 // Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
@@ -48,7 +48,9 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Threading;
-using VisualStudio.SpellChecker.Configuration;
+
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
 using VisualStudio.SpellChecker.Tagging;
@@ -110,7 +112,7 @@ namespace VisualStudio.SpellChecker
         private readonly ITagAggregator<IUrlTag> urlAggregator;
 
         private readonly SpellCheckerConfiguration configuration;
-        private readonly WordSplitter wordSplitter;
+        private readonly TaggerWordSplitter wordSplitter;
 
         private volatile List<MisspellingTag> misspellings;
 
@@ -203,7 +205,7 @@ namespace VisualStudio.SpellChecker
             string filename = buffer.GetFilename();
 #pragma warning restore VSTHRD010
 
-            wordSplitter = new WordSplitter
+            wordSplitter = new TaggerWordSplitter
             {
                 Configuration = configuration,
                 Mnemonic = ClassifierFactory.GetMnemonic(filename),
@@ -668,7 +670,7 @@ namespace VisualStudio.SpellChecker
 
                 // Note the location of all XML elements if needed
                 if(configuration.IgnoreXmlElementsInText)
-                    rangeExclusions.AddRange(WordSplitter.XmlElement.Matches(textToSplit).Cast<Match>());
+                    rangeExclusions.AddRange(CommonUtilities.XmlElement.Matches(textToSplit).Cast<Match>());
 
                 // Add exclusions from the configuration if any
                 foreach(var exclude in configuration.ExclusionExpressions)
@@ -746,12 +748,12 @@ namespace VisualStudio.SpellChecker
                     {
                         errorSpan = new SnapshotSpan(span.Start + word.Start, word.Length);
 
-                        // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                         // If the word is being ignored either in the ignored word lists or in the current
                         // location, skip it.  This goes for doubled words as well.
-                        if(this.Dictionary.ShouldIgnoreWord(textToCheck) || wordsIgnoredOnce.Any(
-                          w => w.Position == errorSpan.Start.Position && w.Word.Equals(actualWord,
-                          StringComparison.OrdinalIgnoreCase)))
+                        if(this.Dictionary.ShouldIgnoreWord(textToCheck) ||
+                          configuration.ShouldIgnoreWord(textToCheck) ||
+                          wordsIgnoredOnce.Any(w => w.Position == errorSpan.Start.Position &&
+                            w.Word.Equals(actualWord, StringComparison.OrdinalIgnoreCase)))
                         {
                             lastWord = word;
                             continue;
@@ -814,9 +816,9 @@ namespace VisualStudio.SpellChecker
 
                                 textToCheck = textToCheck.Substring(0, textToCheck.Length - 2);
 
-                                // TODO: Check configuration.ShouldIgnoreWord to ignore if in ignored keywords
                                 if(this.Dictionary.ShouldIgnoreWord(textToCheck) ||
-                                  this.Dictionary.IsSpelledCorrectly(textToCheck))
+                                 configuration.ShouldIgnoreWord(textToCheck) ||
+                                 this.Dictionary.IsSpelledCorrectly(textToCheck))
                                 {
                                     continue;
                                 }

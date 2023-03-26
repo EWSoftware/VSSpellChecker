@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/20/2023
+// Updated : 03/25/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
@@ -18,7 +18,7 @@
 // 08/23/2015  EFW  Added support for solution/project spell checking
 //===============================================================================================================
 
-// Ignore Spelling: proj
+// Ignore Spelling: proj http
 
 using System;
 using System.ComponentModel.Design;
@@ -37,7 +37,9 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Outlining;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
+using VisualStudio.SpellChecker.Common.EditorConfig;
 using VisualStudio.SpellChecker.Editors;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
 using VisualStudio.SpellChecker.Properties;
@@ -72,10 +74,11 @@ namespace VisualStudio.SpellChecker
     [ProvideToolWindow(typeof(ConvertConfigurationToolWindow),
       Orientation = ToolWindowOrientation.Right, Style = VsDockStyle.MDI, MultiInstances = false,
       Transient = true, PositionX = 100, PositionY = 100, Width = 800, Height = 600)]
-    // This attribute lets the shell know we provide a spelling configuration file editor
+    // This attribute lets the shell know we provide a spelling configuration file editor.  Give our editor a
+    // lower priority than the default as we don't want it opening by default for .editorconfig files.
     [ProvideEditorFactory(typeof(SpellingConfigurationEditorFactory), 112,
       TrustLevel = __VSEDITORTRUSTLEVEL.ETL_AlwaysTrusted)]
-    [ProvideEditorExtension(typeof(SpellingConfigurationEditorFactory), ".vsspell", 50)]
+    [ProvideEditorExtension(typeof(SpellingConfigurationEditorFactory), ".editorconfig", 25)]
     // Provide a binding path for finding custom assemblies in this package
     [ProvideBindingPath()]
     public class VSSpellCheckerPackage : AsyncPackage
@@ -229,32 +232,22 @@ namespace VisualStudio.SpellChecker
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            string configFile = SpellingConfigurationFile.GlobalConfigurationFilename;
+            string configFile = SpellCheckerConfiguration.GlobalConfigurationFilename;
 
-            // Convert the legacy configuration?
-            if(Path.GetFileName(configFile).Equals("SpellChecker.config"))
-            {
-                string newConfigFile = Path.Combine(SpellingConfigurationFile.GlobalConfigurationFilePath,
-                    "VSSpellChecker.vsspell");
-
-                File.Copy(configFile, newConfigFile, true);
-                File.Delete(configFile);
-
-                configFile = newConfigFile;
-            }
-
-            // If it doesn't exist, create an empty file so that the editor can find it
+            // If it doesn't exist, create a default configuration file so that the editor can find it
             if(!File.Exists(configFile))
-            {
-                var file = new SpellingConfigurationFile(configFile, null);
-                file.Save();
-            }
+                SpellCheckerConfiguration.CreateDefaultConfigurationFile();
 
-            if(this.GetService(typeof(SDTE)) is DTE dte)
+            if(this.GetService(typeof(IVsUIShellOpenDocument)) is IVsUIShellOpenDocument shellOpenDocument)
             {
-                var doc = dte.ItemOperations.OpenFile(configFile, EnvDTE.Constants.vsViewKindPrimary);
+                Guid logicalViewGuid = VSConstants.LOGVIEWID_Primary;
+                var guid = new Guid(GuidList.guidSpellingConfigurationEditorFactoryString);
 
-                doc?.Activate();
+                shellOpenDocument.OpenDocumentViaProjectWithSpecific(configFile,
+                    (uint)__VSSPECIFICEDITORFLAGS.VSSPECIFICEDITOR_DoOpen, ref guid, null, ref logicalViewGuid,
+                    out _, out _, out _, out IVsWindowFrame ppWindowFrame);
+
+                ppWindowFrame?.Show();
             }
         }
 
@@ -426,8 +419,8 @@ namespace VisualStudio.SpellChecker
                 try
                 {
 #pragma warning disable VSTHRD010
-                    command.Visible = command.Enabled = DetermineContainingProjectAndSettingsFile(out Project p,
-                      out string filename);
+                    command.Visible = command.Enabled = DetermineContainingProjectAndSelectedFile(out _, out _,
+                        out _);
 #pragma warning restore VSTHRD010
                 }
                 catch(Exception ex)
@@ -450,61 +443,62 @@ namespace VisualStudio.SpellChecker
 
             try
             {
-                if(DetermineContainingProjectAndSettingsFile(out Project containingProject, out string settingsFilename))
+                if(DetermineContainingProjectAndSelectedFile(out Project containingProject,
+                  out string editorConfigFile, out string fileGlob))
                 {
                     if(this.GetService(typeof(SDTE)) is DTE2 dte2)
                     {
                         // Don't add it again if it's already there, just open it
-                        var existingItem = dte2.Solution.FindProjectItemForFile(settingsFilename);
+                        var existingItem = dte2.Solution.FindProjectItemForFile(editorConfigFile);
 
                         if(existingItem == null)
                         {
-                            var newConfigFile = new SpellingConfigurationFile(settingsFilename, null);
-                            newConfigFile.Save();
+                            if(!File.Exists(editorConfigFile))
+                            {
+                                var editorConfig = new EditorConfigFile { Filename = editorConfigFile };
+                                
+                                editorConfig.Sections.Add(
+                                    new EditorConfigSection(new[] { new SectionLine($"[{fileGlob}]") }));
+                                editorConfig.Save();
+                            }
 
                             if(containingProject != null)
-                            {
-                                // If file settings, add them as a dependency if possible
-                                if(!settingsFilename.StartsWith(containingProject.FullName, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    existingItem = dte2.Solution.FindProjectItemForFile(
-                                        Path.GetFileNameWithoutExtension(settingsFilename));
-
-                                    if(existingItem != null && existingItem.ProjectItems != null)
-                                        existingItem = existingItem.ProjectItems.AddFromFile(settingsFilename);
-                                    else
-                                        existingItem = containingProject.ProjectItems.AddFromFile(settingsFilename);
-                                }
-                                else
-                                    existingItem = containingProject.ProjectItems.AddFromFile(settingsFilename);
-                            }
+                                containingProject.ProjectItems.AddFromFile(editorConfigFile);
                             else
                             {
-#pragma warning disable VSTHRD010
                                 // Add solution settings file.  Don't enumerate projects to find an existing copy
                                 // of the folder.  It's not a project so it won't be found that way.  Just search
                                 // the project collection.  It'll be at the root level if it exists.
+#pragma warning disable VSTHRD010
                                 var siProject = dte2.Solution.Projects.Cast<Project>().FirstOrDefault(
                                     p => p.Name == "Solution Items") ?? ((Solution2)dte2.Solution).AddSolutionFolder("Solution Items");
 #pragma warning restore VSTHRD010
-
-                                existingItem = siProject.ProjectItems.AddFromFile(settingsFilename);
+                                siProject.ProjectItems.AddFromFile(editorConfigFile);
                             }
                         }
 
-                        if(existingItem != null)
+                        try
                         {
-                            try
+                            if(this.GetService(typeof(IVsUIShellOpenDocument)) is IVsUIShellOpenDocument shellOpenDocument)
                             {
-                                existingItem.Open()?.Activate();
+                                SpellingConfigurationEditorPane.DefaultFileGlob = fileGlob;
+
+                                Guid logicalViewGuid = VSConstants.LOGVIEWID_Primary;
+                                var guid = new Guid(GuidList.guidSpellingConfigurationEditorFactoryString);
+
+                                shellOpenDocument.OpenDocumentViaProjectWithSpecific(editorConfigFile,
+                                    (uint)__VSSPECIFICEDITORFLAGS.VSSPECIFICEDITOR_DoOpen, ref guid, null,
+                                    ref logicalViewGuid, out _, out _, out _, out IVsWindowFrame ppWindowFrame);
+
+                                ppWindowFrame?.Show();
                             }
-                            catch(Exception ex)
-                            {
-                                // Sometimes this isn't implemented for some reason.  The file does get added and
-                                // can be opened manually.
-                                if(ex.HResult != VSConstants.E_NOTIMPL)
-                                    throw;
-                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            // Sometimes this isn't implemented for some reason.  The file does get added and
+                            // can be opened manually.
+                            if(ex.HResult != VSConstants.E_NOTIMPL)
+                                throw;
                         }
                     }
                 }
@@ -514,7 +508,7 @@ namespace VisualStudio.SpellChecker
                 // Ignore on error but report it
                 Debug.WriteLine(ex);
 
-                VsShellUtilities.ShowMessageBox(this, $"Unable to add spell checker configuration file: {ex.Message}",
+                VsShellUtilities.ShowMessageBox(this, $"Unable to edit spell checker configuration file: {ex.Message}",
                      Resources.PackageTitle, OLEMSGICON.OLEMSGICON_CRITICAL, OLEMSGBUTTON.OLEMSGBUTTON_OK,
                      OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
             }
@@ -626,27 +620,29 @@ namespace VisualStudio.SpellChecker
 
         #region Helper methods
         //=====================================================================
-
+        
         /// <summary>
-        /// This is used to determine the containing project and settings filename when adding a new spell
-        /// checker configuration file.
+        /// This is used to determine the containing project and selected filename or folder that will be used
+        /// to determine the .editorconfig file used to contain the settings.
         /// </summary>
-        /// <param name="containingProject">On return, this contains the containing project or null if adding
-        /// a solution configuration file.</param>
-        /// <param name="settingsFilename">On return, this contains the name of the settings file to be added</param>
-        /// <returns>True if a settings file can be added for the item selected in the Solution Explorer window
-        /// or false if not.</returns>
-        private static bool DetermineContainingProjectAndSettingsFile(out Project containingProject,
-          out string settingsFilename)
+        /// <param name="containingProject">On return, this contains the containing project or null if the
+        /// solution was selected.</param>
+        /// <param name="editorConfigLocation">On return, this contains the path to the .editorconfig file to
+        /// use for the settings.</param>
+        /// <param name="fileGlob">On return, this contains the file glob to use for the section header</param>
+        /// <returns>True if a single file or folder was selected in the Solution Explorer window or false if
+        /// not or the selected item does not represent a file or folder.</returns>
+        private static bool DetermineContainingProjectAndSelectedFile(out Project containingProject,
+          out string editorConfigLocation, out string fileGlob)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
             string folderName = null;
 
             containingProject = null;
-            settingsFilename = null;
+            editorConfigLocation = fileGlob = null;
 
-            // Only add if a single file is selected
+            // Only allow the option if a single item is selected
             if(!(GetGlobalService(typeof(SDTE)) is DTE2 dte2) || dte2.SelectedItems.Count != 1)
                 return false;
 
@@ -700,13 +696,19 @@ namespace VisualStudio.SpellChecker
                     if(project != null)
                     {
                         containingProject = project;
-                        settingsFilename = project.FullName;
+                        editorConfigLocation = project.FullName;
+                        fileGlob = "*";
 
-                        // Website projects are named after the folder rather than a file
-                        if(settingsFilename.Length > 1 && settingsFilename[settingsFilename.Length - 1] == '\\')
+                        if(editorConfigLocation.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                         {
-                            folderName = settingsFilename;
-                            settingsFilename += item.Name;
+                            folderName = path;
+                            editorConfigLocation = null;
+                        }
+                        else
+                        {
+                            // Website projects are named after the folder rather than a file
+                            if(editorConfigLocation.Length > 1 && editorConfigLocation[editorConfigLocation.Length - 1] == '\\')
+                                folderName = editorConfigLocation;
                         }
                     }
                 }
@@ -717,7 +719,10 @@ namespace VisualStudio.SpellChecker
                 {
                     // Looks like a solution
                     if(Path.GetFileNameWithoutExtension(dte2.Solution.FullName) == item.Name)
-                        settingsFilename = dte2.Solution.FullName;
+                    {
+                        editorConfigLocation = dte2.Solution.FullName;
+                        fileGlob = "*";
+                    }
                 }
                 else
                 {
@@ -744,17 +749,17 @@ namespace VisualStudio.SpellChecker
                                 containingProject = item.ProjectItem.ContainingProject;
 
                                 // Folder items have a trailing backslash in some project systems, others don't.
-                                // We'll put the configuration file in the folder using its name as the filename.
+                                // We'll put the configuration file in the folder.
                                 if(path[path.Length - 1] == '\\' || (!File.Exists(path) && Directory.Exists(path)))
                                 {
                                     if(path[path.Length - 1] != '\\')
                                         path += @"\";
 
-                                    folderName = path;
-                                    settingsFilename = path + item.Name;
+                                    folderName = editorConfigLocation = path;
+                                    fileGlob = "*";
                                 }
                                 else
-                                    settingsFilename = path;
+                                    editorConfigLocation = path;
                             }
                         }
                     }
@@ -763,35 +768,60 @@ namespace VisualStudio.SpellChecker
                         if(item.ProjectItem.Kind == EnvDTE.Constants.vsProjectItemKindSolutionItems)
                         {
                             // Looks like a solution item
-                            settingsFilename = item.ProjectItem.get_FileNames(1);
+                            editorConfigLocation = item.ProjectItem.get_FileNames(1);
                         }
                     }
                 }
             }
-            
-            if(settingsFilename != null)
+
+            if(editorConfigLocation != null && ((folderName == null && !File.Exists(editorConfigLocation)) ||
+              (folderName != null && !Directory.Exists(folderName)) ||
+              (folderName == null && SpellCheckFileInfo.IsBinaryFile(editorConfigLocation))))
             {
-                if(settingsFilename.EndsWith(".vsspell", StringComparison.OrdinalIgnoreCase) ||
-                 ((folderName == null && !File.Exists(settingsFilename)) ||
-                 (folderName != null && !Directory.Exists(folderName))))
-                {
-                    settingsFilename = null;
-                }
+                editorConfigLocation = null;
+            }
+            else
+            {
+                if(folderName != null)
+                    editorConfigLocation = Path.Combine(folderName, ".editorconfig");
                 else
                 {
-                    if(folderName == null)
+                    if(editorConfigLocation != null)
                     {
-                        if(SpellCheckFileInfo.IsBinaryFile(settingsFilename))
-                            settingsFilename = null;
+                        if(editorConfigLocation.EndsWith(".editorconfig", StringComparison.OrdinalIgnoreCase) ||
+                          editorConfigLocation.EndsWith(".globalconfig", StringComparison.OrdinalIgnoreCase))
+                        {
+                            fileGlob = "*";
+                        }
                         else
-                            settingsFilename += ".vsspell";
+                        {
+                            if(fileGlob == null)
+                            {
+                                fileGlob = Path.GetFileName(editorConfigLocation);
+
+                                // If it looks like there are multiple files with the same prefix (e.g. Form1.cs,
+                                // Form1.Designer.cs, Form1.resx), use a wildcard.
+                                int firstDot = fileGlob.IndexOf('.');
+
+                                if(firstDot > 0)
+                                {
+                                    string prefix = fileGlob.Substring(0, firstDot) + ".*";
+
+                                    if(Directory.EnumerateFiles(Path.GetDirectoryName(editorConfigLocation),
+                                      prefix).Count() > 1)
+                                    {
+                                        fileGlob = prefix;
+                                    }
+                                }
+                            }
+
+                            editorConfigLocation = Path.Combine(Path.GetDirectoryName(editorConfigLocation), ".editorconfig");
+                        }
                     }
-                    else
-                        settingsFilename += ".vsspell";
                 }
             }
 
-            return (settingsFilename != null);
+            return (editorConfigLocation != null);
         }
         #endregion
     }

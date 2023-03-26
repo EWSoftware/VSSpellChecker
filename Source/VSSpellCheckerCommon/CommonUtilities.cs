@@ -1,8 +1,8 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : Utility.cs
+// File    : CommonUtilities.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/12/2023
+// Updated : 03/25/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
@@ -29,20 +29,15 @@ using System.Xml.Linq;
 namespace VisualStudio.SpellChecker.Common
 {
     /// <summary>
-    /// This class contains utility and extension methods
+    /// This class contains common utility and extension methods
     /// </summary>
-    public static class Utility
+    public static class CommonUtilities
     {
         #region Constants and private data members
         //=====================================================================
 
         private static readonly Regex reUppercase = new Regex("([A-Z])");
         private static readonly Regex reRegexSeparator = new Regex(@"\(\?\#/Options/(.*?)\)");
-
-        internal static Regex XmlElement = new Regex(@"<[A-Za-z/]+?.*?>");
-
-        internal static Regex Url = new Regex(@"(ht|f)tp(s?)\:\/\/[0-9a-z]([-.\w]*[0-9a-z])*(:(0-9)*)*(\/?)" +
-            @"([a-z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// This defines the minimum identifier length
@@ -55,6 +50,17 @@ namespace VisualStudio.SpellChecker.Common
         /// </summary>
         public static readonly Regex IgnoreSpellingDirectiveRegex = new Regex(
             @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// This defines the regular expression used to find XML elements in text
+        /// </summary>
+        public static readonly Regex XmlElement = new Regex(@"<[A-Za-z/]+?.*?>");
+
+        /// <summary>
+        /// This defines the regular expression used to find URLs in text
+        /// </summary>
+        public static readonly Regex Url = new Regex(@"(ht|f)tp(s?)\:\/\/[0-9a-z]([-.\w]*[0-9a-z])*(:(0-9)*)*(\/?)" +
+            @"([a-z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?", RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -119,13 +125,18 @@ namespace VisualStudio.SpellChecker.Common
             minLength = Math.Min(baseParts.Length, absParts.Length);
 
             for(idx = 0; idx < minLength; idx++)
+            {
                 if(String.Compare(baseParts[idx], absParts[idx], StringComparison.OrdinalIgnoreCase) != 0)
                     break;
+            }
 
             // Use the absolute path if there's nothing in common (i.e. they are on different drives or network
-            // shares.
-            if(idx == 0)
+            // shares or it would go all the way up to the root anyway).
+            if(idx == 0 || (idx == 2 && absolutePath.Length > 2 && Char.IsLetter(absolutePath[0]) &&
+              absolutePath[1] == Path.VolumeSeparatorChar))
+            {
                 relPath = absolutePath;
+            }
             else
             {
                 // If equal to the base path, it doesn't have to go anywhere.  Otherwise, work up from the base
@@ -133,8 +144,10 @@ namespace VisualStudio.SpellChecker.Common
                 if(idx == baseParts.Length)
                     relPath = String.Empty;
                 else
+                {
                     relPath = new String(' ', baseParts.Length - idx).Replace(" ", ".." +
                         Path.DirectorySeparatorChar);
+                }
 
                 // And finally, add the path from the common root to the absolute path
                 relPath += String.Join(Path.DirectorySeparatorChar.ToString(), absParts, idx,

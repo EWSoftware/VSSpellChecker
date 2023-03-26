@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerLegacyConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/19/2023
+// Updated : 03/22/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to convert the legacy spell checker configuration settings to the new
@@ -107,11 +107,6 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// File type classification prefix
         /// </summary>
         private const string FileType = "File Type: ";
-
-        //// <summary>
-        //// Extension classification prefix
-        //// </summary>
-        ////private const string Extension = "Extension: ";
 
         /// <summary>
         /// Visual Studio ID Exclusion expression item

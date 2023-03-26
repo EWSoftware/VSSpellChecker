@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ISpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/08/2015
-// Note    : Copyright 2014-2015, Eric Woodruff, All rights reserved
+// Updated : 03/26/2023
+// Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
 //
 // This file contains an interface used by the configuration user controls
 //
@@ -43,13 +43,6 @@ namespace VisualStudio.SpellChecker.Editors
         /// This read-only property returns the help URL
         /// </summary>
         string HelpUrl { get; }
-
-        /// <summary>
-        /// This is used to determine whether or not the configuration page applies to the given configuration type
-        /// </summary>
-        /// <param name="configurationType">The configuration type to check</param>
-        /// <returns>True if it applies, false if not</returns>
-        bool AppliesTo(ConfigurationType configurationType);
 
         /// <summary>
         /// Load the configuration settings for the control

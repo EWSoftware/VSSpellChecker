@@ -7,17 +7,17 @@
 [**/bin/*]
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
-vsspell_code_analyzer_enabled = false
+vsspell_code_analyzers_enabled = false
 
 [**/obj/*]
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
-vsspell_code_analyzer_enabled = false
+vsspell_code_analyzers_enabled = false
 
 [*.min.cs]
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
-vsspell_code_analyzer_enabled = false
+vsspell_code_analyzers_enabled = false
 
 [*.min.js]
 vsspell_spell_check_as_you_type = false
@@ -39,17 +39,17 @@ vsspell_include_in_project_spell_check = false
 [GlobalSuppressions.*]
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
-vsspell_code_analyzer_enabled = false
+vsspell_code_analyzers_enabled = false
 
 [Resources.Designer.*]
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
-vsspell_code_analyzer_enabled = false
+vsspell_code_analyzers_enabled = false
 
 [Settings.Designer.cs]
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
-vsspell_code_analyzer_enabled = false
+vsspell_code_analyzers_enabled = false
 
 [Settings.settings]
 vsspell_spell_check_as_you_type = false

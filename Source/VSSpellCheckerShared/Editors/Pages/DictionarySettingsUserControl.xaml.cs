@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/04/2022
-// Note    : Copyright 2014-2022, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the spell checker dictionary settings
 //
@@ -33,6 +33,7 @@ using EnvDTE80;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Configuration;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
@@ -168,12 +169,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             configuration.StoreValues(PropertyNames.SelectedLanguages, PropertyNames.SelectedLanguagesItem,
                 lbSelectedLanguages.Items.Cast<SpellCheckerDictionary>().Select(d => d.Culture.Name));
-        }
-
-        /// <inheritdoc />
-        public bool AppliesTo(ConfigurationType configurationType)
-        {
-            return true;
         }
 
         /// <inheritdoc />
@@ -725,12 +720,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
+            /* TODO: Add back once converted to use the new configuration
             if(!GlobalDictionary.IsReadyForUse(selectedDictionary.Culture))
             {
                 MessageBox.Show("The selected dictionary is still loading.  Please try again in a few seconds.",
                     PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
-            }
+            }*/
 
             if(idx != -1)
             {
@@ -758,11 +754,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     File.WriteAllLines(selectedDictionary.UserDictionaryFilePath,
                         lbUserDictionary.Items.Cast<string>());
 
+                    /* TODO: Add back once converted to use the new configuration
                     if(!String.IsNullOrWhiteSpace(word))
                         GlobalDictionary.RemoveWord(selectedDictionary.Culture, word);
 
-                    GlobalDictionary.LoadUserDictionaryFile(selectedDictionary.Culture);
-                }
+                    GlobalDictionary.LoadUserDictionaryFile(selectedDictionary.Culture);*/
+        }
                 else
                     MessageBox.Show("Unable to save user dictionary.  The file could not be added to the " +
                         "project, could not be checked out, or is read-only", PackageResources.PackageTitle,
@@ -785,12 +782,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
+            /* TODO: Add back once converted to use the new configuration
             if(!GlobalDictionary.IsReadyForUse(selectedDictionary.Culture))
             {
                 MessageBox.Show("The selected dictionary is still loading.  Please try again in a few seconds.",
                     PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
-            }
+            }*/
 
             OpenFileDialog dlg = new OpenFileDialog
             {
@@ -805,7 +803,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             {
                 try
                 {
-                    var uniqueWords = new HashSet<string>(Utility.LoadUserDictionary(dlg.FileName, true, false),
+                    var uniqueWords = new HashSet<string>(CommonUtilities.LoadUserDictionary(dlg.FileName, true, false),
                         StringComparer.OrdinalIgnoreCase);
 
                     if(uniqueWords.Count == 0)
@@ -831,7 +829,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         {
                             File.WriteAllLines(selectedDictionary.UserDictionaryFilePath, uniqueWords);
 
-                            GlobalDictionary.LoadUserDictionaryFile(selectedDictionary.Culture);
+                            // TODO: Add back once converted to use the new configuration
+                            //GlobalDictionary.LoadUserDictionaryFile(selectedDictionary.Culture);
 
                             cboAvailableLanguages_SelectionChanged(sender, new SelectionChangedEventArgs(
                                 e.RoutedEvent, Array.Empty<object>(), Array.Empty<object>()));
@@ -903,12 +902,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                         if(result == MessageBoxResult.No)
                         {
-                            uniqueWords.UnionWith(Utility.LoadUserDictionary(dlg.FileName, true, true));
+                            uniqueWords.UnionWith(CommonUtilities.LoadUserDictionary(dlg.FileName, true, true));
                             replaceWords = false;
                         }
                     }
 
-                    Utility.SaveCustomDictionary(dlg.FileName, replaceWords, true, uniqueWords);
+                    CommonUtilities.SaveCustomDictionary(dlg.FileName, replaceWords, true, uniqueWords);
                 }
                 catch(Exception ex)
                 {

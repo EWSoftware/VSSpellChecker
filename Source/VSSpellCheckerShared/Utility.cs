@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/21/2021
-// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
+// Updated : 03/25/2023
+// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
 //
@@ -23,7 +23,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 using EnvDTE;
 using EnvDTE80;
@@ -237,6 +236,7 @@ namespace VisualStudio.SpellChecker
             return String.IsNullOrEmpty(path) ? null : Path.GetExtension(path);
         }
 
+        // TODO: Remove and use the copy in CommonUtilities
         /// <summary>
         /// This returns the given absolute file path relative to the given base path
         /// </summary>
@@ -295,13 +295,18 @@ namespace VisualStudio.SpellChecker
             minLength = Math.Min(baseParts.Length, absParts.Length);
 
             for(idx = 0; idx < minLength; idx++)
+            {
                 if(String.Compare(baseParts[idx], absParts[idx], StringComparison.OrdinalIgnoreCase) != 0)
                     break;
+            }
 
             // Use the absolute path if there's nothing in common (i.e. they are on different drives or network
-            // shares.
-            if(idx == 0)
+            // shares or it would go all the way up to the root anyway).
+            if(idx == 0 || (idx == 2 && absolutePath.Length > 2 && Char.IsLetter(absolutePath[0]) &&
+              absolutePath[1] == Path.VolumeSeparatorChar))
+            {
                 relPath = absolutePath;
+            }
             else
             {
                 // If equal to the base path, it doesn't have to go anywhere.  Otherwise, work up from the base
@@ -309,8 +314,10 @@ namespace VisualStudio.SpellChecker
                 if(idx == baseParts.Length)
                     relPath = String.Empty;
                 else
+                {
                     relPath = new String(' ', baseParts.Length - idx).Replace(" ", ".." +
                         Path.DirectorySeparatorChar);
+                }
 
                 // And finally, add the path from the common root to the absolute path
                 relPath += String.Join(Path.DirectorySeparatorChar.ToString(), absParts, idx,
@@ -320,6 +327,7 @@ namespace VisualStudio.SpellChecker
             return (hasBackslash) ? relPath + "\\" : relPath;
         }
 
+        // TODO: Remove and use the copy in CommonUtilities
         /// <summary>
         /// Convert a camel cased term to one or more space-separated words
         /// </summary>
@@ -337,6 +345,7 @@ namespace VisualStudio.SpellChecker
         #region Property state conversion methods
         //=====================================================================
 
+        // TODO: Remove if unused
         /// <summary>
         /// This is used to convert a wildcard file pattern to an equivalent regular expression
         /// </summary>
@@ -355,6 +364,7 @@ namespace VisualStudio.SpellChecker
             return new Regex(Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$", RegexOptions.IgnoreCase);
         }
 
+        // TODO: Remove if unused or use the one in CommonUtilities
         /// <summary>
         /// Convert the named property value to the appropriate selection state
         /// </summary>
@@ -369,6 +379,7 @@ namespace VisualStudio.SpellChecker
                 configuration.ToBoolean(propertyName) ? PropertyState.Yes : PropertyState.No;
         }
 
+        // TODO: Remove if unused or use the one in CommonUtilities
         /// <summary>
         /// Convert the selection state value to a property value
         /// </summary>
@@ -545,192 +556,6 @@ namespace VisualStudio.SpellChecker
         }
         #endregion
 
-        #region User dictionary import/export methods
-        //=====================================================================
-
-        /// <summary>
-        /// This loads all of the words from the given file based on the determined type (an XML or text user
-        /// dictionary file or a StyleCop settings file).
-        /// </summary>
-        /// <param name="filename">The file to load.</param>
-        /// <param name="onlyAddedWords">True to only load words from an XML user dictionary file where the
-        /// <c>Spelling</c> attribute is set to "Add" or false to only load words where the <c>Spelling</c>
-        /// attribute is set to "Ignore".  Words without a <c>Spelling</c> attribute will be added to the list
-        /// regardless of this setting.</param>
-        /// <param name="allWords">True to return all words including duplicates and those containing digits or
-        /// false to return only unique words without digits.</param>
-        /// <returns>An enumerable list of words from the file or an empty enumeration if the file type is XML
-        /// but is not a recognized format.</returns>
-        public static IEnumerable<string> LoadUserDictionary(string filename, bool onlyAddedWords, bool allWords)
-        {
-            IEnumerable<string> words = Enumerable.Empty<string>();
-            string action = onlyAddedWords ? "Add" : "Ignore";
-            char[] escapedLetters = new[] { 'a', 'b', 'f', 'n', 'r', 't', 'v', 'x', 'u', 'U' };
-
-            if(!File.Exists(filename))
-                return Enumerable.Empty<string>();
-
-            try
-            {
-                var doc = XDocument.Load(filename);
-
-                if(doc.Root.Name == "Dictionary")
-                {
-                    var recognizedWords = doc.Descendants("Recognized").FirstOrDefault();
-
-                    if(recognizedWords != null)
-                        words = recognizedWords.Elements("Word").Where(
-                            w => ((string)w.Attribute("Spelling") == action ||
-                                (string)w.Attribute("Spelling") == null) &&
-                                !String.IsNullOrWhiteSpace(w.Value)).Select(w => w.Value.Trim());
-                }
-                else
-                    if(doc.Root.Name == "StyleCopSettings")
-                    {
-                        var recognizedWords = doc.Descendants("CollectionProperty").FirstOrDefault(
-                            c => (string)c.Attribute("Name") == "RecognizedWords");
-
-                        if(recognizedWords != null)
-                            words = recognizedWords.Elements("Value").Where(
-                                w => !String.IsNullOrWhiteSpace(w.Value)).Select(w => w.Value.Trim());
-                    }
-            }
-            catch
-            {
-                // If it doesn't look like an XML file, assume it's text of some sort.  Convert anything that
-                // isn't a letter or a digit to a space and get each word.
-                var wordList = (new String(File.ReadAllText(filename).ToCharArray().Select(
-                    c => (c == '\\' || Char.IsLetterOrDigit(c)) ? c : ' ').ToArray())).Split(new[] { ' ' },
-                    StringSplitOptions.RemoveEmptyEntries).ToList();
-
-                // Handle escaped words and split words containing the escape anywhere other than the start
-                foreach(string w in wordList.Where(wd => wd.IndexOf('\\') != -1).ToArray())
-                {
-                    wordList.Remove(w);
-
-                    if(w.Length > 2)
-                    {
-                        if(w.IndexOf('\\', 1) > 0)
-                            wordList.AddRange(w.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
-                        else
-                            if(!onlyAddedWords)
-                            {
-                                if(escapedLetters.Contains(w[1]))
-                                    wordList.Add(w);
-                                else
-                                    wordList.Add(w.Substring(1));
-                            }
-                    }
-                }
-
-                words = wordList;
-            }
-
-            if(allWords)
-                return words;
-
-            return words.Distinct().Where(w => w.Length > 1 && w.IndexOfAny(
-                new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
-        }
-
-        /// <summary>
-        /// This is used to save an enumerable list of words to a user dictionary file
-        /// </summary>
-        /// <param name="filename">The user dictionary filename.  This can be a text or XML user dictionary file.</param>
-        /// <param name="replaceWords">True to replace the words in the file with the new list or false to
-        /// merge the words into the existing list.  This only applies to XML user dictionaries.  For text user
-        /// dictionaries, the word list contains all words including those from the current file if wanted so it
-        /// is always overwritten.</param>
-        /// <param name="addedWords">For XML user dictionaries, this indicates the <c>Spelling</c> attribute
-        /// setting (true for added words, false for ignored words).</param>
-        /// <param name="words">The list of words to save to the user dictionary file.</param>
-        public static void SaveCustomDictionary(string filename, bool replaceWords, bool addedWords,
-          IEnumerable<string> words)
-        {
-            XDocument dictionary = null;
-            string action = addedWords ? "Add" : "Ignore";
-
-            try
-            {
-                // For existing files, see if it's XML.  Don't assume the type by the extension.  If creating a
-                // new file, we will only use the XML format if it's got a ".xml" extension though.
-                if(File.Exists(filename))
-                    dictionary = XDocument.Load(filename);
-                else
-                    if(Path.GetExtension(filename).Equals(".xml", StringComparison.OrdinalIgnoreCase))
-                        dictionary = XDocument.Parse("<Dictionary />");
-            }
-            catch(Exception ex)
-            {
-                // Ignore any exceptions and treat the file as plain text
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
-
-            if(dictionary == null)
-            {
-                // Sort and write all the words to the file.  If under source control, this should minimize the
-                // number of merge conflicts that could result if multiple people added words and they were all
-                // written to the end of the file.
-                File.WriteAllLines(filename, words.OrderBy(w => w));
-                return;
-            }
-
-            // This only supports the code analysis custom dictionary format
-            if(dictionary.Root.Name != "Dictionary")
-                throw new InvalidOperationException("Only code analysis format XML custom dictionaries are supported");
-
-            var wordsElement = dictionary.Root.Element("Words");
-
-            if(wordsElement == null)
-            {
-                wordsElement = new XElement("Words");
-                dictionary.Root.Add(wordsElement);
-            }
-
-            var recognizedElement = wordsElement.Element("Recognized");
-
-            if(recognizedElement == null)
-            {
-                recognizedElement = new XElement("Recognized");
-                wordsElement.Add(recognizedElement);
-            }
-
-            var existingWords = recognizedElement.Elements("Word").Where(
-                w => (string)w.Attribute("Spelling") == action || words.Contains(w.Value)).ToList();
-
-            if(replaceWords && existingWords.Count != 0)
-            {
-                foreach(var word in existingWords)
-                    word.Remove();
-
-                existingWords.Clear();
-            }
-
-            // Escaped words are ignored as they aren't supported in XML user dictionary files
-            foreach(string w in words)
-                if(w.Length > 0 && w[0] != '\\')
-                {
-                    var match = existingWords.FirstOrDefault(m => m.Value.Equals(w, StringComparison.OrdinalIgnoreCase));
-
-                    if(match != null)
-                    {
-                        if(match.Attribute("Spelling") != null)
-                            match.Attribute("Spelling").Value = action;
-                        else
-                            match.Add(new XAttribute("Spelling", action));
-                    }
-                    else
-                    {
-                        var newWord = new XElement("Word", new XAttribute("Spelling", action), w);
-                        existingWords.Add(newWord);
-                        recognizedElement.Add(newWord);
-                    }
-                }
-
-            dictionary.Save(filename);
-        }
-        #endregion
-
         #region Range classification helpers
         //=====================================================================
 
@@ -746,19 +571,6 @@ namespace VisualStudio.SpellChecker
             return ((classification == RangeClassification.InterpolatedStringLiteral ||
                 classification == RangeClassification.NormalStringLiteral ||
                 classification == RangeClassification.VerbatimStringLiteral) && classification == nextClassification);
-        }
-
-        /// <summary>
-        /// This is used to see if a range classification is one of the string literal types
-        /// </summary>
-        /// <param name="classification">The classification to check</param>
-        /// <returns>True if the classification is an interpolated, normal, or verbatim string literal, false
-        /// if not.</returns>
-        internal static bool IsStringLiteral(this RangeClassification classification)
-        {
-            return (classification == RangeClassification.InterpolatedStringLiteral ||
-                classification == RangeClassification.NormalStringLiteral ||
-                classification == RangeClassification.VerbatimStringLiteral);
         }
         #endregion
     }

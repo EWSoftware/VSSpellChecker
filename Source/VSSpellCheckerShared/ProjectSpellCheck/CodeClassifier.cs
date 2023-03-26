@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/28/2021
-// Note    : Copyright 2015-2021, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify source code file content using a set of regular expressions
 //
@@ -26,7 +26,7 @@ using HtmlAgilityPack;
 
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {
@@ -64,7 +64,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             oldStyleDocCommentDelimiter = (string)classifierConfiguration.Attribute("OldStyleDocCommentDelimiter");
 
             isCSharp = filename.EndsWith(".cs", StringComparison.OrdinalIgnoreCase);
-            isCStyleCode = (spellCheckConfiguration.CSharpOptions.ApplyToAllCStyleLanguages &&
+            isCStyleCode = (spellCheckConfiguration.CodeAnalyzerOptions.ApplyToAllCStyleLanguages &&
                 ClassifierFactory.IsCStyleCode(filename));
         }
         #endregion
@@ -88,7 +88,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 // Apply the C# options to C# code and, if wanted, all C-style code
                 if(isCSharp || isCStyleCode)
                 {
-                    var opts = this.SpellCheckConfiguration.CSharpOptions;
+                    var opts = this.SpellCheckConfiguration.CodeAnalyzerOptions;
                     var classification = span.Classification;
 
                     if((classification == RangeClassification.XmlDocComments && opts.IgnoreXmlDocComments) ||

@@ -658,7 +658,7 @@ namespace VisualStudio.SpellChecker.Common
         ///     <description>The word is camel cased.</description>
         /// </list>
         /// </returns>
-        internal bool IsProbablyARealWord(string word)
+        public bool IsProbablyARealWord(string word)
         {
             if(String.IsNullOrWhiteSpace(word))
                 return false;

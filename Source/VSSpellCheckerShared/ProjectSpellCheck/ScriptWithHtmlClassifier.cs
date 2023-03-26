@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ScriptWithHtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/29/2021
-// Note    : Copyright 2021, Eric Woodruff, All rights reserved
+// Updated : 03/22/2023
+// Note    : Copyright 2021-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify script files with a mix of code and HTML
 //
@@ -26,7 +26,7 @@ using HtmlAgilityPack;
 
 using Microsoft.VisualStudio.Text;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.ProjectSpellCheck
 {
