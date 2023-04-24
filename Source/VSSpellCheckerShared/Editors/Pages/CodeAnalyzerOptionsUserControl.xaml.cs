@@ -1,11 +1,11 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : GeneralSettingsUserControl.xaml.cs
+// File    : CodeAnalyzerOptionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/16/2023
+// Updated : 04/21/2023
 // Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
 //
-// This file contains a user control used to edit the general spell checker configuration settings
+// This file contains a user control used to edit the code analyzer spell checker configuration settings
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -14,12 +14,11 @@
 //
 //    Date     Who  Comments
 // ==============================================================================================================
-// 06/09/2014  EFW  Moved the general settings to a user control
+// 06/12/2014  EFW  Created the code
 //===============================================================================================================
 
 using System;
 using System.Collections.Generic;
-using System.Windows;
 using System.Windows.Controls;
 
 using VisualStudio.SpellChecker.Common.Configuration;
@@ -27,9 +26,9 @@ using VisualStudio.SpellChecker.Common.Configuration;
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
     /// <summary>
-    /// This user control is used to edit the general spell checker configuration settings
+    /// This user control is used to edit the code analyzer spell checker configuration settings
     /// </summary>
-    public partial class GeneralSettingsUserControl : UserControl, ISpellCheckerConfiguration
+    public partial class CodeAnalyzerOptionsUserControl : UserControl, ISpellCheckerConfiguration
     {
         #region Private data members
         //=====================================================================
@@ -44,24 +43,27 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <summary>
         /// Constructor
         /// </summary>
-        public GeneralSettingsUserControl()
+        public CodeAnalyzerOptionsUserControl()
         {
             InitializeComponent();
 
             configPropertyControls = new[]
             {
-                (cboSpellCheckAsYouType, nameof(SpellCheckerConfiguration.SpellCheckAsYouType)),
-                (cboIncludeInProjectSpellCheck, nameof(SpellCheckerConfiguration.IncludeInProjectSpellCheck)),
-                (cboEnableCodeAnalyzers, nameof(SpellCheckerConfiguration.EnableCodeAnalyzers)),
-                (cboDetectDoubledWords, nameof(SpellCheckerConfiguration.DetectDoubledWords)),
-                (cboIgnoreWordsWithDigits, nameof(SpellCheckerConfiguration.IgnoreWordsWithDigits)),
-                (cboIgnoreAllUppercase, nameof(SpellCheckerConfiguration.IgnoreWordsInAllUppercase)),
-                (cboIgnoreMixedCase, nameof(SpellCheckerConfiguration.IgnoreWordsInMixedCase)),
-                (cboIgnoreFormatSpecifiers, nameof(SpellCheckerConfiguration.IgnoreFormatSpecifiers)),
-                (cboIgnoreFilenamesAndEMail, nameof(SpellCheckerConfiguration.IgnoreFilenamesAndEMailAddresses)),
-                (cboIgnoreXmlInText, nameof(SpellCheckerConfiguration.IgnoreXmlElementsInText)),
-                (cboTreatUnderscoresAsSeparators, nameof(SpellCheckerConfiguration.TreatUnderscoreAsSeparator)),
-                (cboIgnoreMnemonics, nameof(SpellCheckerConfiguration.IgnoreMnemonics))
+                (cboIgnoreIdentifierIfPrivate, nameof(CodeAnalyzerOptions.IgnoreIdentifierIfPrivate)),
+                (cboIgnoreIdentifierIfInternal, nameof(CodeAnalyzerOptions.IgnoreIdentifierIfInternal)),
+                (cboIgnoreIdentifierIfAllUppercase, nameof(CodeAnalyzerOptions.IgnoreIdentifierIfAllUppercase)),
+                (cboIgnoreIdentifierWithinMemberBodies, nameof(CodeAnalyzerOptions.IgnoreIdentifiersWithinMemberBodies)),
+                (cboIgnoreTypeParameters, nameof(CodeAnalyzerOptions.IgnoreTypeParameters)),
+                (cboIgnoreIfCompilerGenerated, nameof(CodeAnalyzerOptions.IgnoreIfCompilerGenerated)),
+                (cboIgnoreXmlDocComments, nameof(CodeAnalyzerOptions.IgnoreXmlDocComments)),
+                (cboIgnoreDelimitedComments, nameof(CodeAnalyzerOptions.IgnoreDelimitedComments)),
+                (cboIgnoreStandardSingleLineComments, nameof(CodeAnalyzerOptions.IgnoreStandardSingleLineComments)),
+                (cboIgnoreQuadrupleSlashComments, nameof(CodeAnalyzerOptions.IgnoreQuadrupleSlashComments)),
+                (cboIgnoreNormalStrings, nameof(CodeAnalyzerOptions.IgnoreNormalStrings)),
+                (cboIgnoreVerbatimStrings, nameof(CodeAnalyzerOptions.IgnoreVerbatimStrings)),
+                (cboIgnoreInterpolatedStrings, nameof(CodeAnalyzerOptions.IgnoreInterpolatedStrings)),
+                (cboIgnoreRawStrings, nameof(CodeAnalyzerOptions.IgnoreRawStrings)),
+                (cboApplyToAllCStyleLanguages, nameof(CodeAnalyzerOptions.ApplyToAllCStyleLanguages)),
             };
         }
         #endregion
@@ -73,16 +75,16 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title => "General Settings";
+        public string Title => "Code Analyzer Options";
+
+        /// <inheritdoc />
+        public string HelpUrl => "09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d";
 
         /// <inheritdoc />
         public string ConfigurationFilename { get; set; }
 
         /// <inheritdoc />
         public bool HasChanges { get; private set; }
-
-        /// <inheritdoc />
-        public string HelpUrl => "b4a8726f-5bee-48a4-81a9-00b1be332607";
 
         /// <inheritdoc />
         public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
@@ -103,37 +105,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 configProp.cbo.SelectedValue = properties.ToPropertyState(configProp.PropertyName, isGlobal);
             }
 
-            rbInheritIgnoredCharClass.Visibility = isGlobal ? Visibility.Collapsed : Visibility.Visible;
-
-            if(!properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredCharacterClass), out var pi) &&
-              !isGlobal)
-            {
-                rbInheritIgnoredCharClass.IsChecked = true;
-            }
-            else
-            {
-                if(pi == null || !Enum.TryParse(pi.EditorConfigPropertyValue, out IgnoredCharacterClass charClass))
-                {
-                    charClass = (IgnoredCharacterClass)SpellCheckerConfiguration.DefaultValueFor(
-                        nameof(SpellCheckerConfiguration.IgnoredCharacterClass));
-                }
-
-                switch(charClass)
-                {
-                    case IgnoredCharacterClass.NonAscii:
-                        rbIgnoreNonAscii.IsChecked = true;
-                        break;
-
-                    case IgnoredCharacterClass.NonLatin:
-                        rbIgnoreNonLatin.IsChecked = true;
-                        break;
-
-                    default:
-                        rbIncludeAll.IsChecked = true;
-                        break;
-                }
-            }
-
             this.HasChanges = false;
         }
 
@@ -148,15 +119,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                 if(propertyValue.PropertyName != null)
                     yield return propertyValue;
-            }
-
-            if((!isGlobal && !rbInheritIgnoredCharClass.IsChecked.Value) ||
-              (isGlobal && !rbIncludeAll.IsChecked.Value))
-            {
-                yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
-                    nameof(SpellCheckerConfiguration.IgnoredCharacterClass)).PropertyName,
-                    (rbIncludeAll.IsChecked.Value ? IgnoredCharacterClass.None : rbIgnoreNonLatin.IsChecked.Value ?
-                        IgnoredCharacterClass.NonLatin : IgnoredCharacterClass.NonAscii).ToString());
             }
         }
 
@@ -173,7 +135,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void Property_Changed(object sender, RoutedEventArgs e)
+        private void Property_Changed(object sender, System.Windows.RoutedEventArgs e)
         {
             this.HasChanges = true;
             this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);

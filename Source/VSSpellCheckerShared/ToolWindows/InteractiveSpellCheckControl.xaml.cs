@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 03/22/2023
+// Updated : 04/16/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -324,7 +324,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             words.Add(wordToIgnore);
 
 #pragma warning disable VSTHRD010
-                            if(!ignoredWordsFile.CanWriteToUserWordsFile(null))
+                            if(!ignoredWordsFile.CanWriteToUserWordsFile(null, true))
                             {
                                 MessageBox.Show("Ignored words file is read-only or could not be checked out",
                                     PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);

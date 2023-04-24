@@ -3,10 +3,21 @@ root = true
 
 # Don't use tabs for indentation unless otherwise overridden
 [*]
-guidelines = 80, 114
+guidelines = 80 dotted, 114 dotted
 indent_style = space
 end_of_line = crlf
 # (Please don't specify an indent_size here; that has too many unintended consequences.)
+
+# VSSPELL: Spell checker settings from VSSpellChecker.sln.vsspell
+vsspell_section_id = 6788f50bfd7c45868a229f5bebbd58f5
+vsspell_ignored_words_6788f50bfd7c45868a229f5bebbd58f5 = File:IgnoredWords.dic
+vsspell_exclusion_expressions_6788f50bfd7c45868a229f5bebbd58f5 = [a-z]{2}-([A-Z]{2}|Cyrl|Latn)(?@@PND@@/Options/None)\\\\\w+(?@@PND@@/Options/None)
+
+[NHunspell/**]
+# VSSPELL: Ignore spell checking in the NHunspell folder
+vsspell_spell_check_as_you_type = false
+vsspell_include_in_project_spell_check = false
+vsspell_code_analyzers_enabled = false
 
 # XML files of various types
 [*.{aml,asax,ascx,asmx,asp,aspx,axml,config,content,cshtml,csproj,database,datasource,dbml,disco,discomap,dtsx,edmx,exclude,fxcop,htm,html,items,layout,maml,manifest,master,msha,myapp,nunit,nuspec,proj,projitems,props,publishproj,pubxml,rdl,rdlc,resx,ruleset,settings,shfbproj,shproj,sitemap,snippets,soap,svc,svcinfo,svcmap,targets,tasks,tokens,vbhtml,vbproj,vcxproj,vcxproj.filters,vsct,vsixmanifest,vstemplate,webinfo,wsdl,xaml,xamlcfg,xml,xsd,xsl,xslt,xsx}]

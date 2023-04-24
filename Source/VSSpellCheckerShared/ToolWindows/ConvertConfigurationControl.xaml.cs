@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ConvertConfigurationControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 03/20/2023
+// Updated : 04/21/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles conversion of the old configuration files to .editorconfig
@@ -33,10 +33,10 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 
+using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Common.Configuration.Legacy;
 using VisualStudio.SpellChecker.Common.EditorConfig;
-using VisualStudio.SpellChecker.ProjectSpellCheck;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -63,8 +63,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
         public ConvertConfigurationControl()
         {
             InitializeComponent();
-
-            this.UpdateState(null);
         }
         #endregion
 
@@ -78,72 +76,73 @@ namespace VisualStudio.SpellChecker.ToolWindows
 #pragma warning disable VSTHRD100
         public async void UpdateState(string solutionFolder)
         {
-            if(this.solutionFolder == solutionFolder)
-                return;
-
             this.solutionFolder = solutionFolder;
+
+            if(!btnRefresh.IsEnabled)
+                return;
 
             lbEditorConfigFiles.Items.Clear();
             lbSpellCheckerConfigs.Items.Clear();
             fdConfiguration.Document.Blocks.Clear();
+            tbResults.Text = "--";
 
-            if(!String.IsNullOrWhiteSpace(solutionFolder))
+            spSpinner.Visibility = lblProgress.Visibility = Visibility.Visible;
+            btnRefresh.IsEnabled = btnConvertSelected.IsEnabled = btnConvertAll.IsEnabled = false;
+
+            configFiles = await Task.Run(() => this.GenerateConfigurationFileChanges()).ConfigureAwait(true);
+            editorConfigFiles = new Dictionary<string, string>();
+
+            spSpinner.Visibility = lblProgress.Visibility = Visibility.Hidden;
+            btnRefresh.IsEnabled = true;
+
+            if(this.solutionFolder == solutionFolder && configFiles.Any())
             {
-                spSpinner.Visibility = tbProgress.Visibility = Visibility.Visible;
-                btnConvertSelected.IsEnabled = btnConvertAll.IsEnabled = false;
+                btnConvertSelected.IsEnabled = true;
 
-                configFiles = await Task.Run(() => this.GenerateConfigurationFileChanges()).ConfigureAwait(true);
-                editorConfigFiles = new Dictionary<string, string>();
+                // If multiple solution files are found.  There may be some overlap between the
+                // configurations used.  In such cases, converting individual files and/or merging
+                // changed manually is usually the better approach to avoid issues.
+                btnConvertAll.IsEnabled = configFiles.Count > 1 && configFiles.Count(
+                    c => c.LegacyConfiguration.IsSolutionConfiguration) < 2;
 
-                if(this.solutionFolder == solutionFolder)
+                foreach(var config in configFiles)
                 {
-                    spSpinner.Visibility = tbProgress.Visibility = Visibility.Hidden;
-
-                    if(configFiles.Any())
+                    if(config.LegacyConfiguration.IsGlobalConfiguration)
+                        lbSpellCheckerConfigs.Items.Add("Global Configuration");
+                    else
                     {
-                        btnConvertSelected.IsEnabled = true;
-
-                        // If multiple solution files are found.  There may be some overlap between the
-                        // configurations used.  In such cases, converting individual files and/or merging
-                        // changed manually is usually the better approach to avoid issues.
-                        btnConvertAll.IsEnabled = configFiles.Count > 1 && configFiles.Count(
-                            c => c.LegacyConfiguration.IsSolutionConfiguration) < 2;
-
-                        foreach(var config in configFiles)
-                        {
-                            if(config.LegacyConfiguration.IsGlobalConfiguration)
-                                lbSpellCheckerConfigs.Items.Add("Global Configuration");
-                            else
-                            {
-                                lbSpellCheckerConfigs.Items.Add(
-                                    config.LegacyConfiguration.LegacyConfigurationFilename.ToRelativePath(solutionFolder));
-                            }
-                        }
-
-                        var first = configFiles.First();
-
-                        if(first.LegacyConfiguration.IsGlobalConfiguration)
-                        {
-                            editorConfigFiles.Add("Global Configuration",
-                                first.LegacyConfiguration.EditorConfigFilename);
-                            lbEditorConfigFiles.Items.Add("Global Configuration");
-                        }
-
-                        foreach(var editorConfig in configFiles.Where(
-                            c => !c.LegacyConfiguration.IsGlobalConfiguration).Select(
-                            c => c.LegacyConfiguration.EditorConfigFilename).Distinct().OrderBy(
-                            c => Path.GetDirectoryName(c)).ThenBy(c => c))
-                        {
-                            string relativePath = editorConfig.ToRelativePath(solutionFolder);
-
-                            editorConfigFiles.Add(relativePath, editorConfig);
-                            lbEditorConfigFiles.Items.Add(relativePath);
-                        }
-
-                        lbSpellCheckerConfigs.SelectedIndex = 0;
+                        lbSpellCheckerConfigs.Items.Add(
+                            config.LegacyConfiguration.LegacyConfigurationFilename.ToRelativePath(solutionFolder));
                     }
                 }
+
+                var first = configFiles.First();
+
+                if(first.LegacyConfiguration.IsGlobalConfiguration)
+                {
+                    editorConfigFiles.Add("Global Configuration",
+                        first.LegacyConfiguration.EditorConfigFilename);
+                    lbEditorConfigFiles.Items.Add("Global Configuration");
+                }
+
+                foreach(var editorConfig in configFiles.Where(
+                    c => !c.LegacyConfiguration.IsGlobalConfiguration).Select(
+                    c => c.LegacyConfiguration.EditorConfigFilename).Distinct().OrderBy(
+                    c => Path.GetDirectoryName(c)).ThenBy(c => c))
+                {
+                    string relativePath = editorConfig.ToRelativePath(solutionFolder);
+
+                    editorConfigFiles.Add(relativePath, editorConfig);
+                    lbEditorConfigFiles.Items.Add(relativePath);
+                }
+
+                lbSpellCheckerConfigs.SelectedIndex = 0;
             }
+
+            if(lbSpellCheckerConfigs.Items.Count == 0)
+                tbResults.Text = "No more legacy configurations to convert";
+            else
+                tbResults.Text = $"{lbSpellCheckerConfigs.Items.Count} legacy configuration(s) left to convert";
         }
 #pragma warning restore VSTHRD100
 
@@ -260,8 +259,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             sectionExisted = true;
                     }
 
-                    var existingProperties = matchingSection.SpellCheckerProperties.ToDictionary(
-                        p => SpellCheckerConfiguration.PropertyNameForEditorConfigSetting(p.PropertyName), p => p);
+                    // There shouldn't be duplicate properties but in case there are, we'll use the last one found
+                    var existingProperties = new Dictionary<string, SectionLine>();
+
+                    foreach(var scp in matchingSection.SpellCheckerProperties)
+                    {
+                        existingProperties[SpellCheckerConfiguration.PropertyNameForEditorConfigSetting(
+                            scp.PropertyName)] = scp;
+                    }
 
                     bool propertiesAdded = false;
 
@@ -325,10 +330,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         // If no properties were added because they all matched existing ones, remove any
                         // obsolete comments.
                         while(matchingSection.SectionLines.Count != 0 &&
-                          (matchingSection.SectionLines[matchingSection.SectionLines.Count - 1].LineText.StartsWith(
-                            "# VSSPELL:", StringComparison.OrdinalIgnoreCase) ||
                           matchingSection.SectionLines[matchingSection.SectionLines.Count - 1].LineText.StartsWith(
-                            "# TODO: Review imported", StringComparison.OrdinalIgnoreCase)))
+                            "# VSSPELL:", StringComparison.OrdinalIgnoreCase))
                         {
                             matchingSection.SectionLines.RemoveAt(matchingSection.SectionLines.Count - 1);
                         }
@@ -410,7 +413,20 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     if(File.Exists(oldFile.LegacyConfiguration.LegacyConfigurationFilename))
                     {
                         File.SetAttributes(oldFile.LegacyConfiguration.LegacyConfigurationFilename, FileAttributes.Normal);
-                        File.Delete(oldFile.LegacyConfiguration.LegacyConfigurationFilename);
+
+                        try
+                        {
+                            File.Delete(oldFile.LegacyConfiguration.LegacyConfigurationFilename);
+                        }
+                        catch(Exception ex)
+                        {
+                            // Ignore exceptions trying to delete the file.  The user will have to do it manually.
+                            System.Diagnostics.Debug.WriteLine(ex);
+
+                            MessageBox.Show("Unable to delete the old spell checker configuration file: " +
+                                $"{oldFile.LegacyConfiguration.LegacyConfigurationFilename}\r\n\r\n{ex.Message}",
+                                PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        }
                     }
                 }
             }
@@ -564,11 +580,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <param name="e">The event arguments</param>
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            string folder = solutionFolder;
-
-            solutionFolder = null;
-
-            this.UpdateState(folder);
+            this.UpdateState(solutionFolder);
         }
         #endregion
     }

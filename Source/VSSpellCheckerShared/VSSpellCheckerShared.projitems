@@ -9,22 +9,17 @@
     <Import_RootNamespace>VisualStudio.SpellChecker</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\CodeAnalysisDictionaryOptions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\ConfigurationType.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\CSharpOptions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\PropertyNames.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\RecognizedWordHandling.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SpellCheckerConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SpellCheckerDictionary.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SpellingConfigurationFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editors\CommandTargetArguments.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\EditorConfigSectionAddEditForm.xaml.cs">
+      <DependentUpon>EditorConfigSectionAddEditForm.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Editors\ICommonCommandSupport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editors\ISpellCheckerConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalysisUserControl.xaml.cs">
-      <DependentUpon>CodeAnalysisUserControl.xaml</DependentUpon>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalysisDictionaryUserControl.xaml.cs">
+      <DependentUpon>CodeAnalysisDictionaryUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\CSharpOptionsUserControl.xaml.cs">
-      <DependentUpon>CSharpOptionsUserControl.xaml</DependentUpon>
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalyzerOptionsUserControl.xaml.cs">
+      <DependentUpon>CodeAnalyzerOptionsUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\DictionarySettingsUserControl.xaml.cs">
       <DependentUpon>DictionarySettingsUserControl.xaml</DependentUpon>
@@ -44,9 +39,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredClassificationsUserControl.xaml.cs">
       <DependentUpon>IgnoredClassificationsUserControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredFilePatternsUserControl.xaml.cs">
-      <DependentUpon>IgnoredFilePatternsUserControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredWordsUserControl.xaml.cs">
       <DependentUpon>IgnoredWordsUserControl.xaml</DependentUpon>
     </Compile>
@@ -60,8 +52,10 @@
       <DependentUpon>XmlFilesUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Editors\PropertyState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\SectionInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editors\SimpleEditorFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editors\SimpleEditorPane.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Editors\SpellCheckPropertyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Editors\SpellingConfigurationEditorControl.xaml.cs">
       <DependentUpon>SpellingConfigurationEditorControl.xaml</DependentUpon>
     </Compile>
@@ -149,11 +143,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)WpfTextBox\WpfTextBoxSpellChecker.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalysisUserControl.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)Editors\EditorConfigSectionAddEditForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\CSharpOptionsUserControl.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalysisDictionaryUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\CodeAnalyzerOptionsUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -178,10 +176,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredClassificationsUserControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="$(MSBuildThisFileDirectory)Editors\Pages\IgnoredFilePatternsUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -225,8 +219,5 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />
   </ItemGroup>
 </Project>

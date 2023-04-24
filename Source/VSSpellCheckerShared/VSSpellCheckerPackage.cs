@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/25/2023
+// Updated : 04/22/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
@@ -236,7 +236,17 @@ namespace VisualStudio.SpellChecker
 
             // If it doesn't exist, create a default configuration file so that the editor can find it
             if(!File.Exists(configFile))
+            {
+                // If the old configuration file hasn't been converted yet.  Show the info bar and don't create
+                // a blank configuration file.  Otherwise, it won't convert the old one.
+                if(File.Exists(Path.ChangeExtension(configFile, ".vsspell")))
+                {
+                    ConvertConfigurationInfoBar.Instance.ShowInfoBar();
+                    return;
+                }
+
                 SpellCheckerConfiguration.CreateDefaultConfigurationFile();
+            }
 
             if(this.GetService(typeof(IVsUIShellOpenDocument)) is IVsUIShellOpenDocument shellOpenDocument)
             {
@@ -377,6 +387,11 @@ namespace VisualStudio.SpellChecker
             }
         }
 
+        /// <summary>
+        /// Enable or disable the spell checker menu options based on the session disabled state
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
         private void SpellCheckActionsQueryStatusHandler(object sender, EventArgs e)
         {
             if(sender is OleMenuCommand command)
@@ -446,6 +461,13 @@ namespace VisualStudio.SpellChecker
                 if(DetermineContainingProjectAndSelectedFile(out Project containingProject,
                   out string editorConfigFile, out string fileGlob))
                 {
+                    // If it's for an old .vsspell file, offer conversion instead
+                    if(fileGlob.EndsWith(".vsspell", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ConvertConfigurationInfoBar.Instance.ShowInfoBar();
+                        return;
+                    }
+
                     if(this.GetService(typeof(SDTE)) is DTE2 dte2)
                     {
                         // Don't add it again if it's already there, just open it
@@ -800,10 +822,11 @@ namespace VisualStudio.SpellChecker
                                 fileGlob = Path.GetFileName(editorConfigLocation);
 
                                 // If it looks like there are multiple files with the same prefix (e.g. Form1.cs,
-                                // Form1.Designer.cs, Form1.resx), use a wildcard.
+                                // Form1.Designer.cs, Form1.resx), use a wildcard.  Skip .vsspell files as we
+                                // will offer conversion for those instead.
                                 int firstDot = fileGlob.IndexOf('.');
 
-                                if(firstDot > 0)
+                                if(firstDot > 0 && !fileGlob.EndsWith(".vsspell", StringComparison.OrdinalIgnoreCase))
                                 {
                                     string prefix = fileGlob.Substring(0, firstDot) + ".*";
 

@@ -1,9 +1,9 @@
 ﻿//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
-// File    : CodeAnalysisUserControl.xaml.cs
+// File    : CodeAnalysisDictionaryUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 04/16/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the code analysis dictionary configuration settings
 //
@@ -22,24 +22,40 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
     /// <summary>
     /// This user control is used to edit the code analysis dictionary configuration settings
     /// </summary>
-    public partial class CodeAnalysisUserControl : UserControl, ISpellCheckerConfiguration
+    public partial class CodeAnalysisDictionaryUserControl : UserControl, ISpellCheckerConfiguration
     {
+        #region Private data members
+        //=====================================================================
+
+        private readonly (ComboBox cbo, string PropertyName)[] configPropertyControls;
+
+        #endregion
+
         #region Constructor
         //=====================================================================
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public CodeAnalysisUserControl()
+        public CodeAnalysisDictionaryUserControl()
         {
             InitializeComponent();
+
+            configPropertyControls = new[]
+            {
+                (cboImportCADictionaries, nameof(CodeAnalysisDictionaryOptions.ImportCodeAnalysisDictionaries)),
+                (cboUnrecognizedWords, nameof(CodeAnalysisDictionaryOptions.TreatUnrecognizedWordsAsMisspelled)),
+                (cboDeprecatedTerms, nameof(CodeAnalysisDictionaryOptions.TreatDeprecatedTermsAsMisspelled)),
+                (cboCompoundTerms, nameof(CodeAnalysisDictionaryOptions.TreatCompoundTermsAsMisspelled)),
+                (cboCasingExceptions, nameof(CodeAnalysisDictionaryOptions.TreatCasingExceptionsAsIgnoredWords))
+            };
         }
         #endregion
 
@@ -56,42 +72,47 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public string HelpUrl => "e01bd3d9-c525-4407-8c65-fcdb64539299";
 
         /// <inheritdoc />
-        public void LoadConfiguration(SpellingConfigurationFile configuration)
+        public string ConfigurationFilename { get; set; }
+
+        /// <inheritdoc />
+        public bool HasChanges { get; private set; }
+
+        /// <inheritdoc />
+        public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
         {
             var dataSource = new List<PropertyState>();
 
-            if(configuration.ConfigurationType != ConfigurationType.Global)
+            if(properties == null)
+                throw new ArgumentNullException(nameof(properties));
+
+            if(!isGlobal)
                 dataSource.AddRange(new[] { PropertyState.Inherited, PropertyState.Yes, PropertyState.No });
             else
                 dataSource.AddRange(new[] { PropertyState.Yes, PropertyState.No });
 
-            cboImportCADictionaries.ItemsSource = cboUnrecognizedWords.ItemsSource =
-                cboDeprecatedTerms.ItemsSource = cboCompoundTerms.ItemsSource =
-                cboCasingExceptions.ItemsSource = dataSource;
+            foreach(var configProp in configPropertyControls)
+            {
+                configProp.cbo.ItemsSource = dataSource;
+                configProp.cbo.SelectedValue = properties.ToPropertyState(configProp.PropertyName, isGlobal);
+            }
 
-            cboImportCADictionaries.SelectedValue = configuration.ToPropertyState(
-                PropertyNames.CadOptionsImportCodeAnalysisDictionaries);
-            cboUnrecognizedWords.SelectedValue = configuration.ToPropertyState(
-                PropertyNames.CadOptionsTreatUnrecognizedWordsAsMisspelled);
-            cboDeprecatedTerms.SelectedValue = configuration.ToPropertyState(
-                PropertyNames.CadOptionsTreatDeprecatedTermsAsMisspelled);
-            cboCompoundTerms.SelectedValue = configuration.ToPropertyState(
-                PropertyNames.CadOptionsTreatCompoundTermsAsMisspelled);
-            cboCasingExceptions.SelectedValue = configuration.ToPropertyState(
-                PropertyNames.CadOptionsTreatCasingExceptionsAsIgnoredWords);
+            rbInheritRecWordHandling.Visibility = isGlobal ? Visibility.Collapsed : Visibility.Visible;
 
-            if(configuration.ConfigurationType != ConfigurationType.Global)
-                rbInheritRecWordHandling.Visibility = Visibility.Visible;
-            else
-                rbInheritRecWordHandling.Visibility = Visibility.Collapsed;
-
-            if(!configuration.HasProperty(PropertyNames.CadOptionsRecognizedWordHandling) &&
-              configuration.ConfigurationType != ConfigurationType.Global)
+            if(!properties.TryGetValue(nameof(CodeAnalysisDictionaryOptions.RecognizedWordHandling), out var pi) &&
+              !isGlobal)
             {
                 rbInheritRecWordHandling.IsChecked = true;
             }
             else
-                switch(configuration.ToEnum<RecognizedWordHandling>(PropertyNames.CadOptionsRecognizedWordHandling))
+            {
+                if(pi == null || !Enum.TryParse(pi.EditorConfigPropertyValue,
+                  out RecognizedWordHandling recWordHandling))
+                {
+                    recWordHandling = (RecognizedWordHandling)SpellCheckerConfiguration.DefaultValueFor(
+                        nameof(CodeAnalysisDictionaryOptions.RecognizedWordHandling));
+                }
+
+                switch(recWordHandling)
                 {
                     case RecognizedWordHandling.IgnoreAllWords:
                         rbIgnoreAll.IsChecked = true;
@@ -109,30 +130,34 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         rbNone.IsChecked = true;
                         break;
                 }
+            }
+
+            this.HasChanges = false;
         }
 
         /// <inheritdoc />
-        public void SaveConfiguration(SpellingConfigurationFile configuration)
+        public IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal,
+          string sectionId)
         {
-            configuration.StoreProperty(PropertyNames.CadOptionsImportCodeAnalysisDictionaries,
-                ((PropertyState)cboImportCADictionaries.SelectedValue).ToPropertyValue());
-            configuration.StoreProperty(PropertyNames.CadOptionsTreatUnrecognizedWordsAsMisspelled,
-                ((PropertyState)cboUnrecognizedWords.SelectedValue).ToPropertyValue());
-            configuration.StoreProperty(PropertyNames.CadOptionsTreatDeprecatedTermsAsMisspelled,
-                ((PropertyState)cboDeprecatedTerms.SelectedValue).ToPropertyValue());
-            configuration.StoreProperty(PropertyNames.CadOptionsTreatCompoundTermsAsMisspelled,
-                ((PropertyState)cboCompoundTerms.SelectedValue).ToPropertyValue());
-            configuration.StoreProperty(PropertyNames.CadOptionsTreatCasingExceptionsAsIgnoredWords,
-                ((PropertyState)cboCasingExceptions.SelectedValue).ToPropertyValue());
+            foreach(var configProp in configPropertyControls)
+            {
+                var propertyValue = ((PropertyState)configProp.cbo.SelectedValue).ToPropertyValue(
+                    configProp.PropertyName, isGlobal);
 
-            if(rbInheritRecWordHandling.IsChecked.Value)
-                configuration.StoreProperty(PropertyNames.CadOptionsRecognizedWordHandling, null);
-            else
-                configuration.StoreProperty(PropertyNames.CadOptionsRecognizedWordHandling,
-                    rbNone.IsChecked.Value ? RecognizedWordHandling.None :
+                if(propertyValue.PropertyName != null)
+                    yield return propertyValue;
+            }
+
+            if((!isGlobal && !rbInheritRecWordHandling.IsChecked.Value) ||
+              (isGlobal && !rbIgnoreAll.IsChecked.Value))
+            {
+                yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
+                    nameof(CodeAnalysisDictionaryOptions.RecognizedWordHandling)).PropertyName,
+                    (rbNone.IsChecked.Value ? RecognizedWordHandling.None :
                         rbIgnoreAll.IsChecked.Value ? RecognizedWordHandling.IgnoreAllWords :
                             rbAddToDictionary.IsChecked.Value ? RecognizedWordHandling.AddAllWords :
-                                RecognizedWordHandling.AttributeDeterminesUsage);
+                                RecognizedWordHandling.AttributeDeterminesUsage).ToString());
+            }
         }
 
         /// <inheritdoc />
@@ -150,6 +175,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
+            this.HasChanges = true;
             this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion

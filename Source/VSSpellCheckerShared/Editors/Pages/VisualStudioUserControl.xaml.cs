@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VisualStudioUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 04/15/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the Visual Studio WPF text box spell checker configuration
 // settings.
@@ -27,7 +27,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
@@ -69,25 +70,35 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public string HelpUrl => "e23551ac-52f5-4505-b2d2-0728c7607fd3";
 
         /// <inheritdoc />
-        public void LoadConfiguration(SpellingConfigurationFile configuration)
+        public string ConfigurationFilename { get; set; }
+
+        /// <inheritdoc />
+        public bool HasChanges { get; private set; }
+
+        /// <inheritdoc />
+        public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
         {
             string displayText;
 
             lbExclusionExpressions.Items.Clear();
 
             // Will be null if resetting to default ID list
-            if(configuration != null)
+            if(properties != null)
             {
-                chkEnableWpfTextBoxSpellChecking.IsChecked = configuration.ToBoolean(PropertyNames.EnableWpfTextBoxSpellChecking);
+                chkEnableWpfTextBoxSpellChecking.IsChecked = properties.ToPropertyState(
+                    nameof(SpellCheckerConfiguration.EnableWpfTextBoxSpellChecking), true) == PropertyState.Yes;
 
-                if(configuration.HasProperty(PropertyNames.VisualStudioIdExclusions))
+                if(properties.TryGetValue(nameof(SpellCheckerConfiguration.VisualStudioIdExclusions),
+                  out var exclusions))
                 {
-                    expressions = configuration.ToRegexes(PropertyNames.VisualStudioIdExclusions,
-                        PropertyNames.VisualStudioIdExclusionItem).OrderBy(exp => exp.ToString()).ToList();
+                    expressions = exclusions.EditorConfigPropertyValue.ToRegexes().OrderBy(
+                        exp => exp.ToString()).ToList();
                 }
                 else
-                    expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioExclusions.Select(
+                {
+                    expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioIdExclusions.Select(
                         p => new Regex(p)));
+                }
             }
 
             foreach(var exp in expressions)
@@ -101,24 +112,32 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
 
             btnEditExpression.IsEnabled = btnRemoveExpression.IsEnabled = (expressions.Count != 0);
+            
+            this.HasChanges = false;
         }
 
         /// <inheritdoc />
-        public void SaveConfiguration(SpellingConfigurationFile configuration)
+        public IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal,
+          string sectionId)
         {
-            configuration.StoreProperty(PropertyNames.EnableWpfTextBoxSpellChecking, chkEnableWpfTextBoxSpellChecking.IsChecked);
+            var enableInWPFTextBoxes = (chkEnableWpfTextBoxSpellChecking.IsChecked.Value ? PropertyState.Yes :
+                PropertyState.No).ToPropertyValue(
+                    nameof(SpellCheckerConfiguration.EnableWpfTextBoxSpellChecking), true);
+
+            if(enableInWPFTextBoxes.PropertyValue != null)
+                yield return enableInWPFTextBoxes;
 
             var newList = new HashSet<string>(lbExclusionExpressions.Items.Cast<string>(),
                 StringComparer.OrdinalIgnoreCase);
 
-            if(newList.SetEquals(SpellCheckerConfiguration.DefaultVisualStudioExclusions))
+            if(!newList.SetEquals(SpellCheckerConfiguration.DefaultVisualStudioIdExclusions))
             {
-                configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
-                    PropertyNames.VisualStudioIdExclusionItem, null);
+                // Regular expressions are a bit tricky to specify on one line.  We'll use the options comment
+                // as the separator.
+                yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
+                    nameof(SpellCheckerConfiguration.VisualStudioIdExclusions)).PropertyName,
+                    String.Concat(expressions.Select(r => $"{r}(?#/Options/{r.Options})")));
             }
-            else
-                configuration.StoreRegexes(PropertyNames.VisualStudioIdExclusions,
-                    PropertyNames.VisualStudioIdExclusionItem, expressions.Count == 0 ? null : expressions);
         }
 
         /// <inheritdoc />
@@ -224,10 +243,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnDefaultIDs_Click(object sender, RoutedEventArgs e)
         {
-            expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioExclusions.Select(
+            expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioIdExclusions.Select(
                 p => new Regex(p)));
 
-            this.LoadConfiguration(null);
+            this.LoadConfiguration(true, null);
 
             Property_Changed(sender, e);
         }
@@ -261,6 +280,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
+            this.HasChanges = true;
             this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion

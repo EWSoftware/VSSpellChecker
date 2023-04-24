@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-	mc:Ignorable="d" d:DesignHeight="530" d:DesignWidth="500"
+	mc:Ignorable="d" d:DesignHeight="560" d:DesignWidth="500"
 	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
 	<UserControl.Resources>
 		<ResourceDictionary>
@@ -28,6 +28,10 @@
 					<StackPanel Orientation="Horizontal" Name="spIncludeInProjectSpellCheck">
 						<ComboBox Name="cboIncludeInProjectSpellCheck" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
 						<Label Margin="3" Content="Include when performing solution/project spell checking" />
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<ComboBox Name="cboEnableCodeAnalyzers" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+						<Label Margin="3" Content="Enable spell checking code analyzer in supported languages" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
 						<ComboBox Name="cboDetectDoubledWords" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />

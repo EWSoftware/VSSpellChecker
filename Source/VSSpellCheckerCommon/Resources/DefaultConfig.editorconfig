@@ -3,23 +3,28 @@
 # This file should only contain spell checker settings.  All other settings will be ignored.  Use the spell
 # checker configuration editor in Visual Studio to modify the settings.
 [*]
+# VSSPELL: Spell checker settings for all files
 
 [**/bin/*]
+# VSSPELL: Disable spell checking in the .\bin folder
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 vsspell_code_analyzers_enabled = false
 
 [**/obj/*]
+# VSSPELL: Disable spell checking in the .\obj folder
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 vsspell_code_analyzers_enabled = false
 
-[*.min.cs]
+[*.min.css]
+# VSSPELL: Disable spell checking in *.min.css files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 vsspell_code_analyzers_enabled = false
 
 [*.min.js]
+# VSSPELL: Disable spell checking in *.min.js files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
@@ -29,61 +34,75 @@ vsspell_section_id = 1C663502B9244D4DB52510C55DF2AB99
 vsspell_ignored_keywords_1C663502B9244D4DB52510C55DF2AB99 = microsoft|mimetype|mscorlib|resheader|resx|utf
 
 [*.rproj]
+# VSSPELL: Disable spell checking in *.rproj files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [CodeAnalysisLog.xml]
+# VSSPELL: Disable spell checking in code analysis log files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [GlobalSuppressions.*]
+# VSSPELL: Disable spell checking in global suppression files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 vsspell_code_analyzers_enabled = false
 
 [Resources.Designer.*]
+# VSSPELL: Disable spell checking in resource designer files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 vsspell_code_analyzers_enabled = false
 
 [Settings.Designer.cs]
+# VSSPELL: Disable spell checking in settings designer files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 vsspell_code_analyzers_enabled = false
 
 [Settings.settings]
+# VSSPELL: Disable spell checking in settings files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [UpgradeLog.htm]
+# VSSPELL: Disable spell checking in upgrade log files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [bootstrap*.css]
+# VSSPELL: Disable spell checking in bootstrap CSS files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [bootstrap*.js]
+# VSSPELL: Disable spell checking in bootstrap script files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [html5shiv.js]
+# VSSPELL: Disable spell checking in HTML shiv script files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [jquery*.d.ts]
+# VSSPELL: Disable spell checking in jQuery script files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [jquery*.js]
+# VSSPELL: Disable spell checking in jQuery script files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [respond*.js]
+# VSSPELL: Disable spell checking in respond script files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 
 [robots.txt]
+# VSSPELL: Disable spell checking in robots.txt files
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 

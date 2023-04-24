@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ImportSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/05/2018
-// Note    : Copyright 2018, Eric Woodruff, All rights reserved
+// Updated : 04/17/2023
+// Note    : Copyright 2018-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to specify a file from which to import settings
 //
@@ -17,16 +17,20 @@
 // 10/04/2018  EFW  Created the code
 //===============================================================================================================
 
-// Ignore Spelling: vsspell
+// Ignore Spelling: editorconfig
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
-using VisualStudio.SpellChecker.Configuration;
+using Microsoft.Win32;
+
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
-using WinForms = System.Windows.Forms;
+
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
@@ -35,14 +39,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
     /// </summary>
     public partial class ImportSettingsUserControl : UserControl, ISpellCheckerConfiguration
     {
-        #region Private data members
-        //=====================================================================
-
-        private bool isGlobal;
-        private string configFilePath;
-
-        #endregion
-
         #region Constructor
         //=====================================================================
 
@@ -70,28 +66,34 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public string HelpUrl => "b156d5ad-347f-4f63-89dc-4f945953ae41";
 
         /// <inheritdoc />
-        public void LoadConfiguration(SpellingConfigurationFile configuration)
+        public string ConfigurationFilename { get; set; }
+
+        /// <inheritdoc />
+        public bool HasChanges { get; private set; }
+
+        /// <inheritdoc />
+        public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
         {
-            isGlobal = configuration.ConfigurationType == ConfigurationType.Global;
-            configFilePath = Path.GetDirectoryName(configuration.Filename);
-
             tbGlobal.Visibility = isGlobal ? Visibility.Visible : Visibility.Collapsed;
-            tbOther.Visibility = !isGlobal ? Visibility.Visible : Visibility.Collapsed;
+            tbOther.Visibility = tbParentConfigs.Visibility = !isGlobal ? Visibility.Visible : Visibility.Collapsed;
 
-            txtImportSettingsFile.Text = configuration.ToString(PropertyNames.ImportSettingsFile);
+            if(properties.TryGetValue(nameof(SpellCheckerConfiguration.ImportSettingsFile), out var spi))
+                txtImportSettingsFile.Text = spi.EditorConfigPropertyValue;
+
+            this.HasChanges = false;
         }
 
         /// <inheritdoc />
-        public void SaveConfiguration(SpellingConfigurationFile configuration)
+        public IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal,
+          string sectionId)
         {
-            configFilePath = Path.GetDirectoryName(configuration.Filename);
-
             string filename = txtImportSettingsFile.Text.Trim();
 
-            if(filename.Length == 0)
-                filename = null;
-
-            configuration.StoreProperty(PropertyNames.ImportSettingsFile, filename);
+            if(filename.Length != 0)
+            {
+                yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
+                    nameof(SpellCheckerConfiguration.ImportSettingsFile)).PropertyName + sectionId, filename);
+            }
         }
 
         /// <inheritdoc />
@@ -109,24 +111,27 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnSelectFile_Click(object sender, RoutedEventArgs e)
         {
-            using(WinForms.OpenFileDialog dlg = new WinForms.OpenFileDialog())
+            string configFilePath = Path.GetDirectoryName(this.ConfigurationFilename);
+            bool isGlobal = configFilePath.Equals(SpellCheckerConfiguration.GlobalConfigurationFilePath,
+                StringComparison.OrdinalIgnoreCase);
+
+            OpenFileDialog dlg = new OpenFileDialog
             {
-                dlg.Title = "Select Configuration File to Import";
-                dlg.Filter = "Spell Checker Configuration Files (*.vsspell)|*.vsspell";
-                dlg.DefaultExt = "vsspell";
-                dlg.InitialDirectory = isGlobal ? Directory.GetCurrentDirectory() : configFilePath;
+                Title = "Select a Configuration File to Import",
+                InitialDirectory = isGlobal ? Directory.GetCurrentDirectory() : configFilePath,
+                Filter = ".editorconfig Files (*.editorconfig)|*.editorconfig",
+            };
 
-                if(dlg.ShowDialog() == WinForms.DialogResult.OK)
+            if(dlg.ShowDialog() ?? false)
+            {
+                txtImportSettingsFile.Text = dlg.FileName;
+                txtImportSettingsFile_LostFocus(sender, e);
+
+                if(!isGlobal && MessageBox.Show("Would you like to make the path relative to the current " +
+                    "configuration file?", PackageResources.PackageTitle, MessageBoxButton.YesNo,
+                    MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
                 {
-                    txtImportSettingsFile.Text = dlg.FileName;
-                    txtImportSettingsFile_LostFocus(sender, e);
-
-                    if(!isGlobal && MessageBox.Show("Would you like to make the path relative to the current " +
-                      "configuration file?", PackageResources.PackageTitle, MessageBoxButton.YesNo,
-                      MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.Yes)
-                    {
-                        txtImportSettingsFile.Text = txtImportSettingsFile.Text.ToRelativePath(configFilePath);
-                    }
+                    txtImportSettingsFile.Text = txtImportSettingsFile.Text.ToRelativePath(configFilePath);
                 }
             }
         }
@@ -138,6 +143,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void txtImportSettingsFile_LostFocus(object sender, RoutedEventArgs e)
         {
+            string configFilePath = Path.GetDirectoryName(this.ConfigurationFilename);
+
             try
             {
                 string filename = txtImportSettingsFile.Text.Trim();
@@ -169,6 +176,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
+            this.HasChanges = true;
             this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion

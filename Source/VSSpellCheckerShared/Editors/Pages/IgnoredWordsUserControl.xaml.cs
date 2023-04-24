@@ -2,10 +2,11 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
+// Updated : 04/23/2023
 // Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
 //
-// This file contains a user control used to edit the ignored words spell checker configuration settings
+// This file contains a user control used to edit the ignored words and ignored keywords spell checker
+// configuration settings.
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -32,24 +33,18 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 
 using VisualStudio.SpellChecker.Common;
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
     /// <summary>
-    /// This user control is used to edit the ignored words spell checker configuration settings
+    /// This user control is used to edit the ignored words and ignored keywords spell checker configuration
+    /// settings.
     /// </summary>
     public partial class IgnoredWordsUserControl : UserControl, ISpellCheckerConfiguration
     {
-        #region Private data members
-        //=====================================================================
-
-        private string configFilePath;
-
-        #endregion
-
         #region Constructor
         //=====================================================================
 
@@ -69,69 +64,164 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public UserControl Control => this;
 
         /// <inheritdoc />
-        public string Title => "Ignored Words";
+        public string Title => "Ignored Words/Keywords";
 
         /// <inheritdoc />
         public string HelpUrl => "c592c4d8-7387-47fe-9b79-28bf0168f447";
 
         /// <inheritdoc />
-        public void LoadConfiguration(SpellingConfigurationFile configuration)
+        public string ConfigurationFilename { get; set; }
+
+        /// <inheritdoc />
+        public bool HasChanges { get; private set; }
+
+        /// <inheritdoc />
+        public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
         {
-            IEnumerable<string> words;
+            var words = new List<string>();
+
             lbIgnoredWords.Items.Clear();
+            lbIgnoredKeywords.Items.Clear();
+            txtIgnoredWordsFile.Text = null;
 
-            configFilePath = Path.GetDirectoryName(configuration.Filename);
-
-            if(configuration.ConfigurationType == ConfigurationType.Global)
+            if(isGlobal)
             {
                 chkInheritIgnoredWords.IsChecked = false;
                 chkInheritIgnoredWords.Visibility = Visibility.Collapsed;
             }
             else
-                chkInheritIgnoredWords.IsChecked = configuration.ToBoolean(PropertyNames.InheritIgnoredWords);
+                chkInheritIgnoredWords.IsChecked = true;
 
-            txtIgnoredWordsFile.Text = configuration.ToString(PropertyNames.IgnoredWordsFile);
+            if(properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredWords), out var spi))
+            {
+                words.AddRange(spi.EditorConfigPropertyValue.Split(new[] { '|' },
+                    StringSplitOptions.RemoveEmptyEntries));
 
-            if(String.IsNullOrWhiteSpace(txtIgnoredWordsFile.Text) && configuration.ConfigurationType == ConfigurationType.Global)
-                txtIgnoredWordsFile.Text = "IgnoredWords.dic";
+                if(words.Count != 0 && words[0].Equals(SpellCheckerConfiguration.ClearInherited,
+                  StringComparison.OrdinalIgnoreCase))
+                {
+                    chkInheritIgnoredWords.IsChecked = false;
+                    words.RemoveAt(0);
+                }
 
-            if(configuration.HasProperty(PropertyNames.IgnoredWords))
-                words = configuration.ToValues(PropertyNames.IgnoredWords, PropertyNames.IgnoredWordsItem);
-            else
-                if(!chkInheritIgnoredWords.IsChecked.Value && configuration.ConfigurationType == ConfigurationType.Global)
-                    words = SpellCheckerConfiguration.DefaultIgnoredWords;
+                if(words.Count != 0 && words[0].StartsWith(SpellCheckerConfiguration.FilePrefix,
+                  StringComparison.OrdinalIgnoreCase))
+                {
+                    txtIgnoredWordsFile.Text = words[0].Substring(5);
+                    words.RemoveAt(0);
+                }
+
+                foreach(string el in words)
+                    lbIgnoredWords.Items.Add(el);
+            }
+
+            // For the global configuration, the default ignored words file should always be used if an override
+            // is not specified.
+            if(isGlobal)
+            {
+                if(String.IsNullOrWhiteSpace(txtIgnoredWordsFile.Text))
+                    txtIgnoredWordsFile.Text = "IgnoredWords.dic";
                 else
-                    words = Enumerable.Empty<string>();
+                {
+                    if(Path.GetDirectoryName(txtIgnoredWordsFile.Text).Equals(
+                      SpellCheckerConfiguration.GlobalConfigurationFilePath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        txtIgnoredWordsFile.Text = Path.GetFileName(txtIgnoredWordsFile.Text);
+                    }
+                }
+            }
 
-            foreach(string el in words)
-                lbIgnoredWords.Items.Add(el);
+            if(properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredKeywords), out spi))
+            {
+                words.Clear();
+                words.AddRange(spi.EditorConfigPropertyValue.Split(new[] { '|' },
+                    StringSplitOptions.RemoveEmptyEntries));
+
+                foreach(string el in words)
+                    lbIgnoredKeywords.Items.Add(el);
+            }
 
             var sd = new SortDescription { Direction = ListSortDirection.Ascending };
 
             lbIgnoredWords.Items.SortDescriptions.Add(sd);
+            lbIgnoredKeywords.Items.SortDescriptions.Add(sd);
+
+            this.HasChanges = false;
         }
 
         /// <inheritdoc />
-        public void SaveConfiguration(SpellingConfigurationFile configuration)
+        public IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal,
+          string sectionId)
         {
-            HashSet<string> newList = null;
+            var newWordList = new List<string>();
+            string configFilePath = Path.GetDirectoryName(this.ConfigurationFilename),
+                ignoredWordsFile = txtIgnoredWordsFile.Text.Trim();
 
-            configFilePath = Path.GetDirectoryName(configuration.Filename);
+            // For the global configuration, don't store the ignored words filename if it has no path and
+            // is the default name.  This prevents it getting added to every section.
+            if(isGlobal && ignoredWordsFile == "IgnoredWords.dic")
+                ignoredWordsFile = null;
 
-            if(lbIgnoredWords.Items.Count != 0 || !chkInheritIgnoredWords.IsChecked.Value)
+            if(lbIgnoredWords.Items.Count != 0 || (!isGlobal && !chkInheritIgnoredWords.IsChecked.Value) ||
+              !String.IsNullOrWhiteSpace(ignoredWordsFile))
             {
-                newList = new HashSet<string>(lbIgnoredWords.Items.Cast<string>(), StringComparer.OrdinalIgnoreCase);
+                newWordList.AddRange(lbIgnoredWords.Items.Cast<string>());
 
-                if(configuration.ConfigurationType == ConfigurationType.Global &&
-                  newList.SetEquals(SpellCheckerConfiguration.DefaultIgnoredWords))
-                    newList = null;
+                // The ignored words file always appears first with a prefix to identify it as such
+                if(!String.IsNullOrWhiteSpace(ignoredWordsFile))
+                {
+                    // For the global configuration, always fully qualify the path
+                    if(isGlobal && !Path.IsPathRooted(ignoredWordsFile))
+                        ignoredWordsFile = Path.GetFullPath(Path.Combine(configFilePath, ignoredWordsFile));
+
+                    newWordList.Insert(0, SpellCheckerConfiguration.FilePrefix + ignoredWordsFile);
+
+                    if(!Path.IsPathRooted(ignoredWordsFile))
+                        ignoredWordsFile = Path.GetFullPath(Path.Combine(configFilePath, ignoredWordsFile));
+
+                    try
+                    {
+                        // Create the file if it doesn't exist and add it to the project if possible if it looks
+                        // like it is within the project folder structure and isn't in the project already.
+                        if(!File.Exists(ignoredWordsFile) ||
+                          Path.GetDirectoryName(ignoredWordsFile).StartsWith(configFilePath, StringComparison.OrdinalIgnoreCase) ||
+                          configFilePath.StartsWith(Path.GetDirectoryName(ignoredWordsFile), StringComparison.OrdinalIgnoreCase))
+                        {
+#pragma warning disable VSTHRD010
+                            _ = ignoredWordsFile.CanWriteToUserWordsFile(this.ConfigurationFilename, false);
+#pragma warning restore VSTHRD010
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        // Ignore exceptions.  The user will have to create it and add it to the project.
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+                }
+
+                if(!isGlobal && !chkInheritIgnoredWords.IsChecked.Value)
+                    newWordList.Insert(0, SpellCheckerConfiguration.ClearInherited);
+
+                if(newWordList.Count != 0)
+                {
+                    yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
+                        nameof(SpellCheckerConfiguration.IgnoredWords)).PropertyName + sectionId,
+                            String.Join("|", newWordList));
+                }
             }
 
-            if(configuration.ConfigurationType != ConfigurationType.Global)
-                configuration.StoreProperty(PropertyNames.InheritIgnoredWords, chkInheritIgnoredWords.IsChecked);
+            if(lbIgnoredKeywords.Items.Count != 0)
+            {
+                newWordList.Clear();
+                newWordList.AddRange(lbIgnoredKeywords.Items.Cast<string>());
 
-            configuration.StoreValues(PropertyNames.IgnoredWords, PropertyNames.IgnoredWordsItem, newList);
-            configuration.StoreProperty(PropertyNames.IgnoredWordsFile, txtIgnoredWordsFile.Text.Trim());
+                if(newWordList.Count != 0)
+                {
+                    yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
+                        nameof(SpellCheckerConfiguration.IgnoredKeywords)).PropertyName + sectionId,
+                            String.Join("|", newWordList));
+                }
+            }
         }
 
         /// <inheritdoc />
@@ -143,7 +233,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         //=====================================================================
 
         /// <summary>
-        /// Add one or more new ignored word to the list
+        /// Add one or more new ignored words to the ignored words or keywords list
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
@@ -152,10 +242,14 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             char[] escapedLetters = new[] { 'a', 'b', 'f', 'n', 'r', 't', 'v', 'x', 'u', 'U' };
             int idx;
 
-            txtIgnoredWord.Text = txtIgnoredWord.Text.Trim();
+            var ignoredWordTextBox = sender == btnAddIgnoredWord ? txtIgnoredWord : txtIgnoredKeyword;
+            var ignoredWordsListBox = ignoredWordTextBox == txtIgnoredWord ? lbIgnoredWords : lbIgnoredKeywords;
 
-            if(txtIgnoredWord.Text.Length != 0)
-                foreach(string word in txtIgnoredWord.Text.Split(new[] { ' ', '\t', ',', '.' },
+            ignoredWordTextBox.Text = ignoredWordTextBox.Text.Trim();
+
+            if(ignoredWordTextBox.Text.Length != 0)
+            {
+                foreach(string word in ignoredWordTextBox.Text.Split(new[] { ' ', '\t', ',', '.', '|' },
                   StringSplitOptions.RemoveEmptyEntries))
                 {
                     string addWord = word;
@@ -163,80 +257,87 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     if(addWord.Length < 3 && addWord[0] == '\\')
                         addWord = String.Empty;
                     else
+                    {
                         if(addWord.Length > 1 && addWord[0] == '\\' && !escapedLetters.Contains(addWord[1]))
                             addWord = addWord.Substring(1);
+                    }
 
                     if(addWord.Length > 1)
                     {
-                        idx = lbIgnoredWords.Items.IndexOf(addWord);
+                        idx = ignoredWordsListBox.Items.IndexOf(addWord);
 
                         if(idx == -1)
-                            idx = lbIgnoredWords.Items.Add(addWord);
+                            idx = ignoredWordsListBox.Items.Add(addWord);
 
                         if(idx != -1)
                         {
-                            lbIgnoredWords.SelectedIndex = idx;
-                            lbIgnoredWords.ScrollIntoView(lbIgnoredWords.Items[idx]);
+                            ignoredWordsListBox.SelectedIndex = idx;
+                            ignoredWordsListBox.ScrollIntoView(ignoredWordsListBox.Items[idx]);
                         }
                     }
                 }
+            }
 
-            txtIgnoredWord.Text = null;
+            ignoredWordTextBox.Text = null;
             Property_Changed(sender, e);
         }
 
         /// <summary>
-        /// Remove the selected word from the list of ignored words
+        /// Remove the selected word from the ignored words or keywords list
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
         private void btnRemoveIgnoredWord_Click(object sender, RoutedEventArgs e)
         {
-            int idx = lbIgnoredWords.SelectedIndex;
+            var ignoredWordsListBox = sender == btnRemoveIgnoredWord ? lbIgnoredWords : lbIgnoredKeywords;
+            int idx = ignoredWordsListBox.SelectedIndex;
 
             if(idx != -1)
-                lbIgnoredWords.Items.RemoveAt(idx);
+                ignoredWordsListBox.Items.RemoveAt(idx);
 
-            if(lbIgnoredWords.Items.Count != 0)
+            if(ignoredWordsListBox.Items.Count != 0)
             {
                 if(idx < 0)
                     idx = 0;
                 else
-                    if(idx >= lbIgnoredWords.Items.Count)
-                        idx = lbIgnoredWords.Items.Count - 1;
+                {
+                    if(idx >= ignoredWordsListBox.Items.Count)
+                        idx = ignoredWordsListBox.Items.Count - 1;
+                }
 
-                lbIgnoredWords.SelectedIndex = idx;
+                ignoredWordsListBox.SelectedIndex = idx;
             }
 
             Property_Changed(sender, e);
         }
 
         /// <summary>
-        /// Reset the ignored words to the default list or blank if inherited
+        /// Clear the ignored words or keywords list
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnDefaultIgnoredWords_Click(object sender, RoutedEventArgs e)
+        private void btnClearIgnoredWords_Click(object sender, RoutedEventArgs e)
         {
-            lbIgnoredWords.Items.Clear();
+            var ignoredWordsListBox = sender == btnClearIgnoredWords ? lbIgnoredWords : lbIgnoredKeywords;
 
-            if(!chkInheritIgnoredWords.IsChecked.Value)
-                foreach(string el in SpellCheckerConfiguration.DefaultIgnoredWords)
-                    lbIgnoredWords.Items.Add(el);
+            ignoredWordsListBox.Items.Clear();
 
             var sd = new SortDescription { Direction = ListSortDirection.Ascending };
-            lbIgnoredWords.Items.SortDescriptions.Add(sd);
+
+            ignoredWordsListBox.Items.SortDescriptions.Add(sd);
 
             Property_Changed(sender, e);
         }
 
         /// <summary>
-        /// Import ignored words from a user dictionary file
+        /// Import words from a user dictionary file into the ignored words or keywords list
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnImport_Click(object sender, RoutedEventArgs e)
+        private void btnImportIgnoredWords_Click(object sender, RoutedEventArgs e)
         {
+            var ignoredWordsListBox = sender == btnImportIgnoredWords ? lbIgnoredWords : lbIgnoredKeywords;
+
             OpenFileDialog dlg = new OpenFileDialog
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -260,22 +361,22 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         return;
                     }
 
-                    if(lbIgnoredWords.Items.Count != 0 && MessageBox.Show("Do you want to replace the " +
+                    if(ignoredWordsListBox.Items.Count != 0 && MessageBox.Show("Do you want to replace the " +
                       "existing list of words?  Click Yes to replace them or No to merge the new words into " +
                       "the existing list.", PackageResources.PackageTitle, MessageBoxButton.YesNo,
                       MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
                     {
-                        uniqueWords.UnionWith(lbIgnoredWords.Items.Cast<string>());
+                        uniqueWords.UnionWith(ignoredWordsListBox.Items.Cast<string>());
                     }
 
-                    lbIgnoredWords.Items.Clear();
+                    ignoredWordsListBox.Items.Clear();
 
                     foreach(string w in uniqueWords)
-                        lbIgnoredWords.Items.Add(w);
+                        ignoredWordsListBox.Items.Add(w);
 
                     var sd = new SortDescription { Direction = ListSortDirection.Ascending };
 
-                    lbIgnoredWords.Items.SortDescriptions.Add(sd);
+                    ignoredWordsListBox.Items.SortDescriptions.Add(sd);
 
                     Property_Changed(sender, e);
                 }
@@ -289,12 +390,14 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <summary>
-        /// Export ignored words to a file
+        /// Export ignored words or keywords to a file
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
-        private void btnExport_Click(object sender, RoutedEventArgs e)
+        private void btnExportIgnoredWords_Click(object sender, RoutedEventArgs e)
         {
+            var ignoredWordsListBox = sender == btnExportIgnoredWords ? lbIgnoredWords : lbIgnoredKeywords;
+
             SaveFileDialog dlg = new SaveFileDialog
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -309,16 +412,16 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             {
                 try
                 {
-                    var uniqueWords = new HashSet<string>(lbIgnoredWords.Items.Cast<string>(),
+                    var uniqueWords = new HashSet<string>(ignoredWordsListBox.Items.Cast<string>(),
                         StringComparer.OrdinalIgnoreCase);
                     bool replaceWords = true;
 
                     if(File.Exists(dlg.FileName))
                     {
 #pragma warning disable VSTHRD010
-                        if(!dlg.FileName.CanWriteToUserWordsFile(null))
+                        if(!dlg.FileName.CanWriteToUserWordsFile(null, true))
                         {
-                            MessageBox.Show("File is read-only or could not be checked out",
+                            MessageBox.Show("The selected file is read-only or could not be checked out",
                                 PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                             return;
                         }
@@ -357,6 +460,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnSelectFile_Click(object sender, RoutedEventArgs e)
         {
+            string configFilePath = Path.GetDirectoryName(this.ConfigurationFilename);
+
             OpenFileDialog dlg = new OpenFileDialog
             {
                 InitialDirectory = Directory.Exists(configFilePath) ? configFilePath :
@@ -369,7 +474,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             {
                 string filename = dlg.FileName;
 
-                if(filename.StartsWith(configFilePath, StringComparison.OrdinalIgnoreCase))
+                if(filename.StartsWith(configFilePath, StringComparison.OrdinalIgnoreCase) ||
+                  configFilePath.StartsWith(Path.GetDirectoryName(filename), StringComparison.OrdinalIgnoreCase))
                 {
                     filename = Path.Combine(Path.GetDirectoryName(filename).ToRelativePath(configFilePath),
                         Path.GetFileName(filename));
@@ -396,7 +502,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
 
             if(!Path.IsPathRooted(filename))
-                filename = Path.GetFullPath(Path.Combine(configFilePath, filename));
+                filename = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(this.ConfigurationFilename), filename));
 
             try
             {
@@ -439,6 +545,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
+            this.HasChanges = true;
             this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion

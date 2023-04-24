@@ -74,7 +74,7 @@ namespace VisualStudio.SpellChecker.Common
         /// <remarks>The default implementation only checks to see if the file is writable.  It does not take
         /// source control status into consideration and will not add it to the active project.  Assign a
         /// different function to this property that implements that functionality if necessary.</remarks>
-        public static Func<string, string, bool> CanWriteToUserWordsFile { get; set; } = CanWriteToUserWordsFileDefault;
+        public static Func<string, string, bool, bool> CanWriteToUserWordsFile { get; set; } = CanWriteToUserWordsFileDefault;
 
         #endregion
 
@@ -187,7 +187,7 @@ namespace VisualStudio.SpellChecker.Common
             if(this.ShouldIgnoreWord(word) || this.IsSpelledCorrectly(word))
                 return true;
 
-            if(!(CanWriteToUserWordsFile ?? CanWriteToUserWordsFileDefault)(dictionaryWordsFile, dictionaryFile))
+            if(!(CanWriteToUserWordsFile ?? CanWriteToUserWordsFileDefault)(dictionaryWordsFile, dictionaryFile, true))
                 return false;
 
             bool multipleWordsAdded = false;
@@ -273,11 +273,14 @@ namespace VisualStudio.SpellChecker.Common
         /// </summary>
         /// <param name="dictionaryWordsFile">The user dictionary words file</param>
         /// <param name="dictionaryFile">The related dictionary file or null if there isn't one</param>
+        /// <param name="checkOutForEdit">This is unused but is needed to match the package version that has a
+        /// parameter used to indicate whether or not the file should be checked out for editing.</param>
         /// <returns>True if it can, false if not.</returns>
         /// <remarks>This only checks to see if the file is writable.  It does not take source control status
         /// into consideration and will not add it to the active project.  Use the
         /// <see cref="CanWriteToUserWordsFile"/> property to assign a different function that does if necessary.</remarks>
-        private static bool CanWriteToUserWordsFileDefault(string dictionaryWordsFile, string dictionaryFile)
+        private static bool CanWriteToUserWordsFileDefault(string dictionaryWordsFile, string dictionaryFile,
+          bool checkOutForEdit)
         {
             if(String.IsNullOrWhiteSpace(dictionaryWordsFile))
                 throw new ArgumentException("Dictionary words file cannot be null or empty", nameof(dictionaryWordsFile));

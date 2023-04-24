@@ -88,8 +88,10 @@
 					ToolTip="Show help for converting configurations" />
 			<vssc:SpinnerControl Grid.Column="5" Visibility="Hidden" Margin="3" x:Name="spSpinner"
         HorizontalAlignment="Left"/>
-			<Label Name="tbProgress" Visibility="Hidden" VerticalAlignment="Center" Margin="3"
+			<Label Name="lblProgress" Visibility="Collapsed" VerticalAlignment="Center" Margin="3"
 				Content="Searching for spell checker configuration files to convert" />
+			<TextBlock Name="tbResults" Margin="3,10,3,10" Padding="3" Text="--"
+				Style="{StaticResource NotificationText}" />
 		</StackPanel>
 	</Grid>
 </UserControl>

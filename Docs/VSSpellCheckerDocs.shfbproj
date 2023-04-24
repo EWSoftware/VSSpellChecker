@@ -216,7 +216,6 @@
     <None Include="Content\VersionHistory\v2018.8.25.0.aml" />
     <None Include="Content\VersionHistory\vNext.aml" />
     <None Include="Content\Welcome.aml" />
-    <None Include="VSSpellCheckerDocs.shfbproj.vsspell" />
   </ItemGroup>
   <ItemGroup>
     <ContentLayout Include="ContentLayout.content" />

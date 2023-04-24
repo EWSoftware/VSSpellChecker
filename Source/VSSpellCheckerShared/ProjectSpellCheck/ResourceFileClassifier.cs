@@ -17,8 +17,6 @@
 // 09/10/2015  EFW  Created the code
 //===============================================================================================================
 
-// Ignore spelling: microsoft resx
-
 using System;
 using System.Xml;
 

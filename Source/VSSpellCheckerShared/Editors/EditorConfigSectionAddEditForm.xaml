@@ -1,0 +1,38 @@
+﻿<Window x:Class="VisualStudio.SpellChecker.Editors.Pages.EditorConfigSectionAddEditForm"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:vsst="clr-namespace:VisualStudio.SpellChecker.Theme"
+	Title="Edit File Glob and Spell Checker Comments" MinWidth="800" MaxWidth="800" ResizeMode="NoResize" SizeToContent="Height"
+	WindowStartupLocation="CenterScreen" Background="{DynamicResource ToolWindowBackgroundBrushKey}"
+	FontFamily="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontFamilyKey}}"
+	FontSize="{DynamicResource {x:Static vsst:ThemeColors.EnvironmentFontSizeKey}}"
+	FocusManager.FocusedElement="{Binding ElementName=txtFileGlob}">
+	<Window.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Window.Resources>
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition />
+		</Grid.ColumnDefinitions>
+		<Label Grid.Row="0" Grid.Column="0" Margin="3" Content="File Glob" HorizontalAlignment="Right" />
+		<TextBox Grid.Row="0" Grid.Column="1"  Name="txtFileGlob" Margin="3" HorizontalAlignment="Stretch" />
+		<Label Grid.Row="1" Grid.Column="0" Margin="3" Content="Comments" HorizontalAlignment="Right" />
+		<TextBox Grid.Row="1" Grid.Column="1"  Name="txtComment" Margin="3" HorizontalAlignment="Stretch" />
+		<Label Grid.Row="2" Grid.Column="0" Margin="3" Content="Options" HorizontalAlignment="Right" />
+		<Button Grid.Row="3" Grid.Column="0" Name="btnSave" Content="Save" Margin="3" MinWidth="80"
+			HorizontalAlignment="Left" Click="btnSave_Click" />
+		<Button Grid.Row="3" Grid.Column="1" Name="btnCancel" Content="Cancel" Margin="3" MinWidth="80"
+			HorizontalAlignment="Right" IsCancel="True" />
+	</Grid>
+</Window>

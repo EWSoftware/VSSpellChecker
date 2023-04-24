@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
+// Updated : 04/16/2023
 // Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
@@ -542,7 +542,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                         words.Add(selectedMisspelling.Word);
 
 #pragma warning disable VSTHRD010
-                        if(ignoredWordsFile.CanWriteToUserWordsFile(null))
+                        if(ignoredWordsFile.CanWriteToUserWordsFile(null, true))
                             CommonUtilities.SaveCustomDictionary(ignoredWordsFile, false, false, words);
 #pragma warning restore VSTHRD010
                     }

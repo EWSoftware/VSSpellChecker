@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/26/2023
+// Updated : 04/23/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that presents the spell checking options to the user
@@ -153,18 +153,31 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     btnAddIgnored.Tag = ignoredWordsFiles.First();
                 else
                 {
-                    foreach(var file in ignoredWordsFiles)
+                    // If there are multiple ignored words files, order the files such that those within the
+                    // solution are listed first closest to farthest and the global file last.  We're making an
+                    // assumption here based on the file paths.
+                    string basePath = Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName);
+
+                    foreach(var file in ignoredWordsFiles.OrderBy(f => !String.IsNullOrWhiteSpace(basePath) &&
+                      (f.StartsWith(basePath, StringComparison.OrdinalIgnoreCase) || basePath.StartsWith(
+                        Path.GetDirectoryName(f), StringComparison.OrdinalIgnoreCase)) ? 0 : 1).ThenByDescending(
+                          f => f))
                     {
                         string displayText;
 
-                        if(file.Equals(SpellCheckerConfiguration.GlobalConfigurationFilename, StringComparison.OrdinalIgnoreCase))
+                        if(Path.GetDirectoryName(file).Equals(SpellCheckerConfiguration.GlobalConfigurationFilePath,
+                          StringComparison.OrdinalIgnoreCase))
+                        {
                             displayText = "Global";
+                        }
                         else
                         {
-                            string basePath = Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName);
-
-                            if(basePath != null && file.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
+                            if(!String.IsNullOrWhiteSpace(basePath) &&
+                              (file.StartsWith(basePath, StringComparison.OrdinalIgnoreCase) ||
+                              basePath.StartsWith(Path.GetDirectoryName(file), StringComparison.OrdinalIgnoreCase)))
+                            {
                                 displayText = file.ToRelativePath(basePath);
+                            }
                             else
                             {
                                 if(file.Length < 51)

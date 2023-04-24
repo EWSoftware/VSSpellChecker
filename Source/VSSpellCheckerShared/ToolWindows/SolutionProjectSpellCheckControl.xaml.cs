@@ -1582,7 +1582,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             words.Add(wordToIgnore);
 
 #pragma warning disable VSTHRD010
-                            if(!ignoredWordsFile.CanWriteToUserWordsFile(null))
+                            if(!ignoredWordsFile.CanWriteToUserWordsFile(null, true))
                             {
                                 MessageBox.Show("Ignored words file is read-only or could not be checked out",
                                     PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);

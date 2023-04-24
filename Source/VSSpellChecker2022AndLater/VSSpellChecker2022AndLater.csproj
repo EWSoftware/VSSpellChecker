@@ -197,9 +197,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <None Include="..\VSSpellChecker2017And2019\NHunspell\NHunspell.vsspell">
-      <Link>NHunspell\NHunspell.vsspell</Link>
-    </None>
     <Content Include="..\VSSpellChecker2017And2019\NHunspell\LGPL-License.txt">
       <Link>NHunspell\LGPL-License.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

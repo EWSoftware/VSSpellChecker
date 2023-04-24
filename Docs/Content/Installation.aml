@@ -51,6 +51,11 @@ search for "Visual Studio Spell Checker".  Include the quote marks for an exact 
 <legacyItalic>EWSoftware</legacyItalic>.  Once found, you can click the <ui>Download</ui> button to download and
 install it.</para>
 
+				<para>Correcting spelling errors within the editor is handled using the Quick Actions and Refactorings
+context menu option or the smart tags.  See the <link xlink:href="e8f67bc4-a8f8-4e50-ab5a-876599f3a645" />
+topic for more information.  A spell checker toolbar is also available.  Right click anywhere in the Visual
+Studio toolbar area and select the Spell Checker option from the context menu to display it.</para>
+				
 				<para>Once installed, you will find a new <ui>Spell Checker</ui> option on the <ui>Tools</ui> menu.
 Unless other packages have been installed that alter its position, it will be the fourth or fifth option from the
 bottom between the <ui>External Tools</ui> and the <ui>Import and Export Settings</ui> options.  Its submenu
@@ -115,9 +120,6 @@ global spell checker settings.</para>
 					</listItem>
 
 				</list>
-
-				<para>A spell checker toolbar is also available.  Right click anywhere in the Visual Studio toolbar area
-and select the Spell Checker option from the context menu to display it.</para>
 
 			</content>
 		</section>

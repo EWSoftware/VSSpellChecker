@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ExclusionExpressionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 04/16/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the exclusion expression spell checker configuration settings
 //
@@ -26,7 +26,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common;
+using VisualStudio.SpellChecker.Common.Configuration;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
@@ -67,29 +68,41 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public string HelpUrl => "6216eedb-6434-4cad-be06-576814e0b735";
 
         /// <inheritdoc />
-        public void LoadConfiguration(SpellingConfigurationFile configuration)
+        public string ConfigurationFilename { get; set; }
+
+        /// <inheritdoc />
+        public bool HasChanges { get; private set; }
+
+        /// <inheritdoc />
+        public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
         {
             string displayText;
 
             lbExclusionExpressions.Items.Clear();
 
-            if(configuration.ConfigurationType == ConfigurationType.Global)
+            if(isGlobal)
             {
                 chkInheritExclusionExpressions.IsChecked = false;
                 chkInheritExclusionExpressions.Visibility = Visibility.Collapsed;
             }
             else
-                chkInheritExclusionExpressions.IsChecked = configuration.ToBoolean(PropertyNames.InheritExclusionExpressions);
+                chkInheritExclusionExpressions.IsChecked = true;
 
-            if(configuration.HasProperty(PropertyNames.ExclusionExpressions))
+            if(properties.TryGetValue(nameof(SpellCheckerConfiguration.ExclusionExpressions), out var spi))
             {
-                expressions = configuration.ToRegexes(PropertyNames.ExclusionExpressions,
-                    PropertyNames.ExclusionExpressionItem).OrderBy(exp => exp.ToString()).ToList();
+                expressions = spi.EditorConfigPropertyValue.ToRegexes().ToList();
+
+                if(expressions.Count != 0 && expressions[0].ToString().Equals(SpellCheckerConfiguration.ClearInherited,
+                  StringComparison.OrdinalIgnoreCase))
+                {
+                    chkInheritExclusionExpressions.IsChecked = false;
+                    expressions.RemoveAt(0);
+                }
             }
             else
                 expressions = new List<Regex>();
 
-            foreach(var exp in expressions)
+            foreach(var exp in expressions.OrderBy(e => e.ToString()))
             {
                 displayText = exp.ToString();
 
@@ -100,16 +113,25 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
 
             btnEditExpression.IsEnabled = btnRemoveExpression.IsEnabled = (expressions.Count != 0);
+
+            this.HasChanges = false;
         }
 
         /// <inheritdoc />
-        public void SaveConfiguration(SpellingConfigurationFile configuration)
+        public IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal,
+          string sectionId)
         {
-            if(configuration.ConfigurationType != ConfigurationType.Global)
-                configuration.StoreProperty(PropertyNames.InheritExclusionExpressions, chkInheritExclusionExpressions.IsChecked);
+            var values = new List<string>(expressions.Select(r => $"{r}(?#/Options/{r.Options})"));
 
-            configuration.StoreRegexes(PropertyNames.ExclusionExpressions, PropertyNames.ExclusionExpressionItem,
-                expressions.Count == 0 ? null : expressions);
+            if(!isGlobal && !chkInheritExclusionExpressions.IsChecked.Value)
+                values.Insert(0, SpellCheckerConfiguration.ClearInherited + "(?#/Options/)");
+
+            if(values.Count != 0)
+            {
+                yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
+                    nameof(SpellCheckerConfiguration.ExclusionExpressions)).PropertyName + sectionId,
+                        String.Concat(values));
+            }
         }
 
         /// <inheritdoc />
@@ -174,8 +196,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 }
             }
             else
+            {
                 if(lbExclusionExpressions.Items.Count != 0)
                     lbExclusionExpressions.SelectedIndex = 0;
+            }
         }
 
         /// <summary>
@@ -201,8 +225,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 if(idx < 0)
                     idx = 0;
                 else
+                {
                     if(idx >= lbExclusionExpressions.Items.Count)
                         idx = lbExclusionExpressions.Items.Count - 1;
+                }
 
                 lbExclusionExpressions.SelectedIndex = idx;
             }
@@ -237,6 +263,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
+            this.HasChanges = true;
             this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion

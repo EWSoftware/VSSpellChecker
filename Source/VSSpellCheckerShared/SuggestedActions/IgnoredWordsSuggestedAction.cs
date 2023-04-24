@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsSuggestedAction.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/26/2023
+// Updated : 04/23/2023
 // Note    : Copyright 2020-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide suggested actions for adding words to an ignored words file
@@ -62,14 +62,21 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             this.dictionary = dictionary;
             this.ignoredWordsFile = ignoredWordsFile;
 
-            if(ignoredWordsFile.Equals(SpellCheckerConfiguration.GlobalConfigurationFilename, StringComparison.OrdinalIgnoreCase))
+            if(Path.GetDirectoryName(ignoredWordsFile).Equals(SpellCheckerConfiguration.GlobalConfigurationFilePath,
+              StringComparison.OrdinalIgnoreCase))
+            {
                 this.DisplayTextSuffix = "Global";
+            }
             else
             {
                 string basePath = Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName);
 
-                if(basePath != null && ignoredWordsFile.StartsWith(basePath, StringComparison.OrdinalIgnoreCase))
+                if(!String.IsNullOrWhiteSpace(basePath) &&
+                  (ignoredWordsFile.StartsWith(basePath, StringComparison.OrdinalIgnoreCase) ||
+                  basePath.StartsWith(Path.GetDirectoryName(ignoredWordsFile), StringComparison.OrdinalIgnoreCase)))
+                {
                     this.DisplayTextSuffix = ignoredWordsFile.ToRelativePath(basePath);
+                }
                 else
                 {
                     if(ignoredWordsFile.Length < 51)
@@ -107,7 +114,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                     words.Add(wordToIgnore);
 
 #pragma warning disable VSTHRD010
-                    if(!ignoredWordsFile.CanWriteToUserWordsFile(null))
+                    if(!ignoredWordsFile.CanWriteToUserWordsFile(null, true))
                     {
                         MessageBox.Show("Ignored words file is read-only or could not be checked out",
                             PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);

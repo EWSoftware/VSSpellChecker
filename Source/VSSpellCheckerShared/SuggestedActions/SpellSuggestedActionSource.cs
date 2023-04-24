@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedActionSource.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/21/2023
+// Updated : 04/23/2023
 // Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to implement the suggestion source for spelling light bulbs
@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,6 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
 using VisualStudio.SpellChecker.Common;
-using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Definitions;
 using VisualStudio.SpellChecker.Tagging;
 
@@ -315,9 +315,18 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                 }
                 else
                 {
-                    // If there are multiple ignored words files, put them in a submenu
-                    foreach(var iwf in ignoredWordsFiles)
+                    // If there are multiple ignored words files, put them in a submenu.  Order the files such
+                    // that those within the solution are listed first closest to farthest and the global file
+                    // last.  We're making an assumption here based on the file paths.
+                    string basePath = Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName);
+
+                    foreach(var iwf in ignoredWordsFiles.OrderBy(f => !String.IsNullOrWhiteSpace(basePath) &&
+                      (f.StartsWith(basePath, StringComparison.OrdinalIgnoreCase) || basePath.StartsWith(
+                        Path.GetDirectoryName(f), StringComparison.OrdinalIgnoreCase)) ? 0 : 1).ThenByDescending(
+                          f => f))
+                    {
                         actions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary, iwf, String.Empty));
+                    }
 
                     actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(
                         "Add to Ignored Words File", new[] { new SuggestedActionSet(null, actions) }) }, null,
@@ -366,8 +375,15 @@ namespace VisualStudio.SpellChecker.SuggestedActions
             }
             else
             {
-                // If there are multiple ignored words files, put them in a submenu
-                foreach(var iwf in ignoredWordsFiles)
+                // If there are multiple ignored words files, put them in a submenu.  Order the files such
+                // that those within the solution are listed first closest to farthest and the global file
+                // last.  We're making an assumption here based on the file paths.
+                string basePath = Path.GetDirectoryName(SpellingServiceProxy.LastSolutionName);
+
+                foreach(var iwf in ignoredWordsFiles.OrderBy(f => !String.IsNullOrWhiteSpace(basePath) &&
+                  (f.StartsWith(basePath, StringComparison.OrdinalIgnoreCase) || basePath.StartsWith(
+                    Path.GetDirectoryName(f), StringComparison.OrdinalIgnoreCase)) ? 0 : 1).ThenByDescending(
+                      f => f))
                 {
                     ignoredWordsFileActions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary,
                         iwf, String.Empty));

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/26/2023
+// Updated : 04/23/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -38,14 +38,12 @@ using VisualStudio.SpellChecker.Common.EditorConfig;
 
 namespace VisualStudio.SpellChecker.Common.Configuration
 {
-    // TODO: Editor: If the section contains a comment starting with "# VSSPELL:", use that as a section comment
-    // for the spell checker settings.
-
     /// <summary>
     /// This class is used to contain the spell checker's configuration
     /// </summary>
-    /// <remarks>Settings are stored in an XML file in the user's local application data folder and will be used
-    /// by all versions of Visual Studio in which the package is installed.</remarks>
+    /// <remarks>Global settings are stored in an .editorconfig file in the user's local application data folder
+    /// and will be used by all versions of Visual Studio in which the package is installed.  Other .editorconfig
+    /// files in the solution, project, and folder structure can override the global settings.</remarks>
     public class SpellCheckerConfiguration
     {
         #region Private data members and constants
@@ -55,6 +53,23 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// This is the prefix used on all spell checker .editorconfig properties
         /// </summary>
         public const string PropertyPrefix = "vsspell_";
+
+        /// <summary>
+        /// This is the value used in spell checker .editorconfig properties to indicate that inherited values
+        /// should be cleared before applying the new values.
+        /// </summary>
+        public const string ClearInherited = "clear_inherited";
+
+        /// <summary>
+        /// This is the value used in spell checker .editorconfig properties to indicate the position at which
+        /// inherited dictionary languages should be placed
+        /// </summary>
+        public const string Inherited = "inherited";
+
+        /// <summary>
+        /// Ignored words file prefix
+        /// </summary>
+        public const string FilePrefix = "File:";
 
         /// <summary>
         /// File type classification prefix
@@ -129,11 +144,15 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         [EditorConfigProperty("vsspell_section_id")]
         public Guid SectionId { get; set; }
 
-        // TODO: Editor: This property should be the first property for non-global configurations and last
-        // property for global configurations.
         /// <summary>
         /// This is used to get or set the name of a configuration file to import
         /// </summary>
+        /// <remarks>Although it cannot be enforced for non-global configuration files, this property should be
+        /// the first property in the set of spell checker options after the section ID so that the options
+        /// following it override the imported settings.  For the global configuration file, the option is
+        /// added to the loaded set last regardless of it's actual position in the file so that the settings in
+        /// the imported file override the global settings since the global settings are loaded first and all
+        /// other files should override the global settings.</remarks>
         [EditorConfigProperty("vsspell_import_settings_file", true)]
         public string ImportSettingsFile { get; set; }
 
@@ -157,12 +176,10 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// This is used to get or set whether or not to spell check the file as you type using the
         /// classification taggers.
         /// </summary>
-        /// <value>This is true by default.  If code analyzers are enabled, this option will have no effect in
-        /// files in which code analyzers are active.</value>
+        /// <value>This is true by default</value>
         [DefaultValue(true), EditorConfigProperty("vsspell_spell_check_as_you_type")]
         public bool SpellCheckAsYouType { get; set; } = true;
 
-        // TODO: Editor: This is always true for global configuration files so it is never changed
         /// <summary>
         /// This is used to get or set whether or not to spell check the file as part of the solution/project
         /// spell checking process.
@@ -276,30 +293,25 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// </summary>
         /// <remarks>When searching for dictionaries, these folders will be included in the search.  This allows
         /// for solution and project-specific dictionaries.  If the first property value is set to
-        /// "clear_inherited", prior folders are cleared rather than inherited.  If not specified, prior folders
-        /// are retained.</remarks>
+        /// <see cref="ClearInherited"/>, prior folders are cleared rather than inherited.  If not specified,
+        /// prior folders are retained.</remarks>
         [EditorConfigProperty("vsspell_additional_dictionary_folders", true)]
         public IEnumerable<string> AdditionalDictionaryFolders => additionalDictionaryFolders;
 
-        // TODO: Editor: For the global configuration this is always marked to clear the list when loaded to
-        // remove the default list and replace it with the modified default list.  If not changed, nothing will
-        // be written out except for the ignored words file if specified.
         /// <summary>
         /// This read-only property returns an enumerable list of ignored words that will not be spell checked
         /// </summary>
-        /// <remarks>If the first property value is set to "clear_inherited", prior ignored words are cleared
-        /// rather than inherited.  If not specified, prior ignored words are retained.</remarks>
+        /// <remarks>If the first property value is set to <see cref="ClearInherited"/>, prior ignored words are
+        /// cleared rather than inherited.  If not specified, prior ignored words are retained.</remarks>
         [EditorConfigProperty("vsspell_ignored_words", true)]
         public IEnumerable<string> IgnoredWords => ignoredWords;
 
-        // TODO: Editor: If an ignored words file is specified, make sure it exists when the settings are saved.
-        // If not, create a blank file.
         /// <summary>
         /// This read-only property returns an enumerable list of ignored words files that were loaded by this
         /// configuration.
         /// </summary>
         /// <remarks>A filename is added if the <see cref="IgnoredWords" /> property value contains an entry
-        /// prefixed with "File:".</remarks>
+        /// prefixed with <see cref="FilePrefix"/>.</remarks>
         public IEnumerable<string> IgnoredWordsFiles => ignoredWordsFiles;
 
         /// <summary>
@@ -316,43 +328,34 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// This read-only property returns an enumerable list of exclusion regular expressions that will be used
         /// to find ranges of text that should not be spell checked.
         /// </summary>
-        /// <remarks>If the first property value is set to "clear_inherited", prior expressions are cleared
-        /// rather than inherited.  If not specified, prior expressions are retained.</remarks>
+        /// <remarks>If the first property value is set to <see cref="ClearInherited"/>, prior expressions are
+        /// cleared rather than inherited.  If not specified, prior expressions are retained.</remarks>
         [EditorConfigProperty("vsspell_exclusion_expressions", true)]
         public IEnumerable<Regex> ExclusionExpressions => exclusionExpressions;
 
-        // TODO: Editor: For the global configuration this is always marked to clear the list when loaded to
-        // remove the default list and replace it with the modified default list.  If not changed, nothing will
-        // be written out.
         /// <summary>
         /// This read-only property returns an enumerable list of ignored XML element names that will not have
         /// their content spell checked.
         /// </summary>
-        /// <remarks>If the first property value is set to "clear_inherited", prior elements are cleared rather
-        /// than inherited.  If not specified, prior elements are retained.</remarks>
+        /// <remarks>If the first property value is set to <see cref="ClearInherited"/>, prior elements are
+        /// cleared rather than inherited.  If not specified, prior elements are retained.</remarks>
         [EditorConfigProperty("vsspell_ignored_xml_elements", true)]
         public IEnumerable<string> IgnoredXmlElements => ignoredXmlElements;
 
-        // TODO: Editor: For the global configuration this is always marked to clear the list when loaded to
-        // remove the default list and replace it with the modified default list.  If not changed, nothing will
-        // be written out.
         /// <summary>
         /// This read-only property returns an enumerable list of XML attribute names that will have their values
         /// spell checked.
         /// </summary>
-        /// <remarks>If the first property value is set to "clear_inherited", prior attributes are cleared rather
-        /// than inherited.  If not specified, prior attributes are retained.</remarks>
+        /// <remarks>If the first property value is set to <see cref="ClearInherited"/>, prior attributes are
+        /// cleared rather than inherited.  If not specified, prior attributes are retained.</remarks>
         [EditorConfigProperty("vsspell_spell_checked_xml_attributes", true)]
         public IEnumerable<string> SpellCheckedXmlAttributes => spellCheckedXmlAttributes;
 
-        // TODO: Editor: For the global configuration this is always marked to clear the list when loaded to
-        // remove the default list and replace it with the modified default list.  If not changed, nothing will
-        // be written out.
         /// <summary>
         /// This read-only property returns the ignored classification settings
         /// </summary>
-        /// <remarks>If the first property value is set to "clear_inherited", prior classifications are cleared
-        /// rather than inherited.  If not specified, prior classifications are retained.</remarks>
+        /// <remarks>If the first property value is set to <see cref="ClearInherited"/>, prior classifications
+        /// are cleared rather than inherited.  If not specified, prior classifications are retained.</remarks>
         [EditorConfigProperty("vsspell_ignored_classifications", true)]
         public Dictionary<string, HashSet<string>> IgnoredClassifications => ignoredClassifications;
 
@@ -390,8 +393,9 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// This read-only property returns an enumerable list of exclusion regular expressions that will be used
         /// to exclude WPF text boxes in Visual Studio editor and tool windows from being spell checked.
         /// </summary>
-        /// <value>This option only applies to the global configuration.</value>
-        [EditorConfigProperty("vsspell_visual_studio_id_exclusions")]
+        /// <value>This option only applies to the global configuration.  It cannot have multiple values but
+        /// is marked as such to prevent the default type handling from being used to set the property.</value>
+        [EditorConfigProperty("vsspell_visual_studio_id_exclusions", true)]
         public IEnumerable<Regex> VisualStudioIdExclusions => visualStudioIdExclusions;
 
         /// <summary>
@@ -416,9 +420,9 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// </summary>
         public static IEnumerable<string> DefaultIgnoredXmlElements =>
             new string[] { "c", "code", "codeEntityReference", "codeInline", "codeReference", "command",
-                "environmentVariable", "fictitiousUri", "foreignPhrase", "link", "linkTarget", "linkUri",
-                "localUri", "replaceable", "resheader", "see", "seealso", "style", "token",
-                "unmanagedCodeEntityReference" };
+                "environmentVariable", "fictitiousUri", "foreignPhrase", "languageKeyword", "link",
+                "linkTarget", "linkUri", "localUri", "replaceable", "resheader", "see", "seealso", "style",
+                "token", "unmanagedCodeEntityReference" };
 
         /// <summary>
         /// This read-only property returns the default list of spell checked XML attributes
@@ -431,30 +435,31 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// This read-only property returns the default list of excluded Visual Studio text box IDs
         /// </summary>
         public static IEnumerable<string> DefaultVisualStudioIdExclusions => new[] {
+            @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
+                "(?# SHFB build component and plug-in configuration forms)",
             @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|" +
                 "filterTextBox|searchTextBox|tboxFilter|txtSearchText)(?# Various search text boxes)",
-            @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
-            @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
             @"131369f2-062d-44a2-8671-91ff31efb4f4.*?\.globalSettingsSectionView.*(?# Git global settings)",
-            @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
             @"1c79180c-bb93-46d2-b4d3-f22e7015a6f1\.txtFindID(?# SHFB resource item editor)",
             @"581e89c0-e423-4453-bde3-a0403d5f380d\.ucEntityReferences\.txtFindName(?# SHFB entity references)",
             @"7aad2922-72a2-42c1-a077-85f5097a8fa7\.txtFindID(?# SHFB content layout editor)",
-            @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
+            @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
+            @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.grdSettings\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
+                "txtFilePattern|txtIgnoredElement|txtIgnoredWord|txtImportSettingsFile)(?# Spell checker config editor)",
             @"b270807c-d8c6-49eb-8ebe-8e8d566637a1\.(.*\.txtFolder|.*\.txtFile|txtHtmlHelpName|" +
                 "txtWebsiteAdContent|txtCatalogProductId|txtCatalogName|txtVendorName|txtValue|" +
                 "pgProps.*|txtPreBuildEvent|txtPostBuildEvent)(?# SHFB property page and form controls)",
-            @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
-                "(?# SHFB build component and plug-in configuration forms)",
-            @"64debe95-07ea-48ac-8744-af87605d624a.*(?# Spell checker solution/project tool window)",
-            @"837501d0-c07d-47c6-aab7-9ba4d78d0038\.pnlPages\.(txtAdditionalFolder|txtAttributeName|" +
-                "txtFilePattern|txtIgnoredElement|txtIgnoredWord|txtImportSettingsFile)(?# Spell checker config editor)",
-            @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
-            @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
-                "(?# Spell checker exclusion expression editor)",
+            @"d481fb70-9bf0-4868-9d4c-5db33c6565e1\.(txtFindID|txtTokenName)(?# SHFB Token editor)",
             @"da95c001-7ed0-4f46-b5f0-351125ab8bda.*(?# Web publishing dialog box)",
+            @"fbcae063-e2c0-4ab1-a516-996ea3dafb72.*(?# SQL Server object explorer)",
+            @"fd92f3d8-cebf-47b9-bb98-674a1618f364.*(?# Spell checker interactive tool window)",
+            @"Microsoft\.VisualStudio\.Dialogs\.NewProjectDialog.*(?# New Project dialog box)",
             @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.AdvancedPreCompileOptionsDialog.*" +
-                "(?# Web publishing compile options dialog box)"
+                "(?# Web publishing compile options dialog box)",
+            @"Microsoft\.VisualStudio\.Web\.Publish\.PublishUI\.PublishDialog.*(?# Website publishing dialog box)",
+            @"VisualStudio\.SpellChecker\.Editors\.Pages\.EditorConfigSectionAddEditForm\.txtFileGlob",
+            @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
+                "(?# Spell checker exclusion expression editor)"
         };
         #endregion
 
@@ -670,19 +675,33 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             }
 
             // If the global configuration doesn't contain any explicit ignore words file, include the default one
-            string ignoredWordsPropName = EditorConfigSettingsFor(nameof(IgnoredWords)).PropertyName;
+            string propName = EditorConfigSettingsFor(nameof(IgnoredWords)).PropertyName;
             string file = Path.Combine(GlobalConfigurationFilePath, "IgnoredWords.dic");
 
-            var iwp = editorConfigProperties.FirstOrDefault(p => p.PropertyName.StartsWith(ignoredWordsPropName,
+            var ecp = editorConfigProperties.FirstOrDefault(p => p.PropertyName.StartsWith(propName,
                 StringComparison.OrdinalIgnoreCase)) ??
-                new SectionLine { PropertyName = ignoredWordsPropName, PropertyValue = String.Empty };
+                    new SectionLine { PropertyName = propName, PropertyValue = String.Empty };
 
-            if(iwp.PropertyValue.IndexOf("File:", StringComparison.OrdinalIgnoreCase) == -1)
+            if(ecp.PropertyValue.IndexOf(FilePrefix, StringComparison.OrdinalIgnoreCase) == -1)
             {
-                if(!String.IsNullOrWhiteSpace(iwp.PropertyValue))
-                    iwp.PropertyValue = "File:" + file + "|" + iwp.PropertyValue;
+                if(!String.IsNullOrWhiteSpace(ecp.PropertyValue))
+                    ecp.PropertyValue = FilePrefix + file + "|" + ecp.PropertyValue;
                 else
-                    iwp.PropertyValue = "File:" + file;
+                    ecp.PropertyValue = FilePrefix + file;
+            }
+
+            // If the import settings file property is present, move it to the end of the set so that its
+            // settings override those from the global configuration.  The global configuration is the root file
+            // so other settings should override it.
+            propName = EditorConfigSettingsFor(nameof(ImportSettingsFile)).PropertyName;
+
+            ecp = editorConfigProperties.FirstOrDefault(p => p.PropertyName.StartsWith(propName,
+                StringComparison.OrdinalIgnoreCase));
+
+            if(ecp != null)
+            {
+                editorConfigProperties.Remove(ecp);
+                editorConfigProperties.Add(ecp);
             }
 
             return editorConfigProperties.Select(p => (p.PropertyName, p.PropertyValue));
@@ -780,9 +799,13 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             foreach(string discard in discardedGlobals)
                 globalProperties.Remove(discard);
 
+            // There could be duplicate properties.  If so, the last one found is used
             var editorConfigProperties = new List<SectionLine>(globalProperties.Values.Select(p => p.Property));
-            var replaceValues = editorConfigProperties.ToDictionary(k => k.PropertyName, v => v);
+            var replaceValues = new Dictionary<string, SectionLine>();
             bool addedProperties = false;
+
+            foreach(var ecp in editorConfigProperties)
+                replaceValues[ecp.PropertyName] = ecp;
 
             // Load .editorconfig file properties next in folder order.  Additional files are processed last in
             // folder order.
@@ -845,7 +868,8 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         public static SpellCheckerConfiguration CreateSpellCheckerConfigurationFor(string filename,
           IEnumerable<string> additionalGlobalConfigFiles, IEnumerable<string> additionalEditorConfigFiles)
         {
-            filename = Path.GetFullPath(filename);
+            if(filename != null)
+                filename = Path.GetFullPath(filename);
 
             var configuration = new SpellCheckerConfiguration(filename ?? "NoFile");
             var globalProperties = GlobalConfigurationPropertiesFor(filename);
@@ -1024,8 +1048,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
 
                         if(tempRegexes.Any())
                         {
-                            if(!tempRegexes.First().ToString().Equals("clear_inherited",
-                              StringComparison.OrdinalIgnoreCase))
+                            if(!tempRegexes.First().ToString().Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                             {
                                 var tempHashSet = new HashSet<string>(exclusionExpressions.Select(r => r.ToString()));
 
@@ -1047,11 +1070,14 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                     case nameof(IgnoredWords):
                         foreach(string word in p.Value.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            if(word.Equals("clear_inherited", StringComparison.OrdinalIgnoreCase))
+                            if(word.Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
+                            {
                                 ignoredWords.Clear();
+                                ignoredWordsFiles.Clear();
+                            }
                             else
                             {
-                                if(!word.StartsWith("File:", StringComparison.OrdinalIgnoreCase))
+                                if(!word.StartsWith(FilePrefix, StringComparison.OrdinalIgnoreCase))
                                     ignoredWords.Add(word);
                                 else
                                 {
@@ -1085,7 +1111,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                     case nameof(AdditionalDictionaryFolders):
                         foreach(string folder in p.Value.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            if(folder.Equals("clear_inherited", StringComparison.OrdinalIgnoreCase))
+                            if(folder.Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                                 additionalDictionaryFolders.Clear();
                             else
                             {
@@ -1102,7 +1128,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
 
                         if(tempElements.Length != 0)
                         {
-                            if(tempElements[0].Equals("clear_inherited", StringComparison.OrdinalIgnoreCase))
+                            if(tempElements[0].Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                                 ignoredXmlElements.Clear();
                             
                             ignoredXmlElements.UnionWith(tempElements);
@@ -1114,7 +1140,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
 
                         if(tempAttrs.Length != 0)
                         {
-                            if(tempAttrs[0].Equals("clear_inherited", StringComparison.OrdinalIgnoreCase))
+                            if(tempAttrs[0].Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                                 spellCheckedXmlAttributes.Clear();
 
                             spellCheckedXmlAttributes.UnionWith(tempAttrs);
@@ -1124,7 +1150,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                     case nameof(IgnoredClassifications):
                         foreach(string classification in p.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                         {
-                            if(classification.Equals("clear_inherited", StringComparison.OrdinalIgnoreCase))
+                            if(classification.Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                                 ignoredClassifications.Clear();
                             else
                             {
@@ -1153,7 +1179,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         // insert the inherited languages at that point
                         for(int idx = 0; idx < tempLanguages.Count; idx++)
                         {
-                            if(tempLanguages[idx].Equals("inherited", StringComparison.OrdinalIgnoreCase))
+                            if(tempLanguages[idx].Equals(Inherited, StringComparison.OrdinalIgnoreCase))
                             {
                                 tempLanguages.RemoveAt(idx);
 
@@ -1197,6 +1223,13 @@ namespace VisualStudio.SpellChecker.Common.Configuration
 
             if(filename.IndexOf('%') != -1)
                 filename = Environment.ExpandEnvironmentVariables(filename);
+
+            // If the file is in the global configuration path, consider it resolved even if it doesn't exist yet
+            if(Path.IsPathRooted(filename) && Path.GetDirectoryName(filename).Equals(GlobalConfigurationFilePath,
+              StringComparison.OrdinalIgnoreCase))
+            {
+                return filename;
+            }
 
             if(!Path.IsPathRooted(filename) && !String.IsNullOrWhiteSpace(basePath))
             {

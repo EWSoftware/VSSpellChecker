@@ -1,0 +1,92 @@
+﻿<UserControl x:Class="VisualStudio.SpellChecker.Editors.Pages.CodeAnalyzerOptionsUserControl"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="800"
+	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary x:Uid="VisualStudioThemeResources"
+					Source="pack://application:,,,/VisualStudio.SpellChecker;component/Resources/VisualStudioThemeResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition />
+				<ColumnDefinition />
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<StackPanel Grid.Row="0" Grid.Column="0">
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreIdentifierIfPrivate" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore identifier if private" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreIdentifierIfInternal" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore identifier if internal" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreIdentifierIfAllUppercase" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore identifier if all uppercase" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreIdentifierWithinMemberBodies" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore identifiers within member bodies" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreTypeParameters" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore type parameters" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreIfCompilerGenerated" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore if compiler generated" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreXmlDocComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore XML documentation comments (/// ... and /** ... */)" />
+				</StackPanel>
+			</StackPanel>
+			<StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,0">
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreDelimitedComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore delimited comments (/* ... */)" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreStandardSingleLineComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore standard single line comments (// ...)" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreQuadrupleSlashComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore quadruple slash single line comments (//// ...)" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreNormalStrings" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore normal string literals (&quot;...&quot;)" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreVerbatimStrings" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore verbatim string literals (@&quot;...&quot;)" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreInterpolatedStrings" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore interpolated string literals ($&quot;{PropertyName}...&quot;)" />
+				</StackPanel>
+				<StackPanel Orientation="Horizontal">
+					<ComboBox Name="cboIgnoreRawStrings" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+					<Label Margin="3" Content="Ignore raw string literals (&quot;&quot;&quot;...&quot;&quot;&quot;)" />
+				</StackPanel>
+			</StackPanel>
+			<StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,20,0,0">
+				<ComboBox Name="cboApplyToAllCStyleLanguages" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
+				<Label Margin="3" Content="Apply the above options to all C-style languages as applicable" />
+			</StackPanel>
+		</Grid>
+	</ScrollViewer>
+</UserControl>

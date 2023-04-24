@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SectionLine.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/18/2023
+// Updated : 04/13/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the enumeration used to represent a line within an .editorconfig file section
@@ -190,7 +190,7 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
         /// subfolders in the filename being compared will be taken into consideration along with the filename.</returns>
         public bool IsMatchForFile(string filename)
         {
-            if(glob != null)
+            if(glob != null && filename != null)
             {
                 try
                 {

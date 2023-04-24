@@ -103,7 +103,7 @@ namespace GlobExpressions
             if (_matchFilenameOnly && _segments.Length == 1)
             {
                 var last = pathSegments.LastOrDefault();
-                var tail = (last == null) ? System.Array.Empty<string>() : new[] { last };
+                var tail = (last == null) ? Array.Empty<string>() : new[] { last };
 
                 if (GlobEvaluator.Eval(_segments, 0, tail, 0, _caseSensitive))
                     return true;
@@ -125,6 +125,8 @@ namespace GlobExpressions
                 {
                     if(GlobEvaluator.Eval(_segments, 0, pathSegments, idx, _caseSensitive))
                         return true;
+
+                    idx--;
                 }
 
                 return false;

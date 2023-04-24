@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : EditorConfigFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/20/2023
+// Updated : 04/11/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to load and manage an .editorconfig file
@@ -44,9 +44,9 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
         public Collection<EditorConfigSection> Sections { get; }
 
         /// <summary>
-        /// This read-only property returns true if this is a global file, false if not
+        /// This read-only property returns true if this is a .globalconfig file, false if not
         /// </summary>
-        public bool IsGlobal => this.Filename != null && Path.GetFileName(this.Filename).Equals(".globalconfig",
+        public bool IsGlobal => this.Filename != null && this.Filename.EndsWith(".globalconfig",
             StringComparison.OrdinalIgnoreCase) || this.Sections.Count != 0 && this.Sections[0].IsGlobal;
 
         /// <summary>

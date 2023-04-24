@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ISpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/26/2023
+// Updated : 04/16/2023
 // Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
 //
 // This file contains an interface used by the configuration user controls
@@ -18,9 +18,8 @@
 //===============================================================================================================
 
 using System;
+using System.Collections.Generic;
 using System.Windows.Controls;
-
-using VisualStudio.SpellChecker.Configuration;
 
 namespace VisualStudio.SpellChecker.Editors
 {
@@ -45,15 +44,31 @@ namespace VisualStudio.SpellChecker.Editors
         string HelpUrl { get; }
 
         /// <summary>
-        /// Load the configuration settings for the control
+        /// This is used to get or set the name of the configuration file that is being edited
         /// </summary>
-        /// <param name="configuration">The configuration file from which to load settings</param>
-        void LoadConfiguration(SpellingConfigurationFile configuration);
+        string ConfigurationFilename { get; set; }
 
         /// <summary>
-        /// Save the configuration settings for the control to the given configuration file
+        /// This is read-only property is used to see if the control has changes that need to be saved
         /// </summary>
-        void SaveConfiguration(SpellingConfigurationFile configuration);
+        bool HasChanges { get; }
+
+        /// <summary>
+        /// Load the configuration settings for the control from the given set of spell checker properties
+        /// </summary>
+        /// <param name="isGlobal">True if the settings come from the global spell checker configuration file,
+        /// false if not.</param>
+        /// <param name="properties">The spell checker .editorconfig properties from which to load the settings</param>
+        void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties);
+
+        /// <summary>
+        /// Return a set of changed properties from the control to add to the configuration file
+        /// </summary>
+        /// <param name="isGlobal">True if the settings come from the global spell checker configuration file,
+        /// false if not.</param>
+        /// <param name="sectionId">The section ID used to make multiple instance properties unique</param>
+        /// <returns>An enumerable list of changed properties that should be added to the .editorconfig file</returns>
+        IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal, string sectionId);
 
         /// <summary>
         /// This event is raised to notify the parent of changes to the configuration

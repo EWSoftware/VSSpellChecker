@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	mc:Ignorable="d" d:DesignHeight="200" d:DesignWidth="500"
+	mc:Ignorable="d" d:DesignHeight="250" d:DesignWidth="500"
 	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
 	<UserControl.Resources>
 		<ResourceDictionary>
@@ -15,6 +15,7 @@
 	</UserControl.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
@@ -45,6 +46,12 @@ to be relative to the configuration file.
 		</TextBlock>
 		<TextBlock Grid.Row="4" Name="tbOther" TextWrapping="Wrap" Margin="3,10,3,10">
 			Settings in this file will override settings from the imported configuration file.
+		</TextBlock>
+		<TextBlock Grid.Row="5" Name="tbParentConfigs" TextWrapping="Wrap" Margin="3,10,3,10" Padding="3"
+			Style="{StaticResource NotificationText}">
+			.editorconfig files in parent folders are automatically found and their settings used if applicable.  If
+the file you are importing is in a parent folder of this file, you do not need to specify it here unless it has a
+non-standard name.
 		</TextBlock>
 	</Grid>
 </UserControl>

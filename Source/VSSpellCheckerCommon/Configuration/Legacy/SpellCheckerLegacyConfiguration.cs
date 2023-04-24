@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerLegacyConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
+// Updated : 04/22/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to convert the legacy spell checker configuration settings to the new
@@ -29,6 +29,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+
 using VisualStudio.SpellChecker.Common.EditorConfig;
 
 namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
@@ -50,67 +51,46 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
         #endregion
 
-        #region Property name constants
+        #region Legacy configuration constants
         //=====================================================================
 
-        /// <summary>
-        /// Selected languages list
-        /// </summary>
+        // Configuration file schema version
+        private const string ConfigSchemaVersion = "2018.8.16.0";
+
+        // Selected languages list
         private const string SelectedLanguages = "SelectedLanguages";
 
-        /// <summary>
-        /// Selected languages list item
-        /// </summary>
+        // Selected languages list item
         private const string SelectedLanguagesItem = "LanguageName";
 
-        /// <summary>
-        /// Ignored file pattern item
-        /// </summary>
+        // Ignored file pattern item
         private const string IgnoredFilePatternItem = "FilePattern";
 
-        /// <summary>
-        /// Additional dictionary folders list item
-        /// </summary>
+        // Additional dictionary folders list item
         private const string AdditionalDictionaryFoldersItem = "Folder";
 
-        /// <summary>
-        /// Ignored item
-        /// </summary>
+        // Ignored item
         private const string IgnoredItem = "Ignore";
 
-        /// <summary>
-        /// Exclusion expression item
-        /// </summary>
+        // Exclusion expression item
         private const string ExclusionExpressionItem = "Expression";
 
-        /// <summary>
-        /// Spell checked XML attributes item
-        /// </summary>
+        // Spell checked XML attributes item
         private const string SpellCheckedXmlAttributesItem = "SpellCheck";
 
-        /// <summary>
-        /// Content type item
-        /// </summary>
+        // Content type item
         private const string ContentType = "ContentType";
 
-        /// <summary>
-        /// Content type name attribute
-        /// </summary>
+        // Content type name attribute
         private const string ContentTypeName = "Name";
 
-        /// <summary>
-        /// Ignored classification item
-        /// </summary>
+        // Ignored classification item
         private const string Classification = "Classification";
 
-        /// <summary>
-        /// File type classification prefix
-        /// </summary>
+        // File type classification prefix
         private const string FileType = "File Type: ";
 
-        /// <summary>
-        /// Visual Studio ID Exclusion expression item
-        /// </summary>
+        // Visual Studio ID Exclusion expression item
         private const string VisualStudioIdExclusionItem = "IdExpression";
 
         #endregion
@@ -535,7 +515,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                     root = document.Root;
 
                     // If it's an older configuration file, upgrade it to the new format
-                    if(root.Attribute("Format") == null || root.Attribute("Format").Value != AssemblyInfo.ConfigSchemaVersion)
+                    if(root.Attribute("Format") == null || root.Attribute("Format").Value != ConfigSchemaVersion)
                         this.UpgradeConfiguration();
 
                     this.Load();
@@ -549,9 +529,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
             if(document == null)
             {
-                root = new XElement("SpellCheckerConfiguration", new XAttribute("Format",
-                    AssemblyInfo.ConfigSchemaVersion));
-
+                root = new XElement("SpellCheckerConfiguration", new XAttribute("Format", ConfigSchemaVersion));
                 document = new XDocument(root);
             }
         }
@@ -585,17 +563,26 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                 {
                     // Imported settings filenames may need correcting or may not be needed if they
                     // are in a folder higher than the current folder as they will be merged automatically.
+                    // It should always be the first property so that others override its settings.
                     if(p.PropertyName.StartsWith(importSettingsFile, StringComparison.OrdinalIgnoreCase))
                     {
-                        section.SectionLines.Add(new SectionLine("# TODO: Review imported settings file.  " +
-                            "Is it still needed?  Does the path need correcting?"));
-                    }
+                        section.SectionLines.Insert(1, new SectionLine("# VSSPELL: TO DO: Review imported settings " +
+                            "file.  Is it still needed?  Does the path need correcting?"));
 
-                    section.SectionLines.Add(new SectionLine
+                        section.SectionLines.Insert(2, new SectionLine
+                        {
+                            PropertyName = p.PropertyName,
+                            PropertyValue = p.Value,
+                        });
+                    }
+                    else
                     {
-                        PropertyName = p.PropertyName,
-                        PropertyValue = p.Value,
-                    });
+                        section.SectionLines.Add(new SectionLine
+                        {
+                            PropertyName = p.PropertyName,
+                            PropertyValue = p.Value,
+                        });
+                    }
                 }
 
                 yield return section;
@@ -659,77 +646,77 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(SpellCheckAsYouType)).PropertyName,
-                    this.SpellCheckAsYouType.ToString()));
+                    this.SpellCheckAsYouType.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IncludeInProjectSpellCheck)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IncludeInProjectSpellCheck)).PropertyName,
-                    this.IncludeInProjectSpellCheck.ToString()));
+                    this.IncludeInProjectSpellCheck.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(DetectDoubledWords)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(DetectDoubledWords)).PropertyName,
-                    this.DetectDoubledWords.ToString()));
+                    this.DetectDoubledWords.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IgnoreWordsWithDigits)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoreWordsWithDigits)).PropertyName,
-                    this.IgnoreWordsWithDigits.ToString()));
+                    this.IgnoreWordsWithDigits.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IgnoreWordsInAllUppercase)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoreWordsInAllUppercase)).PropertyName,
-                    this.IgnoreWordsInAllUppercase.ToString()));
+                    this.IgnoreWordsInAllUppercase.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IgnoreWordsInMixedCase)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoreWordsInMixedCase)).PropertyName,
-                    this.IgnoreWordsInMixedCase.ToString()));
+                    this.IgnoreWordsInMixedCase.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IgnoreFormatSpecifiers)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoreFormatSpecifiers)).PropertyName,
-                    this.IgnoreFormatSpecifiers.ToString()));
+                    this.IgnoreFormatSpecifiers.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IgnoreFilenamesAndEMailAddresses)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoreFilenamesAndEMailAddresses)).PropertyName,
-                    this.IgnoreFilenamesAndEMailAddresses.ToString()));
+                    this.IgnoreFilenamesAndEMailAddresses.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IgnoreXmlElementsInText)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoreXmlElementsInText)).PropertyName,
-                    this.IgnoreXmlElementsInText.ToString()));
+                    this.IgnoreXmlElementsInText.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(TreatUnderscoreAsSeparator)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(TreatUnderscoreAsSeparator)).PropertyName,
-                    this.TreatUnderscoreAsSeparator.ToString()));
+                    this.TreatUnderscoreAsSeparator.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(IgnoreMnemonics)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoreMnemonics)).PropertyName,
-                    this.IgnoreMnemonics.ToString()));
+                    this.IgnoreMnemonics.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(SpellCheckerLegacyConfiguration.IgnoreCharacterClass)))
@@ -743,14 +730,14 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(DetermineResourceFileLanguageFromName)).PropertyName,
-                    this.DetermineResourceFileLanguageFromName.ToString()));
+                    this.DetermineResourceFileLanguageFromName.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(EnableWpfTextBoxSpellChecking)))
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(EnableWpfTextBoxSpellChecking)).PropertyName,
-                    this.EnableWpfTextBoxSpellChecking.ToString()));
+                    this.EnableWpfTextBoxSpellChecking.ToString().ToLowerInvariant()));
             }
 
             // If both of these are disabled, assume no spell checking is wanted and turn off the code analyzers
@@ -758,7 +745,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             if(!this.SpellCheckAsYouType && !this.IncludeInProjectSpellCheck)
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
-                    nameof(SpellCheckerConfiguration.EnableCodeAnalyzers)).PropertyName, "False"));
+                    nameof(SpellCheckerConfiguration.EnableCodeAnalyzers)).PropertyName, "false"));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -766,7 +753,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.IgnoreXmlDocComments)).PropertyName,
-                    this.CSharpOptions.IgnoreXmlDocComments.ToString()));
+                    this.CSharpOptions.IgnoreXmlDocComments.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -774,7 +761,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.IgnoreDelimitedComments)).PropertyName,
-                    this.CSharpOptions.IgnoreDelimitedComments.ToString()));
+                    this.CSharpOptions.IgnoreDelimitedComments.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -782,7 +769,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.IgnoreStandardSingleLineComments)).PropertyName,
-                    this.CSharpOptions.IgnoreStandardSingleLineComments.ToString()));
+                    this.CSharpOptions.IgnoreStandardSingleLineComments.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -790,7 +777,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.IgnoreQuadrupleSlashComments)).PropertyName,
-                    this.CSharpOptions.IgnoreQuadrupleSlashComments.ToString()));
+                    this.CSharpOptions.IgnoreQuadrupleSlashComments.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -798,7 +785,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.IgnoreNormalStrings)).PropertyName,
-                    this.CSharpOptions.IgnoreNormalStrings.ToString()));
+                    this.CSharpOptions.IgnoreNormalStrings.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -806,7 +793,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.IgnoreVerbatimStrings)).PropertyName,
-                    this.CSharpOptions.IgnoreVerbatimStrings.ToString()));
+                    this.CSharpOptions.IgnoreVerbatimStrings.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -814,7 +801,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.IgnoreInterpolatedStrings)).PropertyName,
-                    this.CSharpOptions.IgnoreInterpolatedStrings.ToString()));
+                    this.CSharpOptions.IgnoreInterpolatedStrings.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CSharpOptions) + "." +
@@ -822,7 +809,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalyzerOptions.ApplyToAllCStyleLanguages)).PropertyName,
-                    this.CSharpOptions.ApplyToAllCStyleLanguages.ToString()));
+                    this.CSharpOptions.ApplyToAllCStyleLanguages.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CadOptions) + "." +
@@ -830,7 +817,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalysisDictionaryOptions.ImportCodeAnalysisDictionaries)).PropertyName,
-                    this.CadOptions.ImportCodeAnalysisDictionaries.ToString()));
+                    this.CadOptions.ImportCodeAnalysisDictionaries.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CadOptions) + "." +
@@ -846,7 +833,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalysisDictionaryOptions.TreatUnrecognizedWordsAsMisspelled)).PropertyName,
-                    this.CadOptions.TreatUnrecognizedWordsAsMisspelled.ToString()));
+                    this.CadOptions.TreatUnrecognizedWordsAsMisspelled.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CadOptions) + "." +
@@ -854,7 +841,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalysisDictionaryOptions.TreatDeprecatedTermsAsMisspelled)).PropertyName,
-                    this.CadOptions.TreatDeprecatedTermsAsMisspelled.ToString()));
+                    this.CadOptions.TreatDeprecatedTermsAsMisspelled.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CadOptions) + "." +
@@ -862,7 +849,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalysisDictionaryOptions.TreatCompoundTermsAsMisspelled)).PropertyName,
-                    this.CadOptions.TreatCompoundTermsAsMisspelled.ToString()));
+                    this.CadOptions.TreatCompoundTermsAsMisspelled.ToString().ToLowerInvariant()));
             }
 
             if(this.HasProperty(nameof(CadOptions) + "." + nameof(
@@ -870,18 +857,16 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(CodeAnalysisDictionaryOptions.TreatCasingExceptionsAsIgnoredWords)).PropertyName,
-                    this.CadOptions.TreatCasingExceptionsAsIgnoredWords.ToString()));
+                    this.CadOptions.TreatCasingExceptionsAsIgnoredWords.ToString().ToLowerInvariant()));
             }
 
             if(this.VisualStudioIdExclusions.Count != 0)
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
-
                 // Regular expressions are a bit tricky to specify on one line.  We'll use the options comment
-                // as the separator.
+                // as the separator.  This only appears in the global configuration file so it doesn't need a
+                // section ID suffix.
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
-                    nameof(VisualStudioIdExclusions)).PropertyName + sectionId,
+                    nameof(VisualStudioIdExclusions)).PropertyName,
                     String.Concat(this.VisualStudioIdExclusions.Select(r => $"{r}(?#/Options/{r.Options})"))));
             }
 
@@ -894,7 +879,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                 var values = new List<string>(this.AdditionalDictionaryFolders);
 
                 if(!this.IsGlobalConfiguration && !this.InheritAdditionalDictionaryFolders)
-                    values.Insert(0, "clear_inherited");
+                    values.Insert(0, SpellCheckerConfiguration.ClearInherited);
 
                 // It's unlikely, but a folder could contain a comma so use a pipe to separate the values
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
@@ -911,10 +896,10 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                 int insertIdx = 0;
 
                 if(!this.IsGlobalConfiguration && !this.InheritIgnoredWords)
-                    values.Insert(insertIdx++, "clear_inherited");
+                    values.Insert(insertIdx++, SpellCheckerConfiguration.ClearInherited);
 
                 if(!String.IsNullOrWhiteSpace(this.IgnoredWordsFile))
-                    values.Insert(insertIdx++, "File:" + this.IgnoredWordsFile);
+                    values.Insert(insertIdx++, SpellCheckerConfiguration.FilePrefix + this.IgnoredWordsFile);
 
                 // It's unlikely, but an ignored words filename could contains a comma so use a pipe to separate
                 // the values.
@@ -934,36 +919,37 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                     r => $"{r}(?#/Options/{r.Options})"));
 
                 if(!this.IsGlobalConfiguration && !this.InheritExclusionExpressions)
-                    values.Insert(0, "clear(?#/Options/)");
+                    values.Insert(0, SpellCheckerConfiguration.ClearInherited + "(?#/Options/)");
 
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(ExclusionExpressions)).PropertyName + sectionId, String.Concat(values)));
             }
 
-            if((!this.IsGlobalConfiguration && !this.InheritXmlSettings) || this.IgnoredXmlElements.Count != 0)
+            if(this.IsGlobalConfiguration || !this.InheritXmlSettings || this.IgnoredXmlElements.Count != 0)
             {
                 if(sectionId == null)
                     sectionId = "_" + Guid.NewGuid().ToString("N");
 
                 var values = new List<string>(this.IgnoredXmlElements);
 
-                if(!this.IsGlobalConfiguration && !this.InheritXmlSettings)
-                    values.Insert(0, "clear_inherited");
+                // The global configuration always clears the default set
+                if(this.IsGlobalConfiguration || !this.InheritXmlSettings)
+                    values.Insert(0, SpellCheckerConfiguration.ClearInherited);
 
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(IgnoredXmlElements)).PropertyName + sectionId, String.Join(",", values)));
             }
 
-            if((!this.IsGlobalConfiguration && !this.InheritXmlSettings) ||
-              this.SpellCheckedXmlAttributes.Count != 0)
+            if(this.IsGlobalConfiguration || !this.InheritXmlSettings || this.SpellCheckedXmlAttributes.Count != 0)
             {
                 if(sectionId == null)
                     sectionId = "_" + Guid.NewGuid().ToString("N");
 
                 var values = new List<string>(this.SpellCheckedXmlAttributes);
 
-                if(!this.IsGlobalConfiguration && !this.InheritXmlSettings)
-                    values.Insert(0, "clear_inherited");
+                // The global configuration always clears the default set
+                if(this.IsGlobalConfiguration || !this.InheritXmlSettings)
+                    values.Insert(0, SpellCheckerConfiguration.ClearInherited);
 
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(SpellCheckedXmlAttributes)).PropertyName + sectionId, String.Join(",", values)));
@@ -978,11 +964,25 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                 var values = new List<string>(this.IgnoredClassifications.Select(kv =>
                     $"{kv.Key}|{String.Join("|", kv.Value)}"));
 
-                if(!this.IsGlobalConfiguration && !this.InheritIgnoredClassifications)
-                    values.Insert(0, "clear_inherited");
+                if(this.IsGlobalConfiguration && values.Count == 1 && values[0].Equals("EditorConfig|string",
+                  StringComparison.OrdinalIgnoreCase))
+                {
+                    // Special case: If set to the default in the global configuration, don't add it to the
+                    // .editorconfig file.
+                    values.Clear();
+                }
+                else
+                {
+                    // The global configuration always clears the default set
+                    if(this.IsGlobalConfiguration || !this.InheritIgnoredClassifications)
+                        values.Insert(0, SpellCheckerConfiguration.ClearInherited);
+                }
 
-                properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
-                    nameof(IgnoredClassifications)).PropertyName + sectionId, String.Join(",", values)));
+                if(values.Count != 0)
+                {
+                    properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
+                        nameof(IgnoredClassifications)).PropertyName + sectionId, String.Join(",", values)));
+                }
             }
 
             if(this.DictionaryLanguages.Count != 0)
@@ -1155,7 +1155,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                     int inheritedEntry = this.DictionaryLanguages.IndexOf(String.Empty);
 
                     if(inheritedEntry != -1)
-                        this.DictionaryLanguages[inheritedEntry] = "inherited";
+                        this.DictionaryLanguages[inheritedEntry] = SpellCheckerConfiguration.Inherited;
                 }
             }
             catch(Exception ex)
@@ -1174,8 +1174,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
             if(format != null)
             {
-                Version fileFormat = new Version(format.Value),
-                    currentVersion = new Version(AssemblyInfo.ConfigSchemaVersion);
+                Version fileFormat = new Version(format.Value), currentVersion = new Version(ConfigSchemaVersion);
 
                 // If they've downgraded, there's nothing to convert.  Any property settings from newer
                 // configurations will have to be added back to the older configuration file format by
@@ -1191,7 +1190,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                     this.ConvertCommentExclusions();
                 }
 
-                format.Value = AssemblyInfo.ConfigSchemaVersion;
+                format.Value = ConfigSchemaVersion;
             }
             else
                 this.ConvertFromOriginalFormat();
@@ -1207,7 +1206,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                 nameof(IgnoreFormatSpecifiers), nameof(IgnoreFilenamesAndEMailAddresses),
                 nameof(IgnoreXmlElementsInText), nameof(TreatUnderscoreAsSeparator) };
 
-            root.Add(new XAttribute("Format", AssemblyInfo.ConfigSchemaVersion));
+            root.Add(new XAttribute("Format", ConfigSchemaVersion));
 
             // Set values on these elements
             foreach(string name in propertyNames)
@@ -1628,7 +1627,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                         match = (string)value.Attribute("Match");
                         options = (string)value.Attribute("Options");
 
-                        if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse<RegexOptions>(options,
+                        if(String.IsNullOrWhiteSpace(options) || !Enum.TryParse(options,
                           out RegexOptions regexOpts))
                         {
                             regexOpts = RegexOptions.None;

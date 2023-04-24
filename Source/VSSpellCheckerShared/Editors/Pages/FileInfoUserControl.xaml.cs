@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileInfoUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 04/14/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to provide some information about the settings file
 //
@@ -18,10 +18,10 @@
 //===============================================================================================================
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-
-using VisualStudio.SpellChecker.Configuration;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
@@ -55,25 +55,24 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public string HelpUrl => "7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab";
 
         /// <inheritdoc />
-        public void LoadConfiguration(SpellingConfigurationFile configuration)
+        public string ConfigurationFilename { get; set; }
+
+        /// <inheritdoc />
+        public bool HasChanges => false;
+
+        /// <inheritdoc />
+        public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
         {
-            tbGlobal.Visibility = fdvAddConfigs.Visibility =
-                (configuration.ConfigurationType == ConfigurationType.Global) ? Visibility.Visible : Visibility.Collapsed;
-            tbSolution.Visibility = (configuration.ConfigurationType == ConfigurationType.Solution) ?
-                Visibility.Visible : Visibility.Collapsed;
-            tbProject.Visibility = (configuration.ConfigurationType == ConfigurationType.Project) ?
-                Visibility.Visible : Visibility.Collapsed;
-            tbFolder.Visibility = (configuration.ConfigurationType == ConfigurationType.Folder) ?
-                Visibility.Visible : Visibility.Collapsed;
-            tbFile.Visibility = (configuration.ConfigurationType == ConfigurationType.File) ?
-                Visibility.Visible : Visibility.Collapsed;
+            tbGlobal.Visibility = fdvAddConfigs.Visibility = isGlobal ? Visibility.Visible : Visibility.Collapsed;
+            tbAllOthers.Visibility = !isGlobal ? Visibility.Visible : Visibility.Collapsed;
         }
 
         /// <inheritdoc />
-        public void SaveConfiguration(SpellingConfigurationFile configuration)
+        public IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal,
+          string sectionId)
         {
-            // Nothing to save here, just refresh the information
-            this.LoadConfiguration(configuration);
+            // Nothing to do for this one
+            return Enumerable.Empty<(string PropertyName, string PropertyValue)>();
         }
 
 #pragma warning disable 67

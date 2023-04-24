@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingConfigurationEditorPane.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/25/2023
+// Updated : 04/11/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to host the spelling configuration file editor control
@@ -72,21 +72,19 @@ namespace VisualStudio.SpellChecker.Editors
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
 #pragma warning disable VSTHRD010
-            // TODO: Pass the default file glob to the load method then clear it
-            this.UIControl.LoadConfiguration(fileName);
+            this.UIControl.LoadConfiguration(fileName, DefaultFileGlob);
 #pragma warning restore VSTHRD010
         }
 
         /// <inheritdoc />
         protected override void SaveFile(string fileName)
         {
-            /* TODO: Add this back once it's actually editing the .editorconfig files
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
             Utility.GetServiceFromPackage<IVsUIShell, SVsUIShell>(true).SetWaitCursor();
 
             if(this.IsDirty || !fileName.Equals(this.UIControl.Filename, StringComparison.OrdinalIgnoreCase))
-                this.UIControl.SaveConfiguration(fileName);*/
+                this.UIControl.SaveConfiguration(fileName);
         }
         #endregion
 

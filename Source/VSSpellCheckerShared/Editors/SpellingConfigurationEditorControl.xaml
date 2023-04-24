@@ -22,17 +22,38 @@
 	<Grid KeyboardNavigation.TabNavigation="Local">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
 			<RowDefinition />
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" Orientation="Horizontal">
+		<StackPanel Grid.Row="0">
 			<TextBlock Name="lblTitle" Margin="3" TextTrimming="CharacterEllipsis" Style="{StaticResource TitleText}" />
 		</StackPanel>
-		<Grid Row="1">
+		<Grid Grid.Row="1">
+			<Grid.RowDefinitions>
+				<RowDefinition />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<ListBox Grid.Row="0" Name="lbSections" Margin="3" MinHeight="100" MaxHeight="200"
+				DisplayMemberPath="SectionDescription" SelectionChanged="lbSections_SelectionChanged" />
+			<StackPanel Grid.Row="1" Orientation="Horizontal">
+				<Button Name="btnAddSection" Content="Add Section" MinWidth="90" Margin="3"
+					ToolTip="Add a new section" Click="btnAddSection_Click" />
+				<Button Name="btnDeleteSection" Content="Delete Section" MinWidth="100" Margin="3"
+					ToolTip="Delete the selected section" Click="btnDeleteSection_Click" />
+				<Button Name="btnEditGlob" Content="Edit Glob/Comment" MinWidth="150" Margin="3"
+					ToolTip="Edit the file glob and comment" Click="btnEditGlob_Click" />
+				<Button Name="btnMoveUp" Content="Move Up" MinWidth="80"  Margin="3"
+					ToolTip="Move the selected section up in the list" Click="btnMoveUpDown_Click" />
+				<Button Name="btnMoveDown" Content="Move Down" MinWidth="80"  Margin="3"
+					ToolTip="Move the selected section down in the list" Click="btnMoveUpDown_Click" />
+			</StackPanel>
+		</Grid>
+		<Grid Row="2" Name="grdSettings">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition MinWidth="150" />
 				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition MinWidth="250" Width="3*" />
+				<ColumnDefinition MinWidth="250" Width="4*" />
 			</Grid.ColumnDefinitions>
 			<TreeView Grid.Column="0" Name="tvPages" Margin="3" SelectedItemChanged="tvPages_SelectedItemChanged"
 				KeyboardNavigation.TabIndex="0" />
@@ -43,7 +64,7 @@
 				</DockPanel>
 			</Border>
 		</Grid>
-		<Grid Grid.Row="2" Margin="3">
+		<Grid Grid.Row="3" Margin="3">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition />
 				<ColumnDefinition Width="Auto" />

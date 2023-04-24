@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredClassificationsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/02/2018
-// Note    : Copyright 2018, Eric Woodruff, All rights reserved
+// Updated : 04/21/2023
+// Note    : Copyright 2018-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored classifications spell checker configuration settings
 //
@@ -23,9 +23,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Xml.Linq;
 
-using VisualStudio.SpellChecker.Configuration;
+using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.ProjectSpellCheck;
 using VisualStudio.SpellChecker.Tagging;
 
@@ -126,58 +125,90 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         public string HelpUrl => "6a987caf-5ad9-4dab-a17c-c887881fec7a";
 
         /// <inheritdoc />
-        public void LoadConfiguration(SpellingConfigurationFile configuration)
+        public string ConfigurationFilename { get; set; }
+
+        /// <inheritdoc />
+        public bool HasChanges { get; private set; }
+
+        /// <inheritdoc />
+        public void LoadConfiguration(bool isGlobal, IDictionary<string, SpellCheckPropertyInfo> properties)
         {
-            if(configuration.ConfigurationType == ConfigurationType.Global)
+            if(isGlobal)
             {
                 chkInheritIgnoredClassifications.IsChecked = false;
                 chkInheritIgnoredClassifications.Visibility = Visibility.Collapsed;
             }
             else
-                chkInheritIgnoredClassifications.IsChecked = configuration.ToBoolean(PropertyNames.InheritIgnoredClassifications);
+                chkInheritIgnoredClassifications.IsChecked = true;
 
             visualStudioItems = new BindingList<ClassificationItem>();
             solutionSpellCheckItems = new BindingList<ClassificationItem>();
 
-            if(!configuration.HasProperty(PropertyNames.IgnoredClassifications))
+            if(properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredClassifications), out var spi))
             {
-                if(configuration.ConfigurationType == ConfigurationType.Global)
+                var classifications = spi.EditorConfigPropertyValue.Split(new[] { ',' },
+                    StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                if(classifications.Count != 0 && classifications[0].Equals(SpellCheckerConfiguration.ClearInherited,
+                  StringComparison.OrdinalIgnoreCase))
+                {
+                    chkInheritIgnoredClassifications.IsChecked = false;
+                    classifications.RemoveAt(0);
+                }
+
+                foreach(string classInfo in classifications)
+                {
+                    var classProps = classInfo.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                    if(classProps.Count != 0)
+                    {
+                        // Solution/project spell check classifications go in a separate collection
+                        if(classProps[0].StartsWith(SpellCheckerConfiguration.FileType, StringComparison.Ordinal) ||
+                            classProps[0].StartsWith(SpellCheckerConfiguration.Extension, StringComparison.Ordinal))
+                        {
+                            foreach(var c in classProps.Skip(1))
+                            {
+                                solutionSpellCheckItems.Add(new ClassificationItem
+                                {
+                                    ContentType = classProps[0],
+                                    Classification = c,
+                                    IsSelected = true
+                                });
+                            }
+                        }
+                        else
+                        {
+                            foreach(var c in classProps.Skip(1))
+                            {
+                                visualStudioItems.Add(new ClassificationItem
+                                {
+                                    ContentType = classProps[0],
+                                    Classification = c,
+                                    IsSelected = true,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if(isGlobal)
+                {
                     foreach(var type in SpellCheckerConfiguration.DefaultIgnoredClassifications)
+                    {
                         foreach(string c in type.Value)
+                        {
                             visualStudioItems.Add(new ClassificationItem
                             {
                                 ContentType = type.Key,
                                 Classification = c,
                                 IsSelected = true,
                             });
-            }
-            else
-                foreach(var type in configuration.Element(PropertyNames.IgnoredClassifications).Elements(
-                  PropertyNames.ContentType))
-                {
-                    string typeName = type.Attribute(PropertyNames.ContentTypeName).Value;
-
-                    // Solution/project spell check classifications go in a separate collection
-                    if(typeName.StartsWith(PropertyNames.FileType, StringComparison.Ordinal) ||
-                      typeName.StartsWith(PropertyNames.Extension, StringComparison.Ordinal))
-                    {
-                        foreach(var c in type.Elements(PropertyNames.Classification))
-                            solutionSpellCheckItems.Add(new ClassificationItem
-                            {
-                                ContentType = typeName,
-                                Classification = c.Value,
-                                IsSelected = true
-                            });
+                        }
                     }
-                    else
-                        foreach(var c in type.Elements(PropertyNames.Classification))
-                            visualStudioItems.Add(new ClassificationItem
-                            {
-                                ContentType = typeName,
-                                Classification = c.Value,
-                                IsSelected = true,
-                            });
                 }
+            }
 
             cboFileType.ItemsSource = ClassifierFactory.ClassifierIds;
             cboFileType.SelectedIndex = 0;
@@ -188,26 +219,38 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 lbFileTypeExt.SelectedIndex = 0;
 
             this.btnRefresh_Click(this, null);
+            this.HasChanges = false;
         }
 
         /// <inheritdoc />
-        public void SaveConfiguration(SpellingConfigurationFile configuration)
+        public IEnumerable<(string PropertyName, string PropertyValue)> ChangedProperties(bool isGlobal,
+          string sectionId)
         {
-            if(configuration.ConfigurationType != ConfigurationType.Global)
-                configuration.StoreProperty(PropertyNames.InheritIgnoredClassifications, chkInheritIgnoredClassifications.IsChecked);
+            // Ignored classifications are grouped by content type with the key and values separated by
+            // pipes.  Multiple classifications are separated by commas.
+            var values = visualStudioItems.Where(v => v.IsSelected).Concat(solutionSpellCheckItems.Where(
+              s => s.IsSelected)).GroupBy(c => c.ContentType).Select(g => 
+                $"{g.Key}|{String.Join("|", g.Select(c => c.Classification))}").ToList();
 
-            var ignoredClassifications = new XElement(PropertyNames.IgnoredClassifications);
-
-            foreach(var g in visualStudioItems.Where(v => v.IsSelected).Concat(solutionSpellCheckItems.Where(
-              s => s.IsSelected)).GroupBy(c => c.ContentType))
+            // For the global configuration, if it matches the default set, don't store it
+            if(isGlobal)
             {
-                ignoredClassifications.Add(
-                    new XElement(PropertyNames.ContentType,
-                        new XAttribute(PropertyNames.ContentTypeName, g.Key),
-                        g.Select(c => new XElement(PropertyNames.Classification, c.Classification))));
+                var defaultIgnored = SpellCheckerConfiguration.DefaultIgnoredClassifications.Select(
+                    kv => $"{kv.Key}|{String.Join("|", kv.Value.Select(c => c))}").ToList();
+
+                if(!values.Except(defaultIgnored).Any())
+                    values.Clear();
             }
 
-            configuration.StoreElement(ignoredClassifications);
+            if((isGlobal && values.Count != 0) || (!isGlobal && !chkInheritIgnoredClassifications.IsChecked.Value))
+                values.Insert(0, SpellCheckerConfiguration.ClearInherited);
+
+            if(values.Count != 0)
+            {
+                yield return (SpellCheckerConfiguration.EditorConfigSettingsFor(
+                    nameof(SpellCheckerConfiguration.IgnoredClassifications)).PropertyName + sectionId,
+                        String.Join(",", values));
+            }
         }
 
         /// <inheritdoc />
@@ -225,6 +268,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void Property_Changed(object sender, RoutedEventArgs e)
         {
+            this.HasChanges = true;
             this.ConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
         #endregion
@@ -254,7 +298,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             // Add classifications from the cache
             foreach(var contentType in ClassificationCache.ContentTypes)
+            {
                 foreach(var classification in ClassificationCache.CacheFor(contentType).Classifications)
+                {
                     items.Add(new ClassificationItem
                     {
                         ContentType = contentType,
@@ -262,11 +308,15 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         IsSelected = visualStudioItems.Any(i => i.ContentType == contentType &&
                             i.Classification == classification && i.IsSelected)
                     });
+                }
+            }
 
             // Add classifications from the configuration that aren't in the cache yet
             foreach(var item in visualStudioItems)
+            {
                 if(!items.Any(i => i.ContentType == item.ContentType && i.Classification == item.Classification))
                     items.Add(item);
+            }
 
             if(visualStudioItems != null)
                 visualStudioItems.ListChanged -= this.ClassificationItems_ListChanged;
@@ -322,6 +372,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 solutionSpellCheckItems.ListChanged -= ClassificationItems_ListChanged;
 
                 foreach(var r in Enum.GetValues(typeof(RangeClassification)))
+                {
                     if((RangeClassification)r != RangeClassification.Undefined &&
                       !classifications.Any(c => c.Classification == r.ToString()))
                     {
@@ -334,6 +385,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         solutionSpellCheckItems.Add(c);
                         classifications.Add(c);
                     }
+                }
 
                 solutionSpellCheckItems.ListChanged += ClassificationItems_ListChanged;
 
@@ -353,9 +405,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             // Add by file type or extension?
             if(cboExtension.SelectedIndex == 0)
-                newItem = PropertyNames.FileType + (string)cboFileType.SelectedItem;
+                newItem = SpellCheckerConfiguration.FileType + (string)cboFileType.SelectedItem;
             else
-                newItem = PropertyNames.Extension + (string)cboExtension.SelectedItem;
+                newItem = SpellCheckerConfiguration.Extension + (string)cboExtension.SelectedItem;
 
             if(!items.Contains(newItem))
             {

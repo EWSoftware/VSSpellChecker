@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : EditorConfigSection.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/24/2023
+// Updated : 04/11/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to represent and .editorconfig file section
@@ -112,6 +112,15 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
         /// </summary>
         public IEnumerable<SectionLine> SpellCheckerProperties => this.SectionLines.Where(
             l => l.LineType == LineType.Property && l.PropertyName.StartsWith("vsspell_", StringComparison.OrdinalIgnoreCase));
+
+        /// <summary>
+        /// This read-only property returns an enumerable list of all spell checker comments in the section
+        /// </summary>
+        /// <remarks>The comments are prefixed with "VSSPELL:".  Typically there will only be one but there
+        /// can be multiple comments after conversion or if the user adds them.  When saved, the comments will
+        /// be merged into one single comment line.</remarks>
+        public IEnumerable<SectionLine> SpellCheckerComments => this.SectionLines.Where(
+            l => l.LineType == LineType.Comment && l.LineText.StartsWith("# VSSPELL:", StringComparison.OrdinalIgnoreCase));
 
         #endregion
 

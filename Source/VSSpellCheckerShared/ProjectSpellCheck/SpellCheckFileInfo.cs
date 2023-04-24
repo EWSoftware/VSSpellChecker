@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/25/2023
+// Updated : 04/22/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to hold information about a file that will be spell checked
@@ -590,6 +590,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     this.ConfigurationFiles = config.LoadedConfigurationFiles;
                     this.IgnoredWordsFiles = config.IgnoredWordsFiles;
                 }
+                else
+                    config = null;
             }
             catch(Exception ex)
             {
