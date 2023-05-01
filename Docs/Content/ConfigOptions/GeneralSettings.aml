@@ -25,6 +25,14 @@ interactive spell checking.</para>
 					</listItem>
 
 					<listItem>
+						<para><ui>Enable spell checking code analyzer in supported languages</ui> - This option enables the
+spell checking code analyzer and is enabled by default.  It will spell check identifiers in all supported
+languages (currently only C# but support for Visual Basic is planned for later).  Unlike comment and string
+misspellings, identifier misspellings will be highlighted using the same colored underline as other code fixes.
+Fixing a misspelling in an identifier will automatically correct it in all other references to it.</para>
+					</listItem>
+
+					<listItem>
 						<para><ui>Detect doubled words</ui> - This will cause the spell checker to report instances of
 doubled words.  An option to remove the duplicate word or ignore it will be offered as the options to correct
 any instances that are found.  The default is enabled.</para>

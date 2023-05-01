@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TeamFoundationColors.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 09/01/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 04/27/2023
+// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that returns theme colors for button elements that are found in the Team
 // Foundation theme color category.
@@ -17,6 +17,8 @@
 //===============================================================================================================
 // 08/17/2015  EFW  Created the code
 //===============================================================================================================
+
+// Ignore Spelling: tfs
 
 using System;
 

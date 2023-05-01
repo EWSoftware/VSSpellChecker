@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : InteractiveSpellCheckToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/17/2020
-// Note    : Copyright 2013-2020, Eric Woodruff, All rights reserved
+// Updated : 04/27/2023
+// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the interactive spell check tool window
 //
@@ -16,6 +16,8 @@
 // ==============================================================================================================
 // 05/25/2013  EFW  Created the code
 //===============================================================================================================
+
+// Ignore Spelling: elementid itemid hier grf Attribs
 
 using System;
 using System.Runtime.InteropServices;
@@ -87,8 +89,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             var rdt = Utility.GetServiceFromPackage<IVsRunningDocumentTable, SVsRunningDocumentTable>(true);
 
-            if(rdt != null)
-                rdt.AdviseRunningDocTableEvents(this, out docTableCookie);
+            rdt?.AdviseRunningDocTableEvents(this, out docTableCookie);
         }
 
         /// <summary>
@@ -101,13 +102,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
             var ms = Utility.GetServiceFromPackage<IVsMonitorSelection, SVsShellMonitorSelection>(true);
 
-            if(ms != null)
-                ms.UnadviseSelectionEvents(selectionMonitorCookie);
+            ms?.UnadviseSelectionEvents(selectionMonitorCookie);
 
             var rdt = Utility.GetServiceFromPackage<IVsRunningDocumentTable, SVsRunningDocumentTable>(true);
 
-            if(rdt != null)
-                rdt.UnadviseRunningDocTableEvents(docTableCookie);
+            rdt?.UnadviseRunningDocTableEvents(docTableCookie);
 
             base.Dispose(disposing);
         }

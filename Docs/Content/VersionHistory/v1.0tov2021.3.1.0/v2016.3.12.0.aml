@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="a81683de-f3ea-4698-847a-d87c3f1e8477" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Improved the performance of configuration file generation for editor spell checkers by only
+searching the current solution if the potential configuration file actually exists on disk.  This significantly
+improves the speed of spelling tagger creation in extremely large solutions.</para>
+					</listItem>
+
+					<listItem>
+						<para>Removed the <codeInline>IgnoredFiles</codeInline> element from the classifications
+configuration file.  This feature has been rolled into the standard spell checker configuration as the new
+<ui>Ignored Files</ui> category which replaces the old <ui>Excluded Filename Extensions</ui> category.</para>
+					</listItem>
+
+					<listItem>
+						<para>Replaced the <ui>Excluded Filename Extensions</ui> configuration file category with the new
+<ui>Ignored Files</ui> category.  Instead of ignored extensions, you can now ignore full wildcard file patterns.
+This allows ignoring files with compound extensions such as <localUri>*.min.js</localUri>.  The set of ignored
+files from the classifications configuration file in the prior release has been added as the default set of
+ignored file wildcard patterns.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added an <ui>Ignore words in mixed/camel case</ui> option to the <ui>General Settings</ui>
+category.  It is enabled by default.  If turned off, words in mixed/camel case will be split and spell
+checked.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added an <ui>Export</ui> option to the solution/project spell check tool window grid's context
+menu to export all issues, those related to the current item's project, or the those related to the current
+item's file.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

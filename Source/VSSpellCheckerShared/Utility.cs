@@ -53,7 +53,6 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public const string EmbeddedPeekTextView = "EMBEDDED_PEEK_TEXT_VIEW";
 
-        private static readonly Regex reUppercase = new Regex("([A-Z])"); 
         private static readonly Regex reAutoGenCodeFilename = new Regex(
             "(#ExternalSource\\(|#line\\s\\d*\\s)\"(?<Filename>.*?)\"");
 

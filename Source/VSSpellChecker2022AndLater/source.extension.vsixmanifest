@@ -23,8 +23,13 @@
     <Assets>
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
         <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="SpellCheckCodeAnalyzer2022AndLater" Path="|SpellCheckCodeAnalyzer2022AndLater|" />
+        <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="SpellCheckCodeAnalyzer2022AndLater" Path="|SpellCheckCodeAnalyzer2022AndLater|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="SpellCheckCodeAnalyzer.CodeFixes2022AndLater" Path="|SpellCheckCodeAnalyzer.CodeFixes2022AndLater|" />
+        <Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="SpellCheckCodeAnalyzer.CodeFixes2022AndLater" Path="|SpellCheckCodeAnalyzer.CodeFixes2022AndLater|" />
     </Assets>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.Roslyn.LanguageServices" Version="[17.0,)" DisplayName="Roslyn Language Services" />
     </Prerequisites>
 </PackageManifest>

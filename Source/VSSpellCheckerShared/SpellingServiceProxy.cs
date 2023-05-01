@@ -320,7 +320,7 @@ namespace VisualStudio.SpellChecker
                 try
                 {
                     if(File.Exists(Common.Configuration.Legacy.SpellCheckerLegacyConfiguration.GlobalConfigurationFilename) &&
-                      !File.Exists(Common.Configuration.SpellCheckerConfiguration.GlobalConfigurationFilename))
+                      !File.Exists(SpellCheckerConfiguration.GlobalConfigurationFilename))
                     {
                         return true;
                     }

@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+		<AssemblyName>VisualStudio.SpellChecker.CodeAnalyzer</AssemblyName>
+		<RootNamespace>VisualStudio.SpellChecker.CodeAnalyzer</RootNamespace>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\SpellChecker.snk</AssemblyOriginatorKeyFile>
+		<GenerateAssemblyTitleAttribute>False</GenerateAssemblyTitleAttribute>
+		<GenerateAssemblyVersionAttribute>False</GenerateAssemblyVersionAttribute>
+		<GenerateAssemblyFileVersionAttribute>False</GenerateAssemblyFileVersionAttribute>
+		<GenerateAssemblyInformationalVersionAttribute>False</GenerateAssemblyInformationalVersionAttribute>
+		<GenerateAssemblyProductAttribute>False</GenerateAssemblyProductAttribute>
+		<GenerateAssemblyCompanyAttribute>False</GenerateAssemblyCompanyAttribute>
+		<GenerateAssemblyCopyrightAttribute>False</GenerateAssemblyCopyrightAttribute>
+		<GenerateAssemblyConfigurationAttribute>False</GenerateAssemblyConfigurationAttribute>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<Configurations>Release2019;Debug2019;Debug2022;Release2022</Configurations>
+	</PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\VSSpellCheckerDefinitionsShared\Properties\AssemblyInfoShared.cs" Link="Properties\AssemblyInfoShared.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VSSpellCheckerCommon\VSSpellCheckerCommon.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
+    <EmbeddedResource Update="Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+  </ItemGroup>
+
+</Project>

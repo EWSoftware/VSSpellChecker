@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>This category contains several options that let you fine tune how source code files are spell
+checked.  The following options are available.  All of them are disabled by default so that the associated
+elements are included for spell checking.</para>
+		</introduction>
+
+		<section>
+			<content>
+				<para>The following options only apply to the code analyzer used to spell check identifiers in C# source
+code (Visual Studio 2019 and later).  Note that camel cased identifiers and those with underscores will be split
+into individual words and each word in the identifier will be spell checked.</para>
+				
+				<list class="bullet">
+					<listItem>
+						<para><ui>Ignore identifiers if private</ui> - If enabled, all identifiers with a visibility of
+private are ignored.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore identifier if internal</ui> - If enabled, all identifiers with a visibility of
+internal are ignored.  Note that protected internal identifiers will still be spell checked as the protected
+visibility will take precedence.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore identifier if all uppercase</ui> - If enabled, any identifier that consists only of
+uppercase letters will be ignored.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore identifiers within member bodies</ui> - If enabled, all identifiers within the body
+of a member will be ignored (local variables in properties, methods, lambda expressions, etc.).  This can be
+useful in reducing the number of spelling errors reported since method bodies tend to contain more abbreviations
+and other shortened identifiers.  Since these will never be publicly visible, it may be preferable to skip spell
+checking them.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore type parameters</ui> - If enabled, type parameters on generic types such as
+<codeInline>TKey</codeInline> and <codeInline>TValue</codeInline> will be ignored.  If spell checked, the leading
+uppercase "T" in the examples would be skipped so it would only flag a spelling error if the remainder of the
+type parameter was misspelled.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore compiler generated code</ui> - If enabled, all compiler generated code is skipped
+and will not be spell checked.</para>
+					</listItem>
+				</list>
+
+				<para>The following options apply to C# source code and are implemented via the classifier in the Visual
+Studio editor.  By enabling the last option, it is also possible to have these options applied to all C-style
+code as applicable.</para>
+
+				<list class="bullet">
+					<listItem>
+						<para><ui>Ignore XML documentation comments (/// ... and /** ... */)</ui> - If enabled, XML
+documentation comments will be excluded from spell checking.  Unless disabled with the option below, standard
+delimited comments will still be included for spell checking.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore delimited comments (/* ... */)</ui> -  This is useful for excluding private comments
+that nobody will see except for developers and commented out code.  Unless disabled with the option above,
+delimited XML comments will still be included for spell checking.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore standard single line comments (// ...)</ui> - This is useful for excluding private
+comments that nobody will see except for developers and commented out code.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore quadruple slash single line comments (//// ...)</ui> - This option is useful for
+ignoring commented out code using the method recommended by StyleCop so that it does not produce style warnings.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore normal string literals ("...")</ui> - This is useful for ignoring string literals in
+code if you use resource files for localized text.  In such cases, the string literals are usually not valid
+words and enabling this option prevents the resource keys from showing up as spelling errors.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore verbatim string literals (@"...")</ui> - Verbatim string literals typically contain
+such things as filenames or multi-line text that is not usually considered text that needs to be spell checked.
+Enabling this option prevents their content from being checked for spelling errors.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore interpolated string literals ($"{PropertyName}...")</ui> - This is useful for
+skipping interpolated strings which may only contain property format specifiers.  Enabling this option prevents
+their content from being checked for spelling errors.  If left disabled, all string content except text within
+braces which denote format specifiers will be spell checked.</para>
+					</listItem>
+
+					<listItem>
+						<para><ui>Apply the above options to all C-style languages as applicable</ui> - If this option is
+enabled, the above options are applied to all C-style languages as applicable.  For example, all of the comments
+options and the normal string literal option will be applied to C, C++, JavaScript, etc.</para>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+		
+		<relatedTopics>
+			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

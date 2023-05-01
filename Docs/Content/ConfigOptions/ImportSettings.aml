@@ -13,9 +13,16 @@ submodule.</para>
 			<content>
 				<para>To specify the configuration file, enter its name in the text box or use the button to browse for
 the file.  If specifying it in the global configuration, the path should be fully qualified.  For non-global
-configuration files (solution, project, folder, or file configurations), relative paths will be considered
-relative to the location of the configuration file containing the import file reference.</para>
+configuration files (solution, project, or folder configurations), relative paths will be considered relative to
+the location of the configuration file containing the import file reference.</para>
 
+				<alert class="tip">
+					<para>.editorconfig files in parent folders all the way up to the root of the driver are automatically
+found and their settings used if applicable.  If the file you are importing is in a parent folder of this file,
+you do not need to specify it here unless it has a non-standard name.  By taking advantage of the normal behavior
+of .editorconfig files, it is likely that you will not need to use this option.</para>
+				</alert>
+				
 				<alert class="important">
 					<para>When specifying the import file in the global configuration, the settings in the imported file
 will override settings in the global configuration.  This is because the global settings file does not inherit

@@ -46,7 +46,7 @@
 				</StackPanel>
 				<StackPanel Orientation="Horizontal">
 					<ComboBox Name="cboIgnoreIfCompilerGenerated" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
-					<Label Margin="3" Content="Ignore if compiler generated" />
+					<Label Margin="3" Content="Ignore compiler generated code" />
 				</StackPanel>
 				<StackPanel Orientation="Horizontal">
 					<ComboBox Name="cboIgnoreXmlDocComments" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />

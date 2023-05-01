@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="3f7ff8cc-5493-4f6d-a1f4-99f9e245f621" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+
+				<list class="bullet">
+					<listItem>
+						<para>Added support and configuration options for spell checking any WPF text box within Visual
+Studio.  See the <link xlink:href="e23551ac-52f5-4505-b2d2-0728c7607fd3" /> topic for usage notes and for known
+issues and limitations.</para>
+					</listItem>
+
+					<listItem>
+						<!-- Ignore spelling: Miloslav Beňo -->
+						<para>Added support for spell checking PHP files within the Visual Studio text editor when using the
+<legacyItalic>PHP Tools for Visual Studio</legacyItalic> extension.  Thanks to Miloslav Beňo of <externalLink>
+							<linkText>DevSense</linkText>
+							<linkUri>http://www.devsense.com/</linkUri>
+							<linkTarget>_blank</linkTarget>
+						</externalLink> for the tagger implementation.</para>
+					</listItem>
+
+					<listItem>
+						<para>Made various adjustments to escape character checking.  It is now only performed in C-style
+language files.  When doing solution/project spell checking, it is further limited to only check comments and
+normal string literals.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for installing the extension in Visual Studio 15 Preview 2.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

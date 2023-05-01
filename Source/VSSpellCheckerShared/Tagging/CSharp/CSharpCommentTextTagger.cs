@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 12/29/2022
-// Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
+// Updated : 04/26/2023
+// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for C# code
 //
@@ -719,6 +719,15 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
             while(!p.EndOfLine)
             {
+                // Skip past format specifiers as they may contain quotes
+                if(isInterpolatedString && p.Char() == '{' && p.NextChar() != '{')
+                {
+                    while(!p.EndOfLine && p.Char() != '}')
+                        p.Advance();
+
+                    continue;
+                }
+
                 if(p.Char() == '\\') // Escaped character.  Skip over it.
                 {
                     p.Advance(2);

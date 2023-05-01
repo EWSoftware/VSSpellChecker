@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommonUtilities.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/15/2023
+// Updated : 04/27/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
@@ -17,7 +17,7 @@
 // 05/25/2013  EFW  Created the code
 //===============================================================================================================
 
-// Ignore Spelling: za tp
+// Ignore Spelling: za tp Regexes
 
 using System;
 using System.Collections.Generic;

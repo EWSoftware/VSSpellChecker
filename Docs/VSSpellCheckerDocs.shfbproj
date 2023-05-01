@@ -13,7 +13,7 @@
     <RootNamespace>VSSpellCheckerWiki</RootNamespace>
     <Name>VSSpellCheckerDocs</Name>
     <!-- SHFB properties -->
-    <FrameworkVersion>.NET Framework 4.6.2</FrameworkVersion>
+    <FrameworkVersion>.NET Framework 4.7.2</FrameworkVersion>
     <OutputPath>Help\</OutputPath>
     <HtmlHelpName>VSSpellChecker</HtmlHelpName>
     <Language>en-US</Language>
@@ -39,7 +39,7 @@
       <Argument Key="RequestExampleUrl" Value="" />
     </TransformComponentArguments>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions2017and2019\VSSpellCheckerDefinitions2017and2019.csproj" xmlns="" />
+      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions2022AndLater\VSSpellCheckerDefinitions2022AndLater.csproj" xmlns="" configuration="Release2022" />
     </DocumentationSources>
     <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
     <HelpFileFormat>Website</HelpFileFormat>
@@ -144,10 +144,17 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug2022' ">
+    <OutputPath>bin\Debug2022\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release2022' ">
+    <OutputPath>bin\Release2022\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Folder Include="Content" />
     <Folder Include="Content\ConfigOptions" />
     <Folder Include="Content\VersionHistory" />
+    <Folder Include="Content\VersionHistory\v1.0tov2021.3.1.0" />
     <Folder Include="media" />
   </ItemGroup>
   <ItemGroup>
@@ -155,17 +162,15 @@
     <None Include="Content\CommonProblems.aml" />
     <None Include="Content\ConfigOptions\CodeAnalysisDictionaries.aml" />
     <None Include="Content\ConfigOptions\ConfigOptions.aml" />
-    <None Include="Content\ConfigOptions\CSharpOptions.aml" />
+    <None Include="Content\ConfigOptions\CodeAnalyzerOptions.aml" />
     <None Include="Content\ConfigOptions\DictionarySettings.aml" />
     <None Include="Content\ConfigOptions\IgnoredClassifications.aml" />
-    <None Include="Content\ConfigOptions\IgnoredFilePatterns.aml" />
     <None Include="Content\ConfigOptions\ExclusionExpressions.aml" />
     <None Include="Content\ConfigOptions\GeneralSettings.aml" />
     <None Include="Content\ConfigOptions\IgnoredWords.aml" />
     <None Include="Content\ConfigOptions\ImportSettings.aml" />
     <None Include="Content\ConfigOptions\VisualStudioWPFTextBoxes.aml" />
     <None Include="Content\ConfigOptions\XMLFiles.aml" />
-    <None Include="Content\ConfigurationFiles.aml" />
     <None Include="Content\Contributing.aml" />
     <None Include="Content\ConvertingToEditorConfig.aml" />
     <None Include="Content\CorrectingIssues.aml" />
@@ -180,40 +185,41 @@
     <None Include="Content\SpellCheckOptions.aml" />
     <None Include="Content\SystemRequirements.aml" />
     <None Include="Content\ThirdPartyContentTypes.aml" />
-    <None Include="Content\VersionHistory\v1.0.0.0.aml" />
-    <None Include="Content\VersionHistory\v1.0.0.1.aml" />
-    <None Include="Content\VersionHistory\v2014.2.23.0.aml" />
-    <None Include="Content\VersionHistory\v2014.6.14.0.aml" />
-    <None Include="Content\VersionHistory\v2014.9.7.0.aml" />
-    <None Include="Content\VersionHistory\v2015.2.21.0.aml" />
-    <None Include="Content\VersionHistory\v2015.3.1.0.aml" />
-    <None Include="Content\VersionHistory\v2016.7.28.0.aml" />
-    <None Include="Content\VersionHistory\v2017.12.29.0.aml" />
-    <None Include="Content\VersionHistory\v2017.8.26.0.aml" />
-    <None Include="Content\VersionHistory\v2018.10.27.0.aml" />
-    <None Include="Content\VersionHistory\v2018.8.3.0.aml" />
-    <None Include="Content\VersionHistory\v2019.4.14.0.aml" />
-    <None Include="Content\VersionHistory\v2019.5.5.0.aml" />
-    <None Include="Content\VersionHistory\v2019.7.8.0.aml" />
-    <None Include="Content\VersionHistory\v2020.3.28.0.aml" />
-    <None Include="Content\VersionHistory\v2020.4.18.0.aml" />
-    <None Include="Content\VersionHistory\v2020.6.11.0.aml" />
-    <None Include="Content\VersionHistory\v2020.8.24.0.aml" />
-    <None Include="Content\VersionHistory\v2021.1.23.0.aml" />
-    <None Include="Content\VersionHistory\v2021.3.1.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0.0.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0.0.1.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0tov2021.3.1.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.2.23.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.6.14.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.9.7.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.11.8.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.2.21.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.3.1.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.8.15.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.9.19.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.10.15.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.3.12.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.5.28.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.7.28.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.12.29.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.3.26.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.8.26.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.10.27.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.8.25.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.8.3.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.4.14.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.5.5.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.7.8.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.3.28.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.4.18.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.6.11.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.8.24.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2021.1.23.0.aml" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2021.3.1.0.aml" />
     <None Include="Content\VersionHistory\v2022.1.3.0.aml" />
     <None Include="Content\VersionHistory\v2022.12.29.0.aml" />
     <None Include="Content\VersionHistory\v2022.9.6.0.aml" />
     <None Include="Content\VersionHistory\v2023.3.4.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
-    <None Include="Content\VersionHistory\v2015.8.15.0.aml" />
-    <None Include="Content\VersionHistory\v2015.9.19.0.aml" />
-    <None Include="Content\VersionHistory\v2015.11.8.0.aml" />
-    <None Include="Content\VersionHistory\v2016.3.12.0.aml" />
-    <None Include="Content\VersionHistory\v2016.5.28.0.aml" />
-    <None Include="Content\VersionHistory\v2016.10.15.0.aml" />
-    <None Include="Content\VersionHistory\v2017.3.26.0.aml" />
-    <None Include="Content\VersionHistory\v2018.8.25.0.aml" />
     <None Include="Content\VersionHistory\vNext.aml" />
     <None Include="Content\Welcome.aml" />
   </ItemGroup>

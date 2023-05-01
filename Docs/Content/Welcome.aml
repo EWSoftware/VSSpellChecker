@@ -9,9 +9,10 @@
 			<content>
 				<!-- Ignore spelling: Golovin, Lehenbauer -->
 				<para>This project is a Visual Studio editor extension that checks the spelling of comments, strings, and
-plain text as you type or interactively with a tool window.  It can also spell check an entire solution, project,
-or selected items.  It is based largely on the spell checker extension originally created by Noah Richards, Roman
-Golovin, and Michael Lehenbauer.  This version has been extended as follows:</para>
+plain text as you type or interactively with a tool window.  It also contains a code analyzer that will spell
+check identifiers in C# source code.  It can spell check an entire solution, project, or selected items.  It is
+based largely on the spell checker extension originally created by Noah Richards, Roman Golovin, and Michael
+Lehenbauer.  This version has been extended as follows:</para>
 
 				<list class="bullet">
 					<listItem>
@@ -98,8 +99,12 @@ folders, and/or files are included in solution/project spell checking operations
 							</listItem>
 
 							<listItem>
-								<para>Various options for excluding specific elements of C# source code files from being spell
-checked.</para>
+								<para>Various options for excluding specific elements of source code files from being spell
+checked.  The options related to comment types can be applied to all C-style languages as they are implemented
+through a classification tagger.  Options for identifiers are implemented through a code analyzer and currently
+only apply to C# source code (Visual Studio 2019 and later).  The code analyzer can be configured to ignore
+private identifiers, internal identifiers, type parameters, identifiers in all uppercase, compiler generated
+code, and all identifiers within member bodies (local variables in properties, methods, lambdas, etc.).</para>
 							</listItem>
 
 							<listItem>
@@ -126,8 +131,9 @@ checking XML files.</para>
 							</listItem>
 
 							<listItem>
-								<para>Configurations can be specified at any level (solution, project, folder, or file).  Options
-can be inherited or overridden.</para>
+								<para>Configuration options are stored in .editorconfig files and thus can be specified at any
+level (solution, project, folder, or file).  Spell checker options can be inherited or overridden.  A global
+configuration file is used as the base set of configuration options.</para>
 							</listItem>
 
 						</list>

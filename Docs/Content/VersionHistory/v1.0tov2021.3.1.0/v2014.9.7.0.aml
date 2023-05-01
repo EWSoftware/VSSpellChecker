@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="e9510e5d-6d29-4561-b127-36fe3b3c61ce" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Added support for spell checking in the Visual Studio Peek Definition window.</para>
+					</listItem>
+
+					<listItem>
+						<para>Removed handling of the space character in C-style format string specifiers.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for installing the spell checker package in Visual Studio 2015.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

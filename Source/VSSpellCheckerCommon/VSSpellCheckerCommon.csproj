@@ -19,6 +19,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <PlatformTarget>AnyCPU</PlatformTarget>
 		<NoWarn>NU1701</NoWarn>
+		<Configurations>Release2019;Debug2019;Debug2022;Release2022</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,11 +30,20 @@
     <PackageReference Include="NHunspell" Version="1.2.5554.16953" />
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug2019|AnyCPU'">
     <ProjectReference Include="..\VSSpellCheckerDefinitions2017And2019\VSSpellCheckerDefinitions2017And2019.csproj" />
-  </ItemGroup>
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release2019|AnyCPU'">
+    <ProjectReference Include="..\VSSpellCheckerDefinitions2017And2019\VSSpellCheckerDefinitions2017And2019.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug2022|AnyCPU'">
+    <ProjectReference Include="..\VSSpellCheckerDefinitions2022AndLater\VSSpellCheckerDefinitions2022AndLater.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release2022|AnyCPU'">
+    <ProjectReference Include="..\VSSpellCheckerDefinitions2022AndLater\VSSpellCheckerDefinitions2022AndLater.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

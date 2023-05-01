@@ -114,7 +114,7 @@ the same.</para>
 						<para>A solid magenta underline is used to note the spelling errors rather than a squiggle like the
 one used in the text editor.  My WPF skills are meager at best and I could not get a squiggle underline to work
 reliably (the wave tended to shift both horizontally and vertically based on the location and didn't look right).
-If you've got better WPF skills and want to have ago at implementing a squiggle underline that stays fixed and
+If you've got better WPF skills and want to have a go at implementing a squiggle underline that stays fixed and
 looks the same regardless of location, feel free to submit the changes if you can get it working.</para>
 					</listItem>
 

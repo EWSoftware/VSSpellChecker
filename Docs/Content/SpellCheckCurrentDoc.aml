@@ -10,12 +10,17 @@ activate the tool window options.  When there are misspellings in the active edi
 the proper location and the misspelling will be highlighted.</para>
 
 			<alert class="note">
+				<para>Spell check as you type only applies to non-source code files and only to strings and comments
+within source code files.  If enabled, identifier spell checking is handled by the code analyzer.  Identifier
+misspellings are separate and will be highlighted like other code analyzer warnings.  Such misspellings will not
+appear in the Spell Check Active Document or Solution/Project Spell Check tool windows.</para>
+
 				<para>If the misspelling is within a collapsed section, an attempt is made to expand the section and show
 the word.  If this does not occur, to make it visible, click on the editor window's tab to select it and then
 expand the section containing the cursor.  When you click on the spell checker tool window, it will reposition to
 the word and highlight it as usual.</para>
 			</alert>
-
+			
 			<autoOutline lead="none" excludeRelatedTopics="true" />
 		</introduction>
 

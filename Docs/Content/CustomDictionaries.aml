@@ -69,9 +69,8 @@ project to which they will apply.</para>
 							</listItem>
 
 							<listItem>
-								<para>Add a solution, project, folder, or file-specific
-<link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab">spell checker configuration file</link> based on how you
-want the dictionaries to be made available and used.</para>
+								<para>Add a <link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5">spell checker configuration
+file</link> based on how you want the dictionaries to be made available and used.</para>
 							</listItem>
 
 							<listItem>
@@ -136,7 +135,6 @@ problem, open a new issue asking for help.</para>
 		</section>
 
 		<relatedTopics>
-			<link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" />
 			<link xlink:href="fb81c214-0fe0-4d62-a172-d7928d5b91d5" />
 			<link xlink:href="027d2fbc-7bfb-4dc3-b4f5-85f95fcf7629" />
 		</relatedTopics>

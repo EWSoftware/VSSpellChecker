@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckEverywherePackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
+// Updated : 04/27/2023
 // Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class that defines the Visual Studio Spell Check Everywhere package
@@ -16,6 +16,8 @@
 // ==============================================================================================================
 // 04/27/2016  EFW  Created the code
 //===============================================================================================================
+
+// Ignore Spelling: elementid itemid Hier
 
 using System;
 using System.Diagnostics;

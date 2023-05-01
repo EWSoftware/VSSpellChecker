@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="ec4462c0-c063-4a9a-895b-8abad08877ae" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>The main feature of this release is the
+<link xlink:href="fa790577-88c0-4141-b8f4-d8b70f625cfd">new tool window</link> that allows spell checking of the
+entire solution, a single project, or whatever items are currently selected in the Solution Explorer window.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added support for the following new commands on the Spell Checker menu that utilize the new
+tool window:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para><ui>Spell Check Entire Solution</ui> - Spell check the entire solution.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Spell Check Current Project</ui> - Spell check just the currently selected project.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Spell Check Selected Items</ui> - Spell check just the items selected in the Solution
+Explorer window (projects, folders, files, or any combination thereof).</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Open the Solution/Project Spell Checker Window</ui> - Open the Solution/Project Spell
+Checker tool window but take no action.</para>
+							</listItem>
+
+						</list>
+					</listItem>
+
+					<listItem>
+						<para>Added two new <ui>General Settings</ui> category properties:</para>
+
+						<list class="bullet">
+							<listItem>
+								<para><ui>Include when performing solution/project spell checking</ui> - This is available in all
+configuration files except the global configuration.  If set to No, the related file(s) will be excluded when
+performing a solution/project spell check operation.</para>
+							</listItem>
+
+							<listItem>
+								<para><ui>Detect doubled words</ui> - This option allows you to disable doubled word detection if
+you do not find it useful.</para>
+							</listItem>
+						</list>
+					</listItem>
+
+					<listItem>
+						<para>Added a new <link xlink:href="6216eedb-6434-4cad-be06-576814e0b735" /> configuration category
+that allows you to define regular expressions that are used to exclude spans of text from the spell checking
+process.</para>
+					</listItem>
+
+					<listItem>
+						<para>The <codeInline>style</codeInline> and <codeInline>resheader</codeInline> elements were added
+as default XML elements to ignore.</para>
+					</listItem>
+
+					<listItem>
+						<para>Both tool windows and the configuration file editor are now theme aware and are styled
+accordingly based on the selected Visual Studio color theme.</para>
+					</listItem>
+
+					<listItem>
+						<para>Added notification text to the <ui>Dictionary Settings</ui> configuration category page that
+informs the user that they need to add a language if necessary when editing a configuration and the list of
+selected languages is empty.</para>
+					</listItem>
+
+					<listItem>
+						<!-- Ignore spelling: Gaisie Essilfie -->
+						<para>Merged changes from Franz Alex Gaisie-Essilfie to group suggestions by word when using multiple
+dictionaries rather than by language.  This presents a more concise list of suggestions.  The language(s) for
+each word are shown after the word in the list.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed up issues in the C# comment text tagger with XML documentation comment elements that span
+lines and added support for spell checking XML documentation comment attributes and ignoring unwanted XML
+documentation comment elements based on the configuration settings (certain limitations apply).</para>
+					</listItem>
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

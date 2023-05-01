@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<AssemblyName>VisualStudio.SpellChecker.CodeFixes</AssemblyName>
+		<RootNamespace>VisualStudio.SpellChecker.CodeFixes</RootNamespace>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\SpellChecker.snk</AssemblyOriginatorKeyFile>
+		<GenerateAssemblyTitleAttribute>False</GenerateAssemblyTitleAttribute>
+		<GenerateAssemblyVersionAttribute>False</GenerateAssemblyVersionAttribute>
+		<GenerateAssemblyFileVersionAttribute>False</GenerateAssemblyFileVersionAttribute>
+		<GenerateAssemblyInformationalVersionAttribute>False</GenerateAssemblyInformationalVersionAttribute>
+		<GenerateAssemblyProductAttribute>False</GenerateAssemblyProductAttribute>
+		<GenerateAssemblyCompanyAttribute>False</GenerateAssemblyCompanyAttribute>
+		<GenerateAssemblyCopyrightAttribute>False</GenerateAssemblyCopyrightAttribute>
+		<GenerateAssemblyConfigurationAttribute>False</GenerateAssemblyConfigurationAttribute>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+		<Configurations>Release2019;Debug2019;Debug2022;Release2022</Configurations>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Include="..\VSSpellCheckerDefinitionsShared\Properties\AssemblyInfoShared.cs" Link="Properties\AssemblyInfoShared.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SpellCheckCodeAnalyzer2022AndLater\SpellCheckCodeAnalyzer2022AndLater.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="CodeFixResources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="CodeFixResources.resx" />
+		<EmbeddedResource Update="CodeFixResources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="CodeFixResources.Designer.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
+
+</Project>

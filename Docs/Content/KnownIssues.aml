@@ -2,12 +2,37 @@
 <topic id="a9ff4ce1-0d6b-4376-8d32-02dae64e2075" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>The following are some known issues and workarounds.</para>
+			<para>The following are some known issues and workarounds and some limitations with the spell checker.</para>
 		</introduction>
 
 		<section>
 			<content>
 				<list class="bullet">
+					<listItem>
+						<para>Spell check as you type and solution/project spell checking only apply to non-source code files
+and only to strings and comments within source code files.  If enabled, identifier spell checking is handled by
+the code analyzer.  Such misspellings will not appear in the Spell Check Active Document or Solution/Project
+Spell Check tool windows.</para>
+					</listItem>
+
+					<listItem>
+						<para>The code analyzer runs in a separate process.  As such, it may not always pick up new words
+added to the dictionaries.  It may be necessary to close and reopen the solution in order to get it to pick up
+new dictionary words.  Ignored words will typically be detected as the configuration used by the code analyzer
+is refreshed quite often.  However, changes made to the global configuration may not be reflected until a change
+is made to the source code of any open editors.</para>
+					</listItem>
+
+					<listItem>
+						<para>The code analyzer is only able to correct the spelling on single part namespaces (e.g.
+<codeInline>namespace SinglePartNamespace</codeInline>) or the last part of multi-part namespaces (e.g.
+<codeInline>namespace FirstPart.MiddlePart.LastPart</codeInline>).  For parts prior to the last part,
+misspellings will be flagged and suggestions offered by you will need to manually correct the spelling and apply
+the refactoring code fix to change the name throughout the code base if necessary.  This appears to be a
+limitation with symbol renaming and I was unable to find a workaround.  If anyone with more knowledge wants to
+fix it, feel free to do so and submit a pull request with the changes.</para>
+					</listItem>
+
 					<listItem>
 						<para>The Spell Check Active Document tool window relies on the <ui>Spell check as you type</ui>
 configuration option being enabled.  If disabled, spell checking will be unavailable until it is turned back on.

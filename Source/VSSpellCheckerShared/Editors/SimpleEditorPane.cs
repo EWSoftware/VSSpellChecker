@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SimpleEditorPane.cs
 // Author  : Istvan Novak
-// Updated : 09/02/2018
+// Updated : 04/27/2023
 // Source  : http://learnvsxnow.codeplex.com/
-// Note    : Copyright 2008-2018, Istvan Novak, All rights reserved
+// Note    : Copyright 2008-2023, Istvan Novak, All rights reserved
 //
 // This file contains a class that implements the core functionality for an editor pane
 //
@@ -18,8 +18,9 @@
 // 02/06/2015  EFW  Added the code to the project and updated it to support WPF user controls
 //===============================================================================================================
 
+// Ignore Spelling: hier itemid pn prg pguid pva cmdexecopt grf attribs
+
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Windows.Controls;
@@ -537,39 +538,31 @@ namespace VisualStudio.SpellChecker.Editors
                 switch(nCmdID)
                 {
                     case (uint)VSConstants.VSStd97CmdID.Copy:
-                        if(commandSupport != null)
-                            commandSupport.DoCopy();
+                        commandSupport?.DoCopy();
                         return VSConstants.S_OK;
 
                     case (uint)VSConstants.VSStd97CmdID.Cut:
-                        if(commandSupport != null)
-                            commandSupport.DoCut();
+                        commandSupport?.DoCut();
                         return VSConstants.S_OK;
 
                     case (uint)VSConstants.VSStd97CmdID.Paste:
-                        if(commandSupport != null)
-                            commandSupport.DoPaste();
+                        commandSupport?.DoPaste();
                         return VSConstants.S_OK;
 
                     case (uint)VSConstants.VSStd97CmdID.Redo:
-                        if(commandSupport != null)
-                            commandSupport.DoRedo();
+                        commandSupport?.DoRedo();
                         return VSConstants.S_OK;
 
                     case (uint)VSConstants.VSStd97CmdID.Undo:
-                        if(commandSupport != null)
-                            commandSupport.DoUndo();
+                        commandSupport?.DoUndo();
                         return VSConstants.S_OK;
 
                     case (uint)VSConstants.VSStd97CmdID.SelectAll:
-                        if(commandSupport != null)
-                            commandSupport.DoSelectAll();
+                        commandSupport?.DoSelectAll();
                         return VSConstants.S_OK;
 
                     default:
-                        return ExecuteVSStd97Command(execArgs)
-                          ? VSConstants.S_OK
-                          : (int)(Constants.OLECMDERR_E_NOTSUPPORTED);
+                        return ExecuteVSStd97Command(execArgs) ? VSConstants.S_OK : (int)(Constants.OLECMDERR_E_NOTSUPPORTED);
                 }
             }
 

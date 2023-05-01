@@ -1,23 +1,27 @@
-# Top-most EditorConfig file
-root = true
-
 # Don't use tabs for indentation unless otherwise overridden
 [*]
-guidelines = 80 dotted, 114 dotted
 indent_style = space
 end_of_line = crlf
+guidelines = 80 dotted, 114 dotted
 # (Please don't specify an indent_size here; that has too many unintended consequences.)
 
 # VSSPELL: Spell checker settings from VSSpellChecker.sln.vsspell
-vsspell_section_id = 6788f50bfd7c45868a229f5bebbd58f5
-vsspell_ignored_words_6788f50bfd7c45868a229f5bebbd58f5 = File:IgnoredWords.dic
-vsspell_exclusion_expressions_6788f50bfd7c45868a229f5bebbd58f5 = [a-z]{2}-([A-Z]{2}|Cyrl|Latn)(?@@PND@@/Options/None)\\\\\w+(?@@PND@@/Options/None)
+vsspell_section_id = 9f07c577adcd4fd7a93a42a503828225
+vsspell_code_analyzer_ignore_identifier_if_private = true
+vsspell_code_analyzer_ignore_identifier_if_internal = true
+vsspell_code_analyzer_ignore_identifier_if_all_uppercase = true
+vsspell_code_analyzer_ignore_identifiers_within_member_bodies = true
+vsspell_code_analyzer_ignore_if_compiler_generated = true
+vsspell_code_analyzer_ignore_delimited_comments = true
+vsspell_code_analyzer_ignore_quadruple_slash_comments = true
+vsspell_code_analyzer_apply_to_all_c_style_languages = true
+vsspell_ignored_words_9f07c577adcd4fd7a93a42a503828225 = File:IgnoredWords.dic
+vsspell_exclusion_expressions_9f07c577adcd4fd7a93a42a503828225 = [a-z]{2}-([A-Z]{2}|Cyrl|Latn)(?@@PND@@/Options/None)\\\\\w+(?@@PND@@/Options/None)
 
 [NHunspell/**]
 # VSSPELL: Ignore spell checking in the NHunspell folder
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
-vsspell_code_analyzers_enabled = false
 
 # XML files of various types
 [*.{aml,asax,ascx,asmx,asp,aspx,axml,config,content,cshtml,csproj,database,datasource,dbml,disco,discomap,dtsx,edmx,exclude,fxcop,htm,html,items,layout,maml,manifest,master,msha,myapp,nunit,nuspec,proj,projitems,props,publishproj,pubxml,rdl,rdlc,resx,ruleset,settings,shfbproj,shproj,sitemap,snippets,soap,svc,svcinfo,svcmap,targets,tasks,tokens,vbhtml,vbproj,vcxproj,vcxproj.filters,vsct,vsixmanifest,vstemplate,webinfo,wsdl,xaml,xamlcfg,xml,xsd,xsl,xslt,xsx}]

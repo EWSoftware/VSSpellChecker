@@ -6,6 +6,13 @@
 the mouse over the word and click the down arrow on the smart tag to see the available options.  Alternately, you
 can place the cursor anywhere in the word and press <ui>Ctrl+.</ui> or <ui>Shift+Alt+F10</ui> depending on your
 version of Visual Studio to show the smart tag options.</para>
+
+			<alert class="note">
+				<para>Spell check as you type only applies to non-source code files and only to strings and comments
+within source code files.  If enabled, identifier spell checking is handled by the code analyzer.  Identifier
+misspellings are separate and will be highlighted like other code analyzer warnings.  Such misspellings will not
+appear in the Spell Check Active Document or Solution/Project Spell Check tool windows.</para>
+			</alert>
 		</introduction>
 
 		<section>

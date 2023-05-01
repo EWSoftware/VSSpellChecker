@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingErrorAdorner.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/29/2018
-// Note    : Copyright 2016-2018, Eric Woodruff, All rights reserved
+// Updated : 04/27/2023
+// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that is used to adorn spelling errors in a WPF text box with an underline
 //
@@ -291,8 +291,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
 
                     var al = this.GetAdornerLayer();
 
-                    if(al != null)
-                        al.Remove(this);
+                    al?.Remove(this);
 
                     al = AdornerLayer.GetAdornerLayer(textBox);
 
@@ -306,11 +305,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                 else
                 {
                     this.Visibility = Visibility.Hidden;
-
-                    var al = this.GetAdornerLayer();
-
-                    if(al != null)
-                        al.Remove(this);
+                    this.GetAdornerLayer()?.Remove(this);
                 }
             }
             catch(Exception ex)

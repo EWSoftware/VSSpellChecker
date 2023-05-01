@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommandTargetArguments.cs
 // Author  : Istvan Novak
-// Updated : 09/02/2018
+// Updated : 04/27/2023
 // Source  : http://learnvsxnow.codeplex.com/
-// Note    : Copyright 2008-2018, Istvan Novak, All rights reserved
+// Note    : Copyright 2008-2023, Istvan Novak, All rights reserved
 //
 // This file contains classes that define event arguments used by the SimpleEditorPane class
 //
@@ -17,6 +17,8 @@
 // ==============================================================================================================
 // 02/06/2015  EFW  Added the code to the project
 //===============================================================================================================
+
+// Ignore Spelling: pva
 
 using System;
 using Microsoft.VisualStudio.OLE.Interop;

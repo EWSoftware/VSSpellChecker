@@ -6,6 +6,12 @@
 options opens the solution/project spell checker tool window.  This tool window will only be usable when a
 solution containing projects is loaded.</para>
 
+			<alert class="note">
+				<para>Solution/project spell checking only applies to non-source code files and only to strings and
+comments within source code files.  If enabled, identifier spell checking is handled by the code analyzer.
+Identifier misspellings are separate and will not appear in the Solution/Project Spell Check tool window.</para>
+			</alert>
+
 		</introduction>
 
 		<section>

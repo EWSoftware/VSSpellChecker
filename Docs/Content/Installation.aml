@@ -2,13 +2,19 @@
 <topic id="e339cac1-9783-4c2a-919f-88436c78fef8" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>If you have currently got a spell checker extension installed, uninstall or disable it before
-installing this package.  To install this package:</para>
+			<para>To install this package:</para>
 		</introduction>
 
 		<section>
 			<content>
 				<list class="bullet">
+					<listItem>
+						<para>If you currently have a spell checker extension installed, uninstall or disable it before
+installing this package.  Examples are the ones in Resharper and GhostDoc.  If using Visual Studio 2022, disable
+the built-in spell checker by going to <ui>Edit</ui> | <ui>Advanced</ui> and disabling the <ui>Toggle Text Spell
+Checker</ui> option.</para>
+					</listItem>
+					
 					<listItem>
 						<para>Download the latest release of the VSIX installer from the <externalLink>
 <linkText>Releases</linkText>

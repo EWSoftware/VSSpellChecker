@@ -2,15 +2,77 @@
 <topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>To set the spelling tag underline color, select <ui>Tools | Options | Environment | Fonts and Colors</ui>
-and select the <ui>Spelling Error</ui> display item.  The default color is magenta.  All other spell checker
-options are found in the configuration editor that appears when you select <ui>Tools | Spell Checker | Edit
-Global Configuration</ui> or open a <localUri>.vsspell</localUri> configuration file within a solution or
-project.  They are divided into several categories described below.</para>
-		</introduction>
+			<para>Configuration options for the spell checker are stored in .editorconfig files.  There is one global
+configuration that contains the default settings.  Spell checker options can also be stored in .editorconfig
+files within a solution, project, and/or folder.  This allows you to define different settings at each level
+while inheriting the options that are not changed from higher level configurations.</para>
+			
+				<para>When a project file that can be spell checked is opened, the global settings are merged with any
+defined solution, project, folder .editorconfig settings.  In all settings other than global, properties default
+to being inherited rather than being set to a specific default value.  If set to a specific value in a settings
+file, they override any settings loaded earlier in the chain.  Additional dictionary folders, ignored filename
+patterns, ignored words, ignored XML elements, and spell checked XML attributes get special treatment.  Each
+can be inherited and added to or, if marked as not to be inherited, can replace the lists from previous settings
+files earlier in the chain.  This provides for very flexible settings that should cover a wide variety of
+situations.</para>
+			
+	</introduction>
 
 		<section>
 			<content>
+						<para>The global settings file is stored in the local application data folder
+(<localUri>%LOCALAPPDATA%\EWSoftware\Visual Studio Spell Checker</localUri>).  These are the base settings used
+in the absence of, and inherited by, solution, project, and folder configuration files.  The settings in the
+general section (<legacyBold>[*]</legacyBold>) will be applied to all files.  Additional sections with specific
+file globs are present to disable the spell checker in certain files or to adjust the ignored words and keywords
+based on the file type.</para>
+			
+				<para>Options that are set in other .editorconfig files will override the global settings and any other
+settings inherited from .editorconfig files higher up in the folder structure.  Settings will be inherited by
+all files within the folder and its subfolders.  Subfolders may themselves contain .editorconfig files that make
+further changes to the spell checker configuration settings.</para>
+
+				<para>A file editor in Visual Studio allows you to modify the settings at any level by opening the
+settings file in the project.  Global settings are modified by selecting the <ui>Tools | Spell Checker | Edit
+Global Configuration</ui> option.</para>
+
+				<para>To add folder or file-specific settings, use one of the following methods when a solution file is
+loaded:</para>
+			
+				<list class="bullet">
+					<listItem>
+						<para>Select the solution, a project, a folder, or a file in the <ui>Solution Explorer</ui>
+window and use the <ui>File</ui> | <ui>New</ui> | <ui>Spell Checker Configuration for Selected Item</ui> option
+to add a configuration for the selected item.</para>
+					</listItem>
+
+					<listItem>
+						<para>Right click on the solution, a project, or a folder in the <ui>Solution Explorer</ui> window
+and use the <ui>Add</ui> | <ui>Spell Checker Configuration</ui> context menu option to add a configuration file
+for the selected item.</para>
+					</listItem>
+
+					<listItem>
+						<para>Right click on a file that can be spell checked (source code, text, HTML, XML, etc.) or an
+.editorconfig file in the <ui>Solution Explorer</ui> window and use the <ui>Spell Checker Configuration</ui>
+context menu option to add or edit a configuration for the selected item.</para>
+					</listItem>
+				</list>
+
+				<para>In all cases, a new .editorconfig file will be added in the folder and project if one does not
+already exist.  If one does exist, a new section will be added to it for the selected folder or file if
+necessary.  The top section of the editor allows you to manage the sections (file globs) within the .editorconfig
+file.  Selecting a section will allow you to edit its settings in the bottom part of the editor.  Options are
+available to move sections up or down in the order, edit the file glob for the section and add an optional
+spell checker specific comment for the section, and if a section only contains spell checker settings, an option
+is available to delete it.</para>
+		
+				<para>To set the spelling tag underline color, select <ui>Tools | Options | Environment | Fonts and
+Colors</ui> and select the <ui>Spelling Error</ui> display item.  The default color is magenta.  All other spell
+checker options are found in the configuration editor that appears when you select <ui>Tools | Spell Checker |
+Edit Global Configuration</ui> or open an .editorconfig file within a solution or project.  They are divided into
+several categories described below.</para>
+				
 				<list class="bullet">
 					<listItem>
 						<para>
@@ -19,43 +81,53 @@ project.  They are divided into several categories described below.</para>
 					</listItem>
 					
 					<listItem>
-						<para><link xlink:href="af34b863-6a1c-41ed-bcf2-48a714686519" /></para>
+						<para>
+							<link xlink:href="af34b863-6a1c-41ed-bcf2-48a714686519" />
+						</para>
 					</listItem>
 
 					<listItem>
-						<para><link xlink:href="b4a8726f-5bee-48a4-81a9-00b1be332607" /></para>
+						<para>
+							<link xlink:href="b4a8726f-5bee-48a4-81a9-00b1be332607" />
+						</para>
 					</listItem>
 
 					<listItem>
-						<para><link xlink:href="09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d" /></para>
+						<para>
+							<link xlink:href="09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="c592c4d8-7387-47fe-9b79-28bf0168f447" />
+					</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="6216eedb-6434-4cad-be06-576814e0b735" />
+					</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="db9ee77f-6932-4df7-bd06-e94f20fc7450" />
+						</para>
+					</listItem>
+
+					<listItem>
+						<para>
+							<link xlink:href="e01bd3d9-c525-4407-8c65-fcdb64539299" />
+					</para>
 					</listItem>
 
 					<listItem>
 						<para>
 							<link xlink:href="6a987caf-5ad9-4dab-a17c-c887881fec7a" />
-						</para>
+					</para>
 					</listItem>
-
-					<listItem>
-						<para><link xlink:href="c592c4d8-7387-47fe-9b79-28bf0168f447" /></para>
-					</listItem>
-
-					<listItem>
-						<para><link xlink:href="6216eedb-6434-4cad-be06-576814e0b735" /></para>
-					</listItem>
-
-					<listItem>
-						<para><link xlink:href="70a7fa5b-1a9e-494f-9d2c-5eb3321b2596" /></para>
-					</listItem>
-
-					<listItem>
-						<para><link xlink:href="db9ee77f-6932-4df7-bd06-e94f20fc7450" /></para>
-					</listItem>
-
-					<listItem>
-						<para><link xlink:href="e01bd3d9-c525-4407-8c65-fcdb64539299" /></para>
-					</listItem>
-
+					
 					<listItem>
 						<para>
 							<link xlink:href="e23551ac-52f5-4505-b2d2-0728c7607fd3" />
@@ -87,7 +159,6 @@ category to remove words from the user dictionary.</para>
 
 		<relatedTopics>
 			<link xlink:href="d9dc230f-ae34-464b-a3c2-4a7778907fc9" />
-			<link xlink:href="7b2bc3bb-5b5c-4d17-a88e-d58b476e49ab" />
 			<link xlink:href="e339cac1-9783-4c2a-919f-88436c78fef8" />
 		</relatedTopics>
 	</developerConceptualDocument>

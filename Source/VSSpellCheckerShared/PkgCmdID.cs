@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PkgCmdID.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/20/2021
-// Note    : Copyright 2013-2021, Eric Woodruff, All rights reserved
+// Updated : 04/27/2023
+// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains various command IDs for the package
 //
@@ -17,6 +17,8 @@
 // 05/20/2013  EFW  Created the code
 // 08/23/2015  EFW  Added support for solution/project spell checking
 //===============================================================================================================
+
+// Ignore Spelling: sel ctx
 
 namespace VisualStudio.SpellChecker
 {

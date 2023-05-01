@@ -20,10 +20,10 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net46" />
-		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net46" />
-		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net47" />
-		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net47" />
+		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release2019\VisualStudio.SpellChecker.Definitions.dll" target="lib\net46" />
+		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release2019\VisualStudio.SpellChecker.Definitions.xml" target="lib\net46" />
+		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release2022\VisualStudio.SpellChecker.Definitions.dll" target="lib\net47" />
+		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release2022\VisualStudio.SpellChecker.Definitions.xml" target="lib\net47" />
 		<file src="ReadMe.txt" target="ReadMe.txt" />
 		<file src="VSSpellChecker.png" target="VSSpellChecker.png" />
 	</files>

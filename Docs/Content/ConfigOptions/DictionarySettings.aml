@@ -12,9 +12,9 @@
 complete dictionaries (dictionary and affix file pairs) or just user dictionaries.  Enter the name of a folder or
 click the "<ui>...</ui>" button to select a folder.  Relative paths are considered to be relative to the
 configuration file's location.  For the global configuration, the paths should always be fully qualified.  For
-solution, project, folder, and file-specific settings files, the folders should typically be relative so that if
-the solution or project moves, the dictionary files can still be found.  You are prompted when adding a folder if
-you would like to make it relative to the current configuration file.  Environment variable references such as
+solution, project, or folder settings files, the folders should typically be relative so that if the solution or
+project moves, the dictionary files can still be found.  You are prompted when adding a folder if you would like
+to make it relative to the current configuration file.  Environment variable references such as
 <environmentVariable>%USERPROFILE%\OneDrive\Dictionaries</environmentVariable> are supported.</para>
 
 				<para>Once a folder has been added, the <ui>Language(s)</ui> combo box will be updated to contain any

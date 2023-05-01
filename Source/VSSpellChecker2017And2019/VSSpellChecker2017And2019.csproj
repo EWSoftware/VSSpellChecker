@@ -4,12 +4,9 @@
     <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\SpellChecker.snk</AssemblyOriginatorKeyFile>
+    <ZipPackageCompressionLevel Condition=" '$(ZipPackageCompressionLevel)' == '' ">Normal</ZipPackageCompressionLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug2022|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -21,9 +18,18 @@
     <ErrorReport>prompt</ErrorReport>
     <DeployExtension>False</DeployExtension>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release2022|AnyCPU'">
+    <OutputPath>bin\Release2022\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug2019</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -50,15 +56,15 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Debug2019\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release2019|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Release2019\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -359,6 +365,14 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SpellCheckCodeAnalyzer.CodeFixes2017And2019\SpellCheckCodeAnalyzer.CodeFixes2017And2019.csproj">
+      <Project>{6B5C32AE-E4D5-4A23-9E2D-CBFC5ACA2E3E}</Project>
+      <Name>SpellCheckCodeAnalyzer.CodeFixes2017And2019</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpellCheckCodeAnalyzer2017And2019\SpellCheckCodeAnalyzer2017And2019.csproj">
+      <Project>{8B29EDE0-A0B1-4FEF-AEE6-1417B87C8690}</Project>
+      <Name>SpellCheckCodeAnalyzer2017And2019</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VSSpellCheckerCommon\VSSpellCheckerCommon.csproj">
       <Project>{4c23d550-7d6d-439b-a464-65c8419cc8ca}</Project>
       <Name>VSSpellCheckerCommon</Name>
@@ -378,7 +392,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup>
-    <PostBuildEvent>IF "$(ConfigurationName)"=="Debug" Goto Exit
+    <PostBuildEvent>IF "$(ConfigurationName)"=="Debug2019" Goto Exit
 
 IF NOT EXIST "$(SolutionDir)..\Deployment\" MD "$(SolutionDir)..\Deployment\"
 

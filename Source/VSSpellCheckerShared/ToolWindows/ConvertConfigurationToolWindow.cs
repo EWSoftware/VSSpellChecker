@@ -17,6 +17,8 @@
 // 03/16/2023  EFW  Created the code
 //===============================================================================================================
 
+// Ignore Spelling: pgrf
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
