@@ -8,10 +8,26 @@ strings, XML content, attribute values, etc.).  To be imported, the code analysi
 project of the file being spell checked and must have its <ui>Build Action</ui> property set to
 <codeInline>CodeAnalysisDictionary</codeInline>.</para>
 
+			<alert class="important">
+				<para>For the code analysis dictionaries to be recognized by the code analyzer for use in spell checking
+identifiers, an additional step is required so that they are passed as additional files to the analyzers.  Add
+the <codeInline>AdditionalFileItemNames</codeInline> property to a property group in each project in the solution
+and update it so that it includes all <codeInline>CodeAnalysisDictionary</codeInline> items as additional files
+as shown in the example below.</para>
+			</alert>
+			
+			<code language="xml" title="Specifying Code Analysis Dictionaries as Additional Files">
+				&lt;PropertyGroup&gt;
+					&lt;!-- Update the property to include all code analysis dictionary files --&gt;
+					&lt;AdditionalFileItemNames&gt;$(AdditionalFileItemNames);CodeAnalysisDictionary&lt;/AdditionalFileItemNames&gt;
+				&lt;/PropertyGroup&gt;
+			</code>
 		</introduction>
 
 		<section>
 			<content>
+				<para>The following options are available.</para>
+
 				<list class="bullet">
 					<listItem>
 						<para><ui>Import project code analysis dictionaries if present</ui> - This option is enabled by

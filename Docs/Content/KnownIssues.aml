@@ -34,6 +34,14 @@ fix it, feel free to do so and submit a pull request with the changes.</para>
 					</listItem>
 
 					<listItem>
+						<para>Code analyzers are designed to work with source code.  Unfortunately, the do not work well for
+updating non-code files or files outside of the project.  As such, there are no fixes to allow adding a word
+in a misspelled identifier to ignored words files in the solution or project or the global configuration nor to
+the dictionary itself.  If you want a word flagged by the code analyzer added to either of those files, you must
+do so manually or through the spell checker configuration editor.</para>
+					</listItem>
+
+					<listItem>
 						<para>The Spell Check Active Document tool window relies on the <ui>Spell check as you type</ui>
 configuration option being enabled.  If disabled, spell checking will be unavailable until it is turned back on.
 Any open editors will need to be closed and reopened for the new setting to take effect.</para>
