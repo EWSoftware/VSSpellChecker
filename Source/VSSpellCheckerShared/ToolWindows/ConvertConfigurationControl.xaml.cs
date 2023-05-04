@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ConvertConfigurationControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 04/21/2023
+// Updated : 05/01/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles conversion of the old configuration files to .editorconfig
@@ -37,6 +37,7 @@ using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Common.Configuration;
 using VisualStudio.SpellChecker.Common.Configuration.Legacy;
 using VisualStudio.SpellChecker.Common.EditorConfig;
+using EnvDTE;
 
 namespace VisualStudio.SpellChecker.ToolWindows
 {
@@ -390,8 +391,22 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     {
                         if(oldFileItem != null)
                         {
-                            editorConfig.Save();
-                            oldFileItem.ProjectItems.AddFromFile(editorConfig.Filename);
+                            // If null, it's probably in Solution Items
+                            if(oldFileItem.ProjectItems == null)
+                            {
+#pragma warning disable VSTHRD010
+                                var siProject = dte2.Solution.Projects.Cast<Project>().FirstOrDefault(
+                                    p => p.Name == "Solution Items");
+#pragma warning restore VSTHRD010
+                                editorConfig.Save();
+                                siProject?.ProjectItems.AddFromFile(editorConfig.Filename);
+                            }
+                            else
+                            {
+                                editorConfig.Save();
+                                oldFileItem.ProjectItems.AddFromFile(editorConfig.Filename);
+                            }
+
                             oldFileItem.Delete();
                         }
                     }

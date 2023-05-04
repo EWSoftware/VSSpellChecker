@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/30/2023
+// Updated : 05/02/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
@@ -31,6 +31,11 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
+
+#if VS2017AND2019
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+#endif
 
 using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Common.Configuration;

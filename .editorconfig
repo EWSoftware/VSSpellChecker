@@ -1,11 +1,11 @@
-# Don't use tabs for indentation unless otherwise overridden
 [*]
+# Don't use tabs for indentation unless otherwise overridden
 indent_style = space
 end_of_line = crlf
 guidelines = 80 dotted, 114 dotted
 # (Please don't specify an indent_size here; that has too many unintended consequences.)
 
-# VSSPELL: Spell checker settings from VSSpellChecker.sln.vsspell
+# VSSPELL: Spell checker settings for all files
 vsspell_section_id = 9f07c577adcd4fd7a93a42a503828225
 vsspell_code_analyzer_ignore_identifier_if_private = true
 vsspell_code_analyzer_ignore_identifier_if_internal = true
