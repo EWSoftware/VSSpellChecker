@@ -159,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Content\ClassifierDefinition.aml" />
+    <None Include="Content\CodeAnalyzer.aml" />
     <None Include="Content\CommonProblems.aml" />
     <None Include="Content\ConfigOptions\CodeAnalysisDictionaries.aml" />
     <None Include="Content\ConfigOptions\ConfigOptions.aml" />
@@ -220,7 +221,9 @@
     <None Include="Content\VersionHistory\v2022.9.6.0.aml" />
     <None Include="Content\VersionHistory\v2023.3.4.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
-    <None Include="Content\VersionHistory\vNext.aml" />
+    <None Include="Content\VersionHistory\v2023.5.8.0.aml" />
+    <None Include="Content\VSSpell001.aml" />
+    <None Include="Content\VSSpell002.aml" />
     <None Include="Content\Welcome.aml" />
   </ItemGroup>
   <ItemGroup>

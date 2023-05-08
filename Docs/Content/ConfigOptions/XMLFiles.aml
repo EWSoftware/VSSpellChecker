@@ -14,12 +14,30 @@ false reports when working with XML files.  The options are divided into two sec
 						<para><ui>Ignored XML Elements</ui> - This section lets you manage the list of ignored XML elements.
 If an element name appears in this list, its inner text will be ignored when spell checking is performed.  All
 other elements not in the list will have their inner text spell checked.</para>
+
+				<code language="none" title=" ">
+vsspell_ignored_xml_elements_[sectionId] = [clear_inherited],[element1,element2,...]
+
+sectionId = The unique ID for the section
+clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+prior values from other property instances are inherited.
+element1,element2,... = A comma-separated list of XML element names to ignore.
+				</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Spell Checked Attributes</ui> - This section lets you manage the list of attribute names
 that will have their values spell checked.  The values for all other attributes not in the list will be
 ignored.</para>
+
+				<code language="none" title=" ">
+vsspell_spell_checked_xml_attributes_[sectionId] = [clear_inherited],[attribute1,attribute2,...]
+
+sectionId = The unique ID for the section
+clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+prior values from other property instances are inherited.
+attribute1,attribute2,... = A comma-separated list of XML attribute names to spell check.
+				</code>
 					</listItem>
 
 				</list>

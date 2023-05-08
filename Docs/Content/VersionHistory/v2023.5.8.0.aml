@@ -51,10 +51,11 @@ etc.)</para>
 
 						<para>The options above only apply to the code analyzer for fixing identifiers and only in C# code
 right now.  Strings and comments are still handled via the taggers as in prior releases and will work across all
-languages.  The code fix will offer suggestions to correct the spelling of identifiers.  Options to ignore an
-identifier misspelling or add it to the dictionary are planned for a future release if I can figure out how to do
-it.  For now, they can be added to the ignored words file directly by editing it or to the dictionary through the
-.editorconfig file on the <legacyBold>Dictionary Settings</legacyBold> page.</para>
+languages.  The code fix will offer suggestions to correct the spelling of identifiers or add misspellings to an
+Ignore Spelling directive comment in the source code file.  Options to add it to the dictionary or an ignored
+words file are planned for a future release if I can figure out how to do it.  For now, they can be added to the
+ignored words file or dictionary file directly by editing them.  The location of the user dictionary can be
+found via the settings file on the <legacyBold>Dictionary Settings</legacyBold> page.</para>
 
 						<para>See the <link xlink:href="a9ff4ce1-0d6b-4376-8d32-02dae64e2075" /> topic for some information
 on issues and limitations with the code analyzer.</para>

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCodeFixProvider.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/30/2023
+// Updated : 05/06/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide the spell check code fixes
@@ -29,23 +29,26 @@ using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Rename;
 
 using VisualStudio.SpellChecker.CodeAnalyzer;
 
 namespace VisualStudio.SpellChecker.CodeFixes
 {
+    // TODO: Separate code fixes for VB and F# are likely needed since they uses different SyntaxNode types among
+    // other things.
+
     /// <summary>
     /// This is used to provide the spell check code fixes
     /// </summary>
-    // TODO: Separate code fixes for VB and F# are likely needed since they uses different SyntaxNode types among
-    // other things.
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(SpellCheckCodeFixProvider)), Shared]
     public class SpellCheckCodeFixProvider : CodeFixProvider
     {
         /// <inheritdoc />
         public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
-            CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId);
+            CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId,
+            CSharpSpellCheckCodeAnalyzer.IgnoreWordDiagnosticId);
 
         /// <summary>
         /// This fix provider does not use a fix all provider
@@ -66,45 +69,56 @@ namespace VisualStudio.SpellChecker.CodeFixes
             {
                 var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-                // Find the identifier for the diagnostic
-                var syntaxToken = root.FindToken(diagnosticSpan.Start);
-
-                if(diagnostic.Properties.TryGetValue("Suggestions", out string suggestions))
+                if(diagnostic.Id == CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId)
                 {
-                    // If the misspelling is a sub-span, the prefix and suffix will contain the surrounding text
-                    // used to create the full identifier.
-                    _ = diagnostic.Properties.TryGetValue("Prefix", out string prefix);
-                    _ = diagnostic.Properties.TryGetValue("Suffix", out string suffix);
+                    // Find the identifier for the diagnostic
+                    var syntaxToken = root.FindToken(diagnosticSpan.Start);
 
-                    ImmutableArray<CodeAction> replacements;
-
-                    if(!String.IsNullOrWhiteSpace(suggestions))
+                    if(diagnostic.Properties.TryGetValue("Suggestions", out string suggestions))
                     {
-                        replacements = suggestions.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(
-                            s =>
-                            {
-                                string replacement = s;
+                        // If the misspelling is a sub-span, the prefix and suffix will contain the surrounding text
+                        // used to create the full identifier.
+                        _ = diagnostic.Properties.TryGetValue("Prefix", out string prefix);
+                        _ = diagnostic.Properties.TryGetValue("Suffix", out string suffix);
 
-                                if(!String.IsNullOrWhiteSpace(prefix) || !String.IsNullOrWhiteSpace(suffix))
-                                    replacement = prefix + replacement + suffix;
+                        ImmutableArray<CodeAction> replacements;
 
-                                return CodeAction.Create(replacement, c => CorrectSpellingAsync(context.Document, syntaxToken,
-                                    replacement, c), nameof(CodeFixResources.CodeFixTitle));
+                        if(!String.IsNullOrWhiteSpace(suggestions))
+                        {
+                            replacements = suggestions.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(
+                                s =>
+                                {
+                                    string replacement = (String.IsNullOrWhiteSpace(prefix) &&
+                                        String.IsNullOrWhiteSpace(suffix)) ? s : prefix + s + suffix;
 
-                            }).ToImmutableArray();
-                    }
-                    else
-                    {
-                        replacements = new[] { CodeAction.Create("(No Suggestions)",
-                            c => CorrectSpellingAsync(context.Document, syntaxToken, null, c),
-                            nameof(CodeFixResources.CodeFixTitle)) }.ToImmutableArray();
-                    }
+                                    return CodeAction.Create(replacement,
+                                        c => CorrectSpellingAsync(context.Document, syntaxToken, replacement, c),
+                                        replacement);
 
-                    // Register a code action that will invoke the fix and offer the various suggested replacements
+                                }).ToImmutableArray();
+                        }
+                        else
+                        {
+                            replacements = new[] { CodeAction.Create(CodeFixResources.NoSuggestions,
+                                c => CorrectSpellingAsync(context.Document, syntaxToken, null, c),
+                                nameof(CodeFixResources.NoSuggestions)) }.ToImmutableArray();
+                        }
 #pragma warning disable RS1010
-                    context.RegisterCodeFix(CodeAction.Create(diagnostic.Descriptor.MessageFormat.ToString(null),
-                        replacements, false), diagnostic);
+                        // Register a code action that will invoke the fix and offer the various suggested replacements
+                        context.RegisterCodeFix(CodeAction.Create(diagnostic.Descriptor.MessageFormat.ToString(null),
+                            replacements, false), diagnostic);
 #pragma warning restore RS1010
+                    }
+                }
+                else
+                {
+                    // Offer the option to ignore the word by adding it to an Ignore Spelling directive comment.
+                    // Support for modifying non-code files is limited and nonexistent for files outside of the
+                    // project as far as I can tell so this is the best we can do.
+                    string ignoredWord = root.GetText().GetSubText(diagnosticSpan).ToString();
+
+                    context.RegisterCodeFix(CodeAction.Create(diagnostic.Descriptor.MessageFormat.ToString(null),
+                        c => IgnoreWordAsync(context.Document, ignoredWord, c), ignoredWord), diagnostic);
                 }
             }
         }
@@ -260,13 +274,14 @@ namespace VisualStudio.SpellChecker.CodeFixes
                     break;
 
                 case IdentifierNameSyntax _:
-                    // TODO: Renaming namespace parts needs some work.  It's fine for the last part but renaming
-                    // an earlier part puts the change on the end (e.g. If renaming "Namespace1" in
-                    // Root.Namespace1.SubNamespace it becomes Root.Namespace1.NewNamespace rather than
-                    // Root.NewNamespace.SubNamespace).  Not sure how to fix that yet.  As such, we'll limit it
-                    // to only allowing fixing the misspelling on single namespaces or the last part of
-                    // multi-part namespaces.  For others, it will show suggestions but won't allow a change
-                    // and it will have to be fixed manually.
+                    // Renaming namespace parts needs some work.  It's fine for the last part but renaming
+                    // an earlier part puts the change on the end (e.g. If renaming "OldNamespace" in
+                    // Root.OldNamespace.SubNamespace it becomes Root.OldNamespace.NewNamespace rather than
+                    // Root.NewNamespace.SubNamespace).  I'm not sure if this is a limitation of the code fix
+                    // API or my limited understanding of how they work.  As such, for now we'll limit it to
+                    // only allowing fixing the misspelling on single namespaces or the last part of multi-part
+                    // namespaces.  For others, it will show suggestions but won't allow a change and it will
+                    // have to be fixed manually.
                     if(token.Parent?.Parent is NamespaceDeclarationSyntax singleNamespace)
                         symbol = semanticModel.GetDeclaredSymbol(singleNamespace, cancellationToken);
                     else
@@ -313,6 +328,111 @@ namespace VisualStudio.SpellChecker.CodeFixes
             }
 #endif
             return null;
+        }
+
+        /// <summary>
+        /// Create the solution used to ignore a misspelled word
+        /// </summary>
+        /// <param name="document">The document containing the misspelling</param>
+        /// <param name="ignoredWord">The ignored word syntax token</param>
+        /// <param name="cancellationToken">A cancellation token</param>
+        /// <returns>The solution task used to add the ignored word to the Ignore Spelling directive</returns>
+        private static async Task<Document> IgnoreWordAsync(Document document, string ignoredWord,
+          CancellationToken cancellationToken)
+        {
+            if(document == null || ignoredWord == null)
+                return null;
+
+            var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+
+            // TODO: This will vary by language
+            string newLineText = document.Project.Solution.Workspace.Options.GetOption(FormattingOptions.NewLine,
+                LanguageNames.CSharp);
+            char commentChar = '/';
+
+            var newLineTrivia = SyntaxFactory.EndOfLine(newLineText);
+            var newLeadingTrivia = SyntaxFactory.ParseLeadingTrivia(String.Empty);
+
+            // We'll try to insert the directive after any leading comments and whitespace so add any existing
+            // leading trivia around the directive comment.
+            SyntaxTriviaList leadingTrivia = root.GetLeadingTrivia();
+            string existingComment = null;
+            int triviaIdx = 0, existingCommentIdx = -1, lineCount = 0, blankLineCount = 0;
+            bool done = false;
+
+            while(triviaIdx < leadingTrivia.Count && !done)
+            {
+                switch(leadingTrivia[triviaIdx].Kind())
+                {
+                    case SyntaxKind.EndOfLineTrivia:
+                        triviaIdx++;
+                        lineCount++;
+                        break;
+
+                    case SyntaxKind.WhitespaceTrivia:
+                    case SyntaxKind.MultiLineCommentTrivia:
+                        triviaIdx++;
+                        lineCount = 0;
+                        break;
+
+                    case SyntaxKind.SingleLineCommentTrivia:
+                        existingComment = leadingTrivia[triviaIdx].ToString();
+                        blankLineCount = lineCount;
+
+                        int skipIdx = 0;
+
+                        while(skipIdx < existingComment.Length && (existingComment[skipIdx] == commentChar ||
+                          Char.IsWhiteSpace(existingComment[skipIdx])))
+                        {
+                            skipIdx++;
+                        }
+
+                        if(skipIdx < existingComment.Length && existingComment.Substring(skipIdx).StartsWith(
+                          "Ignore Spelling:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            existingCommentIdx = triviaIdx;
+                            triviaIdx--;
+                            done = true;
+                        }
+                        else
+                            triviaIdx++;
+                        break;
+
+                    default:
+                        triviaIdx--;
+                        done = true;
+                        break;
+                }
+            }
+
+            if(triviaIdx > 0)
+            {
+                newLeadingTrivia = newLeadingTrivia.AddRange(leadingTrivia.Take(triviaIdx + 1));
+
+                if(blankLineCount == 0)
+                    newLeadingTrivia = newLeadingTrivia.Add(newLineTrivia);
+            }
+
+            if(existingCommentIdx != -1)
+            {
+                // No need for a new line here as there should already be new line trivia after it
+                newLeadingTrivia = newLeadingTrivia.AddRange(SyntaxFactory.ParseLeadingTrivia(
+                    existingComment + " " + ignoredWord));
+                triviaIdx++;
+            }
+            else
+            {
+                newLeadingTrivia = newLeadingTrivia.AddRange(SyntaxFactory.ParseLeadingTrivia(
+                    $"// Ignore Spelling: {ignoredWord}{newLineText}"));
+
+                if(triviaIdx + 1 >= leadingTrivia.Count || !leadingTrivia[triviaIdx + 1].IsKind(SyntaxKind.EndOfLineTrivia))
+                    newLeadingTrivia = newLeadingTrivia.Add(newLineTrivia);
+            }
+
+            if(triviaIdx < leadingTrivia.Count)
+                newLeadingTrivia = newLeadingTrivia.AddRange(leadingTrivia.Skip(triviaIdx + 1));
+
+            return document.WithSyntaxRoot(root.WithLeadingTrivia(newLeadingTrivia));
         }
     }
 }

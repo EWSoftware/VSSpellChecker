@@ -61,7 +61,34 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Code element spell checker..
+        ///   Looks up a localized string similar to Ignore misspelled word..
+        /// </summary>
+        internal static string IgnoreWordAnalyzerDescription {
+            get {
+                return ResourceManager.GetString("IgnoreWordAnalyzerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore word &apos;{0}&apos;.
+        /// </summary>
+        internal static string IgnoreWordAnalyzerMessageFormat {
+            get {
+                return ResourceManager.GetString("IgnoreWordAnalyzerMessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore Word.
+        /// </summary>
+        internal static string IgnoreWordAnalyzerTitle {
+            get {
+                return ResourceManager.GetString("IgnoreWordAnalyzerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Code element spell check..
         /// </summary>
         internal static string SpellingAnalyzerDescription {
             get {

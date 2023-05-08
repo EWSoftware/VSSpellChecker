@@ -33,6 +33,10 @@ as shown in the example below.</para>
 						<para><ui>Import project code analysis dictionaries if present</ui> - This option is enabled by
 default and controls whether or not the code analysis dictionaries are imported.  If disabled, all of the
 following options are ignored.</para>
+
+						<code language="none" title=" ">
+vsspell_cad_import_code_analysis_dictionaries = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -40,6 +44,10 @@ following options are ignored.</para>
 will cause unrecognized words in the dictionary to be treated as misspelled words.  Adding a
 <codeInline>SpellingAlternates</codeInline> attribute to the <codeInline>Word</codeInline> element allows you to
 specify a list of one or more comma-separated words to offer as suggested replacements.</para>
+
+						<code language="none" title=" ">
+vsspell_cad_treat_unrecognized_words_as_misspelled = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -47,6 +55,10 @@ specify a list of one or more comma-separated words to offer as suggested replac
 will cause deprecated terms in the dictionary to be treated as misspelled words.  The preferred alternate is
 offered as the suggested replacement.  If the preferred alternate is camel cased, spaces are inserted before each
 capital letter.</para>
+
+						<code language="none" title=" ">
+vsspell_cad_treat_deprecated_terms_as_misspelled = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -54,6 +66,10 @@ capital letter.</para>
 cause compound terms in the dictionary to be treated as misspelled words.  The compound alternate is offered as
 the suggested replacement.  If the compound alternate is camel cased, spaces are inserted before each capital
 letter.</para>
+
+						<code language="none" title=" ">
+vsspell_cad_treat_compound_terms_as_misspelled = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -63,6 +79,10 @@ in all uppercase or camel case.  Camel cased words are always ignored.  All uppe
 <ui>Ignore words in all uppercase</ui> option in the <ui>General Settings</ui> category is enabled.  This option
 may be of use if that option is disabled so that acronyms in all uppercase within this category are not spell
 checked.</para>
+
+						<code language="none" title=" ">
+vsspell_cad_treat_casing_exceptions_as_ignored_words = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -94,6 +114,10 @@ the word is not imported and will be spell checked in the normal manner.</para>
 							</listItem>
 
 						</list>
+
+						<code language="none" title=" ">
+vsspell_cad_recognized_word_handling = [None|IgnoreAllWords|AddAllWords|AttributeDeterminesUsage]
+						</code>
 					</listItem>
 
 				</list>

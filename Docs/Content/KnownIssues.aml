@@ -6,41 +6,60 @@
 		</introduction>
 
 		<section>
+			<title>Code Analyzers</title>
 			<content>
+				<para>The code analyzers only apply to identifiers in supported languages.  Identifier misspellings
+will not appear in the Spell Check Active Document or Solution/Project Spell Check tool windows.</para>
+
 				<list class="bullet">
 					<listItem>
-						<para>Spell check as you type and solution/project spell checking only apply to non-source code files
-and only to strings and comments within source code files.  If enabled, identifier spell checking is handled by
-the code analyzer.  Such misspellings will not appear in the Spell Check Active Document or Solution/Project
-Spell Check tool windows.</para>
-					</listItem>
-
-					<listItem>
 						<para>The code analyzer runs in a separate process.  As such, it may not always pick up new words
-added to the dictionaries.  It may be necessary to close and reopen the solution in order to get it to pick up
-new dictionary words.  Ignored words will typically be detected as the configuration used by the code analyzer
-is refreshed quite often.  However, changes made to the global configuration may not be reflected until a change
-is made to the source code of any open editors.</para>
+added to the dictionaries or ignored words files by the spell check as you type option and solution/project
+spell checking until a change is made to the source code of an open editor.  Likewise, changes made to the global
+and/or local project configurations may not be reflected until a change is made to the source code of an open
+editor.</para>
 					</listItem>
 
 					<listItem>
 						<para>The code analyzer is only able to correct the spelling on single part namespaces (e.g.
 <codeInline>namespace SinglePartNamespace</codeInline>) or the last part of multi-part namespaces (e.g.
 <codeInline>namespace FirstPart.MiddlePart.LastPart</codeInline>).  For parts prior to the last part,
-misspellings will be flagged and suggestions offered by you will need to manually correct the spelling and apply
+misspellings will be flagged and suggestions offered but you will need to manually correct the spelling and apply
 the refactoring code fix to change the name throughout the code base if necessary.  This appears to be a
 limitation with symbol renaming and I was unable to find a workaround.  If anyone with more knowledge wants to
 fix it, feel free to do so and submit a pull request with the changes.</para>
 					</listItem>
 
 					<listItem>
-						<para>Code analyzers are designed to work with source code.  Unfortunately, the do not work well for
-updating non-code files or files outside of the project.  As such, there are no fixes to allow adding a word
-in a misspelled identifier to ignored words files in the solution or project or the global configuration nor to
-the dictionary itself.  If you want a word flagged by the code analyzer added to either of those files, you must
-do so manually or through the spell checker configuration editor.</para>
+						<para>Correcting a misspelling on an identifier will correct it throughout the code base wherever the
+containing identifier is used.  However, there are no provisions for correcting a common misspelling in multiple,
+different identifiers (replace all).  Each must be corrected individually.</para>
 					</listItem>
 
+					<listItem>
+						<para>Code analyzers are, naturally, designed to work with source code.  Unfortunately, they do not
+work well for updating non-code files or files outside of the project.  There are some provisions for updating
+non-code files as long as they are added to the additional file set used by code analyzers but that requires some
+extra steps to set up properly.  Files in the solution items or outside of the solution entirely such as those
+specified in the global spell checker configuration are inaccessible.  As such, there are no fixes offered to
+allow adding a word in a misspelled identifier to ignored words files in the solution or project or the global
+configuration nor to the dictionary itself.  If you want a word flagged by the code analyzer added to either of
+those files, you must do so manually or through the spell checker configuration editor.  Again, this limitation
+may be due to my lack of knowledge on code analyzers so feel free to offer an update with this functionality if
+you can provide one.</para>
+					</listItem>
+
+				</list>
+			</content>
+		</section>
+		
+		<section>
+			<title>Spell Check as You Type and Solution/Project Spell Checking</title>
+			<content>
+				<para>Spell check as you type and solution/project spell checking applies to comments and strings within
+source code and for the text in all non-source code files.</para>
+				
+				<list class="bullet">
 					<listItem>
 						<para>The Spell Check Active Document tool window relies on the <ui>Spell check as you type</ui>
 configuration option being enabled.  If disabled, spell checking will be unavailable until it is turned back on.
@@ -76,7 +95,7 @@ line can be ignored due to the way the tagger is implemented.</para>
 					</listItem>
 
 					<listItem>
-						<para>On a similar note to the item above, in other languages such as VB.NET, the content of
+						<para>On a similar note to the item above, in other languages such as Visual Basic, the content of
 <codeInline>code</codeInline> elements will typically not be spell checked unless you make a change on a
 particular line within it.  Moving the cursor away from the edited line will usually clear any issues on it.
 Again, this is due to the way the tagger is implemented.  As noted, such elements are always ignored as expected

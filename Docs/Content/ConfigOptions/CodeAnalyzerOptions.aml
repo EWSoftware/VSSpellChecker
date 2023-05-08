@@ -17,17 +17,29 @@ into individual words and each word in the identifier will be spell checked.</pa
 					<listItem>
 						<para><ui>Ignore identifiers if private</ui> - If enabled, all identifiers with a visibility of
 private are ignored.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_identifier_if_private = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore identifier if internal</ui> - If enabled, all identifiers with a visibility of
 internal are ignored.  Note that protected internal identifiers will still be spell checked as the protected
 visibility will take precedence.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_identifier_if_internal = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore identifier if all uppercase</ui> - If enabled, any identifier that consists only of
 uppercase letters will be ignored.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_identifier_if_all_uppercase = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -36,6 +48,10 @@ of a member will be ignored (local variables in properties, methods, lambda expr
 useful in reducing the number of spelling errors reported since method bodies tend to contain more abbreviations
 and other shortened identifiers.  Since these will never be publicly visible, it may be preferable to skip spell
 checking them.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_identifiers_within_member_bodies = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -43,11 +59,19 @@ checking them.</para>
 <codeInline>TKey</codeInline> and <codeInline>TValue</codeInline> will be ignored.  If spell checked, the leading
 uppercase "T" in the examples would be skipped so it would only flag a spelling error if the remainder of the
 type parameter was misspelled.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_type_parameters = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore compiler generated code</ui> - If enabled, all compiler generated code is skipped
 and will not be spell checked.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_if_compiler_generated = [true|false]
+						</code>
 					</listItem>
 				</list>
 
@@ -60,34 +84,58 @@ code as applicable.</para>
 						<para><ui>Ignore XML documentation comments (/// ... and /** ... */)</ui> - If enabled, XML
 documentation comments will be excluded from spell checking.  Unless disabled with the option below, standard
 delimited comments will still be included for spell checking.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_xml_doc_comments = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore delimited comments (/* ... */)</ui> -  This is useful for excluding private comments
 that nobody will see except for developers and commented out code.  Unless disabled with the option above,
 delimited XML comments will still be included for spell checking.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_delimited_comments = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore standard single line comments (// ...)</ui> - This is useful for excluding private
 comments that nobody will see except for developers and commented out code.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_standard_single_line_comments = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore quadruple slash single line comments (//// ...)</ui> - This option is useful for
 ignoring commented out code using the method recommended by StyleCop so that it does not produce style warnings.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_quadruple_slash_comments = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore normal string literals ("...")</ui> - This is useful for ignoring string literals in
 code if you use resource files for localized text.  In such cases, the string literals are usually not valid
 words and enabling this option prevents the resource keys from showing up as spelling errors.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_normal_strings = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore verbatim string literals (@"...")</ui> - Verbatim string literals typically contain
 such things as filenames or multi-line text that is not usually considered text that needs to be spell checked.
 Enabling this option prevents their content from being checked for spelling errors.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_verbatim_strings = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -95,12 +143,30 @@ Enabling this option prevents their content from being checked for spelling erro
 skipping interpolated strings which may only contain property format specifiers.  Enabling this option prevents
 their content from being checked for spelling errors.  If left disabled, all string content except text within
 braces which denote format specifiers will be spell checked.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_interpolated_strings = [true|false]
+						</code>
+					</listItem>
+
+					<listItem>
+						<para><ui>Ignore raw string literals ("""...""")</ui> - Verbatim string literals typically contain
+such things as filenames or multi-line text that is not usually considered text that needs to be spell checked.
+Enabling this option prevents their content from being checked for spelling errors.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_ignore_raw_strings = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Apply the above options to all C-style languages as applicable</ui> - If this option is
 enabled, the above options are applied to all C-style languages as applicable.  For example, all of the comments
 options and the normal string literal option will be applied to C, C++, JavaScript, etc.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzer_apply_to_all_c_style_languages = [true|false]
+						</code>
 					</listItem>
 
 				</list>

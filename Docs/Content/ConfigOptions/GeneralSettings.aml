@@ -13,6 +13,10 @@
 						<para><ui>Spell check as you type</ui> - This enables and disables the spell checker.  Naturally, it
 is enabled by default. The spell checker tool window relies on this being enabled.  If disabled, spell checking
 will be unavailable until it is turned back on.</para>
+
+						<code language="none" title=" ">
+vsspell_spell_check_as_you_type = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -22,6 +26,10 @@ it will include the related files in the solution/project spell checking process
 files will be excluded from the process.  For example, this offers a convenient way of excluding an entire folder
 of files from being spell checked as part of the solution/project as it does with the option above for
 interactive spell checking.</para>
+
+						<code language="none" title=" ">
+vsspell_include_in_project_spell_check = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -30,22 +38,38 @@ spell checking code analyzer and is enabled by default.  It will spell check ide
 languages (currently only C# but support for Visual Basic is planned for later).  Unlike comment and string
 misspellings, identifier misspellings will be highlighted using the same colored underline as other code fixes.
 Fixing a misspelling in an identifier will automatically correct it in all other references to it.</para>
+
+						<code language="none" title=" ">
+vsspell_code_analyzers_enabled = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Detect doubled words</ui> - This will cause the spell checker to report instances of
 doubled words.  An option to remove the duplicate word or ignore it will be offered as the options to correct
 any instances that are found.  The default is enabled.</para>
+
+						<code language="none" title=" ">
+vsspell_detect_doubled_words = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore words with digits</ui> - This will cause the spell checker to ignore any words
 containing digits.  The default is enabled.</para>
+
+						<code language="none" title=" ">
+vsspell_ignore_words_with_digits = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Ignore words in all uppercase</ui> - This will cause the spell checker to ignore any words
 consisting of all uppercase letters.  The default is enabled.</para>
+
+						<code language="none" title=" ">
+vsspell_ignore_words_in_all_uppercase = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -53,13 +77,17 @@ consisting of all uppercase letters.  The default is enabled.</para>
 consisting of mixed/camel case letters.  The default is enabled.  Note that if disabled, it may result in a large
 number of false reports of misspellings especially on control prefixes such as <codeInline>btn</codeInline> and
 <codeInline>txt</codeInline>.  These can be added as ignored words to suppress them.  Disabling this option may
-also result in false reports of doubled words where the one of the words is part of a mixed case word preceded
+also result in false reports of doubled words where one of the words is part of a mixed case word preceded
 or followed by another occurrence of the same word.</para>
 
 						<para>Mixed case words that also include an underscore, period, or at sign will not be included for
 spell checking even if this option is disabled based on the option related to the special word break character's
 setting (treat underscores as separators is disabled, ignore words that look like filenames/e-mail addresses
 is enabled)</para>
+
+						<code language="none" title=" ">
+vsspell_ignore_words_in_mixed_case = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -67,6 +95,10 @@ is enabled)</para>
 to skip text in .NET and C-style format specifiers (i.e. <codeInline>{0:MM/dd/yyyy}</codeInline> and
 <codeInline>%ld</codeInline>).  This prevents the text within them from showing up as misspelled words.  The
 default is enabled.</para>
+
+						<code language="none" title=" ">
+vsspell_ignore_format_specifiers = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -75,6 +107,10 @@ checker to ignore words that contain periods and at signs with no intervening wh
 <localUri>Userinfo.config</localUri> or <localUri>auser@mydomain.com</localUri>).  This option can occasionally
 cause a misspelled word to be missed such as when a space is missing following the period in a sentence.
 However, it excludes far more false reports and is enabled by default.</para>
+
+						<code language="none" title=" ">
+vsspell_ignore_filenames_and_email_addresses = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -83,12 +119,20 @@ spell checker to ignore words within angle brackets in spell checked text (i.e. 
 element creates a paragraph").  This option can occasionally cause a misspelled word to be missed such as when a
 space is missing following the opening angle bracket.  However, it excludes far more false reports and is enabled
 by default.</para>
+
+						<code language="none" title=" ">
+vsspell_ignore_xml_elements_in_text = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
 						<para><ui>Treat underscores as separators</ui> - This option is disabled by default and all words
 containing underscores will be ignored.  Enabling this option will treat the underscore as a word separator and
 each word separated by the underscores will be spell checked along with all the other text.</para>
+
+						<code language="none" title=" ">
+vsspell_treat_underscore_as_separator = [true|false]
+						</code>
 					</listItem>
 
 					<listItem>
@@ -100,6 +144,10 @@ reporting them as misspellings.</para>
 						<para>If a misspelled word contains a mnemonic, it will be reported with the mnemonic and each
 suggested replacement will have a matching mnemonic if it contains a matching letter.  This allows you to see
 where the mnemonic is placed or if it will be lost in the replacement.</para>
+
+						<code language="none" title=" ">
+vsspell_ignore_mnemonics = [true|false]
+						</code>
 					</listItem>
 
 				</list>
@@ -115,6 +163,10 @@ default is <ui>Include all words</ui> so that all words are included regardless 
 It can be set to <ui>Ignore words containing non-Latin characters</ui> to ignore words containing characters
 above 0xFF or it can be set to <ui>Ignore words containing non-ASCII characters</ui> to ignore words containing
 characters above 0x7F.</para>
+
+				<code language="none" title=" ">
+vsspell_ignored_character_class = [None|NonLatin|NonAscii]
+				</code>
 			</content>
 		</section>
 

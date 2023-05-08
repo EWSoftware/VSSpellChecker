@@ -61,11 +61,29 @@ namespace VisualStudio.SpellChecker.CodeFixes {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore Word.
+        /// </summary>
+        internal static string IgnoreWordCodeFixTitle {
+            get {
+                return ResourceManager.GetString("IgnoreWordCodeFixTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (No Suggestions).
+        /// </summary>
+        internal static string NoSuggestions {
+            get {
+                return ResourceManager.GetString("NoSuggestions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Spell Check.
         /// </summary>
-        internal static string CodeFixTitle {
+        internal static string SpellCheckCodeFixTitle {
             get {
-                return ResourceManager.GetString("CodeFixTitle", resourceCulture);
+                return ResourceManager.GetString("SpellCheckCodeFixTitle", resourceCulture);
             }
         }
     }

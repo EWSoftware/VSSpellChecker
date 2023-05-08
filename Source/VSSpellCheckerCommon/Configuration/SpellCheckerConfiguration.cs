@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/23/2023
+// Updated : 05/06/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -1081,7 +1081,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                                     ignoredWords.Add(word);
                                 else
                                 {
-                                    string ignoredWordsFile = ResolveFilePath(word.Substring(5), basePath);
+                                    string ignoredWordsFile = ResolveFilePath(word.Substring(5).Trim(), basePath);
 
                                     if(ignoredWordsFile != null)
                                     {

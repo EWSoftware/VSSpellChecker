@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/22/2023
+// Updated : 05/06/2023
 // Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the spell checker dictionary settings
@@ -35,6 +35,9 @@ using VisualStudio.SpellChecker.Common.EditorConfig;
 
 using PackageResources = VisualStudio.SpellChecker.Properties.Resources;
 using FolderBrowserDlg = System.Windows.Forms.FolderBrowserDialog;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio;
 
 namespace VisualStudio.SpellChecker.Editors.Pages
 {
@@ -666,7 +669,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnRemoveDictionaryWord_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             int idx = lbUserDictionary.SelectedIndex;
             string word = null;
@@ -724,13 +727,64 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         }
 
         /// <summary>
+        /// Edit the user dictionary file
+        /// </summary>
+        /// <param name="sender">The sender of the event</param>
+        /// <param name="e">The event arguments</param>
+        private void btnEditUserDictionary_Click(object sender, RoutedEventArgs e)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
+
+            if(!GlobalDictionary.IsReadyForUse(selectedDictionary.Culture))
+            {
+                MessageBox.Show("The selected dictionary is still loading.  Please try again in a few seconds.",
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            try
+            {
+                if(!File.Exists(selectedDictionary.UserDictionaryFilePath))
+                {
+                    if(MessageBox.Show("The ignored words file does not exist.  Do you want to create it?",
+                      PackageResources.PackageTitle, MessageBoxButton.YesNo, MessageBoxImage.Question,
+                      MessageBoxResult.No) == MessageBoxResult.No)
+                    {
+                        return;
+                    }
+
+                    File.WriteAllText(selectedDictionary.UserDictionaryFilePath, String.Empty);
+                }
+
+                var openDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, SVsUIShellOpenDocument>(false);
+
+                if(openDoc != null && openDoc.OpenDocumentViaProject(selectedDictionary.UserDictionaryFilePath,
+                    VSConstants.LOGVIEWID_TextView, out _, out _, out _,
+                    out IVsWindowFrame ppWindowFrame) == VSConstants.S_OK)
+                {
+                    // On occasion, the call above is successful but we get a null frame for some reason
+                    ppWindowFrame?.Show();
+                }
+            }
+            catch(Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+
+                MessageBox.Show("Unable to open the user dictionary file for editing.  Reason: " + ex.Message,
+                    PackageResources.PackageTitle, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+        }
+
+        /// <summary>
         /// Import words from a user dictionary file
         /// </summary>
         /// <param name="sender">The sender of the event</param>
         /// <param name="e">The event arguments</param>
         private void btnImport_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             var selectedDictionary = (SpellCheckerDictionary)cboAvailableLanguages.SelectedItem;
 
@@ -813,7 +867,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnExport_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             SaveFileDialog dlg = new SaveFileDialog
             {

@@ -33,6 +33,12 @@ the containing file will override settings from the imported file.  This allows 
 base configuration settings and then selectively override them in the containing configuration file.</para>
 				</alert>
 
+				<code language="none" title=" ">
+vsspell_import_settings_file_[sectionId] = [pathToImportedSettingsFile]
+
+sectionId = The unique ID for the section.
+pathToImportedSettingsFile = The path to the settings file to import.
+				</code>
 			</content>
 		</section>
 

@@ -45,6 +45,24 @@ next to each classification that you want to exclude or uncheck them to include 
 shown are the internal ones from the language classifiers and vary from language to language.  Many are
 self-explanatory but others may not be.  You may need to experiment with the classifications to determine which
 ones to use to exclude the elements you are interested in ignoring.</para>
+						
+				<code language="none" title=" ">
+vsspell_ignored_classifications_[sectionId] = [clear_inherited],
+[classificationType|classification1|classification2|...],
+[File Type: fileType|classification1|classification2|...],
+[Extension: extension|classification1|classification2|...]
+
+sectionId = The unique ID for the section
+clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+prior values from other property instances are inherited.
+classificationType|classification1|classification2|... = A classifier type and the classifications to ignore.
+The values are separated by pipes.
+File Type: fileType|classification1|classification2|... = A set of classifications for a specific file type to
+ignore.  The values are separated by pipes.
+Extension: extension|classification1|classification2|... = A set of classifications for a specific file extension
+to ignore.  The values are separated by pipes.
+				</code>
+						
 					</content>
 				</section>
 

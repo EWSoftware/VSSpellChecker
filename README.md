@@ -7,9 +7,11 @@ Welcome to the **Visual Studio Spell Checker** project.
 * [Contributing](https://ewsoftware.github.io/VSSpellChecker/html/847a2b53-6583-4198-80ef-0e537346e4a3.htm)
 
 This project is a Visual Studio editor extension that checks the spelling of comments, strings, and plain text
-as you type or interactively with a tool window.  It is based largely on the spell checker extension originally
-created by Noah Richards, Roman Golovin, and Michael Lehenbauer.  This version has been extended significantly to
-include many new features all of which are configurable.
+as you type or interactively with a tool window.  It also contains a code analyzer that will spell check
+identifiers in C# source code.  It can spell check an entire solution, project, or selected items.  It is based
+largely on the spell checker extension originally created by Noah Richards, Roman Golovin, and Michael
+Lehenbauer.  This version has been extended significantly to include many new features all of which are
+configurable.
 
 _**NOTE: The master branch is for Visual Studio 2017 and later.  For Visual Studio 2013/2015, use the VSLegacy
 branch.**_

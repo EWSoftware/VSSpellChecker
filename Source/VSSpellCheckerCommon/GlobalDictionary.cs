@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/20/2023
+// Updated : 05/06/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
@@ -67,6 +67,11 @@ namespace VisualStudio.SpellChecker.Common
         /// This read-only property indicates whether or not the dictionary is initialized
         /// </summary>
         public bool IsInitialized { get; private set; }
+
+        /// <summary>
+        /// This read-only property returns the name of the user dictionary file
+        /// </summary>
+        public string UserDictionaryFile => dictionaryWordsFile;
 
         /// <summary>
         /// This can be used to assign a function that checks to see if the user words file is writable
@@ -363,8 +368,30 @@ namespace VisualStudio.SpellChecker.Common
                 }
                 else
                 {
-                    // Add recognized words that are not already there
-                    globalDictionary.AddRecognizedWords(recognizedWords);
+                    // Add recognized words that are not already there and include the user dictionary in case it
+                    // was modified by another process.
+                    var dw = new HashSet<string>();
+
+                    try
+                    {
+                        if(File.Exists(globalDictionary.UserDictionaryFile))
+                        {
+                            foreach(string word in File.ReadLines(globalDictionary.UserDictionaryFile))
+                            {
+                                if(!String.IsNullOrWhiteSpace(word))
+                                    dw.Add(word.Trim());
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        // Ignore exceptions.  Not much we can do, we'll just not include those words for now.
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
+
+                    dw.UnionWith(recognizedWords);
+
+                    globalDictionary.AddRecognizedWords(dw);
                 }
             }
             catch(Exception ex)
@@ -548,8 +575,10 @@ namespace VisualStudio.SpellChecker.Common
         public static void NotifyChangeOfStatus()
         {
             if(globalDictionaries != null)
+            {
                 foreach(var g in globalDictionaries.Values)
                     g.NotifySpellingServicesOfChange(null);
+            }
         }
 
         /// <summary>
@@ -564,14 +593,16 @@ namespace VisualStudio.SpellChecker.Common
                 try
                 {
                     foreach(string word in File.ReadLines(dictionaryWordsFile))
+                    {
                         if(!String.IsNullOrWhiteSpace(word))
                             dictionaryWords.Add(word.Trim());
+                    }
 
                     this.AddSuggestions();
                 }
                 catch(Exception ex)
                 {
-                    // Ignore exceptions.  Not much we can do, we'll just not ignore anything by default.
+                    // Ignore exceptions.  Not much we can do, we'll just not include those words for now.
                     System.Diagnostics.Debug.WriteLine(ex);
                 }
             }
@@ -617,11 +648,13 @@ namespace VisualStudio.SpellChecker.Common
             lock(recognizedWords)
             {
                 foreach(string word in words)
+                {
                     if(!recognizedWords.Contains(word))
                     {
                         recognizedWords.Add(word);
                         addSuggestions = true;
                     }
+                }
 
                 if(addSuggestions && this.IsInitialized)
                     this.AddSuggestions();
@@ -652,6 +685,7 @@ namespace VisualStudio.SpellChecker.Common
                 Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
 
                 if(hunspellSemaphore != null && hunspells != null)
+                {
                     try
                     {
                         // Make sure we get all semaphores since we will be touching all spellers
@@ -666,9 +700,13 @@ namespace VisualStudio.SpellChecker.Common
                         }
 
                         if(releaseCount == processors)
+                        {
                             foreach(var hs in hunspells.ToArray())
+                            {
                                 if(!hs.Spell(word))
                                     hs.Add(word.ToLower(this.Culture));
+                            }
+                        }
                     }
                     catch(Exception ex)
                     {
@@ -680,6 +718,7 @@ namespace VisualStudio.SpellChecker.Common
                         if(releaseCount != 0)
                             hunspellSemaphore.Release(releaseCount);
                     }
+                }
             }
         }
 
@@ -707,6 +746,7 @@ namespace VisualStudio.SpellChecker.Common
                 Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
 
                 if(hunspellSemaphore != null && hunspells != null)
+                {
                     try
                     {
                         // Make sure we get all semaphores since we will be touching all spellers
@@ -723,10 +763,16 @@ namespace VisualStudio.SpellChecker.Common
                         lock(recognizedWords)
                         {
                             if(releaseCount == processors)
+                            {
                                 foreach(var hs in hunspells.ToArray())
+                                {
                                     foreach(string word in dictionaryWords.Concat(recognizedWords))
+                                    {
                                         if(!hs.Spell(word))
                                             hs.Add(word.ToLower(this.Culture));
+                                    }
+                                }
+                            }
                         }
                     }
                     catch(Exception ex)
@@ -739,6 +785,7 @@ namespace VisualStudio.SpellChecker.Common
                         if(releaseCount != 0)
                             hunspellSemaphore.Release(releaseCount);
                     }
+                }
             }
         }
 
@@ -784,6 +831,7 @@ namespace VisualStudio.SpellChecker.Common
                 Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
 
                 if(hunspellSemaphore != null && hunspells != null)
+                {
                     try
                     {
                         // Make sure we get all semaphores since we will be touching all spellers
@@ -798,9 +846,13 @@ namespace VisualStudio.SpellChecker.Common
                         }
 
                         if(releaseCount == processors)
+                        {
                             foreach(var hs in hunspells.ToArray())
+                            {
                                 if(hs.Spell(word))
                                     hs.Remove(word.ToLower(this.Culture));
+                            }
+                        }
                     }
                     catch(Exception ex)
                     {
@@ -812,6 +864,7 @@ namespace VisualStudio.SpellChecker.Common
                         if(releaseCount != 0)
                             hunspellSemaphore.Release(releaseCount);
                     }
+                }
             }
         }
         #endregion

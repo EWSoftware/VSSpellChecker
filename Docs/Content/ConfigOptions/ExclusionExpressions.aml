@@ -60,6 +60,20 @@ checking process, especially for spell checking as you type.  It may be better t
 particular type of project within that project's solution or project spell checking configuration file rather
 than putting all of them in the global configuration.</para>
 				</alert>
+
+				<code language="none" title=" ">
+vsspell_exclusion_expressions_[sectionId] = [clear_inherited(?@@PND@@/Options/)][regEx1(?@@PND@@/Options/)]...
+
+Note: Because expressions may contain any given character, the regular expressions are separated by their
+options information which is included in the expression as a comment.  Due to a Visual Studio bug, # and ; are
+encoded as @@PND@@ and @@SEMI@@.
+
+sectionId = The unique ID for the section.
+clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+prior values from other property instances are inherited.
+regEx1(?@@PND@@/Options/)... = One or more regular expressions to use and their options.
+				</code>
+
 			</content>
 		</section>
 

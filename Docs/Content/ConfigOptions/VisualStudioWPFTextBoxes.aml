@@ -32,6 +32,13 @@ button or double click it.  The same dialog box will appear in which you can mod
 remove an expression, select it in the list and click the <ui>Remove</ui> button.  To reset the list to the
 default set of ignored Visual Studio control IDs, click the <ui>Default</ui> button.</para>
 
+				<code language="none" title=" ">
+vsspell_enable_wpf_text_box_spell_checking = [true|false]
+vsspell_visual_studio_id_exclusions = [regEx1(?@@PND@@/Options/)]...
+
+These option only have an effect in the global spell checker configuration file.
+regEx1(?@@PND@@/Options/)... = One or more regular expressions to use and their options.
+				</code>
 			</content>
 		</section>
 

@@ -63,6 +63,17 @@ importing or exporting words, you will be asked whether you want to replace the 
 the existing words.  Escaped words (those starting with a backslash) will not be exported to XML user dictionary
 files as they do not support escaped words.</para>
 
+				<code language="none" title=" ">
+vsspell_ignored_words_[sectionId] = [clear_inherited]|[File:ignoredWordsFilePath]|[word1|word2|...]
+
+sectionId = The unique ID for the section.
+clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+prior values from other property instances are inherited.
+File:ignoredWordsFilePath = If a value is prefixed with "File:", the value after the colon is assumed to be a
+path to the ignored words file.
+word1|word2|... = A pipe-separated list of words to ignore.
+				</code>
+				
 			</content>
 		</section>
 
@@ -74,7 +85,14 @@ ignored keywords file counterpart though.  As noted above, ignored keywords are 
 configuration files and cannot be cleared by a later configuration file.  They are typically defined in the
 global configuration file for the file set to which they apply.  The default configuration contains several sets
 of ignored keywords for various languages.</para>
-			</content>
+
+				<code language="none" title=" ">
+vsspell_ignored_keywords_[sectionID] = [keyword1|keyword2|...]
+
+sectionId = The unique ID for the section.
+keyword1|keyword2|... = A pipe-separated list of keywords to ignore.
+				</code>
+		</content>
 		</section>
 		
 		<relatedTopics>

@@ -2,7 +2,7 @@
 <topic id="d9dc230f-ae34-464b-a3c2-4a7778907fc9" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>Starting with version YYYY.MM.DD.0, configuration settings have been moved from the old XML
+			<para>Starting with version 2023.5.8.0, configuration settings have been moved from the old XML
 <localUri>.vsspell</localUri> configuration files to .editorconfig settings.  This is a significant change from
 prior versions but has the following benefits:</para>
 

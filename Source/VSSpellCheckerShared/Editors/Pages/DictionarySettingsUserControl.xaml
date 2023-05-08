@@ -3,7 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-	mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="650"
+	mc:Ignorable="d" d:DesignHeight="400" d:DesignWidth="750"
 	Background="{DynamicResource ToolWindowBackgroundBrushKey}">
 	<UserControl.Resources>
 		<ResourceDictionary>
@@ -118,13 +118,16 @@ the configuration file.</TextBlock>
 							<ColumnDefinition />
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
 						<Button Grid.Column="0" Name="btnRemoveWord" Content="Remove" MinWidth="80" Margin="3"
 							ToolTip="Remove selected word from user dictionary" HorizontalAlignment="Left"
 							Click="btnRemoveDictionaryWord_Click" />
-						<Button Grid.Column="1" Name="btnImport" Content="Import" MinWidth="80" Margin="3"
+						<Button Grid.Column="1" Name="btnEditUserDictionary" Content="Edit File" MinWidth="80" Margin="3"
+							ToolTip="Edit the user dictionary file" Click="btnEditUserDictionary_Click" />
+						<Button Grid.Column="2" Name="btnImport" Content="Import" MinWidth="80" Margin="3"
 							ToolTip="Import user dictionary words from a file" Click="btnImport_Click" />
-						<Button Grid.Column="2" Name="btnExport" Content="Export" MinWidth="80" Margin="3"
+						<Button Grid.Column="3" Name="btnExport" Content="Export" MinWidth="80" Margin="3"
 							ToolTip="Export user dictionary words to a file" Click="btnExport_Click" />
 					</Grid>
 				</Grid>

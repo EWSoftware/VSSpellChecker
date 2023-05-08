@@ -55,6 +55,15 @@ configurations are ignored.  Likewise, if a solution configuration contains a us
 contains a user dictionary, the project user dictionary would override the solution-level one rather than being
 additive to it.</para>
 				</alert>
+
+				<code language="none" title=" ">
+vsspell_additional_dictionary_folders_[sectionId] = [clear_inherited]|[path1|path2|...]
+
+sectionId = The unique ID for the section.
+clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+prior values from other property instances are inherited.
+path1|path2|... = A pipe-separated list of additional paths to use in finding dictionaries.
+				</code>
 			</content>
 		</section>
 
@@ -87,6 +96,15 @@ the selected languages will be used (French alone in the example above).</para>
 cause additional memory usage.  Only add extra languages when necessary.  Consider using solution or project
 configurations rather than specifying them in the global configuration.</para>
 				</alert>
+			
+				<code language="none" title=" ">
+vsspell_dictionary_languages_[sectionId] = [langId1],[langId2]...,inherited,[langIdN]...
+
+sectionId = The unique ID for the section.
+langId1,langId2...,langIdN = A comma-separated list of languages to use for spell checking (en-US, fr-FR, etc.)
+inherited = If present, this indicates the point at which inherited languages are inserted into the list.
+If omitted, languages from prior configurations are ignored.
+				</code>
 			</content>
 		</section>
 
@@ -102,6 +120,10 @@ available regardless of any other languages that have been selected.</para>
 					<para>If this option is enabled, it will override all other dictionary languages.  The determined
 language will be the only one used for spell checking the resource file.</para>
 				</alert>
+
+				<code language="none" title=" ">
+vsspell_determine_resource_file_language_from_name = [true|false]
+				</code>
 			</content>
 		</section>
 

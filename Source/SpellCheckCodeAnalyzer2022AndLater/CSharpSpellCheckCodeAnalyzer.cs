@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/02/2023
+// Updated : 05/06/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
@@ -56,29 +56,45 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
         #region Private data members and constants
         //=====================================================================
 
+        private static readonly Dictionary<string, Assembly> referenceAssemblies = new Dictionary<string, Assembly>();
+
         /// <summary>
         /// This constant represents the diagnostic ID for spelling errors
         /// </summary>
         public const string SpellingDiagnosticId = "VSSpell001";
 
+        private const string SpellingCategory = "Naming";
+
         // You can change these strings in the Resources.resx file. If you do not want your analyzer to be
         // localize-able, you can use regular strings for Title and MessageFormat.
         // See https://github.com/dotnet/roslyn/blob/main/docs/analyzers/Localizing%20Analyzers.md for more on
         // localization.
-        private static readonly LocalizableString SpellingTitle = new LocalizableResourceString(nameof(Resources.SpellingAnalyzerTitle),
-            Resources.ResourceManager, typeof(Resources));
+        private static readonly LocalizableString SpellingTitle = new LocalizableResourceString(
+            nameof(Resources.SpellingAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
         private static readonly LocalizableString SpellingMessageFormat = new LocalizableResourceString(
             nameof(Resources.SpellingAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
         private static readonly LocalizableString SpellingDescription = new LocalizableResourceString(
             nameof(Resources.SpellingAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-        private const string SpellingCategory = "Naming";
+        private static readonly DiagnosticDescriptor SpellingRule = new DiagnosticDescriptor(
+            SpellingDiagnosticId, SpellingTitle, SpellingMessageFormat, SpellingCategory,
+            DiagnosticSeverity.Warning, true, SpellingDescription,
+            "https://ewsoftware.github.io/VSSpellChecker/html/a7120f4c-5191-4442-b366-c3e792060569.htm");
 
-        // TODO: Provide help link URL?
-        private static readonly DiagnosticDescriptor SpellingRule = new DiagnosticDescriptor(SpellingDiagnosticId,
-            SpellingTitle, SpellingMessageFormat, SpellingCategory, DiagnosticSeverity.Warning, true,
-            SpellingDescription);
+        /// <summary>
+        /// This constant represents the diagnostic ID for ignoring a misspelled word
+        /// </summary>
+        public const string IgnoreWordDiagnosticId = "VSSpell002";
 
-        private static readonly Dictionary<string, Assembly> referenceAssemblies = new Dictionary<string, Assembly>();
+        private static readonly LocalizableString IgnoreWordTitle = new LocalizableResourceString(
+            nameof(Resources.IgnoreWordAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
+        private static readonly LocalizableString IgnoreWordMessageFormat = new LocalizableResourceString(
+            nameof(Resources.IgnoreWordAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
+        private static readonly LocalizableString IgnoreWordDescription = new LocalizableResourceString(
+            nameof(Resources.IgnoreWordAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
+        private static readonly DiagnosticDescriptor IgnoreWordRule = new DiagnosticDescriptor(IgnoreWordDiagnosticId,
+            IgnoreWordTitle, IgnoreWordMessageFormat, SpellingCategory, DiagnosticSeverity.Hidden, true,
+            IgnoreWordDescription,
+            "https://ewsoftware.github.io/VSSpellChecker/html/83ff9063-294f-4a18-b765-1510c86ad0d4.htm");
 
         #endregion
 
@@ -127,7 +143,8 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
         //=====================================================================
 
         /// <inheritdoc />
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(SpellingRule);
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(
+            SpellingRule, IgnoreWordRule);
 
         /// <inheritdoc />
         public override void Initialize(AnalysisContext context)
@@ -252,9 +269,12 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                         { "Suffix", null }
                     };
 
-                    // TODO: For the first release, just handle identifiers and leave the rest to the existing
-                    // tagger which already handles all the other elements.  This would let me get this out
-                    // quicker and figure out how to handle the other stuff later if at all with an analyzer.
+                    // Just handle identifiers and leave the rest to the existing tagger which already handles
+                    // all the other elements.  The inability to add words to the ignored words files and the
+                    // dictionary from the code analyzer is a limitation the tagger doesn't have so, for now,
+                    // they'll continue to handle strings and comments.  The code's already written so I'll
+                    // leave it in here to parse the other elements.  If the above issue is ever resolved, I
+                    // could move that functionality in here later on.
                     foreach(var s in handler.Spans.Where(s => s.SpanType == SpellCheckType.Identifier))
                     {
                         context.CancellationToken.ThrowIfCancellationRequested();
@@ -331,7 +351,9 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
 
                                 if(!dictionary.IsSpelledCorrectly(textToCheck))
                                 {
-                                    // TODO: Ignore the dictionary the suggestions come from for now.
+                                    // Ignore the dictionary the suggestions come from for now.  I may add this
+                                    // later but we can't add words to dictionaries from the code fix so it may
+                                    // serve no purpose.
                                     var (skipMisspelling, suggestions) = CheckSuggestions(textToCheck,
                                         dictionary.SuggestCorrections(textToCheck).Select(ss => ss.Suggestion));
 
@@ -349,8 +371,13 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
 
                                         context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
                                             Location.Create(context.Tree, TextSpan.FromBounds(
-                                            s.TextSpan.Start + word.Start, s.TextSpan.Start + word.Start + word.Length)),
-                                            diagnosticProperties.ToImmutableDictionary(), s.Text));
+                                                s.TextSpan.Start + word.Start,
+                                                s.TextSpan.Start + word.Start + word.Length)),
+                                            diagnosticProperties.ToImmutableDictionary(), textToCheck));
+                                        context.ReportDiagnostic(Diagnostic.Create(IgnoreWordRule,
+                                            Location.Create(context.Tree, TextSpan.FromBounds(
+                                                s.TextSpan.Start + word.Start,
+                                                s.TextSpan.Start + word.Start + word.Length)), textToCheck));
                                     }
                                 }
                             }
