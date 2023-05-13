@@ -33,11 +33,11 @@ vsspell_include_in_project_spell_check = [true|false]
 					</listItem>
 
 					<listItem>
-						<para><ui>Enable spell checking code analyzer in supported languages</ui> - This option enables the
-spell checking code analyzer and is enabled by default.  It will spell check identifiers in all supported
-languages (currently only C# but support for Visual Basic is planned for later).  Unlike comment and string
-misspellings, identifier misspellings will be highlighted using the same colored underline as other code fixes.
-Fixing a misspelling in an identifier will automatically correct it in all other references to it.</para>
+						<para><ui>Enable the identifier spell checking code analyzer in supported languages</ui> - This
+option enables the spell checking code analyzer and is enabled by default.  It will spell check identifiers in
+all supported languages (currently only C# but support for Visual Basic is planned for later).  Unlike comment
+and string misspellings, identifier misspellings will be highlighted using the same colored underline as other
+code fixes.  Fixing a misspelling in an identifier will automatically correct it in all other references to it.</para>
 
 						<code language="none" title=" ">
 vsspell_code_analyzers_enabled = [true|false]

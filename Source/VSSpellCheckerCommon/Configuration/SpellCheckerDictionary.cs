@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/19/2023
+// Updated : 05/13/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain information about the available spell checker dictionaries
@@ -206,7 +206,9 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                     // etc.) so look for any affix files with a related dictionary file and see if they are valid
                     // cultures.  If so, we'll take them.
                     if(Directory.Exists(location))
+                    {
                         foreach(string affixFile in Directory.EnumerateFiles(location, "*.aff"))
+                        {
                             if(File.Exists(Path.ChangeExtension(affixFile, ".dic")))
                             {
                                 try
@@ -238,6 +240,8 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                                         Path.ChangeExtension(affixFile, ".dic"), userDictPath, isCustomDictionary);
                                 }
                             }
+                        }
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -251,6 +255,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             // dictionaries in projects to override the global user dictionaries while still using the standard
             // global dictionary.
             if(additionalSearchFolders != null)
+            {
                 foreach(string folder in additionalSearchFolders)
                 {
                     try
@@ -266,6 +271,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         }
 
                         if(Directory.Exists(location))
+                        {
                             foreach(string file in Directory.EnumerateFiles(location, "*_User.dic"))
                             {
                                 // Match by filename but with a different path
@@ -277,6 +283,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                                 if(match != null)
                                     match.UserDictionaryFilePath = file;
                             }
+                        }
                     }
                     catch(Exception ex)
                     {
@@ -284,7 +291,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         System.Diagnostics.Debug.WriteLine(ex);
                     }
                 }
-
+            }
 
             return availableDictionaries;
         }

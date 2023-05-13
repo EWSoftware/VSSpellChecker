@@ -105,15 +105,15 @@ namespace VisualStudio.SpellChecker.Editors
             // The property pages will be listed in this order
             Type[] propertyPages = new[] {
                 typeof(FileInfoUserControl),
-                typeof(ImportSettingsUserControl),
-                typeof(DictionarySettingsUserControl),
                 typeof(GeneralSettingsUserControl),
                 typeof(CodeAnalyzerOptionsUserControl),
+                typeof(DictionarySettingsUserControl),
                 typeof(IgnoredWordsUserControl),
                 typeof(ExclusionExpressionsUserControl),
                 typeof(XmlFilesUserControl),
                 typeof(CodeAnalysisDictionaryUserControl),
                 typeof(IgnoredClassificationsUserControl),
+                typeof(ImportSettingsUserControl),
                 // Global only, should always be last
                 typeof(VisualStudioUserControl)
             };

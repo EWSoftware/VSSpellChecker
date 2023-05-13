@@ -31,7 +31,7 @@
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
 						<ComboBox Name="cboEnableCodeAnalyzers" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />
-						<Label Margin="3" Content="Enable spell checking code analyzer in supported languages" />
+						<Label Margin="3" Content="Enable the identifier spell checking code analyzer in supported languages" />
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">
 						<ComboBox Name="cboDetectDoubledWords" MinWidth="75" Margin="3" SelectionChanged="Property_Changed" />

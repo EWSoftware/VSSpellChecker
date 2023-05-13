@@ -40,6 +40,19 @@ added in that version.</para>
 global configuration has not been converted yet, you will be prompted to convert the settings by an info bar that
 will appear just below the Visual Studio main menu bar.  Click the <ui>Convert</ui> link in the info bar to open
 the conversion tool window.</para>
+			
+			<alert class="note">
+				<para>The global spell checker configuration is also stored in the .editorconfig format but remains a
+separate configuration file stored in the same user settings location as the old configuration file
+(<localUri>%LOCALAPPDATA%\EWSoftware\Visual Studio Spell Checker</localUri>).  If you do not use solution/project
+spell checker configurations, only the global spell checker configuration file will need conversion and the
+currently loaded solution and its projects will remain unchanged.</para>
+
+				<para>If a solution or project with old <localUri>.vsspell</localUri> configuration files does not
+currently contain an .editorconfig file, one will be added to it to store the spell checker settings.  If one
+does already exist, all other settings in it will remain unchanged.  Only the new spell checker settings will be
+added to it.  The conversion tool window shows a preview of the changes that will be made.</para>
+			</alert>
 
 			<autoOutline lead="none" excludeRelatedTopics="true" />
 		</introduction>

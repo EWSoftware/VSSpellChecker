@@ -71,20 +71,10 @@
       <HelpKeyword index="K" term="configuration options, conversion" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isSelected="true" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
-    <Topic id="b156d5ad-347f-4f63-89dc-4f945953ae41" visible="True" title="Import Settings">
-      <HelpKeywords>
-        <HelpKeyword index="K" term="configuration, import settings" />
-      </HelpKeywords>
-    </Topic>
-    <Topic id="af34b863-6a1c-41ed-bcf2-48a714686519" visible="True" title="Dictionary Settings">
-      <HelpKeywords>
-        <HelpKeyword index="K" term="configuration, dictionary settings" />
-      </HelpKeywords>
-    </Topic>
     <Topic id="b4a8726f-5bee-48a4-81a9-00b1be332607" visible="True" title="General Settings">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, general settings" />
@@ -93,6 +83,11 @@
     <Topic id="09cc5bfa-9eba-47e5-ba5f-a36e04f09b0d" visible="True" title="Code Analyzer Options">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, code analyzer options" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="af34b863-6a1c-41ed-bcf2-48a714686519" visible="True" title="Dictionary Settings">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="configuration, dictionary settings" />
       </HelpKeywords>
     </Topic>
     <Topic id="c592c4d8-7387-47fe-9b79-28bf0168f447" visible="True" title="Ignored Words/Keywords">
@@ -119,6 +114,11 @@
     <Topic id="6a987caf-5ad9-4dab-a17c-c887881fec7a" visible="True" title="Ignored Classifications">
       <HelpKeywords>
         <HelpKeyword index="K" term="configuration, ignored classifications" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="b156d5ad-347f-4f63-89dc-4f945953ae41" visible="True" title="Import Settings">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="configuration, import settings" />
       </HelpKeywords>
     </Topic>
     <Topic id="e23551ac-52f5-4505-b2d2-0728c7607fd3" visible="True" title="Visual Studio WPF Text Boxes">
@@ -164,7 +164,7 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="0374de80-9512-4b10-928f-ec3ba6caf018" visible="True" isSelected="true" title="Version 2023.5.8.0">
+    <Topic id="0374de80-9512-4b10-928f-ec3ba6caf018" visible="True" title="Version 2023.5.8.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2023.5.8.0" />
       </HelpKeywords>

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/06/2023
+// Updated : 05/13/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
@@ -70,6 +70,11 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// Ignored words file prefix
         /// </summary>
         public const string FilePrefix = "File:";
+
+        /// <summary>
+        /// Ignored words file prefix for the global configuration
+        /// </summary>
+        private const string GlobalFilePrefix = "Global:";
 
         /// <summary>
         /// File type classification prefix
@@ -679,8 +684,13 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             string file = Path.Combine(GlobalConfigurationFilePath, "IgnoredWords.dic");
 
             var ecp = editorConfigProperties.FirstOrDefault(p => p.PropertyName.StartsWith(propName,
-                StringComparison.OrdinalIgnoreCase)) ??
-                    new SectionLine { PropertyName = propName, PropertyValue = String.Empty };
+                StringComparison.OrdinalIgnoreCase));
+
+            if(ecp == null)
+            {
+                ecp = new SectionLine { PropertyName = propName, PropertyValue = String.Empty };
+                editorConfigProperties.Add(ecp);
+            }
 
             if(ecp.PropertyValue.IndexOf(FilePrefix, StringComparison.OrdinalIgnoreCase) == -1)
             {
@@ -689,6 +699,10 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                 else
                     ecp.PropertyValue = FilePrefix + file;
             }
+
+            // The global ignored words file needs special handling in case it doesn't have a path.  In such
+            // cases, the base path needs to be the configuration file folder so that it is found.
+            ecp.PropertyValue = ecp.PropertyValue.Replace(FilePrefix, GlobalFilePrefix);
 
             // If the import settings file property is present, move it to the end of the set so that its
             // settings override those from the global configuration.  The global configuration is the root file
@@ -1077,11 +1091,27 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                             }
                             else
                             {
-                                if(!word.StartsWith(FilePrefix, StringComparison.OrdinalIgnoreCase))
+                                if(!word.StartsWith(FilePrefix, StringComparison.OrdinalIgnoreCase) &&
+                                  !word.StartsWith(GlobalFilePrefix, StringComparison.OrdinalIgnoreCase))
+                                {
                                     ignoredWords.Add(word);
+                                }
                                 else
                                 {
-                                    string ignoredWordsFile = ResolveFilePath(word.Substring(5).Trim(), basePath);
+                                    string ignoredWordsFile;
+
+                                    if(word.StartsWith(FilePrefix, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        ignoredWordsFile = ResolveFilePath(word.Substring(FilePrefix.Length).Trim(),
+                                            basePath);
+                                    }
+                                    else
+                                    {
+                                        // If the ignored words file from the global configuration has no path,
+                                        // use the global configuration path to find it.
+                                        ignoredWordsFile = ResolveFilePath(word.Substring(GlobalFilePrefix.Length).Trim(),
+                                            GlobalConfigurationFilePath);
+                                    }
 
                                     if(ignoredWordsFile != null)
                                     {
@@ -1115,7 +1145,8 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                                 additionalDictionaryFolders.Clear();
                             else
                             {
-                                string additionalFolder = ResolveFolderPath(folder, basePath);
+                                string additionalFolder = ResolveFolderPath(folder, basePath,
+                                    new[] { "*.aff", "*_User.dic" });
 
                                 if(additionalFolder != null)
                                     additionalDictionaryFolders.Add(additionalFolder);
@@ -1254,8 +1285,10 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// </summary>
         /// <param name="folder">The folder for which to find the full path</param>
         /// <param name="basePath">The base path</param>
-        /// <returns>The full path to the folder if found or null if not</returns>
-        private static string ResolveFolderPath(string folder, string basePath)
+        /// <param name="fileTypes">An enumerable list of file types to search for in the path</param>
+        /// <returns>The full path to the folder if found or null if not.  To be considered found, it must
+        /// contain at least one of the file types specified (e.g. *.aff *.dic)</returns>
+        private static string ResolveFolderPath(string folder, string basePath, IEnumerable<string> fileTypes)
         {
             if(String.IsNullOrWhiteSpace(folder))
                 return null;
@@ -1272,7 +1305,8 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                     subfolder = Path.GetFullPath(Path.Combine(path, folder));
                     path = Path.GetDirectoryName(path);
 
-                } while(!Directory.Exists(subfolder) && path != null);
+                } while((!Directory.Exists(subfolder) ||
+                  !fileTypes.Any(f => Directory.EnumerateFiles(subfolder, f).Any())) && path != null);
 
                 folder = subfolder;
             }

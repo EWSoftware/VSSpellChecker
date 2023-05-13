@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ConvertConfigurationInfoBar.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/16/2023
+// Updated : 05/09/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the info bar used to offer converting the spell checker
@@ -51,7 +51,6 @@ namespace VisualStudio.SpellChecker.ToolWindows
         }
         #endregion
 
-
         #region Private data members
         //=====================================================================
 
@@ -99,7 +98,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 {
                     InfoBarModel infoBarModel = new InfoBarModel(
                         new[] { new InfoBarTextSpan("The spell checker extension's configuration is now stored " +
-                            "in .editorconfig files.  The old .vsspell configuration files must be converted.") },
+                            "as .editorconfig settings.  The old .vsspell configuration files, including the " +
+                            "global configuration which will remain separate, must be converted.") },
                         new[]
                         {
                             new InfoBarHyperlink("More Info", ConvertAction.MoreInfo),

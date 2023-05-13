@@ -3,20 +3,21 @@
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
 			<para>This category contains several options that let you fine tune how source code files are spell
-checked.  The following options are available.  All of them are disabled by default so that the associated
-elements are included for spell checking.</para>
+checked.  The following options are available.</para>
 		</introduction>
 
 		<section>
 			<content>
 				<para>The following options only apply to the code analyzer used to spell check identifiers in C# source
 code (Visual Studio 2019 and later).  Note that camel cased identifiers and those with underscores will be split
-into individual words and each word in the identifier will be spell checked.</para>
+into individual words and each word in the identifier will be spell checked.  The default settings are configured
+so that only public and protected member identifiers are spell checked.  The options below can be adjusted to
+include private members, internal members, local variables, and compiler generated code if so desired.</para>
 				
 				<list class="bullet">
 					<listItem>
-						<para><ui>Ignore identifiers if private</ui> - If enabled, all identifiers with a visibility of
-private are ignored.</para>
+						<para><ui>Ignore identifiers if private</ui> - If enabled, the default, all identifiers with a
+visibility of private are ignored.</para>
 
 						<code language="none" title=" ">
 vsspell_code_analyzer_ignore_identifier_if_private = [true|false]
@@ -24,9 +25,9 @@ vsspell_code_analyzer_ignore_identifier_if_private = [true|false]
 					</listItem>
 
 					<listItem>
-						<para><ui>Ignore identifier if internal</ui> - If enabled, all identifiers with a visibility of
-internal are ignored.  Note that protected internal identifiers will still be spell checked as the protected
-visibility will take precedence.</para>
+						<para><ui>Ignore identifier if internal</ui> - If enabled, the default, all identifiers with a
+visibility of internal are ignored.  Note that protected internal identifiers will still be spell checked as the
+protected visibility will take precedence.</para>
 
 						<code language="none" title=" ">
 vsspell_code_analyzer_ignore_identifier_if_internal = [true|false]
@@ -43,11 +44,11 @@ vsspell_code_analyzer_ignore_identifier_if_all_uppercase = [true|false]
 					</listItem>
 
 					<listItem>
-						<para><ui>Ignore identifiers within member bodies</ui> - If enabled, all identifiers within the body
-of a member will be ignored (local variables in properties, methods, lambda expressions, etc.).  This can be
-useful in reducing the number of spelling errors reported since method bodies tend to contain more abbreviations
-and other shortened identifiers.  Since these will never be publicly visible, it may be preferable to skip spell
-checking them.</para>
+						<para><ui>Ignore identifiers within member bodies</ui> - If enabled, the default, all identifiers
+within the body of a member will be ignored (local variables in properties, methods, lambda expressions, etc.).
+This can be useful in reducing the number of spelling errors reported since method bodies tend to contain more
+abbreviations and other shortened identifiers.  Since these will never be publicly visible, it may be preferable
+to skip spell checking them.</para>
 
 						<code language="none" title=" ">
 vsspell_code_analyzer_ignore_identifiers_within_member_bodies = [true|false]
@@ -66,8 +67,8 @@ vsspell_code_analyzer_ignore_type_parameters = [true|false]
 					</listItem>
 
 					<listItem>
-						<para><ui>Ignore compiler generated code</ui> - If enabled, all compiler generated code is skipped
-and will not be spell checked.</para>
+						<para><ui>Ignore compiler generated code</ui> - If enabled, the default, all compiler generated code
+is skipped and will not be spell checked.</para>
 
 						<code language="none" title=" ">
 vsspell_code_analyzer_ignore_if_compiler_generated = [true|false]
