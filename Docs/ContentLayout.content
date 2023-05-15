@@ -71,7 +71,7 @@
       <HelpKeyword index="K" term="configuration options, conversion" />
     </HelpKeywords>
   </Topic>
-  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" isSelected="true" title="Configuration Options">
+  <Topic id="fb81c214-0fe0-4d62-a172-d7928d5b91d5" visible="True" title="Configuration Options">
     <HelpKeywords>
       <HelpKeyword index="K" term="configuration options, categories" />
     </HelpKeywords>
@@ -164,6 +164,11 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
+    <Topic id="6c7012c2-63ee-41d4-8036-df1054b0b714" visible="True" isSelected="true" title="Version 2023.5.15.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2023.5.15.0" />
+      </HelpKeywords>
+    </Topic>
     <Topic id="0374de80-9512-4b10-928f-ec3ba6caf018" visible="True" title="Version 2023.5.8.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2023.5.8.0" />
