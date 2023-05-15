@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SectionInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/13/2023
+// Updated : 05/15/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to contain information about an .editorconfig section
@@ -156,7 +156,7 @@ namespace VisualStudio.SpellChecker.Editors
             this.ContainsOtherSettings = this.Section.SectionLines.Except(spellcheckerProperties).Any(
                 l => l.LineType == LineType.Property);
 
-            if(commentIdx != -1)
+            if(commentIdx != -1 && commentIdx < this.SectionDescription.Length)
                 this.Comments = this.SectionDescription.Substring(commentIdx);
         }
         #endregion

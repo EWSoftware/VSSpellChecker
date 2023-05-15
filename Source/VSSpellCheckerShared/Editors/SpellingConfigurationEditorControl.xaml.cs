@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/16/2023
+// Updated : 05/15/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit spell checker configuration settings files
@@ -337,8 +337,10 @@ namespace VisualStudio.SpellChecker.Editors
                 var newSection = new EditorConfigSection(new[]
                 {
                     new SectionLine($"[{form.FileGlob}]"),
-                    new SectionLine($"# VSSPELL: {form.Comments}")
                 });
+
+                if(!String.IsNullOrWhiteSpace(form.Comments))
+                    newSection.SectionLines.Add(new SectionLine($"# VSSPELL: {form.Comments}"));
 
                 configFile.Sections.Add(newSection);
                 sections.Add(new SectionInfo(newSection));
@@ -360,6 +362,7 @@ namespace VisualStudio.SpellChecker.Editors
             {
                 int idx = lbSections.SelectedIndex;
 
+                lastSelectedSection = -1;
                 sections.RemoveAt(idx);
                 configFile.Sections.RemoveAt(idx);
 
@@ -404,10 +407,15 @@ namespace VisualStudio.SpellChecker.Editors
                             configSection.SectionLines.Remove(c);
                     }
 
-                    if(currentComments.Count == 0)
-                        configSection.SectionLines.Add(new SectionLine($"# VSSPELL: {form.Comments}"));
+                    if(!String.IsNullOrWhiteSpace(form.Comments))
+                    {
+                        if(currentComments.Count == 0)
+                            configSection.SectionLines.Add(new SectionLine($"# VSSPELL: {form.Comments}"));
+                        else
+                            currentComments[0].LineText = $"# VSSPELL: {form.Comments}";
+                    }
                     else
-                        currentComments[0].LineText = $"# VSSPELL: {form.Comments}";
+                        configSection.SectionLines.Remove(currentComments[0]);
 
                     section.RefreshSectionDescription();
 
