@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/12/2023
+// Updated : 06/14/2023
 // Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
@@ -542,7 +542,7 @@ namespace VisualStudio.SpellChecker.Common
                             }
                             else
                             {
-                                int split = i;
+                                int split = i, start = i;
 
                                 while(split < end)
                                 {
@@ -550,6 +550,13 @@ namespace VisualStudio.SpellChecker.Common
                                     // be accurate but it's the best we can do.
                                     while(split + 1 < end && Char.IsUpper(text[split + 1]))
                                         split++;
+
+                                    // If all uppercase, return the entire word
+                                    if(i == start && split == end - 1)
+                                    {
+                                        yield return this.CreateSpan(i, end);
+                                        break;
+                                    }
 
                                     i = split;
                                     split++;

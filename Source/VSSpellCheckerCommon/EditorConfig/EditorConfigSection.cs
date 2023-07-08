@@ -142,7 +142,7 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
         /// <param name="lines">An enumerable list of section lines</param>
         public EditorConfigSection(IEnumerable<SectionLine> lines)
         {
-            this.SectionLines = new Collection<SectionLine>(lines.ToArray());
+            this.SectionLines = new Collection<SectionLine>(lines.ToList());
         }
 
         /// <summary>

@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
+// Updated : 06/15/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
@@ -149,6 +149,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <returns>True if it does, false if not</returns>
         public static bool SupportsOldStyleXmlDocComments(string filename)
         {
+            if(filename == null)
+                return false;
+
             string extension = Path.GetExtension(filename);
 
             if(extensionMap == null)

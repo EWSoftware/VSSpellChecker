@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/15/2023
+// Updated : 06/15/2023
 // Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit spell checker configuration settings files
@@ -363,8 +363,14 @@ namespace VisualStudio.SpellChecker.Editors
                 int idx = lbSections.SelectedIndex;
 
                 lastSelectedSection = -1;
+
                 sections.RemoveAt(idx);
-                configFile.Sections.RemoveAt(idx);
+
+                // Adjust the index when there is a root section
+                if(configFile.Sections[0].IsRoot)
+                    configFile.Sections.RemoveAt(idx + 1);
+                else
+                    configFile.Sections.RemoveAt(idx);
 
                 if(lbSections.Items.Count <= idx)
                     idx--;
@@ -443,8 +449,18 @@ namespace VisualStudio.SpellChecker.Editors
                 sections.RemoveAt(currentIndex);
                 sections.Insert(newIndex, sectionToMove);
 
-                configFile.Sections.RemoveAt(currentIndex);
-                configFile.Sections.Insert(newIndex, sectionToMove.Section);
+                // Adjust the index when there is a root section
+                if(configFile.Sections[0].IsRoot)
+                {
+                    configFile.Sections.RemoveAt(currentIndex + 1);
+                    configFile.Sections.Insert(newIndex + 1, sectionToMove.Section);
+                }
+                else
+                {
+                    configFile.Sections.RemoveAt(currentIndex);
+                    configFile.Sections.Insert(newIndex, sectionToMove.Section);
+                }
+
                 suppressSectionChange = false;
 
                 lbSections.SelectedIndex = newIndex;
