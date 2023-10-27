@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/06/2023
+// Updated : 10/27/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
@@ -349,36 +349,35 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                     continue;
                                 }
 
-                                if(!dictionary.IsSpelledCorrectly(textToCheck))
+                                // Ignore case as variable names may not match the case and that's okay.  This
+                                // prevents a lot of false reports for things we don't care about.
+                                if(!dictionary.IsSpelledCorrectlyIgnoreCase(textToCheck))
                                 {
                                     // Ignore the dictionary the suggestions come from for now.  I may add this
                                     // later but we can't add words to dictionaries from the code fix so it may
                                     // serve no purpose.
-                                    var (skipMisspelling, suggestions) = CheckSuggestions(textToCheck,
+                                    var suggestions = CheckSuggestions(
                                         dictionary.SuggestCorrections(textToCheck).Select(ss => ss.Suggestion));
 
-                                    if(!skipMisspelling)
+                                    if(s.Text.Length != word.Length)
                                     {
-                                        if(s.Text.Length != word.Length)
-                                        {
-                                            diagnosticProperties["Prefix"] = s.Text.Substring(0, word.Start);
-                                            diagnosticProperties["Suffix"] = s.Text.Substring(word.Start + word.Length);
-                                        }
-                                        else
-                                            diagnosticProperties["Prefix"] = diagnosticProperties["Suffix"] = null;
-
-                                        diagnosticProperties["Suggestions"] = String.Join(",", suggestions);
-
-                                        context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
-                                            Location.Create(context.Tree, TextSpan.FromBounds(
-                                                s.TextSpan.Start + word.Start,
-                                                s.TextSpan.Start + word.Start + word.Length)),
-                                            diagnosticProperties.ToImmutableDictionary(), textToCheck));
-                                        context.ReportDiagnostic(Diagnostic.Create(IgnoreWordRule,
-                                            Location.Create(context.Tree, TextSpan.FromBounds(
-                                                s.TextSpan.Start + word.Start,
-                                                s.TextSpan.Start + word.Start + word.Length)), textToCheck));
+                                        diagnosticProperties["Prefix"] = s.Text.Substring(0, word.Start);
+                                        diagnosticProperties["Suffix"] = s.Text.Substring(word.Start + word.Length);
                                     }
+                                    else
+                                        diagnosticProperties["Prefix"] = diagnosticProperties["Suffix"] = null;
+
+                                    diagnosticProperties["Suggestions"] = String.Join(",", suggestions);
+
+                                    context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
+                                        Location.Create(context.Tree, TextSpan.FromBounds(
+                                            s.TextSpan.Start + word.Start,
+                                            s.TextSpan.Start + word.Start + word.Length)),
+                                        diagnosticProperties.ToImmutableDictionary(), textToCheck));
+                                    context.ReportDiagnostic(Diagnostic.Create(IgnoreWordRule,
+                                        Location.Create(context.Tree, TextSpan.FromBounds(
+                                            s.TextSpan.Start + word.Start,
+                                            s.TextSpan.Start + word.Start + word.Length)), textToCheck));
                                 }
                             }
                         }
@@ -390,34 +389,20 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
         /// <summary>
         /// This is used to filter and adjust the suggestions used to fix a misspelling in an identifier
         /// </summary>
-        /// <param name="misspelling">The misspelling</param>
         /// <param name="suggestions">The suggestions that should replace the misspelling</param>
-        /// <returns>A flag indicating whether or not the misspelling should be skipped and an enumerable list of
-        /// valid suggestions, if any.</returns>
-        /// <remarks>Some suggestions include spaces or punctuation.  Others only differ from the misspelling in
-        /// casing.  Misspellings in which there is a suggestion that only differs in case are ignored.  Those
-        /// with spaces or punctuation are altered to remove the punctuation and return the suggestion in camel
-        /// case.</remarks>
-        private static (bool SkipMisspelling, IEnumerable<string> Suggestions) CheckSuggestions(string misspelling,
-          IEnumerable<string> suggestions)
+        /// <returns>An enumerable list of valid suggestions, if any.</returns>
+        /// <remarks>Some suggestions include spaces or punctuation.  Those are altered to remove the punctuation
+        /// and return the suggestion in camel case.</remarks>
+        private static IEnumerable<string> CheckSuggestions(IEnumerable<string> suggestions)
         {
             var validSuggestions = new HashSet<string>();
-            bool skipMisspelling = false;
 
             foreach(string s in suggestions)
             {
                 var wordChars = s.ToArray();
 
                 if(wordChars.All(c => Char.IsLetter(c)))
-                {
-                    if(s.Equals(misspelling, StringComparison.OrdinalIgnoreCase))
-                    {
-                        skipMisspelling = true;
-                        break;
-                    }
-
                     validSuggestions.Add(s);
-                }
                 else
                 {
                     // Certain misspellings may return suggestions with spaces or punctuation.  For example:
@@ -445,7 +430,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                 }
             }
 
-            return (skipMisspelling, validSuggestions);
+            return validSuggestions;
         }
         #endregion
     }

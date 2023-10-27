@@ -102,6 +102,17 @@ namespace VisualStudio.SpellChecker.Common
         }
 
         /// <summary>
+        /// This is used to spell check a word case insensitively
+        /// </summary>
+        /// <param name="word">The word to spell check</param>
+        /// <returns>True if spelled correctly, false if not</returns>
+        /// <remarks>The word is converted to uppercase to bypass the case sensitive setting in the dictionary</remarks>
+        public bool IsSpelledCorrectlyIgnoreCase(string word)
+        {
+            return this.Dictionaries.Any(d => d.IsSpelledCorrectlyIgnoreCase(word));
+        }
+
+        /// <summary>
         /// This is used to suggest corrections for a misspelled word
         /// </summary>
         /// <param name="word">The misspelled word for which to get suggestions</param>

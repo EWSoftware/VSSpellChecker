@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCodeFixProvider.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/06/2023
+// Updated : 10/27/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide the spell check code fixes
@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Composition;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -161,8 +162,11 @@ namespace VisualStudio.SpellChecker.CodeFixes
                 case BaseTypeDeclarationSyntax btds:
                     symbol = semanticModel.GetDeclaredSymbol(btds, cancellationToken);
 
-                    // Rename the file only if the type is not nested within another type
-                    renameFile = !(token.Parent?.Parent is ClassDeclarationSyntax);
+                    // Rename the file only if the type is not nested within another type and the filename
+                    // matches the token text.  GitHub issue #304.
+                    renameFile = !(token.Parent?.Parent is ClassDeclarationSyntax) &&
+                        Path.GetFileNameWithoutExtension(token.SyntaxTree.FilePath ?? String.Empty).Equals(
+                            token.Text, StringComparison.OrdinalIgnoreCase);
                     break;
 
                 case DelegateDeclarationSyntax dds:

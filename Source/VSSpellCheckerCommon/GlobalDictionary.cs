@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/06/2023
+// Updated : 10/27/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
@@ -141,6 +141,28 @@ namespace VisualStudio.SpellChecker.Common
             {
                 if(this.IsInitialized && spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
                     return spellFactory.Spell(word);
+            }
+            catch(Exception ex)
+            {
+                // Ignore exceptions, there's not much we can do
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// This is used to spell check a word case insensitively
+        /// </summary>
+        /// <param name="word">The word to spell check</param>
+        /// <returns>True if spelled correctly, false if not</returns>
+        /// <remarks>The word is converted to uppercase to bypass the case sensitive setting in the dictionary</remarks>
+        public bool IsSpelledCorrectlyIgnoreCase(string word)
+        {
+            try
+            {
+                if(this.IsInitialized && spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
+                    return spellFactory.Spell(word.ToUpper(this.Culture));
             }
             catch(Exception ex)
             {
