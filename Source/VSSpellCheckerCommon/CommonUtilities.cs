@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommonUtilities.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/27/2023
+// Updated : 12/29/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
@@ -38,6 +38,9 @@ namespace VisualStudio.SpellChecker.Common
 
         private static readonly Regex reUppercase = new Regex("([A-Z])");
         private static readonly Regex reRegexSeparator = new Regex(@"\(\?\#/Options/(.*?)\)");
+
+        private static readonly char[] spaceSeparator = new[] { ' ' }, backslashSeparator = new[] { '\\' },
+            digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
         /// <summary>
         /// This defines the minimum identifier length
@@ -155,6 +158,27 @@ namespace VisualStudio.SpellChecker.Common
             }
 
             return (hasBackslash) ? relPath + "\\" : relPath;
+        }
+
+        /// <summary>
+        /// Capitalize a word if necessary
+        /// </summary>
+        /// <param name="word">The word to capitalize</param>
+        /// <param name="capitalize">True to capitalize it, false if not</param>
+        /// <returns>The word capitalized if necessary</returns>
+        public static string CapitalizeIfNecessary(this string word, bool capitalize)
+        {
+            if(!capitalize || String.IsNullOrWhiteSpace(word) || word.Length == 0 || !Char.IsLetter(word[0]) ||
+              Char.IsUpper(word[0]))
+            {
+                return word;
+            }
+
+            var chars = word.ToCharArray();
+
+            chars[0] = Char.ToUpperInvariant(chars[0]);
+
+            return new string(chars);
         }
 
         /// <summary>
@@ -315,7 +339,7 @@ namespace VisualStudio.SpellChecker.Common
                 // If it doesn't look like an XML file, assume it's text of some sort.  Convert anything that
                 // isn't a letter or a digit to a space and get each word.
                 var wordList = (new String(File.ReadAllText(filename).ToCharArray().Select(
-                    c => (c == '\\' || Char.IsLetterOrDigit(c)) ? c : ' ').ToArray())).Split(new[] { ' ' },
+                    c => (c == '\\' || Char.IsLetterOrDigit(c)) ? c : ' ').ToArray())).Split(spaceSeparator,
                     StringSplitOptions.RemoveEmptyEntries).ToList();
 
                 // Handle escaped words and split words containing the escape anywhere other than the start
@@ -326,7 +350,7 @@ namespace VisualStudio.SpellChecker.Common
                     if(w.Length > 2)
                     {
                         if(w.IndexOf('\\', 1) > 0)
-                            wordList.AddRange(w.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries));
+                            wordList.AddRange(w.Split(backslashSeparator, StringSplitOptions.RemoveEmptyEntries));
                         else
                         {
                             if(!onlyAddedWords)
@@ -346,8 +370,7 @@ namespace VisualStudio.SpellChecker.Common
             if(allWords)
                 return words;
 
-            return words.Distinct().Where(w => w.Length > 1 && w.IndexOfAny(
-                new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }) == -1).ToList();
+            return words.Distinct().Where(w => w.Length > 1 && w.IndexOfAny(digits) == -1).ToList();
         }
 
         /// <summary>

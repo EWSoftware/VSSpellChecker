@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker
 // File    : AssemblyInfoShared.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/15/2023
+// Updated : 12/29/2023
 // Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
 // Visual Studio spell checker common assembly attributes
@@ -75,13 +75,13 @@ internal static partial class AssemblyInfo
     //
     // This is used to set the assembly file version.  This will change with each new release.  MSIs only
     // support a Major value between 0 and 255 so we drop the century from the year on this one.
-    public const string FileVersion = "23.5.15.1";
+    public const string FileVersion = "23.12.29.0";
 
     // Common product version
     //
     // This may contain additional text to indicate Alpha or Beta states.  The version number will always match
     // the file version above but includes the century on the year.
-    public const string ProductVersion = "2023.5.15.1";
+    public const string ProductVersion = "2023.12.29.0";
 
     // Assembly copyright information
     public const string Copyright = "Copyright \xA9 2013-2023, Eric Woodruff, All Rights Reserved.\r\n" +

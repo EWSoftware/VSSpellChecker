@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/27/2023
+// Updated : 12/29/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
@@ -16,8 +16,6 @@
 // ==============================================================================================================
 // 02/26/2023  EFW  Created the code
 //===============================================================================================================
-
-// Ignore Spelling: welldone
 
 using System;
 using System.Collections.Generic;
@@ -251,7 +249,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
 
                 context.CancellationToken.ThrowIfCancellationRequested();
 
-                if(globalDictionaries.Any())
+                if(globalDictionaries.Count != 0)
                 {
                     var dictionary = new SpellingDictionary(globalDictionaries, configuration.IgnoredWords);
                     var handler = new CSharpSpellCheckHandler(configuration);
@@ -262,12 +260,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                         
                     var ignoreSpellingWords = handler.FindIgnoreSpellingDirectives();
                     var rangeExclusions = new List<Match>();
-                    var diagnosticProperties = new Dictionary<string, string>
-                    {
-                        { "Suggestions", null },
-                        { "Prefix", null },
-                        { "Suffix", null }
-                    };
+                    var diagnosticProperties = new Dictionary<string, string>();
 
                     // Just handle identifiers and leave the rest to the existing tagger which already handles
                     // all the other elements.  The inability to add words to the ignored words files and the
@@ -311,13 +304,19 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                 if(configuration.ShouldIgnoreWord(textToCheck) || dictionary.ShouldIgnoreWord(textToCheck))
                                     continue;
 
+                                if(s.Text.Length != word.Length)
+                                {
+                                    diagnosticProperties["Prefix"] = s.Text.Substring(0, word.Start);
+                                    diagnosticProperties["Suffix"] = s.Text.Substring(word.Start + word.Length);
+                                }
+
                                 // Handle code analysis dictionary checks first as they may be not be
                                 // recognized as correctly spelled words but have alternate handling.
                                 if(configuration.CadOptions.TreatDeprecatedTermsAsMisspelled &&
                                     configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
                                 {
-                                    diagnosticProperties["Prefix"] = diagnosticProperties["Suffix"] = null;
-                                    diagnosticProperties["Suggestions"] = preferredTerm;
+                                    diagnosticProperties["Suggestions"] = preferredTerm.CapitalizeIfNecessary(
+                                        Char.IsUpper(textToCheck[0]));
 
                                     context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
                                         Location.Create(context.Tree, s.TextSpan),
@@ -328,8 +327,8 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                 if(configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
                                     configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
                                 {
-                                    diagnosticProperties["Prefix"] = diagnosticProperties["Suffix"] = null;
-                                    diagnosticProperties["Suggestions"] = preferredTerm;
+                                    diagnosticProperties["Suggestions"] = preferredTerm.CapitalizeIfNecessary(
+                                        Char.IsUpper(textToCheck[0]));
 
                                     context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
                                         Location.Create(context.Tree, s.TextSpan),
@@ -340,8 +339,8 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                 if(configuration.CadOptions.TreatUnrecognizedWordsAsMisspelled &&
                                     configuration.UnrecognizedWords.TryGetValue(textToCheck, out IList<string> spellingAlternates))
                                 {
-                                    diagnosticProperties["Prefix"] = diagnosticProperties["Suffix"] = null;
-                                    diagnosticProperties["Suggestions"] = String.Join(",", spellingAlternates);
+                                    diagnosticProperties["Suggestions"] = String.Join(",", spellingAlternates.Select(
+                                        sa => sa.CapitalizeIfNecessary(Char.IsUpper(textToCheck[0]))));
 
                                     context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
                                         Location.Create(context.Tree, s.TextSpan),
@@ -353,21 +352,11 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                 // prevents a lot of false reports for things we don't care about.
                                 if(!dictionary.IsSpelledCorrectlyIgnoreCase(textToCheck))
                                 {
-                                    // Ignore the dictionary the suggestions come from for now.  I may add this
-                                    // later but we can't add words to dictionaries from the code fix so it may
-                                    // serve no purpose.
-                                    var suggestions = CheckSuggestions(
-                                        dictionary.SuggestCorrections(textToCheck).Select(ss => ss.Suggestion));
-
-                                    if(s.Text.Length != word.Length)
-                                    {
-                                        diagnosticProperties["Prefix"] = s.Text.Substring(0, word.Start);
-                                        diagnosticProperties["Suffix"] = s.Text.Substring(word.Start + word.Length);
-                                    }
-                                    else
-                                        diagnosticProperties["Prefix"] = diagnosticProperties["Suffix"] = null;
-
-                                    diagnosticProperties["Suggestions"] = String.Join(",", suggestions);
+                                    // Getting suggestions is expensive so it is deferred until it's really
+                                    // needed when the code fix is invoked.
+                                    diagnosticProperties["TextToCheck"] = textToCheck;
+                                    diagnosticProperties["Languages"] = String.Join(",",
+                                        dictionary.Dictionaries.Select(d => d.Culture.Name));
 
                                     context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
                                         Location.Create(context.Tree, TextSpan.FromBounds(
@@ -384,53 +373,6 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// This is used to filter and adjust the suggestions used to fix a misspelling in an identifier
-        /// </summary>
-        /// <param name="suggestions">The suggestions that should replace the misspelling</param>
-        /// <returns>An enumerable list of valid suggestions, if any.</returns>
-        /// <remarks>Some suggestions include spaces or punctuation.  Those are altered to remove the punctuation
-        /// and return the suggestion in camel case.</remarks>
-        private static IEnumerable<string> CheckSuggestions(IEnumerable<string> suggestions)
-        {
-            var validSuggestions = new HashSet<string>();
-
-            foreach(string s in suggestions)
-            {
-                var wordChars = s.ToArray();
-
-                if(wordChars.All(c => Char.IsLetter(c)))
-                    validSuggestions.Add(s);
-                else
-                {
-                    // Certain misspellings may return suggestions with spaces or punctuation.  For example:
-                    // welldone suggests "well done" and "well-done".  Return those as a camel case suggestion:
-                    // wellDone.
-                    bool caseChanged = false;
-
-                    for(int idx = 0; idx < wordChars.Length; idx++)
-                    {
-                        if(!Char.IsLetter(wordChars[idx]))
-                        {
-                            while(idx < wordChars.Length && !Char.IsLetter(wordChars[idx]))
-                                idx++;
-
-                            if(idx < wordChars.Length)
-                            {
-                                wordChars[idx] = Char.ToUpperInvariant(wordChars[idx]);
-                                caseChanged = true;
-                            }
-                        }
-                    }
-
-                    if(caseChanged)
-                        validSuggestions.Add(new String(wordChars.Where(c => Char.IsLetter(c)).ToArray()));
-                }
-            }
-
-            return validSuggestions;
         }
         #endregion
     }

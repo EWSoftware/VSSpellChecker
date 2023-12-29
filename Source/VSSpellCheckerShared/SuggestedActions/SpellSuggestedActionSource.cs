@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedActionSource.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/23/2023
+// Updated : 12/29/2023
 // Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to implement the suggestion source for spelling light bulbs
@@ -328,9 +328,12 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                         actions.Add(new IgnoredWordsSuggestedAction(trackingSpan, dictionary, iwf, String.Empty));
                     }
 
-                    actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(
-                        "Add to Ignored Words File", new[] { new SuggestedActionSet(null, actions) }) }, null,
-                        SuggestedActionSetPriority.Low));
+                    if(actions.Count != 0)
+                    {
+                        actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(
+                            "Add to Ignored Words File", new[] { new SuggestedActionSet(null, actions) }) }, null,
+                            SuggestedActionSetPriority.Low));
+                    }
                 }
             }
 

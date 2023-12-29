@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/22/2023
+// Updated : 12/29/2023
 // Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
 //
@@ -784,7 +784,8 @@ namespace VisualStudio.SpellChecker
                           configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
                         {
                             yield return new MisspellingTag(MisspellingType.DeprecatedTerm, errorSpan,
-                                new[] { new SpellingSuggestion(null, preferredTerm) });
+                                new[] { new SpellingSuggestion(null, preferredTerm.CapitalizeIfNecessary(
+                                    Char.IsUpper(textToCheck[0]))) });
                             continue;
                         }
 
@@ -792,7 +793,8 @@ namespace VisualStudio.SpellChecker
                           configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
                         {
                             yield return new MisspellingTag(MisspellingType.CompoundTerm, errorSpan,
-                                new[] { new SpellingSuggestion(null, preferredTerm) });
+                                new[] { new SpellingSuggestion(null, preferredTerm.CapitalizeIfNecessary(
+                                    Char.IsUpper(textToCheck[0]))) });
                             continue;
                         }
 
@@ -800,7 +802,8 @@ namespace VisualStudio.SpellChecker
                           configuration.UnrecognizedWords.TryGetValue(textToCheck, out IList<string> spellingAlternates))
                         {
                             yield return new MisspellingTag(MisspellingType.UnrecognizedWord, errorSpan,
-                                spellingAlternates.Select(a => new SpellingSuggestion(null, a)));
+                                spellingAlternates.Select(a => new SpellingSuggestion(null, a.CapitalizeIfNecessary(
+                                    Char.IsUpper(textToCheck[0])))));
                             continue;
                         }
 

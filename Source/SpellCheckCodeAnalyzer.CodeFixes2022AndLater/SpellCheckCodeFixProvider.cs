@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCodeFixProvider.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/27/2023
+// Updated : 12/29/2023
 // Note    : Copyright 2023, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide the spell check code fixes
@@ -17,9 +17,13 @@
 // 01/29/2023  EFW  Created the code
 //===============================================================================================================
 
+// Ignore Spelling: welldone
+
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -34,6 +38,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Rename;
 
 using VisualStudio.SpellChecker.CodeAnalyzer;
+using VisualStudio.SpellChecker.Common;
 
 namespace VisualStudio.SpellChecker.CodeFixes
 {
@@ -65,6 +70,8 @@ namespace VisualStudio.SpellChecker.CodeFixes
         public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+            var suggestions = new List<string>();
+            var separators = new[] { ',' };
 
             foreach(var diagnostic in context.Diagnostics)
             {
@@ -75,18 +82,45 @@ namespace VisualStudio.SpellChecker.CodeFixes
                     // Find the identifier for the diagnostic
                     var syntaxToken = root.FindToken(diagnosticSpan.Start);
 
-                    if(diagnostic.Properties.TryGetValue("Suggestions", out string suggestions))
-                    {
-                        // If the misspelling is a sub-span, the prefix and suffix will contain the surrounding text
-                        // used to create the full identifier.
-                        _ = diagnostic.Properties.TryGetValue("Prefix", out string prefix);
-                        _ = diagnostic.Properties.TryGetValue("Suffix", out string suffix);
+                    suggestions.Clear();
 
+                    if(!diagnostic.Properties.TryGetValue("Suggestions", out string suggestedReplacements))
+                    {
+                        if(diagnostic.Properties.TryGetValue("Languages", out string languages) &&
+                          diagnostic.Properties.TryGetValue("TextToCheck", out suggestedReplacements))
+                        {
+                            // Getting suggestions is expensive so it's done here when actually needed rather
+                            // than in the code analyzer.  Dictionaries should exist at this point since the
+                            // code analyzer will have created them.
+                            var globalDictionaries = languages.Split(separators,
+                                StringSplitOptions.RemoveEmptyEntries).Select(l =>
+                                GlobalDictionary.CreateGlobalDictionary(new CultureInfo(l), null,
+                                Enumerable.Empty<string>(), false)).Where(d => d != null).Distinct().ToList();
+
+                            if(globalDictionaries.Count != 0)
+                            {
+                                var dictionary = new SpellingDictionary(globalDictionaries, null);
+
+                                suggestions.AddRange(CheckSuggestions(
+                                    dictionary.SuggestCorrections(suggestedReplacements).Select(ss => ss.Suggestion)));
+                            }
+                        }
+                    }
+                    else
+                        suggestions.AddRange(suggestedReplacements.Split(separators, StringSplitOptions.RemoveEmptyEntries));
+
+                    if(suggestedReplacements != null)
+                    {
                         ImmutableArray<CodeAction> replacements;
 
-                        if(!String.IsNullOrWhiteSpace(suggestions))
+                        if(suggestions.Count != 0)
                         {
-                            replacements = suggestions.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(
+                            // If the misspelling is a sub-span, the prefix and suffix will contain the surrounding text
+                            // used to create the full identifier.
+                            _ = diagnostic.Properties.TryGetValue("Prefix", out string prefix);
+                            _ = diagnostic.Properties.TryGetValue("Suffix", out string suffix);
+
+                            replacements = suggestions.Select(
                                 s =>
                                 {
                                     string replacement = (String.IsNullOrWhiteSpace(prefix) &&
@@ -123,6 +157,54 @@ namespace VisualStudio.SpellChecker.CodeFixes
                 }
             }
         }
+
+        /// <summary>
+        /// This is used to filter and adjust the suggestions used to fix a misspelling in an identifier
+        /// </summary>
+        /// <param name="suggestions">The suggestions that should replace the misspelling</param>
+        /// <returns>An enumerable list of valid suggestions, if any.</returns>
+        /// <remarks>Some suggestions include spaces or punctuation.  Those are altered to remove the punctuation
+        /// and return the suggestion in camel case.</remarks>
+        private static HashSet<string> CheckSuggestions(IEnumerable<string> suggestions)
+        {
+            var validSuggestions = new HashSet<string>();
+
+            foreach(string s in suggestions)
+            {
+                var wordChars = s.ToArray();
+
+                if(wordChars.All(c => Char.IsLetter(c)))
+                    validSuggestions.Add(s);
+                else
+                {
+                    // Certain misspellings may return suggestions with spaces or punctuation.  For example:
+                    // welldone suggests "well done" and "well-done".  Return those as a camel case suggestion:
+                    // wellDone.
+                    bool caseChanged = false;
+
+                    for(int idx = 0; idx < wordChars.Length; idx++)
+                    {
+                        if(!Char.IsLetter(wordChars[idx]))
+                        {
+                            while(idx < wordChars.Length && !Char.IsLetter(wordChars[idx]))
+                                idx++;
+
+                            if(idx < wordChars.Length)
+                            {
+                                wordChars[idx] = Char.ToUpperInvariant(wordChars[idx]);
+                                caseChanged = true;
+                            }
+                        }
+                    }
+
+                    if(caseChanged)
+                        validSuggestions.Add(new String(wordChars.Where(c => Char.IsLetter(c)).ToArray()));
+                }
+            }
+
+            return validSuggestions;
+        }
+
 
         /// <summary>
         /// Create the solution used to correct a spelling error

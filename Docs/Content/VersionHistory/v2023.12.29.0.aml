@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="9b0ee624-54c6-4020-b546-03e6f5c96b0e" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes made in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Moved generation of suggestions for code analyzer misspellings to the code fix provider which
+should reduce excessive CPU usage by the code analyzer.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed an issue with the classifier factory throwing an exception with ASPX files.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed a couple of issues when adding and removing sections in the configuration editor.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed handling of all uppercase words in the word splitter when they are being spell checked.</para>
+					</listItem>
+
+					<listItem>
+						<para>Changed type identifier renaming to only rename the containing file if the filename matches the
+misspelled identifier name.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>
