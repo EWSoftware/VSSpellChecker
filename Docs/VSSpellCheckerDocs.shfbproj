@@ -57,7 +57,7 @@
     <NamingMethod>Guid</NamingMethod>
     <HelpTitle>Visual Studio Spell Checker Documentation</HelpTitle>
     <FeedbackEMailAddress>Eric%40EWoodruff.us</FeedbackEMailAddress>
-    <CopyrightText>Copyright \xA9 2013-2023, Eric Woodruff, All rights reserved</CopyrightText>
+    <CopyrightText>Copyright \xA9 2013-2024, Eric Woodruff, All rights reserved</CopyrightText>
     <CopyrightHref>https://GitHub.com/EWSoftware/VSSpellChecker</CopyrightHref>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <NamespaceSummaries>
@@ -65,7 +65,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2023.12.29.0</HelpFileVersion>
+    <HelpFileVersion>2024.6.17.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -222,6 +222,7 @@
     <None Include="Content\VersionHistory\v2023.12.29.0.aml" />
     <None Include="Content\VersionHistory\v2023.3.4.0.aml" />
     <None Include="Content\VersionHistory\v2023.5.15.0.aml" />
+    <None Include="Content\VersionHistory\v2024.6.17.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2023.5.8.0.aml" />
     <None Include="Content\VSSpell001.aml" />

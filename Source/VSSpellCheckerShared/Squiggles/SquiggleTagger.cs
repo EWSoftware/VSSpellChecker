@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SquiggleTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
-// Updated : 04/16/2015
-// Note    : Copyright 2010-2015, Microsoft Corporation, All rights reserved
+// Updated : 06/03/2024
+// Note    : Copyright 2010-2024, Microsoft Corporation, All rights reserved
 //
 // This file contains the tagger class for spelling squiggles
 //
@@ -86,7 +86,7 @@ namespace VisualStudio.SpellChecker.Squiggles
             [Import]
             internal IViewTagAggregatorFactoryService TagAggregatorFactory { get; set; }
 
-            #region ITaggerProvider
+            #region IViewTaggerProvider
             public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
             {
                 // If this view isn't editable, then there isn't a good reason to be showing these

@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PlainTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 08/18/2017
-// Note    : Copyright 2010-2017, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2017, Eric Woodruff, All rights reserved
+// Updated : 06/03/2024
+// Note    : Copyright 2010-2024, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2024, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for plain text files
 //
@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -41,17 +42,17 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <summary>
         /// Plain text tagger provider
         /// </summary>
-        [Export(typeof(ITaggerProvider)), ContentType("plaintext"), ContentType("text"),
+        [Export(typeof(IViewTaggerProvider)), ContentType("plaintext"), ContentType("text"),
           TagType(typeof(NaturalTextTag))]
-        internal class PlainTextTaggerProvider : ITaggerProvider
+        internal class PlainTextTaggerProvider : IViewTaggerProvider
         {
             /// <summary>
-            /// Creates a tag provider for the specified buffer
+            /// Creates a tag provider for the specified view and buffer
             /// </summary>
             /// <typeparam name="T">The tag type</typeparam>
             /// <param name="buffer">The text buffer</param>
             /// <returns>The tag provider for the specified buffer or null if the buffer is null</returns>
-            public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+            public ITagger<T> CreateTagger<T>(ITextView view, ITextBuffer buffer) where T : ITag
             {
                 // If no buffer, not enabled, or the content type is one of the more derived types, don't use
                 // this one.

@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 12/29/2022
-// Note    : Copyright 2010-2022, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2022, Eric Woodruff, All rights reserved
+// Updated : 06/03/2024
+// Note    : Copyright 2010-2024, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2024, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for HTML files
 //
@@ -30,6 +30,7 @@ using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -57,23 +58,24 @@ namespace VisualStudio.SpellChecker.Tagging
         /// covers derived HTML content types in certain other web project types, "code++.PHP" and "code++.Markdown"
         /// which cover PHP and markdown files when no extension is present that handles them, "Razor" which
         /// covers cshtml files, and "WebForms" which handles files opened with the Web Forms editor.</remarks>
-        [Export(typeof(ITaggerProvider)), ContentType("html"), ContentType("htmlx"), ContentType("code++.PHP"),
+        [Export(typeof(IViewTaggerProvider)), ContentType("html"), ContentType("htmlx"), ContentType("code++.PHP"),
           ContentType("Markdown"), ContentType("code++.Markdown"), ContentType("Razor"), ContentType("WebForms"),
           TagType(typeof(NaturalTextTag))]
-        internal class HtmlTextTaggerProvider : ITaggerProvider
+        internal class HtmlTextTaggerProvider : IViewTaggerProvider
         {
             [Import]
-            private IClassifierAggregatorService classifierAggregatorService = null;
+            private IViewClassifierAggregatorService classifierAggregatorService = null;
 
             /// <summary>
-            /// Creates a tag provider for the specified buffer
+            /// Creates a tag provider for the specified view and buffer
             /// </summary>
             /// <typeparam name="T">The tag type</typeparam>
+            /// <param name="view">The text view</param>
             /// <param name="buffer">The text buffer</param>
             /// <returns>The tag provider for the specified buffer or null if the buffer is null</returns>
-            public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+            public ITagger<T> CreateTagger<T>(ITextView view, ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null)
+                if(view == null || buffer == null)
                     return null;
 
                 // Since VS 2019 PHP Tools for Visual Studio have PHPProjection content type based on HTLMX
@@ -81,7 +83,7 @@ namespace VisualStudio.SpellChecker.Tagging
                 if(buffer.ContentType.IsOfType("PHPProjection"))
                     return null;
 
-                return new HtmlTextTagger(classifierAggregatorService.GetClassifier(buffer)) as ITagger<T>;
+                return new HtmlTextTagger(classifierAggregatorService.GetClassifier(view)) as ITagger<T>;
             }
         }
         #endregion

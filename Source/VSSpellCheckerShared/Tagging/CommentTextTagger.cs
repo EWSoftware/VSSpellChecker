@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/22/2023
-// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 06/17/2024
+// Note    : Copyright 2010-2024, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2024, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for source code files of any type
 //
@@ -36,6 +36,7 @@ using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -63,24 +64,25 @@ namespace VisualStudio.SpellChecker.Tagging
         //=====================================================================
 
         /// <summary>
-        /// Comment text tagger provider
+        /// Comment view tagger provider
         /// </summary>
-        [Export(typeof(ITaggerProvider)), ContentType("code"), TagType(typeof(NaturalTextTag))]
-        internal class CommentTextTaggerProvider : ITaggerProvider
+        [Export(typeof(IViewTaggerProvider)), ContentType("code"), TagType(typeof(NaturalTextTag))]
+        internal class CommentTextTaggerProvider : IViewTaggerProvider
         {
             [Import]
-            private readonly IClassifierAggregatorService classifierAggregatorService = null;
+            private readonly IViewClassifierAggregatorService classifierAggregatorService = null;
 
             /// <summary>
-            /// Creates a tag provider for the specified buffer
+            /// Creates a tag provider for the specified view and buffer
             /// </summary>
             /// <typeparam name="T">The tag type</typeparam>
+            /// <param name="view">The text view</param>
             /// <param name="buffer">The text buffer</param>
             /// <returns>The tag provider for the specified buffer or null if the buffer is null or the spelling
             /// service is unavailable.</returns>
-            public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+            public ITagger<T> CreateTagger<T>(ITextView view, ITextBuffer buffer) where T : ITag
             {
-                if(buffer == null || buffer.ContentType.IsOfType("R Markdown"))
+                if(view == null || buffer == null || buffer.ContentType.IsOfType("R Markdown"))
                     return null;
 
 #pragma warning disable VSTHRD010
@@ -91,7 +93,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
                 // Markdown has its own tagger
                 if(buffer.ContentType.IsOfType("Markdown") || buffer.ContentType.IsOfType("code++.Markdown"))
-                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
+                    return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(view),
                         config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
 
                 // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
@@ -124,7 +126,7 @@ namespace VisualStudio.SpellChecker.Tagging
                     } as ITagger<T>;
                 }
 
-                return new CommentTextTagger(buffer, classifierAggregatorService.GetClassifier(buffer),
+                return new CommentTextTagger(buffer, classifierAggregatorService.GetClassifier(view),
                     config.IgnoredXmlElements, config.SpellCheckedXmlAttributes,
                     config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
             }
@@ -164,7 +166,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <inheritdoc />
         public IEnumerable<ITagSpan<NaturalTextTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            bool preprocessorKeywordSeen = false, delimiterSeen = false;
+            bool preprocessorKeywordSeen = false, delimiterSeen = false, skipAttributeValueParts = false;
             string elementName = null, attributeName = null, text;
             int pos;
 
@@ -226,10 +228,15 @@ namespace VisualStudio.SpellChecker.Tagging
                             break;
 
                         default:
-                            if(name == "identifier" || name.StartsWith("xml doc comment - ", StringComparison.Ordinal))
+                            if(name == "identifier" || name.StartsWith("xml doc comment - ", StringComparison.Ordinal) ||
+                              (name.Contains("attribute value") && skipAttributeValueParts))
+                            {
                                 continue;
+                            }
                             break;
                     }
+
+                    skipAttributeValueParts = false;
 
                     // As long as the opening and closing XML tags appear on the same line as the content, we
                     // can skip spell checking of unwanted elements.
@@ -306,6 +313,10 @@ namespace VisualStudio.SpellChecker.Tagging
                         if(attributeName != null && (name.Contains("attribute value") || name == "string") &&
                           !spellCheckedXmlAttributes.Contains(attributeName))
                         {
+                            // Some taggers return the opening and closing quotes and each word within as
+                            // separate attribute value spans.  Set a flag to skip any subsequent parts as well.
+                            skipAttributeValueParts = true;
+
                             attributeName = null;
                             continue;
                         }

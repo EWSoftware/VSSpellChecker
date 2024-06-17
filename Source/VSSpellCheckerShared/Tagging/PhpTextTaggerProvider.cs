@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : PhpTextTaggerProvider.cs
 // Authors : Miloslav Beňo (DevSense - http://www.devsense.com/)
-// Updated : 01/22/2020
-// Note    : Copyright 2016-2020, DevSense, All rights reserved
+// Updated : 06/03/2024
+// Note    : Copyright 2016-2024, DevSense, All rights reserved
 //
 // This file contains a class used to provide tags for PHP files when PHP Tools for Visual Studio are installed
 //
@@ -22,6 +22,7 @@ using System.ComponentModel.Composition;
 
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -30,28 +31,27 @@ namespace VisualStudio.SpellChecker.Tagging
     /// <summary>
     /// This class provides tags for PHP files when PHP Tools for Visual Studio are installed
     /// </summary>
-    [Export(typeof(ITaggerProvider))]
+    [Export(typeof(IViewTaggerProvider))]
     [ContentType("Phalanger")] // Because of legacy reasons ContentType is Phalanger, not PHP
     [TagType(typeof(NaturalTextTag))]
-    internal class PhpTextTaggerProvider : ITaggerProvider
+    internal class PhpTextTaggerProvider : IViewTaggerProvider
     {
         [Import]
-        private readonly IClassifierAggregatorService classifierAggregatorService = null;
+        private readonly IViewClassifierAggregatorService classifierAggregatorService = null;
 
         /// <inheritdoc />
-        public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+        public ITagger<T> CreateTagger<T>(ITextView view, ITextBuffer buffer) where T : ITag
         {
-            var classifier = classifierAggregatorService.GetClassifier(buffer);
+            if(view == null || buffer == null)
+                return null;
+
+            var classifier = classifierAggregatorService.GetClassifier(view);
 #pragma warning disable VSTHRD010
             var config = SpellingServiceProxy.GetConfiguration(buffer);
 #pragma warning restore VSTHRD010
 
-            // Use existing comment text tagger, it works well with PHP classifier
-            if(config == null)
-                return new CommentTextTagger(buffer, classifier, null, null, null) as ITagger<T>;
-
             return new CommentTextTagger(buffer, classifier, null, null,
-                config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
+                config?.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
         }
     }
 }

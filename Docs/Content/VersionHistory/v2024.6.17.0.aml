@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="96330520-5052-407a-969e-0fc07ad61c7d" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes made in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Updated the tagger providers to use view taggers to support languages such as Visual Basic that
+changed in Visual Studio 2022 (17.9.1) that now only classify the view and not the buffer.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed handling of ignored attribute values so that all parts are ignored if returned in
+multiple spans of the same attribute value classification type.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>

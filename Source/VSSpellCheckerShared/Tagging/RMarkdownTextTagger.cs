@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RMarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 01/22/2020
-// Note    : Copyright 2017-2020, Eric Woodruff, All rights reserved
+// Updated : 06/03/2024
+// Note    : Copyright 2017-2024, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for R markdown files when the R Tools for Visual Studio
 // package is installed (part of the Data Science and Analytical Applications workload).
@@ -27,6 +27,7 @@ using System.Linq;
 
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -54,25 +55,25 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <summary>
         /// This class provides tags for PHP files when PHP Tools for Visual Studio are installed
         /// </summary>
-        [Export(typeof(ITaggerProvider)), ContentType("R Markdown"), ContentType("RDoc"), TagType(typeof(NaturalTextTag))]
-        internal class RMarkdownTextTaggerProvider : ITaggerProvider
+        [Export(typeof(IViewTaggerProvider)), ContentType("R Markdown"), ContentType("RDoc"), TagType(typeof(NaturalTextTag))]
+        internal class RMarkdownTextTaggerProvider : IViewTaggerProvider
         {
             [Import]
-            private readonly IClassifierAggregatorService classifierAggregatorService = null;
+            private readonly IViewClassifierAggregatorService classifierAggregatorService = null;
 
             /// <inheritdoc />
-            public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag
+            public ITagger<T> CreateTagger<T>(ITextView view, ITextBuffer buffer) where T : ITag
             {
-                var classifier = classifierAggregatorService.GetClassifier(buffer);
+                if(view == null || buffer == null)
+                    return null;
+
+                var classifier = classifierAggregatorService.GetClassifier(view);
 #pragma warning disable VSTHRD010
                 var config = SpellingServiceProxy.GetConfiguration(buffer);
 #pragma warning restore VSTHRD010
 
-                if(config == null)
-                    return new RMarkdownTextTagger(buffer, classifier, null) as ITagger<T>;
-
                 return new RMarkdownTextTagger(buffer, classifier,
-                    config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
+                    config?.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
             }
         }
         #endregion

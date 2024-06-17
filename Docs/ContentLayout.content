@@ -160,11 +160,16 @@
       <HelpKeyword index="K" term="submitting changes" />
     </HelpKeywords>
   </Topic>
-  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isExpanded="true" title="Version History">
+  <Topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" visible="True" isSelected="true" title="Version History">
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="9b0ee624-54c6-4020-b546-03e6f5c96b0e" visible="True" isSelected="true" title="Version 2023.12.29.0">
+    <Topic id="96330520-5052-407a-969e-0fc07ad61c7d" visible="True" title="Version 2024.6.17.0">
+      <HelpKeywords>
+        <HelpKeyword index="K" term="versions, 2024.6.17.0" />
+      </HelpKeywords>
+    </Topic>
+    <Topic id="9b0ee624-54c6-4020-b546-03e6f5c96b0e" visible="True" title="Version 2023.12.29.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2023.12.29.0" />
       </HelpKeywords>
