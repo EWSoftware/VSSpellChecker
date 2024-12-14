@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/29/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 12/14/2024
+// Note    : Copyright 2023-2024, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
 //
@@ -94,6 +94,36 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
             IgnoreWordDescription,
             "https://ewsoftware.github.io/VSSpellChecker/html/83ff9063-294f-4a18-b765-1510c86ad0d4.htm");
 
+        // The path to our dependencies
+        private static readonly string codeAnalyzerPath;
+
+        #endregion
+
+        #region Properties
+        //=====================================================================
+
+// I don't have a choice here so I'm going to use Environment and file I/O
+#pragma warning disable RS1035
+        /// <summary>
+        /// This read-only property returns the global configuration file path
+        /// </summary>
+        /// <value>We need this to get the analyzer code path so that we can find our dependencies because
+        /// Visual Studio makes a copy of this assembly in some other cache location without them.</value>
+        public static string GlobalConfigurationFilePath
+        {
+            get
+            {
+                string configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    @"EWSoftware\Visual Studio Spell Checker");
+
+                if(!Directory.Exists(configPath))
+                    Directory.CreateDirectory(configPath);
+
+                return configPath;
+            }
+        }
+#pragma warning restore RS1035
+
         #endregion
 
         #region Constructor
@@ -107,26 +137,65 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
         /// resolver to load them.</remarks>
         static CSharpSpellCheckCodeAnalyzer()
         {
+            // This is a pain but for some reason starting in v17.12, Visual Studio started running the actual
+            // code analysis in a separate copy of the assembly in a cache folder and we can no longer find our
+            // dependencies.  The odd thing is that it loads a copy to initialize it from the expected location.
+            // As such, I'm forced to store a copy of the real path in a location the other copy can get to.
+            // I haven't been able to find a better way around this.  If you know of one, let me know.
+            string analyzerCodePath = Path.Combine(GlobalConfigurationFilePath, "AnalyzerCodePath.txt");
+
+            var analyzerPaths = new List<string>();
+
+            if(File.Exists(analyzerCodePath))
+                analyzerPaths.AddRange(File.ReadAllLines(analyzerCodePath));
+
+            var asm = Assembly.GetExecutingAssembly();
+            string analyzerPath = analyzerPaths.FirstOrDefault(p => p.StartsWith(asm.FullName, StringComparison.Ordinal));
+
+            if(String.IsNullOrWhiteSpace(analyzerPath))
+            {
+                string dependencyPath = Path.GetDirectoryName(asm.Location);
+
+                if(File.Exists(Path.Combine(dependencyPath, "VisualStudio.SpellChecker.Common.dll")))
+                {
+                    analyzerPaths.Add($"{asm.FullName}|{dependencyPath}");
+                    File.WriteAllLines(analyzerCodePath, analyzerPaths);
+                    codeAnalyzerPath = dependencyPath;
+                }
+            }
+            else
+            {
+                int pos = analyzerPath.IndexOf('|');
+
+                if(pos != -1)
+                    codeAnalyzerPath = analyzerPath.Substring(pos + 1);
+            }
+
             AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
             {
                 Assembly refAsm = null;
 
                 // We do see our own assembly name come through here so we'll ignore it
-                if(!String.IsNullOrWhiteSpace(e.Name) &&
-                  !e.Name.StartsWith(Assembly.GetExecutingAssembly().GetName().Name, StringComparison.OrdinalIgnoreCase) &&
+                if(!String.IsNullOrWhiteSpace(e.Name) && !String.IsNullOrWhiteSpace(codeAnalyzerPath) &&
+                  !e.Name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase) &&
+                  !e.Name.StartsWith(asm.GetName().Name, StringComparison.OrdinalIgnoreCase) &&
                   !referenceAssemblies.TryGetValue(e.Name, out refAsm))
                 {
                     int pos = e.Name.IndexOf(',');
 
                     if(pos != -1)
                     {
-                        string assemblyName = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                            e.Name.Substring(0, pos) + ".dll");
+                        string assemblyName = Path.Combine(codeAnalyzerPath, e.Name.Substring(0, pos) + ".dll");
 
                         // If not found it's probably looking for a resources assembly that doesn't exist so
                         // we'll ignore it.
                         if(File.Exists(assemblyName))
+                        {
                             refAsm = Assembly.LoadFile(assemblyName);
+
+                            if(refAsm.FullName != e.Name)
+                                refAsm = null;
+                        }
                     }
 
                     referenceAssemblies[e.Name] = refAsm;
