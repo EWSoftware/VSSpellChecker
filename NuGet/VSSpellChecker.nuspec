@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>EWSoftware.VSSpellChecker</id>
-		<version>2021.7.27.0</version>
+		<version>2024.12.14.0</version>
 		<title>EWSoftware Visual Studio Spell Checker Definitions</title>
 		<authors>Eric Woodruff</authors>
 		<owners>Eric Woodruff</owners>

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker
 // File    : AssemblyInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 01/29/2023
-// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 12/14/2024
+// Note    : Copyright 2013-2024, Eric Woodruff, All rights reserved
 //
 // Visual Studio spell checker common code attributes.
 //
@@ -25,4 +25,4 @@ using System.Reflection;
 [assembly: AssemblyDescription("This assembly contains interfaces and other supporting classes used to " +
     "implement the Visual Studio spell checker")]
 
-[assembly: CLSCompliant(true)]
+[assembly: CLSCompliant(false)]

@@ -65,7 +65,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2024.6.17.0</HelpFileVersion>
+    <HelpFileVersion>2024.12.14.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -222,6 +222,7 @@
     <None Include="Content\VersionHistory\v2023.12.29.0.aml" />
     <None Include="Content\VersionHistory\v2023.3.4.0.aml" />
     <None Include="Content\VersionHistory\v2023.5.15.0.aml" />
+    <None Include="Content\VersionHistory\v2024.12.14.0.aml" />
     <None Include="Content\VersionHistory\v2024.6.17.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2023.5.8.0.aml" />
