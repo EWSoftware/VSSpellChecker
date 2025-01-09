@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 04/26/2023
-// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 01/09/2025
+// Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for C# code
 //
@@ -443,8 +443,8 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                         return;
                     }
 
-                    // If it looks like a C/C+ #include, skip the filename
-                    if(p.NextSegment(7) == "include")
+                    // If it looks like a C/C+ #include or #import, skip the filename
+                    if(p.NextSegment(7) == "include" || p.NextSegment(6) == "import")
                     {
                         p.Advance(7);
 

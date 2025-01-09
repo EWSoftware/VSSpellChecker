@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/17/2024
-// Note    : Copyright 2010-2024, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2024, Eric Woodruff, All rights reserved
+// Updated : 01/09/2025
+// Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for source code files of any type
 //
@@ -26,7 +26,7 @@
 // 08/15/2018  EFW  Added support for tracking and excluding classifications using the classification cache
 //===============================================================================================================
 
-// Ignore spelling: sql
+// Ignore spelling: sql cppstringdelimitercharacter
 
 using System;
 using System.Collections.Generic;
@@ -93,8 +93,10 @@ namespace VisualStudio.SpellChecker.Tagging
 
                 // Markdown has its own tagger
                 if(buffer.ContentType.IsOfType("Markdown") || buffer.ContentType.IsOfType("code++.Markdown"))
+                {
                     return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(view),
                         config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
+                }
 
                 // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
                 // configuration options to exclude certain elements from being spell checked if not wanted.
@@ -229,6 +231,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
                         default:
                             if(name == "identifier" || name.StartsWith("xml doc comment - ", StringComparison.Ordinal) ||
+                              name.StartsWith("cppstringdelimitercharacter", StringComparison.Ordinal) ||
                               (name.Contains("attribute value") && skipAttributeValueParts))
                             {
                                 continue;
@@ -353,8 +356,10 @@ namespace VisualStudio.SpellChecker.Tagging
                         yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
                     }
                     else
+                    {
                         if(name == "preprocessor keyword")
                             preprocessorKeywordSeen = true;
+                    }
                 }
             }
         }
