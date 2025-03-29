@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/25/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 03/19/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
 //
@@ -147,26 +147,23 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         currentProject = project.FullName;
                                 }
 
-                                if(String.IsNullOrWhiteSpace(currentProject))
-                                    if(dte2.Solution.SolutionBuild != null)
+                                if(String.IsNullOrWhiteSpace(currentProject) && dte2.Solution.SolutionBuild != null)
+                                {
+                                    var startupProjects = (Array)dte2.Solution.SolutionBuild.StartupProjects;
+
+                                    if(startupProjects != null && startupProjects.Length != 0)
                                     {
-                                        var startupProjects = (Array)dte2.Solution.SolutionBuild.StartupProjects;
-
-                                        if(startupProjects != null && startupProjects.Length != 0)
-                                        {
-                                            currentProject = (string)startupProjects.GetValue(0);
-
+                                        currentProject = (string)startupProjects.GetValue(0);
 #pragma warning disable VSTHRD010
-                                            var item = dte2.Solution.EnumerateProjects().FirstOrDefault(
-                                                p => p.UniqueName == currentProject);
+                                        var item = dte2.Solution.EnumerateProjects().FirstOrDefault(
+                                            p => p.UniqueName == currentProject);
 #pragma warning restore VSTHRD010
-
-                                            if(item != null)
-                                                currentProject = item.FullName;
-                                            else
-                                                currentProject = null;
-                                        }
+                                        if(item != null)
+                                            currentProject = item.FullName;
+                                        else
+                                            currentProject = null;
                                     }
+                                }
                             }
 
                             if(currentProject == null)
@@ -222,10 +219,12 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 // Website projects use a folder name for the project so remove the trailing backslash
                 foreach(string p in spellCheckProjectNames)
+                {
                     if(p.Length > 1 && p[p.Length - 1] == '\\')
                         cboSpellCheckTarget.Items.Add(Path.GetFileName(p.Substring(0, p.Length - 1)));
                     else
                         cboSpellCheckTarget.Items.Add(Path.GetFileName(p));
+                }
 
                 cboSpellCheckTarget.Items.Add("Selected Solution Explorer items");
                 cboSpellCheckTarget.Items.Add("All Open Documents");
@@ -307,7 +306,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 if(MessageBox.Show("A spell check is in progress.  Do you want to cancel it?",
                   PackageResources.PackageTitle, MessageBoxButton.YesNo, MessageBoxImage.Question,
                   MessageBoxResult.No) == MessageBoxResult.No)
+                {
                     return false;
+                }
 
                 cancellationTokenSource?.Cancel();
             }
@@ -332,9 +333,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
               out _, out _, out _, out ppWindowFrame) == VSConstants.S_OK)
             {
                 // On occasion, the call above is successful but we get a null frame for some reason
-                if(ppWindowFrame != null)
-                    if(ppWindowFrame.Show() != VSConstants.S_OK)
-                        ppWindowFrame = null;
+                if(ppWindowFrame != null && ppWindowFrame.Show() != VSConstants.S_OK)
+                    ppWindowFrame = null;
             }
 
             return ppWindowFrame;
@@ -493,11 +493,13 @@ namespace VisualStudio.SpellChecker.ToolWindows
                             if(docDataObj is IVsTextLines lines)
                                 buffer = lines;
                             else
+                            {
                                 if(docDataObj is IVsTextBufferProvider tp)
                                 {
                                     if(tp.GetTextBuffer(out buffer) != VSConstants.S_OK)
                                         buffer = null;
                                 }
+                            }
 
                             if(buffer == null || buffer.GetLastLineIndex(out int endLine, out int endIndex) != VSConstants.S_OK ||
                               buffer.GetLineText(0, 0, endLine, endIndex, out text) != VSConstants.S_OK)
@@ -540,6 +542,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                             var editorAdapterFactoryService = componentModel.GetService<IVsEditorAdaptersFactoryService>();
 
                                             if(editorAdapterFactoryService != null)
+                                            {
                                                 try
                                                 {
                                                     var wpfTextView = editorAdapterFactoryService.GetWpfTextView(textView);
@@ -554,6 +557,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                                 {
                                                     // Not an IWpfTextView so ignore it
                                                 }
+                                            }
                                         }
                                     }
                                 }
@@ -807,6 +811,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 // Add exclusions from the configuration if any
                 foreach(var exclude in wordSplitter.Configuration.ExclusionExpressions)
+                {
                     try
                     {
                         rangeExclusions.AddRange(exclude.Matches(textToSplit).Cast<Match>());
@@ -816,6 +821,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         // Ignore expression timeouts
                         System.Diagnostics.Debug.WriteLine(ex);
                     }
+                }
 
                 lastWord = new Span();
 
@@ -989,6 +995,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             if(cboSpellCheckTarget.SelectedIndex == 0 || cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 1)
                 spellCheckFiles = SpellCheckFileInfo.AllProjectFiles(null).ToList();
             else
+            {
                 if(cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 2)
                     spellCheckFiles = SpellCheckFileInfo.SelectedProjectFiles().ToList();
                 else
@@ -996,6 +1003,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     string selectedProjectName = projectNames[cboSpellCheckTarget.SelectedIndex - 1];
                     spellCheckFiles = SpellCheckFileInfo.AllProjectFiles(selectedProjectName).ToList();
                 }
+            }
 
             // Likewise, get the list of open documents upfront.  That way, we only need to switch to the UI
             // thread to get the content of documents that we know are open.
@@ -1008,6 +1016,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     openDocuments.Where(od =>
                         !spellCheckFiles.Any(f => f.CanonicalName.Equals(od, StringComparison.OrdinalIgnoreCase)) &&
                         !od.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) &&
+                        !od.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase) &&
                         !projectNames.Any(p => p.Equals(od, StringComparison.OrdinalIgnoreCase))).Select(
                             od => SpellCheckFileInfo.ForOpenDocument(od))).ToList();
             }
@@ -1360,6 +1369,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 }
                             }
                             else
+                            {
                                 if(textView.GetLineAndColumn(currentIssue.DeleteWordSpan.Start, out startLine,
                                   out startColumn) == VSConstants.S_OK && textView.SetCaretPos(startLine,
                                   startColumn) == VSConstants.S_OK)
@@ -1372,6 +1382,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                         this.AdjustAffectedIssues(currentIssue, String.Empty);
                                     }
                                 }
+                            }
 
                             if(idx >= dgIssues.Items.Count)
                                 idx = dgIssues.Items.Count - 1;
@@ -1471,15 +1482,21 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 if(replacementWord.Length > 1 &&
                                   (Char.IsUpper(replacementWord[0]) != Char.IsUpper(replacementWord[1]) ||
                                   (Char.IsLower(replacementWord[0]) && Char.IsLower(replacementWord[1]))))
+                                {
                                     if(Char.IsUpper(viewWord[0]) && !Char.IsUpper(replacementWord[0]))
                                     {
                                         replacementWord = replacementWord.Substring(0, 1).ToUpper(language) +
                                             replacementWord.Substring(1);
                                     }
                                     else
+                                    {
                                         if(Char.IsLower(viewWord[0]) && !Char.IsLower(replacementWord[0]))
+                                        {
                                             replacementWord = replacementWord.Substring(0, 1).ToLower(language) +
                                                 replacementWord.Substring(1);
+                                        }
+                                    }
+                                }
 
                                 if(textView.ReplaceTextOnLine(startLine, startColumn, viewWord.Length, replacementWord,
                                   replacementWord.Length) == VSConstants.S_OK)
@@ -1509,8 +1526,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 }
 
                 if(replacementsPerformed.Count != 0)
+                {
                     foreach(var issue in replacementsPerformed)
                         issues.Remove(issue);
+                }
 
                 if(idx >= dgIssues.Items.Count)
                     idx = dgIssues.Items.Count - 1;
@@ -1604,7 +1623,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var issue in issues.Where(i => i.MisspellingType == currentIssue.MisspellingType &&
                   i.Word.Equals(currentIssue.Word, StringComparison.OrdinalIgnoreCase)).ToList())
+                {
                     issues.Remove(issue);
+                }
 
                 if(idx >= dgIssues.Items.Count)
                     idx = dgIssues.Items.Count - 1;
@@ -1634,7 +1655,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var issue in issues.Where(i => i.CanonicalName.Equals(file,
                   StringComparison.OrdinalIgnoreCase)).ToList())
+                {
                     issues.Remove(issue);
+                }
 
                 if(idx >= dgIssues.Items.Count)
                     idx = dgIssues.Items.Count - 1;
@@ -1664,7 +1687,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 foreach(var issue in issues.Where(i => i.ProjectName.Equals(project,
                   StringComparison.OrdinalIgnoreCase)).ToList())
+                {
                     issues.Remove(issue);
+                }
 
                 if(idx >= dgIssues.Items.Count)
                     idx = dgIssues.Items.Count - 1;
@@ -1731,7 +1756,9 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         // Remove all issues related to the unmodified added word
                         foreach(var issue in issues.Where(i => i.Word.Equals(currentIssue.Word,
                           StringComparison.OrdinalIgnoreCase)).ToList())
+                        {
                             issues.Remove(issue);
+                        }
                     }
 #pragma warning restore VSTHRD010
 
@@ -1815,8 +1842,10 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 }
             }
             else
+            {
                 MessageBox.Show("Select an issue for export first", PackageResources.PackageTitle,
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
         }
 
         /// <summary>
