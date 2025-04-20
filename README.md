@@ -1,3 +1,6 @@
+_**NOTE: This branch includes legacy support for Visual Studio 2017 and 2019.  For the latest Visual Studio 2022
+and later version, use the master branch.**_
+
 Welcome to the **Visual Studio Spell Checker** project.
 
 * [Get the current release](https://github.com/EWSoftware/VSSpellChecker/releases)
