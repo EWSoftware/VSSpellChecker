@@ -13,5 +13,5 @@ largely on the spell checker extension originally created by Noah Richards, Roma
 Lehenbauer.  This version has been extended significantly to include many new features all of which are
 configurable.
 
-_**NOTE: The master branch is for Visual Studio 2017 and later.  For Visual Studio 2013/2015, use the VSLegacy
-branch.**_
+_**NOTE: The master branch is for Visual Studio 2022 and later.  For Visual Studio 2013/2015, use the VSLegacy
+branch.  For Visual Studio 2017/2019, use the VSLegacy2017-2019 branch.**_

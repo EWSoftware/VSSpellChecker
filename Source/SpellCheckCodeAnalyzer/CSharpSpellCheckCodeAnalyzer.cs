@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/14/2024
-// Note    : Copyright 2023-2024, Eric Woodruff, All rights reserved
+// Updated : 04/20/2025
+// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
 //
@@ -29,11 +29,6 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
-
-#if VS2017AND2019
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-#endif
 
 using VisualStudio.SpellChecker.Common;
 using VisualStudio.SpellChecker.Common.Configuration;
@@ -243,22 +238,6 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
             var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Tree);
             var properties = new List<(string PropertyName, string value)>();
 
-#if VS2017AND2019
-            // The older context options instance doesn't have a Keys property so we have to resort to reflection
-            // to get the backing dictionary.
-            var fi = options.GetType().GetField("_backing", BindingFlags.Instance | BindingFlags.NonPublic |
-                BindingFlags.Public);
-
-            if(fi != null && fi.GetValue(options) is IDictionary<string, string> privateOptions)
-            {
-                foreach(string propertyName in privateOptions.Keys.Where(
-                  k => k.StartsWith(SpellCheckerConfiguration.PropertyPrefix, StringComparison.OrdinalIgnoreCase)))
-                {
-                    if(options.TryGetValue(propertyName, out var value))
-                        properties.Add((propertyName, value.UnescapeEditorConfigValue()));
-                }
-            }
-#else
             // The options collection doesn't have an enumerator or an indexer so we have to do it this way
             foreach(string propertyName in options.Keys.Where(
               k => k.StartsWith(SpellCheckerConfiguration.PropertyPrefix, StringComparison.OrdinalIgnoreCase)))
@@ -266,34 +245,12 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                 if(options.TryGetValue(propertyName, out var value))
                     properties.Add((propertyName, value.UnescapeEditorConfigValue()));
             }
-#endif
+
             var configuration = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(
                 context.Tree.FilePath, properties);
 
-#if VS2017AND2019
-            // The older version doesn't have a generated code indicator on the context
-            var classDecl = root.DescendantNodes(n => true, false).FirstOrDefault(n => n.IsKind(SyntaxKind.ClassDeclaration));
-            bool isCompilerGenerated = false;
-
-            if(classDecl != null)
-            {
-                foreach(var attr in classDecl.DescendantNodes(n => true, false).Where(n => n.IsKind(SyntaxKind.AttributeList)))
-                {
-                    if(((AttributeListSyntax)attr).Attributes.Any(a => a.Name.ToString().IndexOf(
-                      "CompilerGeneratedAttribute", StringComparison.Ordinal) != -1))
-                    {
-                        isCompilerGenerated = true;
-                        break;
-                    }
-                }
-            }
-
-            if(configuration.EnableCodeAnalyzers && 
-              (!isCompilerGenerated || !configuration.CodeAnalyzerOptions.IgnoreIfCompilerGenerated))
-#else
             if(configuration.EnableCodeAnalyzers && 
               (!context.IsGeneratedCode || !configuration.CodeAnalyzerOptions.IgnoreIfCompilerGenerated))
-#endif
             {
                 // Code analysis dictionaries can be passed using the AdditionalFileItemNames project item:
                 // https://github.com/dotnet/roslyn/blob/main/docs/analyzers/Using%20Additional%20Files.md

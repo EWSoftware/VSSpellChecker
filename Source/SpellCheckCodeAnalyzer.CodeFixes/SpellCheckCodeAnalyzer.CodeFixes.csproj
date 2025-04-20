@@ -18,19 +18,19 @@
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 		<PlatformTarget>AnyCPU</PlatformTarget>
-		<Configurations>Release2019;Debug2019;Debug2022;Release2022</Configurations>
+		<Configurations>Debug;Release</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Include="..\VSSpellCheckerDefinitionsShared\Properties\AssemblyInfoShared.cs" Link="Properties\AssemblyInfoShared.cs" />
+		<Compile Include="..\VSSpellCheckerDefinitions\Properties\AssemblyInfoShared.cs" Link="Properties\AssemblyInfoShared.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.13.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\SpellCheckCodeAnalyzer2022AndLater\SpellCheckCodeAnalyzer2022AndLater.csproj" />
+		<ProjectReference Include="..\SpellCheckCodeAnalyzer\SpellCheckCodeAnalyzer.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -39,7 +39,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Properties\" />
+		<Folder Include="Properties\" />
 	</ItemGroup>
 
 </Project>

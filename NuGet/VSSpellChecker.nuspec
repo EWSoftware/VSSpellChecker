@@ -14,17 +14,15 @@
 		<description>This package contains the definitions assembly used to create third party taggers that can be integrated with the EWSoftware Visual Studio Spell Checker (.NET 4.6 - VS 2017/2019, .NET 4.7 - VS 2022 and later).</description>
 		<copyright>Eric Woodruff (c) 2013-2019</copyright>
 		<tags>Visual Studio spell checker integration</tags>
+        <readme>ReadMe.md</readme>
 		<dependencies>
-			<group targetFramework=".NETFramework4.6" />
 			<group targetFramework=".NETFramework4.7" />
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release2019\VisualStudio.SpellChecker.Definitions.dll" target="lib\net46" />
-		<file src="..\Source\VSSpellCheckerDefinitions2017and2019\bin\Release2019\VisualStudio.SpellChecker.Definitions.xml" target="lib\net46" />
-		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release2022\VisualStudio.SpellChecker.Definitions.dll" target="lib\net47" />
-		<file src="..\Source\VSSpellCheckerDefinitions2022AndLater\bin\Release2022\VisualStudio.SpellChecker.Definitions.xml" target="lib\net47" />
-		<file src="ReadMe.txt" target="ReadMe.txt" />
+		<file src="..\Source\VSSpellCheckerDefinitions\bin\Release\VisualStudio.SpellChecker.Definitions.dll" target="lib\net47" />
+		<file src="..\Source\VSSpellCheckerDefinitions\bin\Release\VisualStudio.SpellChecker.Definitions.xml" target="lib\net47" />
+		<file src="ReadMe.md" target="ReadMe.md" />
 		<file src="VSSpellChecker.png" target="VSSpellChecker.png" />
 	</files>
 </package>

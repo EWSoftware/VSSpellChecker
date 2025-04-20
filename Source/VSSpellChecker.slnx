@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../.editorconfig" />
+    <File Path="../IgnoredWords.dic" />
+  </Folder>
+  <Project Path="SpellCheckCodeAnalyzer.CodeFixes/SpellCheckCodeAnalyzer.CodeFixes.csproj" />
+  <Project Path="SpellCheckCodeAnalyzer/SpellCheckCodeAnalyzer.csproj" />
+  <Project Path="VSSpellChecker/VSSpellChecker.csproj" Id="3201406b-0114-4c8a-a64a-632d546517b8">
+    <BuildDependency Project="VSSpellCheckerDefinitions/VSSpellCheckerDefinitions.csproj" />
+  </Project>
+  <Project Path="VSSpellCheckerCommon/VSSpellCheckerCommon.csproj" />
+  <Project Path="VSSpellCheckerDefinitions/VSSpellCheckerDefinitions.csproj" Id="b1a99b3a-6be9-430e-91a8-f4c5c7bd6840" />
+</Solution>

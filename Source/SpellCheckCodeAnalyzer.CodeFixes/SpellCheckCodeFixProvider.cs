@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCodeFixProvider.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/29/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 04/20/2025
+// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide the spell check code fixes
 //
@@ -236,11 +236,11 @@ namespace VisualStudio.SpellChecker.CodeFixes
                 case NamespaceDeclarationSyntax nds:
                     symbol = semanticModel.GetDeclaredSymbol(nds, cancellationToken);
                     break;
-#if !VS2017AND2019
+
                 case FileScopedNamespaceDeclarationSyntax fsnds:
                     symbol = semanticModel.GetDeclaredSymbol(fsnds, cancellationToken);
                     break;
-#endif
+
                 case BaseTypeDeclarationSyntax btds:
                     symbol = semanticModel.GetDeclaredSymbol(btds, cancellationToken);
 
@@ -388,19 +388,6 @@ namespace VisualStudio.SpellChecker.CodeFixes
                     break;
             }
 
-#if VS2017AND2019
-            if(symbol != null)
-            {
-                // Produce a new solution that has all references to the identifier renamed, including the
-                // declaration.
-                var originalSolution = document.Project.Solution;
-                var optionSet = originalSolution.Workspace.Options;
-                var newSolution = await Renamer.RenameSymbolAsync(document.Project.Solution, symbol, replacement,
-                    optionSet, cancellationToken).ConfigureAwait(false);
-
-                return newSolution;
-            }
-#else
             if(symbol != null)
             {
                 // Produce a new solution that has all references to the identifier renamed, including the
@@ -412,7 +399,7 @@ namespace VisualStudio.SpellChecker.CodeFixes
 
                 return newSolution;
             }
-#endif
+
             return null;
         }
 

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckHandler.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/30/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 04/20/2025
+// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the abstract base class used to perform the spell checking process on the code syntax
 // elements.
@@ -159,7 +159,6 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                         if(!ignored)
                                             ignored = configuration.CodeAnalyzerOptions.IgnoreVerbatimStrings;
                                     }
-#if !VS2017AND2019
                                     else
                                     {
                                         if(ise.StringStartToken.IsKind(SyntaxKind.InterpolatedSingleLineRawStringStartToken))
@@ -180,7 +179,6 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                             }
                                         }
                                     }
-#endif
                                 }
 
                                 if(!ignored)
@@ -189,7 +187,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                         token.Text));
                                 }
                                 break;
-#if !VS2017AND2019
+
                             case SyntaxKind.SingleLineRawStringLiteralToken:
                             case SyntaxKind.MultiLineRawStringLiteralToken:
                                 if(!configuration.CodeAnalyzerOptions.IgnoreRawStrings)
@@ -198,7 +196,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                         SpellCheckType.RawString, token.Text));
                                 }
                                 break;
-#endif
+
                             case SyntaxKind.IdentifierToken:
                                 SpellCheckType spanType = this.DetermineIdentifierSpellCheckType(token);
 
