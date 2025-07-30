@@ -31,7 +31,7 @@
       <Argument Key="LogoPlacement" Value="Left" />
       <Argument Key="LogoAlignment" Value="Left" />
       <Argument Key="LogoUrl" Value="" />
-      <Argument Key="MaxVersionParts" Value="" />
+      <Argument Key="MaxVersionParts" Value="4" />
       <Argument Key="DefaultLanguage" Value="cs" />
       <Argument Key="IncludeEnumValues" Value="True" />
       <Argument Key="EnumMemberSortOrder" Value="Value" />

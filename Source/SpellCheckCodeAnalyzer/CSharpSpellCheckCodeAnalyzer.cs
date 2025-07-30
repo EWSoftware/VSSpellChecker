@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/20/2025
+// Updated : 07/30/2025
 // Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
@@ -97,8 +97,6 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
         #region Properties
         //=====================================================================
 
-// I don't have a choice here so I'm going to use Environment and file I/O
-#pragma warning disable RS1035
         /// <summary>
         /// This read-only property returns the global configuration file path
         /// </summary>
@@ -117,8 +115,6 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                 return configPath;
             }
         }
-#pragma warning restore RS1035
-
         #endregion
 
         #region Constructor
@@ -139,22 +135,27 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
             // I haven't been able to find a better way around this.  If you know of one, let me know.
             string analyzerCodePath = Path.Combine(GlobalConfigurationFilePath, "AnalyzerCodePath.txt");
 
-            var analyzerPaths = new List<string>();
+            var asm = Assembly.GetExecutingAssembly();
+            string dependencyPath = Path.GetDirectoryName(asm.Location),
+                nameAndLocation = $"{asm.FullName}|{dependencyPath}", analyzerPath = null;
 
             if(File.Exists(analyzerCodePath))
-                analyzerPaths.AddRange(File.ReadAllLines(analyzerCodePath));
-
-            var asm = Assembly.GetExecutingAssembly();
-            string analyzerPath = analyzerPaths.FirstOrDefault(p => p.StartsWith(asm.FullName, StringComparison.Ordinal));
+            {
+                // If running from the installed location, make sure the path is up to date.  If not, use it as is.
+                if(File.Exists(Path.Combine(dependencyPath, "VisualStudio.SpellChecker.Common.dll")))
+                {
+                    analyzerPath = File.ReadAllLines(analyzerCodePath).FirstOrDefault(
+                        l => l.Equals(nameAndLocation, StringComparison.Ordinal));
+                }
+                else
+                    analyzerPath = File.ReadAllLines(analyzerCodePath).FirstOrDefault();
+            }
 
             if(String.IsNullOrWhiteSpace(analyzerPath))
             {
-                string dependencyPath = Path.GetDirectoryName(asm.Location);
-
                 if(File.Exists(Path.Combine(dependencyPath, "VisualStudio.SpellChecker.Common.dll")))
                 {
-                    analyzerPaths.Add($"{asm.FullName}|{dependencyPath}");
-                    File.WriteAllLines(analyzerCodePath, analyzerPaths);
+                    File.WriteAllText(analyzerCodePath, nameAndLocation);
                     codeAnalyzerPath = dependencyPath;
                 }
             }
@@ -249,7 +250,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
             var configuration = SpellCheckerConfiguration.CreateSpellCheckerConfigurationFor(
                 context.Tree.FilePath, properties);
 
-            if(configuration.EnableCodeAnalyzers && 
+            if(configuration.EnableCodeAnalyzers &&
               (!context.IsGeneratedCode || !configuration.CodeAnalyzerOptions.IgnoreIfCompilerGenerated))
             {
                 // Code analysis dictionaries can be passed using the AdditionalFileItemNames project item:
@@ -283,7 +284,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                     handler.WordSplitter.IsCStyleCode = true;
 
                     handler.Recurse(root, context.CancellationToken);
-                        
+
                     var ignoreSpellingWords = handler.FindIgnoreSpellingDirectives();
                     var rangeExclusions = new List<Match>();
                     var diagnosticProperties = new Dictionary<string, string>();

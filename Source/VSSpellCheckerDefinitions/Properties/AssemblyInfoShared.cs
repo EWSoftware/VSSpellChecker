@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker
 // File    : AssemblyInfoShared.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/14/2024
-// Note    : Copyright 2013-2024, Eric Woodruff, All rights reserved
+// Updated : 07/30/2025
+// Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // Visual Studio spell checker common assembly attributes
 //
@@ -17,41 +17,15 @@
 // 02/23/2014  EFW  Created the code
 //===============================================================================================================
 
-using System.Reflection;
-using System.Resources;
+using System;
 using System.Runtime.InteropServices;
 
-// NOTE: See AssemblyInfo.cs for project-specific assembly attributes
+// NOTE: See AssemblyInfo.cs and/or the project file for project-specific assembly attributes
 
 // General assembly information
-[assembly: AssemblyProduct("Visual Studio Spell Checker")]
-[assembly: AssemblyCompany("Eric Woodruff")]
-[assembly: AssemblyCopyright(AssemblyInfo.Copyright)]
-[assembly: AssemblyCulture("")]
-#if DEBUG
-[assembly: AssemblyConfiguration("Debug")]
-#else
-[assembly: AssemblyConfiguration("Release")]
-#endif
-
-// Not visible to COM
 [assembly: ComVisible(false)]
+[assembly: CLSCompliant(false)]
 
-// Resources contained within the assembly are English
-[assembly: NeutralResourcesLanguage("en")]
-
-// Version numbers.  See comments below.
-
-// Certain assemblies may contain a specific version to maintain binary compatibility with a prior release
-#if !ASSEMBLYSPECIFICVERSION
-[assembly: AssemblyVersion(AssemblyInfo.StrongNameVersion)]
-#endif
-
-[assembly: AssemblyFileVersion(AssemblyInfo.FileVersion)]
-[assembly: AssemblyInformationalVersion(AssemblyInfo.ProductVersion)]
-
-// This defines constants that can be used by plug-ins and components in their metadata.
-//
 // All version numbers for an assembly consists of the following four values:
 //
 //      Year of release
@@ -61,29 +35,3 @@ using System.Runtime.InteropServices;
 //
 // This versioning scheme allows build component and plug-in developers to use the same major, minor, and build
 // numbers as the spell checker to indicate with which version their components are compatible.
-//
-internal static partial class AssemblyInfo
-{
-    // Common assembly strong name version - DO NOT CHANGE UNLESS NECESSARY.
-    //
-    // This is used to set the assembly version in the strong name.  This should remain unchanged to maintain
-    // binary compatibility with prior releases.  It should only be changed if a breaking change is made that
-    // requires assemblies that reference older versions to be recompiled against the newer version.
-    public const string StrongNameVersion = "2024.12.14.0";
-
-    // Common assembly file version
-    //
-    // This is used to set the assembly file version.  This will change with each new release.  MSIs only
-    // support a Major value between 0 and 255 so we drop the century from the year on this one.
-    public const string FileVersion = "24.12.14.0";
-
-    // Common product version
-    //
-    // This may contain additional text to indicate Alpha or Beta states.  The version number will always match
-    // the file version above but includes the century on the year.
-    public const string ProductVersion = "2024.12.14.0";
-
-    // Assembly copyright information
-    public const string Copyright = "Copyright \xA9 2013-2024, Eric Woodruff, All Rights Reserved.\r\n" +
-        "Portions Copyright \xA9 2010-2023, Microsoft Corporation, All Rights Reserved.";
-}

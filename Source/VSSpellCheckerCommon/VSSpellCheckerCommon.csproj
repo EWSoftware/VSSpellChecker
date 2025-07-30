@@ -5,21 +5,12 @@
 		<AssemblyName>VisualStudio.SpellChecker.Common</AssemblyName>
 		<RootNamespace>VisualStudio.SpellChecker.Common</RootNamespace>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\SpellChecker.snk</AssemblyOriginatorKeyFile>
-		<GenerateAssemblyTitleAttribute>False</GenerateAssemblyTitleAttribute>
-		<GenerateAssemblyVersionAttribute>False</GenerateAssemblyVersionAttribute>
-		<GenerateAssemblyFileVersionAttribute>False</GenerateAssemblyFileVersionAttribute>
-		<GenerateAssemblyInformationalVersionAttribute>False</GenerateAssemblyInformationalVersionAttribute>
-		<GenerateAssemblyProductAttribute>False</GenerateAssemblyProductAttribute>
-		<GenerateAssemblyCompanyAttribute>False</GenerateAssemblyCompanyAttribute>
-		<GenerateAssemblyCopyrightAttribute>False</GenerateAssemblyCopyrightAttribute>
-		<GenerateAssemblyConfigurationAttribute>False</GenerateAssemblyConfigurationAttribute>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<Title>Visual Studio Spell Checker Common Code</Title>
+		<AssemblyTitle>Visual Studio Spell Checker Common Code</AssemblyTitle>
+		<Description>This assembly contains interfaces and other supporting classes used to implement the Visual Studio spell checker</Description>
 		<PlatformTarget>AnyCPU</PlatformTarget>
-		<NoWarn>NU1701</NoWarn>
 		<Configurations>Debug;Release</Configurations>
+		<NoWarn>NU1701,NU1702</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NHunspell" Version="1.2.5554.16953" />
+		<PackageReference Include="NHunspell" />
 		<ProjectReference Include="..\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj" />
 	</ItemGroup>
 

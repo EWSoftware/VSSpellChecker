@@ -4,9 +4,8 @@
     <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <TargetFrameworkProfile />
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\SpellChecker.snk</AssemblyOriginatorKeyFile>
     <ZipPackageCompressionLevel Condition=" '$(ZipPackageCompressionLevel)' == '' ">Normal</ZipPackageCompressionLevel>
+    <NoWarn>NU1701,NU1702</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -48,8 +47,6 @@
     <StartAction>Program</StartAction>
     <StartProgram Condition="'$(DevEnvDir)' != ''">$(DevEnvDir)devenv.exe</StartProgram>
     <StartArguments>/rootsuffix Exp</StartArguments>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\VSSpellCheckerDefinitions\Properties\AssemblyInfoShared.cs">
@@ -129,6 +126,7 @@
     <Compile Include="ProjectSpellCheck\SpellCheckSpan.cs" />
     <Compile Include="ProjectSpellCheck\TextClassifier.cs" />
     <Compile Include="ProjectSpellCheck\XmlClassifier.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -364,25 +362,17 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack">
-      <Version>1.12.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense">
-      <Version>17.14.249</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" ExcludeAssets="runtime">
+    <PackageReference Include="HtmlAgilityPack" />
+    <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK" ExcludeAssets="runtime">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Threading">
-      <Version>17.14.15</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.14.2094">
+    <PackageReference Include="Microsoft.VisualStudio.Threading" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NHunspell" GeneratePathProperty="true">
-      <Version>1.2.5554.16953</Version>
-    </PackageReference>
+    <PackageReference Include="NHunspell" GeneratePathProperty="true" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NHunspell\README_de_DE.txt">

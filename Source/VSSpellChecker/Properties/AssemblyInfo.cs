@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : AssemblyInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 02/16/2015
-// Note    : Copyright 2013-2015, Eric Woodruff, All rights reserved
+// Updated : 07/30/2025
+// Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // Visual Studio spell checker definition attributes.
 //
@@ -17,12 +17,18 @@
 // 05/20/2013  EFW  Created the code
 //===============================================================================================================
 
-using System;
 using System.Reflection;
+using System.Resources;
 
 // General assembly information
+[assembly: AssemblyCompany("Eric Woodruff")]
+[assembly: AssemblyProduct("Visual Studio Spell Checker")]
 [assembly: AssemblyTitle("Visual Studio Spell Checker Package")]
+[assembly: AssemblyCopyright("Copyright \xA9 2013-2025, Eric Woodruff, All Rights Reserved.\r\n" +
+        "Portions Copyright \xA9 2010-2025, Microsoft Corporation, All Rights Reserved.")]
 [assembly: AssemblyDescription("This assembly contains a package that implement the Visual Studio spell checker")]
+[assembly: NeutralResourcesLanguage("en")]
 
-// This assembly is not CLS compliant
-[assembly: CLSCompliant(false)]
+// These should match the version in Directory.Build.props
+[assembly: AssemblyVersion("2025.7.30.0")]
+[assembly: AssemblyFileVersion("2025.7.30.0")]

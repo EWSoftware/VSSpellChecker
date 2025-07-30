@@ -2,6 +2,8 @@
   <Folder Name="/Solution Items/">
     <File Path="../.editorconfig" />
     <File Path="../IgnoredWords.dic" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
   </Folder>
   <Project Path="SpellCheckCodeAnalyzer.CodeFixes/SpellCheckCodeAnalyzer.CodeFixes.csproj" />
   <Project Path="SpellCheckCodeAnalyzer/SpellCheckCodeAnalyzer.csproj" />

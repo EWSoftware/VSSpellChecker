@@ -65,15 +65,15 @@ Copyright Notices
 -----------------
 The core Visual Studio package code related to the spell checker implementation
 was originally written by Noah Richards, Roman Golovin, and Michael Lehenbauer
-and is Copyright (c) 2010-2024 Microsoft Corporation, All Rights Reserved.
+and is Copyright (c) 2010-2025 Microsoft Corporation, All Rights Reserved.
 
-The NHunspell library is Copyright (c) 2009-2024 Maierhofer Software,
+The NHunspell library is Copyright (c) 2009-2025 Maierhofer Software,
 All Rights Reserved.
 
-The HTML Agility Pack is Copyright (c) 2006-2024 Simon Mourier, All Rights
+The HTML Agility Pack is Copyright (c) 2006-2025 Simon Mourier, All Rights
 Reserved.
 
-All other code is Copyright (c) 2013-2024 Eric Woodruff, All Rights Reserved.
+All other code is Copyright (c) 2013-2025 Eric Woodruff, All Rights Reserved.
 
 All dictionaries supplied with the package are property of their respective
 copyright holders.  See the README files in the dictionary folder at the project
