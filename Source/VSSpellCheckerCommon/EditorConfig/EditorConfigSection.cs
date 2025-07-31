@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : EditorConfigSection.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/11/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to represent and .editorconfig file section
 //
@@ -133,7 +133,7 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
         /// <overloads>There are two overloads for the constructor</overloads>
         public EditorConfigSection()
         {
-            this.SectionLines = new Collection<SectionLine>();
+            this.SectionLines = [];
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
         /// <param name="lines">An enumerable list of section lines</param>
         public EditorConfigSection(IEnumerable<SectionLine> lines)
         {
-            this.SectionLines = new Collection<SectionLine>(lines.ToList());
+            this.SectionLines = new Collection<SectionLine>([.. lines]);
         }
 
         /// <summary>

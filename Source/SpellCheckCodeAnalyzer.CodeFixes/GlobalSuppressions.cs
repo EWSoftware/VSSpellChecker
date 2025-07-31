@@ -5,4 +5,3 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "<Pending>", Scope = "member", Target = "~M:VisualStudio.SpellChecker.CodeFixes.SpellCheckCodeFixProvider.CorrectSpellingAsync(Microsoft.CodeAnalysis.Document,Microsoft.CodeAnalysis.SyntaxToken,System.String,System.Threading.CancellationToken)~System.Threading.Tasks.Task{Microsoft.CodeAnalysis.Solution}")]

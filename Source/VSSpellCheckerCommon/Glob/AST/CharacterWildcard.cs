@@ -30,10 +30,9 @@ namespace GlobExpressions.AST
 {
     internal sealed class CharacterWildcard : SubSegment
     {
-        public static readonly CharacterWildcard Default = new CharacterWildcard();
+        public static readonly CharacterWildcard Default = new();
 
-        private CharacterWildcard()
-            : base(GlobNodeType.CharacterWildcard)
+        private CharacterWildcard() : base(GlobNodeType.CharacterWildcard)
         {
         }
 

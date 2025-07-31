@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 10/27/2023
-// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
 //
@@ -51,7 +51,7 @@ namespace VisualStudio.SpellChecker.Common
         private string dictionaryFile, dictionaryWordsFile;
         private bool isDisposed;
 
-        private static readonly object syncRoot = new Object();
+        private static readonly object syncRoot = new();
 
         #endregion
 
@@ -96,7 +96,7 @@ namespace VisualStudio.SpellChecker.Common
         {
             this.Culture = culture;
 
-            registeredServices = new List<WeakReference>();
+            registeredServices = [];
             dictionaryWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
             ignoredWords = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -191,7 +191,7 @@ namespace VisualStudio.SpellChecker.Common
                 System.Diagnostics.Debug.WriteLine(ex);
             }
 
-            return Enumerable.Empty<SpellingSuggestion>();
+            return [];
         }
 
         /// <summary>
@@ -348,8 +348,7 @@ namespace VisualStudio.SpellChecker.Common
 
             try
             {
-                if(globalDictionaries == null)
-                    globalDictionaries = new Dictionary<string, GlobalDictionary>();
+                globalDictionaries ??= [];
 
                 if(spellEngine == null)
                 {
@@ -369,8 +368,7 @@ namespace VisualStudio.SpellChecker.Common
                 // The configuration editor should disallow creating a configuration without at least one
                 // language but if someone edits the file manually, they could remove them all.  If that
                 // happens, just use the English-US dictionary.
-                if(culture == null)
-                    culture = new CultureInfo("en-US");
+                culture ??= new CultureInfo("en-US");
 
                 // If not already loaded, create the dictionary and the thread-safe spell factory instance for
                 // the given culture.
@@ -671,11 +669,8 @@ namespace VisualStudio.SpellChecker.Common
             {
                 foreach(string word in words)
                 {
-                    if(!recognizedWords.Contains(word))
-                    {
-                        recognizedWords.Add(word);
+                    if(recognizedWords.Add(word))
                         addSuggestions = true;
-                    }
                 }
 
                 if(addSuggestions && this.IsInitialized)

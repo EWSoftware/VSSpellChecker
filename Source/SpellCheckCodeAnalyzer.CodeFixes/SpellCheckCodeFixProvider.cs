@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCodeFixProvider.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/20/2025
+// Updated : 07/31/2025
 // Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide the spell check code fixes
@@ -52,9 +52,8 @@ namespace VisualStudio.SpellChecker.CodeFixes
     public class SpellCheckCodeFixProvider : CodeFixProvider
     {
         /// <inheritdoc />
-        public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
-            CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId,
-            CSharpSpellCheckCodeAnalyzer.IgnoreWordDiagnosticId);
+        public sealed override ImmutableArray<string> FixableDiagnosticIds =>
+            [CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId, CSharpSpellCheckCodeAnalyzer.IgnoreWordDiagnosticId];
 
         /// <summary>
         /// This fix provider does not use a fix all provider
@@ -94,8 +93,8 @@ namespace VisualStudio.SpellChecker.CodeFixes
                             // code analyzer will have created them.
                             var globalDictionaries = languages.Split(separators,
                                 StringSplitOptions.RemoveEmptyEntries).Select(l =>
-                                GlobalDictionary.CreateGlobalDictionary(new CultureInfo(l), null,
-                                Enumerable.Empty<string>(), false)).Where(d => d != null).Distinct().ToList();
+                                    GlobalDictionary.CreateGlobalDictionary(new CultureInfo(l), null, [], false)).Where(
+                                        d => d != null).Distinct().ToList();
 
                             if(globalDictionaries.Count != 0)
                             {
@@ -120,7 +119,7 @@ namespace VisualStudio.SpellChecker.CodeFixes
                             _ = diagnostic.Properties.TryGetValue("Prefix", out string prefix);
                             _ = diagnostic.Properties.TryGetValue("Suffix", out string suffix);
 
-                            replacements = suggestions.Select(
+                            replacements = [.. suggestions.Select(
                                 s =>
                                 {
                                     string replacement = (String.IsNullOrWhiteSpace(prefix) &&
@@ -130,19 +129,18 @@ namespace VisualStudio.SpellChecker.CodeFixes
                                         c => CorrectSpellingAsync(context.Document, syntaxToken, replacement, c),
                                         replacement);
 
-                                }).ToImmutableArray();
+                                })];
                         }
                         else
                         {
-                            replacements = new[] { CodeAction.Create(CodeFixResources.NoSuggestions,
+                            replacements = [ CodeAction.Create(CodeFixResources.NoSuggestions,
                                 c => CorrectSpellingAsync(context.Document, syntaxToken, null, c),
-                                nameof(CodeFixResources.NoSuggestions)) }.ToImmutableArray();
+                                nameof(CodeFixResources.NoSuggestions)) ];
                         }
-#pragma warning disable RS1010
+
                         // Register a code action that will invoke the fix and offer the various suggested replacements
                         context.RegisterCodeFix(CodeAction.Create(diagnostic.Descriptor.MessageFormat.ToString(null),
                             replacements, false), diagnostic);
-#pragma warning restore RS1010
                     }
                 }
                 else
@@ -198,7 +196,7 @@ namespace VisualStudio.SpellChecker.CodeFixes
                     }
 
                     if(caseChanged)
-                        validSuggestions.Add(new String(wordChars.Where(c => Char.IsLetter(c)).ToArray()));
+                        validSuggestions.Add(new String([.. wordChars.Where(c => Char.IsLetter(c))]));
                 }
             }
 
@@ -246,7 +244,7 @@ namespace VisualStudio.SpellChecker.CodeFixes
 
                     // Rename the file only if the type is not nested within another type and the filename
                     // matches the token text.  GitHub issue #304.
-                    renameFile = !(token.Parent?.Parent is ClassDeclarationSyntax) &&
+                    renameFile = token.Parent?.Parent is not ClassDeclarationSyntax &&
                         Path.GetFileNameWithoutExtension(token.SyntaxTree.FilePath ?? String.Empty).Equals(
                             token.Text, StringComparison.OrdinalIgnoreCase);
                     break;

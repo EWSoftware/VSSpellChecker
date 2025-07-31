@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/13/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain information about the available spell checker dictionaries
 //
@@ -127,7 +127,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// <returns>Returns true if the object equals this instance, false if it does not</returns>
         public override bool Equals(object obj)
         {
-            return (obj is SpellCheckerDictionary d && this.Culture.Name == d.Culture.Name);
+            return obj is SpellCheckerDictionary d && this.Culture.Name == d.Culture.Name;
         }
 
         /// <summary>
@@ -171,8 +171,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         public static IDictionary<string, SpellCheckerDictionary> AvailableDictionaries(
           IEnumerable<string> additionalSearchFolders)
         {
-            Dictionary<string, SpellCheckerDictionary> availableDictionaries = new Dictionary<string,
-                SpellCheckerDictionary>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, SpellCheckerDictionary> availableDictionaries = new(StringComparer.OrdinalIgnoreCase);
             CultureInfo info;
             string dllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), userDictPath, location;
             bool isCustomDictionary;

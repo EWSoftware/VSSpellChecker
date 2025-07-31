@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WordSplitter.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 06/14/2023
-// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that handles splitting spans of text up into individual words for spell checking
 //
@@ -40,6 +40,9 @@ namespace VisualStudio.SpellChecker.Common
         //=====================================================================
 
         private char mnemonic;
+
+        private static readonly char[] specialWordBreakChars = ['_', '.', '@'];
+        private static readonly char[] fileEMailSeparators = ['.', '@'];
 
         #endregion
 
@@ -155,6 +158,7 @@ namespace VisualStudio.SpellChecker.Common
                         {
                             case 'a':   // BEL
                             case 'b':   // BS
+                            case 'e':   // ESC
                             case 'f':   // FF
                             case 'n':   // LF
                             case 'r':   // CR
@@ -201,6 +205,7 @@ namespace VisualStudio.SpellChecker.Common
                             case '?':   // Anti-Trigraph
                             case '0':   // NUL or Octal
                             case 'a':   // BEL
+                            case 'e':   // ESC
                             case 'b':   // BS
                             case 'f':   // FF
                             case 'n':   // LF
@@ -468,7 +473,9 @@ namespace VisualStudio.SpellChecker.Common
                 // Skip trailing apostrophes, periods, at-signs, and mnemonics
                 while(--end > i && (text[end] == '\'' || text[end] == '\u2019' || text[end] == '.' ||
                   text[end] == '@' || text[end] == mnemonic))
+                {
                     ;
+                }
 
                 end++;    // Move back to last match
 
@@ -507,7 +514,9 @@ namespace VisualStudio.SpellChecker.Common
                         {
                             while(--spanEnd > i && (text[spanEnd] == '\'' || text[spanEnd] == '\u2019' ||
                               text[spanEnd] == '.' || text[spanEnd] == '@' || text[spanEnd] == mnemonic))
+                            {
                                 ;
+                            }
 
                             end = spanEnd + 1;
                         }
@@ -536,7 +545,7 @@ namespace VisualStudio.SpellChecker.Common
                               this.Configuration.DeprecatedTerms.ContainsKey(word)) ||
                               (this.Configuration.CadOptions.TreatCompoundTermsAsMisspelled &&
                               this.Configuration.CompoundTerms.ContainsKey(word)) ||
-                              word.IndexOfAny(new[] { '_', '.', '@' }) != -1)
+                              word.IndexOfAny(specialWordBreakChars) != -1)
                             {
                                 yield return this.CreateSpan(i, end);
                             }
@@ -673,7 +682,7 @@ namespace VisualStudio.SpellChecker.Common
             word = word.Trim();
 
             // Check for a period or an at-sign in the word (things that look like filenames and e-mail addresses)
-            if(word.IndexOfAny(new[] { '.', '@' }) >= 0)
+            if(word.IndexOfAny(fileEMailSeparators) >= 0)
                 return false;
 
             // Check for underscores and digits

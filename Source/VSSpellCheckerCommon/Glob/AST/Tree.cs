@@ -27,7 +27,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace GlobExpressions.AST
 {
@@ -35,10 +34,9 @@ namespace GlobExpressions.AST
     {
         public Segment[] Segments { get; }
 
-        public Tree(IEnumerable<Segment> segments)
-            : base(GlobNodeType.Tree)
+        public Tree(IEnumerable<Segment> segments) : base(GlobNodeType.Tree)
         {
-            Segments = segments.ToArray();
+            Segments = [.. segments];
         }
     }
 }

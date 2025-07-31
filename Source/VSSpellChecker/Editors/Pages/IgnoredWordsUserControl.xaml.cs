@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/23/2023
-// Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2014-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored words and ignored keywords spell checker
 // configuration settings.
@@ -239,7 +239,6 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnAddIgnoredWord_Click(object sender, RoutedEventArgs e)
         {
-            char[] escapedLetters = new[] { 'a', 'b', 'f', 'n', 'r', 't', 'v', 'x', 'u', 'U' };
             int idx;
 
             var ignoredWordTextBox = sender == btnAddIgnoredWord ? txtIgnoredWord : txtIgnoredKeyword;
@@ -258,7 +257,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                         addWord = String.Empty;
                     else
                     {
-                        if(addWord.Length > 1 && addWord[0] == '\\' && !escapedLetters.Contains(addWord[1]))
+                        if(addWord.Length > 1 && addWord[0] == '\\' && !CommonUtilities.EscapedLetters.Contains(addWord[1]))
                             addWord = addWord.Substring(1);
                     }
 

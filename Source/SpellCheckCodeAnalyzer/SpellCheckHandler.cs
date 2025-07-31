@@ -90,10 +90,9 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
         /// <param name="configuration">The spell checker configuration to use</param>
         public SpellCheckHandler(SpellCheckerConfiguration configuration)
         {
-            spans = new List<SpellCheckSpan>();
+            spans = [];
 
             this.configuration = configuration;
-
             this.WordSplitter = new CodeAnalyzerWordSplitter { Configuration = configuration };
             this.IdentifierSplitter = new CodeAnalyzerIdentifierSplitter { Configuration = configuration };
         }

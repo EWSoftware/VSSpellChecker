@@ -10,6 +10,8 @@
 
 		<NeutralLanguage>en</NeutralLanguage>
 
+		<LangVersion>13.0</LangVersion>
+
 		<!-- Update the version in VSSpellChecker\Properties\AssemblyInfo.cs as well.
 				 If necessary, update the strong name version in VSSpellCheckerDefinitions.csproj. -->
 		<Version>2025.7.30.0</Version>

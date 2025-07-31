@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerLegacyConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to convert the legacy spell checker configuration settings to the new
 // .editorconfig format.
@@ -18,7 +18,7 @@
 // 02/05/2023  EFW  Created the code
 //===============================================================================================================
 
-// Ignore spelling: lt proj
+// Ignore spelling: lt proj Regexes
 
 using System;
 using System.Collections.Generic;
@@ -48,6 +48,9 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
         private readonly XDocument document;
         private readonly XElement root;
+
+        private static readonly char[] wordSeparators = [',', ' ', '\t', '\r', '\n'];
+        private static readonly char[] propertySeparator = ['.'];
 
         #endregion
 
@@ -190,7 +193,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// This read-only property returns an enumerable list of dictionary languages to be used when spell
         /// checking.
         /// </summary>
-        public List<string> DictionaryLanguages { get; } = new List<string>();
+        public List<string> DictionaryLanguages { get; } = [];
 
         /// <summary>
         /// This is used to get or set whether or not to spell check the file as you type
@@ -312,7 +315,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// This read-only property returns an enumerable list of ignored file patterns
         /// </summary>
         /// <remarks>Filenames matching the patterns in this set will not be spell checked</remarks>
-        public List<string> IgnoredFilePatterns { get; } = new List<string>();
+        public List<string> IgnoredFilePatterns { get; } = [];
 
         /// <summary>
         /// This is used to indicate whether or not additional dictionary folders are inherited by other
@@ -328,7 +331,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// </summary>
         /// <remarks>When searching for dictionaries, these folders will be included in the search.  This allows
         /// for solution and project-specific dictionaries.</remarks>
-        public List<string> AdditionalDictionaryFolders { get; } = new List<string>();
+        public List<string> AdditionalDictionaryFolders { get; } = [];
 
         /// <summary>
         /// This is used to indicate whether or not ignored words are inherited by other configurations
@@ -355,7 +358,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// This read-only property returns an enumerable list of exclusion regular expressions that will be used
         /// to find ranges of text that should not be spell checked.
         /// </summary>
-        public List<Regex> ExclusionExpressions { get; } = new List<Regex>();
+        public List<Regex> ExclusionExpressions { get; } = [];
 
         /// <summary>
         /// This is used to indicate whether or not ignored XML elements and included attributes are inherited by
@@ -370,13 +373,13 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// This read-only property returns an enumerable list of ignored XML element names that will not have
         /// their content spell checked.
         /// </summary>
-        public HashSet<string> IgnoredXmlElements { get; } = new HashSet<string>();
+        public HashSet<string> IgnoredXmlElements { get; } = [];
 
         /// <summary>
         /// This read-only property returns an enumerable list of XML attribute names that will have their values
         /// spell checked.
         /// </summary>
-        public HashSet<string> SpellCheckedXmlAttributes { get; } = new HashSet<string>();
+        public HashSet<string> SpellCheckedXmlAttributes { get; } = [];
 
         /// <summary>
         /// This is used to indicate whether or not ignored classifications are inherited by other configurations
@@ -389,7 +392,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// <summary>
         /// This read-only property returns the ignored classifications
         /// </summary>
-        public Dictionary<string, HashSet<string>> IgnoredClassifications { get; } = new Dictionary<string, HashSet<string>>();
+        public Dictionary<string, HashSet<string>> IgnoredClassifications { get; } = [];
 
         /// <summary>
         /// This is used to indicate whether or not to spell check any WPF text box within Visual Studio
@@ -403,21 +406,22 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// to exclude WPF text boxes in Visual Studio editor and tool windows from being spell checked.
         /// </summary>
         /// <value>This option only applies to the global configuration.</value>
-        public List<Regex> VisualStudioIdExclusions { get; } = new List<Regex>();
+        public List<Regex> VisualStudioIdExclusions { get; } = [];
 
         /// <summary>
         /// This read-only property returns the old default list of ignored words
         /// </summary>
         /// <remarks>These are removed if found in any converted configuration as they are included using a
         /// file-specific ignored words property in the new global configuration file.</remarks>
-        public static IEnumerable<string> OldDefaultIgnoredWords =>
-            new string[] { "\\addindex", "\\addtogroup", "\\anchor", "\\arg", "\\attention", "\\author",
-                "\\authors", "\\brief", "\\bug", "\\file", "\\fn", "\\name", "\\namespace", "\\nosubgrouping",
-                "\\note", "\\ref", "\\refitem", "\\related", "\\relates", "\\relatedalso", "\\relatesalso",
-                "\\remark", "\\remarks", "\\result", "\\return", "\\returns", "\\retval", "\\rtfonly",
-                "\\tableofcontents", "\\test", "\\throw", "\\throws", "\\todo", "\\tparam", "\\typedef",
-                "\\var", "\\verbatim", "\\verbinclude", "\\version", "\\vhdlflow" };
-
+        public static IEnumerable<string> OldDefaultIgnoredWords { get; } =
+        [
+            "\\addindex", "\\addtogroup", "\\anchor", "\\arg", "\\attention", "\\author", "\\authors", "\\brief",
+            "\\bug", "\\file", "\\fn", "\\name", "\\namespace", "\\nosubgrouping", "\\note", "\\ref", "\\refitem",
+            "\\related", "\\relates", "\\relatedalso", "\\relatesalso", "\\remark", "\\remarks", "\\result",
+            "\\return", "\\returns", "\\retval", "\\rtfonly", "\\tableofcontents", "\\test", "\\throw",
+            "\\throws", "\\todo", "\\tparam", "\\typedef", "\\var", "\\verbatim", "\\verbinclude", "\\version",
+            "\\vhdlflow"
+        ];
         #endregion
 
         #region Constructor
@@ -486,7 +490,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             try
             {
                 // Get the property cache for finding current and default values
-                propertyCache = new Dictionary<string, PropertyInfo>();
+                propertyCache = [];
                 configCache = TypeDescriptor.GetProperties(typeof(SpellCheckerLegacyConfiguration));
                 csoCache = TypeDescriptor.GetProperties(typeof(CSharpOptions));
                 cadCache = TypeDescriptor.GetProperties(typeof(CodeAnalysisDictionaryOptions));
@@ -873,8 +877,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             if((!this.IsGlobalConfiguration && !this.InheritAdditionalDictionaryFolders) ||
               this.AdditionalDictionaryFolders.Count != 0)
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
+                sectionId ??= "_" + Guid.NewGuid().ToString("N");
 
                 var values = new List<string>(this.AdditionalDictionaryFolders);
 
@@ -889,8 +892,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             if((!this.IsGlobalConfiguration && !this.InheritIgnoredWords) || this.IgnoredWords.Count != 0 ||
               !String.IsNullOrWhiteSpace(this.IgnoredWordsFile))
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
+                sectionId ??= "_" + Guid.NewGuid().ToString("N");
 
                 var values = new List<string>(this.IgnoredWords);
                 int insertIdx = 0;
@@ -910,8 +912,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             if((!this.IsGlobalConfiguration && !this.InheritExclusionExpressions) ||
               this.ExclusionExpressions.Count != 0)
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
+                sectionId ??= "_" + Guid.NewGuid().ToString("N");
 
                 // Regular expressions are a bit tricky to specify on one line.  We'll use the options comment
                 // as the separator.
@@ -927,8 +928,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
             if(this.IsGlobalConfiguration || !this.InheritXmlSettings || this.IgnoredXmlElements.Count != 0)
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
+                sectionId ??= "_" + Guid.NewGuid().ToString("N");
 
                 var values = new List<string>(this.IgnoredXmlElements);
 
@@ -942,8 +942,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
             if(this.IsGlobalConfiguration || !this.InheritXmlSettings || this.SpellCheckedXmlAttributes.Count != 0)
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
+                sectionId ??= "_" + Guid.NewGuid().ToString("N");
 
                 var values = new List<string>(this.SpellCheckedXmlAttributes);
 
@@ -958,8 +957,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             if((!this.IsGlobalConfiguration && !this.InheritIgnoredClassifications) ||
               this.IgnoredClassifications.Count != 0)
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
+                sectionId ??= "_" + Guid.NewGuid().ToString("N");
 
                 var values = new List<string>(this.IgnoredClassifications.Select(kv =>
                     $"{kv.Key}|{String.Join("|", kv.Value)}"));
@@ -987,8 +985,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
             if(this.DictionaryLanguages.Count != 0)
             {
-                if(sectionId == null)
-                    sectionId = "_" + Guid.NewGuid().ToString("N");
+                sectionId ??= "_" + Guid.NewGuid().ToString("N");
 
                 properties.Add((SpellCheckerConfiguration.EditorConfigSettingsFor(
                     nameof(DictionaryLanguages)).PropertyName + sectionId,
@@ -1138,7 +1135,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
                         if(!this.IgnoredClassifications.TryGetValue(typeName, out HashSet<string> classifications))
                         {
-                            classifications = new HashSet<string>();
+                            classifications = [];
                             this.IgnoredClassifications.Add(typeName, classifications);
                         }
 
@@ -1174,7 +1171,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
 
             if(format != null)
             {
-                Version fileFormat = new Version(format.Value), currentVersion = new Version(ConfigSchemaVersion);
+                Version fileFormat = new(format.Value), currentVersion = new(ConfigSchemaVersion);
 
                 // If they've downgraded, there's nothing to convert.  Any property settings from newer
                 // configurations will have to be added back to the older configuration file format by
@@ -1201,10 +1198,10 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// </summary>
         private void ConvertFromOriginalFormat()
         {
-            string[] propertyNames = new[] { nameof(SpellCheckAsYouType),
+            string[] propertyNames = [ nameof(SpellCheckAsYouType),
                 nameof(IgnoreWordsWithDigits), nameof(IgnoreWordsInAllUppercase),
                 nameof(IgnoreFormatSpecifiers), nameof(IgnoreFilenamesAndEMailAddresses),
-                nameof(IgnoreXmlElementsInText), nameof(TreatUnderscoreAsSeparator) };
+                nameof(IgnoreXmlElementsInText), nameof(TreatUnderscoreAsSeparator) ];
 
             root.Add(new XAttribute("Format", ConfigSchemaVersion));
 
@@ -1225,7 +1222,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                 ignoreNormalStrings = root.Element("IgnoreNormalStrings"),
                 ignoreVerbatimStrings = root.Element("IgnoreVerbatimStrings"),
                 ignoredCharacterClass = root.Element("IgnoredCharacterClass"),
-                csharpOptions = new XElement("CSharpOptions");
+                csharpOptions = new("CSharpOptions");
 
             if(ignoreXmlDocComments != null)
             {
@@ -1293,8 +1290,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
                     excludeExts = new XElement(nameof(IgnoredFilePatterns));
                     root.Add(excludeExts);
 
-                    foreach(string ext in excluded.Split(new[] { ',', ' ', '\t', '\r', '\n' },
-                      StringSplitOptions.RemoveEmptyEntries))
+                    foreach(string ext in excluded.Split(wordSeparators, StringSplitOptions.RemoveEmptyEntries))
                     {
                         string addExt;
 
@@ -1444,7 +1440,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
             {
                 try
                 {
-                    string[] parts = propertyName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = propertyName.Split(propertySeparator, StringSplitOptions.RemoveEmptyEntries);
                     PropertyInfo property = null;
                     object propertyValue = this;
 
@@ -1500,7 +1496,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration.Legacy
         /// separators, the requested nested element is retrieved.</returns>
         private XElement GetPropertyElement(string propertyName)
         {
-            string[] elementNames = propertyName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] elementNames = propertyName.Split(propertySeparator, StringSplitOptions.RemoveEmptyEntries);
             XElement property = null, current = root;
 
             foreach(string name in elementNames)

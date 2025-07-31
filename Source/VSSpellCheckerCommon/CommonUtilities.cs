@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommonUtilities.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/29/2023
-// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
 //
@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -36,11 +37,12 @@ namespace VisualStudio.SpellChecker.Common
         #region Constants and private data members
         //=====================================================================
 
-        private static readonly Regex reUppercase = new Regex("([A-Z])");
-        private static readonly Regex reRegexSeparator = new Regex(@"\(\?\#/Options/(.*?)\)");
+        private static readonly Regex reUppercase = new("([A-Z])");
+        private static readonly Regex reRegexSeparator = new(@"\(\?\#/Options/(.*?)\)");
 
-        private static readonly char[] spaceSeparator = new[] { ' ' }, backslashSeparator = new[] { '\\' },
-            digits = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        private static readonly char[] spaceSeparator = [' '], backslashSeparator = ['\\'],
+            digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+            pathSeparators = [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar];
 
         /// <summary>
         /// This defines the minimum identifier length
@@ -51,19 +53,25 @@ namespace VisualStudio.SpellChecker.Common
         /// <summary>
         /// This defines the regular expression used to find Ignore Spelling directives in code comments
         /// </summary>
-        public static readonly Regex IgnoreSpellingDirectiveRegex = new Regex(
+        public static readonly Regex IgnoreSpellingDirectiveRegex = new(
             @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
 
         /// <summary>
         /// This defines the regular expression used to find XML elements in text
         /// </summary>
-        public static readonly Regex XmlElement = new Regex(@"<[A-Za-z/]+?.*?>");
+        public static readonly Regex XmlElement = new(@"<[A-Za-z/]+?.*?>");
 
         /// <summary>
         /// This defines the regular expression used to find URLs in text
         /// </summary>
-        public static readonly Regex Url = new Regex(@"(ht|f)tp(s?)\:\/\/[0-9a-z]([-.\w]*[0-9a-z])*(:(0-9)*)*(\/?)" +
+        public static readonly Regex Url = new(@"(ht|f)tp(s?)\:\/\/[0-9a-z]([-.\w]*[0-9a-z])*(:(0-9)*)*(\/?)" +
             @"([a-z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?", RegexOptions.IgnoreCase);
+
+        /// <summary>
+        /// This read-only property returns a list of the known escape sequence letters
+        /// </summary>
+        public static ReadOnlyCollection<char> EscapedLetters { get; } = Array.AsReadOnly(
+            ['a', 'b', 'e', 'f', 'n', 'r', 't', 'v', 'x', 'u', 'U']);
 
         #endregion
 
@@ -88,8 +96,7 @@ namespace VisualStudio.SpellChecker.Common
             else
                 basePath = Path.GetFullPath(basePath);
 
-            if(absolutePath == null)
-                absolutePath = String.Empty;
+            absolutePath ??= String.Empty;
 
             // Expand environment variables if necessary
             if(absolutePath.IndexOf('%') != -1)
@@ -119,10 +126,8 @@ namespace VisualStudio.SpellChecker.Common
             }
 
             // Split the paths into their component parts
-            char[] separators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar,
-                Path.VolumeSeparatorChar };
-            string[] baseParts = basePath.Split(separators);
-            string[] absParts = absolutePath.Split(separators);
+            string[] baseParts = basePath.Split(pathSeparators);
+            string[] absParts = absolutePath.Split(pathSeparators);
 
             // Find the common base path
             minLength = Math.Min(baseParts.Length, absParts.Length);
@@ -298,12 +303,11 @@ namespace VisualStudio.SpellChecker.Common
         /// but is not a recognized format.</returns>
         public static IEnumerable<string> LoadUserDictionary(string filename, bool onlyAddedWords, bool allWords)
         {
-            IEnumerable<string> words = Enumerable.Empty<string>();
+            IEnumerable<string> words = [];
             string action = onlyAddedWords ? "Add" : "Ignore";
-            char[] escapedLetters = new[] { 'a', 'b', 'f', 'n', 'r', 't', 'v', 'x', 'u', 'U' };
 
             if(!File.Exists(filename))
-                return Enumerable.Empty<string>();
+                return [];
 
             try
             {
@@ -314,10 +318,12 @@ namespace VisualStudio.SpellChecker.Common
                     var recognizedWords = doc.Descendants("Recognized").FirstOrDefault();
 
                     if(recognizedWords != null)
+                    {
                         words = recognizedWords.Elements("Word").Where(
                             w => ((string)w.Attribute("Spelling") == action ||
                                 (string)w.Attribute("Spelling") == null) &&
                                 !String.IsNullOrWhiteSpace(w.Value)).Select(w => w.Value.Trim());
+                    }
                 }
                 else
                 {
@@ -338,8 +344,8 @@ namespace VisualStudio.SpellChecker.Common
             {
                 // If it doesn't look like an XML file, assume it's text of some sort.  Convert anything that
                 // isn't a letter or a digit to a space and get each word.
-                var wordList = (new String(File.ReadAllText(filename).ToCharArray().Select(
-                    c => (c == '\\' || Char.IsLetterOrDigit(c)) ? c : ' ').ToArray())).Split(spaceSeparator,
+                var wordList = new String([.. File.ReadAllText(filename).ToCharArray().Select(
+                    c => (c == '\\' || Char.IsLetterOrDigit(c)) ? c : ' ')]).Split(spaceSeparator,
                     StringSplitOptions.RemoveEmptyEntries).ToList();
 
                 // Handle escaped words and split words containing the escape anywhere other than the start
@@ -355,7 +361,7 @@ namespace VisualStudio.SpellChecker.Common
                         {
                             if(!onlyAddedWords)
                             {
-                                if(escapedLetters.Contains(w[1]))
+                                if(EscapedLetters.Contains(w[1]))
                                     wordList.Add(w);
                                 else
                                     wordList.Add(w.Substring(1));
@@ -370,7 +376,7 @@ namespace VisualStudio.SpellChecker.Common
             if(allWords)
                 return words;
 
-            return words.Distinct().Where(w => w.Length > 1 && w.IndexOfAny(digits) == -1).ToList();
+            return [.. words.Distinct().Where(w => w.Length > 1 && w.IndexOfAny(digits) == -1)];
         }
 
         /// <summary>

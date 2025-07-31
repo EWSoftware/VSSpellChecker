@@ -36,16 +36,14 @@ namespace GlobExpressions.AST
     {
         public Identifier[] Literals { get; }
 
-        public LiteralSet(params Identifier[] literals)
-            : base(GlobNodeType.LiteralSet)
+        public LiteralSet(params Identifier[] literals) : base(GlobNodeType.LiteralSet)
         {
-            Literals = literals.ToArray();
+            Literals = [.. literals];
         }
 
-        public LiteralSet(IEnumerable<Identifier> literals)
-            : base(GlobNodeType.LiteralSet)
+        public LiteralSet(IEnumerable<Identifier> literals) : base(GlobNodeType.LiteralSet)
         {
-            Literals = literals.ToArray();
+            Literals = [.. literals];
         }
 
         public override string ToString() => $"{{{String.Join(",", Literals.Select(lit => lit.ToString()))}}}";

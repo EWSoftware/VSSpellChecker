@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : EditorConfigFile.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/11/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to load and manage an .editorconfig file
 //
@@ -96,7 +96,7 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
         /// </summary>
         public EditorConfigFile()
         {
-            this.Sections = new Collection<EditorConfigSection>();
+            this.Sections = [];
         }
         #endregion
 
@@ -180,7 +180,7 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
                     {
                         var priorSectionLines = sectionLines;
                             
-                        sectionLines = new Collection<SectionLine>();
+                        sectionLines = [];
 
                         // Comments immediately before the new section are most likely associated with the
                         // next section so keep them together.

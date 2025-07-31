@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckerConfiguration.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/13/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to contain the spell checker's configuration settings
 //
@@ -98,6 +98,10 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         private static readonly Dictionary<string, object> defaultValueCache;
         private static readonly Dictionary<string, EditorConfigPropertyAttribute> editorConfigAttrCache;
         private static readonly Dictionary<string, PropertyInfo> vsspellToPropertyCache;
+
+        private static readonly char[] pipeSeparator = ['|'];
+        private static readonly char[] optionSeparators = [',', ' '];
+        private static readonly char[] commaSeparator = [','];
 
         #endregion
 
@@ -413,33 +417,37 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// <summary>
         /// This read-only property returns the default list of ignored classifications
         /// </summary>
-        public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> DefaultIgnoredClassifications =>
-            new[] {
-                // Only comments are spell checked in EditorConfig files.  Ignore the string classification
-                // use by the EditorConfig Language Service extension by Mads Kristensen.
-                new KeyValuePair<string, IEnumerable<string>>("EditorConfig", new[] { "string" })
-            };
+        public static IEnumerable<KeyValuePair<string, IEnumerable<string>>> DefaultIgnoredClassifications { get; } =
+        [
+            // Only comments are spell checked in EditorConfig files.  Ignore the string classification
+            // use by the EditorConfig Language Service extension by Mads Kristensen.
+            new KeyValuePair<string, IEnumerable<string>>("EditorConfig", ["string"])
+        ];
 
         /// <summary>
         /// This read-only property returns the default list of ignored XML elements
         /// </summary>
-        public static IEnumerable<string> DefaultIgnoredXmlElements =>
-            new string[] { "c", "code", "codeEntityReference", "codeInline", "codeReference", "command",
-                "environmentVariable", "fictitiousUri", "foreignPhrase", "languageKeyword", "link",
-                "linkTarget", "linkUri", "localUri", "replaceable", "resheader", "see", "seealso", "style",
-                "token", "unmanagedCodeEntityReference" };
+        public static IEnumerable<string> DefaultIgnoredXmlElements { get; } =
+        [
+            "c", "code", "codeEntityReference", "codeInline", "codeReference", "command", "environmentVariable",
+            "fictitiousUri", "foreignPhrase", "languageKeyword", "link", "linkTarget", "linkUri", "localUri",
+            "replaceable", "resheader", "see", "seealso", "style", "token", "unmanagedCodeEntityReference"
+        ];
 
         /// <summary>
         /// This read-only property returns the default list of spell checked XML attributes
         /// </summary>
-        public static IEnumerable<string> DefaultSpellCheckedAttributes =>
-            new[] { "altText", "Caption", "CompoundAlternate", "Content", "content", "Header", "lead",
-                "PreferredAlternate", "SpellingAlternates", "term", "Text", "title", "ToolTip" };
+        public static IEnumerable<string> DefaultSpellCheckedAttributes { get; } =
+        [
+            "altText", "Caption", "CompoundAlternate", "Content", "content", "Header", "lead", "PreferredAlternate",
+            "SpellingAlternates", "term", "Text", "title", "ToolTip"
+        ];
 
         /// <summary>
         /// This read-only property returns the default list of excluded Visual Studio text box IDs
         /// </summary>
-        public static IEnumerable<string> DefaultVisualStudioIdExclusions => new[] {
+        public static IEnumerable<string> DefaultVisualStudioIdExclusions { get; } =
+        [
             @"(SandcastleBuilder\.Components\.UI\.|Microsoft\.Ddue\.Tools\.UI\.|SandcastleBuilder\.PlugIns\.).*" +
                 "(?# SHFB build component and plug-in configuration forms)",
             @".*?\.(Placement\.PART_SearchBox|Placement\.PART_EditableTextBox|ServerNameTextBox|" +
@@ -465,7 +473,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             @"VisualStudio\.SpellChecker\.Editors\.Pages\.EditorConfigSectionAddEditForm\.txtFileGlob",
             @"VisualStudio\.SpellChecker\.Editors\.Pages\.ExclusionExpressionAddEditForm\.txtExpression" +
                 "(?# Spell checker exclusion expression editor)"
-        };
+        ];
         #endregion
 
         #region Constructors
@@ -479,24 +487,24 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         {
             this.SpellCheckFilename = spellCheckFilename;
 
-            dictionaryLanguages = new List<CultureInfo>();
+            dictionaryLanguages = [];
             ignoredWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             ignoredKeywords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            ignoredXmlElements = new HashSet<string>(DefaultIgnoredXmlElements);
-            spellCheckedXmlAttributes = new HashSet<string>(DefaultSpellCheckedAttributes);
+            ignoredXmlElements = [.. DefaultIgnoredXmlElements];
+            spellCheckedXmlAttributes = [.. DefaultSpellCheckedAttributes];
             recognizedWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             ignoredWordsFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             loadedConfigurationFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            additionalDictionaryFolders = new List<string>();
-            exclusionExpressions = new List<Regex>();
-            visualStudioIdExclusions = new List<Regex>(DefaultVisualStudioIdExclusions.Select(p => new Regex(p)));
+            additionalDictionaryFolders = [];
+            exclusionExpressions = [];
+            visualStudioIdExclusions = [.. DefaultVisualStudioIdExclusions.Select(p => new Regex(p))];
             deprecatedTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             compoundTerms = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             unrecognizedWords = new Dictionary<string, IList<string>>(StringComparer.OrdinalIgnoreCase);
-            ignoredClassifications = new Dictionary<string, HashSet<string>>();
+            ignoredClassifications = [];
 
             foreach(var kv in DefaultIgnoredClassifications)
-                ignoredClassifications.Add(kv.Key, new HashSet<string>(kv.Value));
+                ignoredClassifications.Add(kv.Key, [.. kv.Value]);
         }
 
         /// <summary>
@@ -504,9 +512,9 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         /// </summary>
         static SpellCheckerConfiguration()
         {
-            defaultValueCache = new Dictionary<string, object>();
-            editorConfigAttrCache = new Dictionary<string, EditorConfigPropertyAttribute>();
-            vsspellToPropertyCache = new Dictionary<string, PropertyInfo>();
+            defaultValueCache = [];
+            editorConfigAttrCache = [];
+            vsspellToPropertyCache = [];
 
             foreach(PropertyInfo property in typeof(SpellCheckerConfiguration).GetProperties(
               BindingFlags.Public | BindingFlags.Instance).Concat(typeof(CodeAnalyzerOptions).GetProperties(
@@ -616,7 +624,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
         public IEnumerable<string> IgnoredClassificationsFor(string contentType)
         {
             if(!ignoredClassifications.TryGetValue(contentType, out HashSet<string> classifications))
-                classifications = new HashSet<string>();
+                classifications = [];
 
             return classifications;
         }
@@ -753,13 +761,10 @@ namespace VisualStudio.SpellChecker.Common.Configuration
           IEnumerable<string> additionalEditorConfigFiles)
         {
             if(String.IsNullOrWhiteSpace(filename))
-                return Enumerable.Empty<(string Source, string PropertyName, string Value)>();
+                return [];
 
-            if(additionalGlobalConfigFiles == null)
-                additionalGlobalConfigFiles = Enumerable.Empty<string>();
-
-            if(additionalEditorConfigFiles == null)
-                additionalEditorConfigFiles = Enumerable.Empty<string>();
+            additionalGlobalConfigFiles ??= [];
+            additionalEditorConfigFiles ??= [];
 
             filename = Path.GetFullPath(filename);
 
@@ -928,8 +933,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             var configuration = new SpellCheckerConfiguration(filename);
             var globalProperties = GlobalConfigurationPropertiesFor(filename);
 
-            configuration.ApplyProperties(Path.GetDirectoryName(filename),
-                globalProperties.Concat(properties ?? Enumerable.Empty<(string PropertyName, string Value)>()));
+            configuration.ApplyProperties(Path.GetDirectoryName(filename), globalProperties.Concat(properties ?? []));
 
             // Always add the Ignore Spelling directive expression as we don't want the directive words included
             // when spell checking with non-English dictionaries.
@@ -1082,7 +1086,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         break;
 
                     case nameof(IgnoredWords):
-                        foreach(string word in p.Value.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+                        foreach(string word in p.Value.Split(pipeSeparator, StringSplitOptions.RemoveEmptyEntries))
                         {
                             if(word.Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                             {
@@ -1134,19 +1138,18 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         break;
 
                     case nameof(IgnoredKeywords):
-                        foreach(string word in p.Value.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+                        foreach(string word in p.Value.Split(pipeSeparator, StringSplitOptions.RemoveEmptyEntries))
                             ignoredKeywords.Add(word);
                         break;
 
                     case nameof(AdditionalDictionaryFolders):
-                        foreach(string folder in p.Value.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
+                        foreach(string folder in p.Value.Split(pipeSeparator, StringSplitOptions.RemoveEmptyEntries))
                         {
                             if(folder.Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                                 additionalDictionaryFolders.Clear();
                             else
                             {
-                                string additionalFolder = ResolveFolderPath(folder, basePath,
-                                    new[] { "*.aff", "*_User.dic" });
+                                string additionalFolder = ResolveFolderPath(folder, basePath, ["*.aff", "*_User.dic"]);
 
                                 if(additionalFolder != null)
                                     additionalDictionaryFolders.Add(additionalFolder);
@@ -1155,7 +1158,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         break;
 
                     case nameof(IgnoredXmlElements):
-                        var tempElements = p.Value.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        var tempElements = p.Value.Split(optionSeparators, StringSplitOptions.RemoveEmptyEntries);
 
                         if(tempElements.Length != 0)
                         {
@@ -1167,7 +1170,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         break;
 
                     case nameof(SpellCheckedXmlAttributes):
-                        var tempAttrs = p.Value.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        var tempAttrs = p.Value.Split(optionSeparators, StringSplitOptions.RemoveEmptyEntries);
 
                         if(tempAttrs.Length != 0)
                         {
@@ -1179,20 +1182,20 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         break;
 
                     case nameof(IgnoredClassifications):
-                        foreach(string classification in p.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                        foreach(string classification in p.Value.Split(commaSeparator, StringSplitOptions.RemoveEmptyEntries))
                         {
                             if(classification.Equals(ClearInherited, StringComparison.OrdinalIgnoreCase))
                                 ignoredClassifications.Clear();
                             else
                             {
-                                var types = classification.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                                var types = classification.Split(pipeSeparator, StringSplitOptions.RemoveEmptyEntries);
 
                                 if(types.Length > 1)
                                 {
                                     if(!ignoredClassifications.TryGetValue(types[0],
                                       out HashSet<string> classifications))
                                     {
-                                        classifications = new HashSet<string>();
+                                        classifications = [];
                                         ignoredClassifications.Add(types[0], classifications);
                                     }
 
@@ -1203,7 +1206,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                         break;
 
                     case nameof(DictionaryLanguages):
-                        var tempLanguages = p.Value.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        var tempLanguages = p.Value.Split(optionSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
                         var languageSet = new HashSet<string>(tempLanguages, StringComparer.OrdinalIgnoreCase);
 
                         // If there is an "inherited" entry that marks the inherited languages placeholder,
@@ -1411,9 +1414,9 @@ namespace VisualStudio.SpellChecker.Common.Configuration
                 {
                     if(!String.IsNullOrWhiteSpace(word.Value))
                     {
-                        unrecognizedWords[word.Value] = new List<string>(
-                            ((string)word.Attribute("SpellingAlternates") ?? String.Empty).Split(
-                                new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries));
+                        unrecognizedWords[word.Value] = [.. ((string)word.Attribute(
+                            "SpellingAlternates") ?? String.Empty).Split(optionSeparators,
+                                StringSplitOptions.RemoveEmptyEntries)];
                     }
                 }
             }

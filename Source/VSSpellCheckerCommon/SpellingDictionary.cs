@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingDictionary.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/15/2023
-// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 07/31/2025
+// Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling dictionary service
 //
@@ -41,6 +41,8 @@ namespace VisualStudio.SpellChecker.Common
         //=====================================================================
 
         private readonly IEnumerable<string> ignoredWords;
+
+        private static readonly char[] mnemonicChars = ['&', '_'];
 
         #endregion
 
@@ -79,8 +81,7 @@ namespace VisualStudio.SpellChecker.Common
 
             this.DictionaryCount = dictionaries.Count();
             this.Dictionaries = dictionaries;
-
-            this.ignoredWords = (ignoredWords ?? Enumerable.Empty<string>());
+            this.ignoredWords = ignoredWords ?? [];
 
             // Register to receive events when any of the global dictionaries are updated
             foreach(var d in dictionaries)
@@ -126,7 +127,7 @@ namespace VisualStudio.SpellChecker.Common
                 throw new ArgumentNullException(nameof(word));
 
             char mnemonicCharacter = '\x0', mnemonicLetter = '\x0';
-            int pos = word.IndexOfAny(new[] { '&', '_' });
+            int pos = word.IndexOfAny(mnemonicChars);
 
             // Remove the mnemonic if present.  It will be added to each suggestion below.
             if(pos != -1)
@@ -138,17 +139,21 @@ namespace VisualStudio.SpellChecker.Common
 
             // IMPORTANT: ALWAYS return an actual list here not an enumeration.  This list can get used a lot
             // and deferred execution has a significant impact on performance.
-            List<SpellingSuggestion> allSuggestions = new List<SpellingSuggestion>();
+            List<SpellingSuggestion> allSuggestions = [];
 
             if(this.DictionaryCount == 1)
                 allSuggestions.AddRange(this.Dictionaries.First().SuggestCorrections(word));
             else
+            {
                 foreach(var d in this.Dictionaries)
                     allSuggestions.AddRange(d.SuggestCorrections(word));
+            }
 
             if(mnemonicCharacter != '\x0')
+            {
                 foreach(var suggestion in allSuggestions)
                     suggestion.AddMnemonic(mnemonicCharacter, mnemonicLetter);
+            }
 
             return allSuggestions;
         }
@@ -171,10 +176,9 @@ namespace VisualStudio.SpellChecker.Common
             if(culture != null)
                 dictionary = this.Dictionaries.FirstOrDefault(d => d.Culture == culture);
 
-            if(dictionary == null)
-                dictionary = this.Dictionaries.First();
+            dictionary ??= this.Dictionaries.First();
 
-            return (this.ShouldIgnoreWord(word) || dictionary.AddWordToDictionary(word));
+            return this.ShouldIgnoreWord(word) || dictionary.AddWordToDictionary(word);
         }
 
         /// <summary>
@@ -205,7 +209,7 @@ namespace VisualStudio.SpellChecker.Common
             if(String.IsNullOrWhiteSpace(word))
                 return false;
 
-            return (this.ShouldIgnoreWord(word) || this.Dictionaries.All(d => d.IgnoreWord(word)));
+            return this.ShouldIgnoreWord(word) || this.Dictionaries.All(d => d.IgnoreWord(word));
         }
 
         /// <summary>

@@ -36,10 +36,9 @@ namespace GlobExpressions.AST
     {
         public SubSegment[] SubSegments { get; }
 
-        public DirectorySegment(IEnumerable<SubSegment> subSegments)
-            : base(GlobNodeType.DirectorySegment)
+        public DirectorySegment(IEnumerable<SubSegment> subSegments) : base(GlobNodeType.DirectorySegment)
         {
-            SubSegments = subSegments.ToArray();
+            SubSegments = [.. subSegments];
         }
 
         public override string ToString()
