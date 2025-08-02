@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpSpellCheckCodeAnalyzer.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/30/2025
+// Updated : 08/01/2025
 // Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to implement the C# spell check code analyzer
@@ -72,22 +72,6 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
             SpellingDiagnosticId, SpellingTitle, SpellingMessageFormat, SpellingCategory,
             DiagnosticSeverity.Warning, true, SpellingDescription,
             "https://ewsoftware.github.io/VSSpellChecker/html/a7120f4c-5191-4442-b366-c3e792060569.htm");
-
-        /// <summary>
-        /// This constant represents the diagnostic ID for ignoring a misspelled word
-        /// </summary>
-        public const string IgnoreWordDiagnosticId = "VSSpell002";
-
-        private static readonly LocalizableString IgnoreWordTitle = new LocalizableResourceString(
-            nameof(Resources.IgnoreWordAnalyzerTitle), Resources.ResourceManager, typeof(Resources));
-        private static readonly LocalizableString IgnoreWordMessageFormat = new LocalizableResourceString(
-            nameof(Resources.IgnoreWordAnalyzerMessageFormat), Resources.ResourceManager, typeof(Resources));
-        private static readonly LocalizableString IgnoreWordDescription = new LocalizableResourceString(
-            nameof(Resources.IgnoreWordAnalyzerDescription), Resources.ResourceManager, typeof(Resources));
-        private static readonly DiagnosticDescriptor IgnoreWordRule = new(IgnoreWordDiagnosticId,
-            IgnoreWordTitle, IgnoreWordMessageFormat, SpellingCategory, DiagnosticSeverity.Hidden, true,
-            IgnoreWordDescription,
-            "https://ewsoftware.github.io/VSSpellChecker/html/83ff9063-294f-4a18-b765-1510c86ad0d4.htm");
 
         // The path to our dependencies
         private static readonly string codeAnalyzerPath;
@@ -206,7 +190,7 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
         //=====================================================================
 
         /// <inheritdoc />
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [SpellingRule, IgnoreWordRule];
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [SpellingRule];
 
         /// <inheritdoc />
         public override void Initialize(AnalysisContext context)
@@ -384,15 +368,17 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                                     diagnosticProperties["Languages"] = String.Join(",",
                                         dictionary.Dictionaries.Select(d => d.Culture.Name));
 
+                                    //// if(configuration.IgnoredWordsFiles.Any())
+                                    //// {
+                                    ////     diagnosticProperties["IgnoredWordsFiles"] = String.Join("|",
+                                    ////         configuration.IgnoredWordsFiles);
+                                    //// }
+
                                     context.ReportDiagnostic(Diagnostic.Create(SpellingRule,
                                         Location.Create(context.Tree, TextSpan.FromBounds(
                                             s.TextSpan.Start + word.Start,
                                             s.TextSpan.Start + word.Start + word.Length)),
                                         diagnosticProperties.ToImmutableDictionary(), textToCheck));
-                                    context.ReportDiagnostic(Diagnostic.Create(IgnoreWordRule,
-                                        Location.Create(context.Tree, TextSpan.FromBounds(
-                                            s.TextSpan.Start + word.Start,
-                                            s.TextSpan.Start + word.Start + word.Length)), textToCheck));
                                 }
                             }
                         }

@@ -117,9 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="IgnoreWordCodeFixTitle" xml:space="preserve">
-    <value>Ignore Word</value>
-    <comment>The title of the code fix.</comment>
+  <data name="AddToIgnoredWordsFile" xml:space="preserve">
+    <value>Add to ignored words file ({0})</value>
+    <comment>Add to ignored words file title.</comment>
+  </data>
+  <data name="AddToDictionary" xml:space="preserve">
+    <value>Add to dictionary ({0})</value>
+    <comment>Add to dictionary title.</comment>
+  </data>
+  <data name="IgnoreWordInFile" xml:space="preserve">
+    <value>Ignore spelling in this file</value>
+    <comment>Ignore in this file title.</comment>
   </data>
   <data name="NoSuggestions" xml:space="preserve">
     <value>(No Suggestions)</value>

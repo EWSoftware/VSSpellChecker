@@ -319,14 +319,7 @@ namespace VisualStudio.SpellChecker.Common
             if(!File.Exists(dictionaryWordsFile))
                 File.WriteAllText(dictionaryWordsFile, String.Empty);
 
-            // If it's in the global configuration folder, we can write to it if not read-only
-            if(Path.GetDirectoryName(dictionaryWordsFile).StartsWith(
-              SpellCheckerConfiguration.GlobalConfigurationFilePath, StringComparison.OrdinalIgnoreCase))
-            {
-                return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
-            }
-
-            return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+            return (File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0;
         }
 
         /// <summary>

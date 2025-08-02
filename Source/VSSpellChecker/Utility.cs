@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/17/2023
-// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 08/01/2025
+// Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
 //
@@ -392,7 +392,7 @@ namespace VisualStudio.SpellChecker
             if(Path.GetDirectoryName(dictionaryWordsFile).StartsWith(
               SpellCheckerConfiguration.GlobalConfigurationFilePath, StringComparison.OrdinalIgnoreCase))
             {
-                return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+                return (File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0;
             }
 
             // If not part of an active solution, we can write to it if not read-only
@@ -400,7 +400,7 @@ namespace VisualStudio.SpellChecker
               String.IsNullOrWhiteSpace(dte.Solution.FullName) ||
               !dictionaryWordsFile.StartsWith(Path.GetDirectoryName(dte.Solution.FullName), StringComparison.OrdinalIgnoreCase))
             {
-                return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+                return (File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0;
             }
 
             // See if the user file or its related dictionary is part of the solution.  If neither are, we can
@@ -409,7 +409,7 @@ namespace VisualStudio.SpellChecker
             var dictItem = (dictionaryFile == null) ? null : dte.Solution.FindProjectItemForFile(dictionaryFile);
 
             if(dictItem == null && userItem == null)
-                return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+                return (File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0;
 
             // If the dictionary is part of a project but the user file isn't, add it to the dictionary file's
             // containing project.
@@ -428,7 +428,7 @@ namespace VisualStudio.SpellChecker
                 return dte.SourceControl.CheckOutItem(dictionaryWordsFile);
             }
 
-            return ((File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0);
+            return (File.GetAttributes(dictionaryWordsFile) & FileAttributes.ReadOnly) == 0;
         }
         #endregion
 

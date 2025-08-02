@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCodeFixProvider.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/31/2025
+// Updated : 08/01/2025
 // Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide the spell check code fixes
@@ -51,9 +51,20 @@ namespace VisualStudio.SpellChecker.CodeFixes
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(SpellCheckCodeFixProvider)), Shared]
     public class SpellCheckCodeFixProvider : CodeFixProvider
     {
+        #region Private data members
+        //=====================================================================
+
+        private static readonly char[] commaSeparator = [','];
+        //// private static readonly char[] pipeSeparator = ['|'];
+
+        #endregion
+
+        #region Property and method overrides
+        //=====================================================================
+
         /// <inheritdoc />
-        public sealed override ImmutableArray<string> FixableDiagnosticIds =>
-            [CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId, CSharpSpellCheckCodeAnalyzer.IgnoreWordDiagnosticId];
+        public sealed override ImmutableArray<string> FixableDiagnosticIds { get; } =
+            [CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId];
 
         /// <summary>
         /// This fix provider does not use a fix all provider
@@ -69,57 +80,56 @@ namespace VisualStudio.SpellChecker.CodeFixes
         public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
-            var suggestions = new List<string>();
-            var separators = new[] { ',' };
 
             foreach(var diagnostic in context.Diagnostics)
             {
+                // Find the identifier for the diagnostic
                 var diagnosticSpan = diagnostic.Location.SourceSpan;
+                var syntaxToken = root.FindToken(diagnosticSpan.Start);
 
-                if(diagnostic.Id == CSharpSpellCheckCodeAnalyzer.SpellingDiagnosticId)
+                HashSet<string> suggestions = null;
+                List<GlobalDictionary> globalDictionaries = null;
+
+                // If suggestions exist, they come from the code analysis dictionary settings and we won't
+                // offer to add them to any dictionaries or ignored words files.
+                if(!diagnostic.Properties.TryGetValue("Suggestions", out string suggestedReplacements))
                 {
-                    // Find the identifier for the diagnostic
-                    var syntaxToken = root.FindToken(diagnosticSpan.Start);
-
-                    suggestions.Clear();
-
-                    if(!diagnostic.Properties.TryGetValue("Suggestions", out string suggestedReplacements))
+                    if(diagnostic.Properties.TryGetValue("Languages", out string languages) &&
+                      diagnostic.Properties.TryGetValue("TextToCheck", out suggestedReplacements))
                     {
-                        if(diagnostic.Properties.TryGetValue("Languages", out string languages) &&
-                          diagnostic.Properties.TryGetValue("TextToCheck", out suggestedReplacements))
+                        // Getting suggestions is expensive so it's done here when actually needed rather
+                        // than in the code analyzer.  Dictionaries should exist at this point since the
+                        // code analyzer will have created them.
+                        globalDictionaries = [.. languages.Split(commaSeparator,
+                        StringSplitOptions.RemoveEmptyEntries).Select(l =>
+                            GlobalDictionary.CreateGlobalDictionary(new CultureInfo(l), null, [], false)).Where(
+                                d => d != null).Distinct()];
+
+                        if(globalDictionaries.Count != 0)
                         {
-                            // Getting suggestions is expensive so it's done here when actually needed rather
-                            // than in the code analyzer.  Dictionaries should exist at this point since the
-                            // code analyzer will have created them.
-                            var globalDictionaries = languages.Split(separators,
-                                StringSplitOptions.RemoveEmptyEntries).Select(l =>
-                                    GlobalDictionary.CreateGlobalDictionary(new CultureInfo(l), null, [], false)).Where(
-                                        d => d != null).Distinct().ToList();
+                            var dictionary = new SpellingDictionary(globalDictionaries, null);
 
-                            if(globalDictionaries.Count != 0)
-                            {
-                                var dictionary = new SpellingDictionary(globalDictionaries, null);
-
-                                suggestions.AddRange(CheckSuggestions(
-                                    dictionary.SuggestCorrections(suggestedReplacements).Select(ss => ss.Suggestion)));
-                            }
+                            suggestions = CheckSuggestions(dictionary.SuggestCorrections(suggestedReplacements).Select(
+                                ss => ss.Suggestion));
                         }
                     }
-                    else
-                        suggestions.AddRange(suggestedReplacements.Split(separators, StringSplitOptions.RemoveEmptyEntries));
+                }
+                else
+                    suggestions = [.. suggestedReplacements.Split(commaSeparator, StringSplitOptions.RemoveEmptyEntries)];
 
-                    if(suggestedReplacements != null)
+                if(suggestedReplacements != null)
+                {
+                    List<CodeAction> replacements;
+                    string word = root.GetText().GetSubText(diagnosticSpan).ToString();
+
+                    if((suggestions?.Count ?? 0) != 0)
                     {
-                        ImmutableArray<CodeAction> replacements;
+                        // If the misspelling is a sub-span, the prefix and suffix will contain the surrounding text
+                        // used to create the full identifier.
+                        _ = diagnostic.Properties.TryGetValue("Prefix", out string prefix);
+                        _ = diagnostic.Properties.TryGetValue("Suffix", out string suffix);
 
-                        if(suggestions.Count != 0)
-                        {
-                            // If the misspelling is a sub-span, the prefix and suffix will contain the surrounding text
-                            // used to create the full identifier.
-                            _ = diagnostic.Properties.TryGetValue("Prefix", out string prefix);
-                            _ = diagnostic.Properties.TryGetValue("Suffix", out string suffix);
-
-                            replacements = [.. suggestions.Select(
+                        replacements = [.. suggestions.Select(
                                 s =>
                                 {
                                     string replacement = (String.IsNullOrWhiteSpace(prefix) &&
@@ -130,31 +140,62 @@ namespace VisualStudio.SpellChecker.CodeFixes
                                         replacement);
 
                                 })];
-                        }
-                        else
-                        {
-                            replacements = [ CodeAction.Create(CodeFixResources.NoSuggestions,
+                    }
+                    else
+                    {
+                        replacements = [ CodeAction.Create(CodeFixResources.NoSuggestions,
                                 c => CorrectSpellingAsync(context.Document, syntaxToken, null, c),
                                 nameof(CodeFixResources.NoSuggestions)) ];
-                        }
-
-                        // Register a code action that will invoke the fix and offer the various suggested replacements
-                        context.RegisterCodeFix(CodeAction.Create(diagnostic.Descriptor.MessageFormat.ToString(null),
-                            replacements, false), diagnostic);
                     }
-                }
-                else
-                {
-                    // Offer the option to ignore the word by adding it to an Ignore Spelling directive comment.
-                    // Support for modifying non-code files is limited and nonexistent for files outside of the
-                    // project as far as I can tell so this is the best we can do.
-                    string ignoredWord = root.GetText().GetSubText(diagnosticSpan).ToString();
 
+                    //// These options are currently not implemented because there is no way to modify a non-code
+                    //// file within the context of a code action because they don't have a syntax tree that can be
+                    //// modified and applied later if the user choses to execute the action.  You can't just write
+                    //// to the file in the called method as it is called to get a preview of the changes and there's
+                    //// no way to defer the actual update in those cases.
+                    ////
+                    //// if(globalDictionaries != null)
+                    //// {
+                    ////     foreach(var d in globalDictionaries)
+                    ////     {
+                    ////         replacements.Add(CodeAction.Create(
+                    ////             String.Format(CodeFixResources.AddToDictionary, d.Culture.DisplayName),
+                    ////             c => AddToDictionaryAsync(d, word), $"{d.Culture.Name}-{word}"));
+                    ////     }
+                    //// }
+                    ////
+                    //// if(diagnostic.Properties.TryGetValue("IgnoredWordsFiles", out string ignoredWordsFiles))
+                    //// {
+                    ////     List<string> ignoredWordsFileList = [.. ignoredWordsFiles.Split(pipeSeparator, StringSplitOptions.RemoveEmptyEntries)];
+                    ////     var solution = context.Document.Project.Solution;
+                    ////
+                    ////     foreach(string f in ignoredWordsFileList)
+                    ////     {
+                    ////         // This is a pain, but to be usable, it has to be in at least one project file in the solution
+                    ////         // with a build action of "Additional Files".
+                    ////         var ids = solution.GetDocumentIdsWithFilePath(f);
+                    ////
+                    ////         if(ids.Length != 0)
+                    ////         {
+                    ////             replacements.Add(CodeAction.Create(String.Format(CodeFixResources.AddToIgnoredWordsFile, f),
+                    ////                 c => AddToIgnoredWordsFileAsync(context.Document, ids[0], word), $"{f}-{word}"));
+                    ////         }
+                    ////     }
+                    //// }
+
+                    replacements.Add(CodeAction.Create(CodeFixResources.IgnoreWordInFile,
+                        c => IgnoreWordAsync(context.Document, word, c), word));
+
+                    // Register a code action that will invoke the fix and offer the various suggested replacements
                     context.RegisterCodeFix(CodeAction.Create(diagnostic.Descriptor.MessageFormat.ToString(null),
-                        c => IgnoreWordAsync(context.Document, ignoredWord, c), ignoredWord), diagnostic);
+                        [.. replacements], false), diagnostic);
                 }
             }
         }
+        #endregion
+
+        #region Helper methods
+        //=====================================================================
 
         /// <summary>
         /// This is used to filter and adjust the suggestions used to fix a misspelling in an identifier
@@ -202,7 +243,6 @@ namespace VisualStudio.SpellChecker.CodeFixes
 
             return validSuggestions;
         }
-
 
         /// <summary>
         /// Create the solution used to correct a spelling error
@@ -505,5 +545,52 @@ namespace VisualStudio.SpellChecker.CodeFixes
 
             return document.WithSyntaxRoot(root.WithLeadingTrivia(newLeadingTrivia));
         }
+
+        //// Not implemented yet.  See above for the reason why.
+        ////
+        //// /// <summary>
+        //// /// Add an ignored word to an ignored words file
+        //// /// </summary>
+        //// /// <param name="document">The document containing the ignored word</param>
+        //// /// <param name="ignoredWordsDocId">The ignored words file document ID</param>
+        //// /// <param name="ignoredWordsFile">The ignored words file to which the word is added</param>
+        //// /// <param name="word">The ignored word</param>
+        //// /// <returns>Always returns null as we update the ignored words file directly</returns>
+        //// private static Task<Solution> AddToIgnoredWordsFileAsync(Document document string ignoredWordsDocId, string word)
+        //// {
+        ////     /* This sort of works but it removes the file from the project and adds it back which removes
+        ////        the "Additional Document" build action so it no longer sees the file to allow adding other
+        ////        words.  It also modifies the project which is unnecessary.
+        ////     var solution = document.Project.Solution;
+        ////     var ignoredWordsDoc = solution.GetAdditionalDocument(ignoredWordsDocId);
+        ////
+        ////     if(ignoredWordsDoc != null)
+        ////     {
+        ////         var project = ignoredWordsDoc.Project;
+        ////         var text = await ignoredWordsDoc.GetTextAsync().ConfigureAwait(false);
+        ////
+        ////         // Not the best way but we're just testing for now
+        ////         text = text.Replace(0, 0, word + Environment.NewLine);
+        ////
+        ////         solution = solution.RemoveAdditionalDocument(ignoredWordsDoc.Id);
+        ////         solution = solution.AddAdditionalDocument(DocumentId.CreateNewId(project.Id), ignoredWordsDoc.Name, text);
+        ////     }
+        ////
+        ////     return solution;*/
+        ////
+        ////     return Task.FromResult<Solution>(null);
+        //// }
+        ////
+        //// /// <summary>
+        //// /// Add a word to a user dictionary
+        //// /// </summary>
+        //// /// <param name="dictionary">The dictionary to which the word will be added</param>
+        //// /// <param name="word">The word to add</param>
+        //// /// <returns>Always returns null as we update the user dictionary file directly</returns>
+        //// private static Task<Document> AddToDictionaryAsync(GlobalDictionary dictionary, string word)
+        //// {
+        ////     return Task.FromResult<Document>(null);
+        //// }
+        #endregion
     }
 }

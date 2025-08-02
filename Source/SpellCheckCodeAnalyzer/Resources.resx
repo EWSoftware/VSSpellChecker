@@ -117,21 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="IgnoreWordAnalyzerDescription" xml:space="preserve">
-    <value>Ignore misspelled word.</value>
-  </data>
-  <data name="IgnoreWordAnalyzerMessageFormat" xml:space="preserve">
-    <value>Ignore word '{0}'</value>
-  </data>
-  <data name="IgnoreWordAnalyzerTitle" xml:space="preserve">
-    <value>Ignore Word</value>
-  </data>
   <data name="SpellingAnalyzerDescription" xml:space="preserve">
-    <value>Code element spell check.</value>
+    <value>Code element spell check.  Choose the correct spelling, add the word to the dictionary, add the word to an ignored words file, or ignore it in this file.</value>
     <comment>An optional longer localizable description of the diagnostic.</comment>
   </data>
   <data name="SpellingAnalyzerMessageFormat" xml:space="preserve">
-    <value>Correct spelling of '{0}'</value>
+    <value>Misspelled word: {0}</value>
     <comment>The formatable message the diagnostic displays.</comment>
   </data>
   <data name="SpellingAnalyzerTitle" xml:space="preserve">
