@@ -18,8 +18,8 @@ vsspell_code_analyzer_apply_to_all_c_style_languages = true
 vsspell_ignored_words_9f07c577adcd4fd7a93a42a503828225 = File:IgnoredWords.dic
 vsspell_exclusion_expressions_9f07c577adcd4fd7a93a42a503828225 = [a-z]{2}-([A-Z]{2}|Cyrl|Latn)(?@@PND@@/Options/None)\\\\\w+(?@@PND@@/Options/None)
 
-[NHunspell/**]
-# VSSPELL: Ignore spell checking in the NHunspell folder
+[Hunspell/**]
+# VSSPELL: Ignore spell checking in the Hunspell folder
 vsspell_spell_check_as_you_type = false
 vsspell_include_in_project_spell_check = false
 

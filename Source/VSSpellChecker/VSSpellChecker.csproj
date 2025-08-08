@@ -210,135 +210,135 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\de_DE.aff">
+    <Content Include="Hunspell\de_DE.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\de_DE.dic">
+    <Content Include="Hunspell\de_DE.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_AU.aff">
+    <Content Include="Hunspell\en_AU.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_AU.dic">
+    <Content Include="Hunspell\en_AU.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_CA.aff">
+    <Content Include="Hunspell\en_CA.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_CA.dic">
+    <Content Include="Hunspell\en_CA.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_GB.aff">
+    <Content Include="Hunspell\en_GB.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_GB.dic">
+    <Content Include="Hunspell\en_GB.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_NZ.aff">
+    <Content Include="Hunspell\en_NZ.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_NZ.dic">
+    <Content Include="Hunspell\en_NZ.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_US.aff">
+    <Content Include="Hunspell\en_US.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_US.dic">
+    <Content Include="Hunspell\en_US.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_ZA.aff">
+    <Content Include="Hunspell\en_ZA.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\en_ZA.dic">
+    <Content Include="Hunspell\en_ZA.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\es_ES.aff">
+    <Content Include="Hunspell\es_ES.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\es_ES.dic">
+    <Content Include="Hunspell\es_ES.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\fr_FR.aff">
+    <Content Include="Hunspell\fr_FR.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\fr_FR.dic">
+    <Content Include="Hunspell\fr_FR.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\it_IT.aff">
+    <Content Include="Hunspell\it_IT.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\it_IT.dic">
+    <Content Include="Hunspell\it_IT.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\LGPL-License.txt">
+    <Content Include="Hunspell\LGPL-License.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\pt_BR.aff">
+    <Content Include="Hunspell\pt_BR.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\pt_BR.dic">
+    <Content Include="Hunspell\pt_BR.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\pt_PT.aff">
+    <Content Include="Hunspell\pt_PT.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\pt_PT.dic">
+    <Content Include="Hunspell\pt_PT.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\ru_RU.aff">
+    <Content Include="Hunspell\ru_RU.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\ru_RU.dic">
+    <Content Include="Hunspell\ru_RU.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sl_SI.aff">
+    <Content Include="Hunspell\sl_SI.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sl_SI.dic">
+    <Content Include="Hunspell\sl_SI.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr-Latn.aff">
+    <Content Include="Hunspell\sr-Latn.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr-Latn.dic">
+    <Content Include="Hunspell\sr-Latn.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr.aff">
+    <Content Include="Hunspell\sr.aff">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\sr.dic">
+    <Content Include="Hunspell\sr.dic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
@@ -375,63 +375,63 @@
     <PackageReference Include="NHunspell" GeneratePathProperty="true" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="NHunspell\README_de_DE.txt">
+    <Content Include="Hunspell\README_de_DE.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_AU.txt">
+    <Content Include="Hunspell\README_en_AU.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_CA.txt">
+    <Content Include="Hunspell\README_en_CA.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_GB.txt">
+    <Content Include="Hunspell\README_en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_NZ.txt">
+    <Content Include="Hunspell\README_en_NZ.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_US.txt">
+    <Content Include="Hunspell\README_en_US.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_en_ZA.txt">
+    <Content Include="Hunspell\README_en_ZA.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_es_ES.txt">
+    <Content Include="Hunspell\README_es_ES.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_fr_FR.txt">
+    <Content Include="Hunspell\README_fr_FR.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_it_IT.txt">
+    <Content Include="Hunspell\README_it_IT.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_pt_BR.TXT">
+    <Content Include="Hunspell\README_pt_BR.TXT">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_pt_PT.txt">
+    <Content Include="Hunspell\README_pt_PT.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_ru_RU.txt">
+    <Content Include="Hunspell\README_ru_RU.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_sl_SI.txt">
+    <Content Include="Hunspell\README_sl_SI.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="NHunspell\README_sr.txt">
+    <Content Include="Hunspell\README_sr.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>

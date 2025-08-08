@@ -180,7 +180,7 @@ namespace VisualStudio.SpellChecker.Common.Configuration
             // be replaced by user-supplied dictionaries in any of the other folders that are searched.
             var searchFolders = new List<string>
             {
-                Path.Combine(dllPath, "NHunspell"),
+                Path.Combine(dllPath, "Hunspell"),
                 SpellCheckerConfiguration.GlobalConfigurationFilePath
             };
 

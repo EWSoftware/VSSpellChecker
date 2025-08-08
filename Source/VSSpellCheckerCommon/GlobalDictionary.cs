@@ -424,7 +424,7 @@ namespace VisualStudio.SpellChecker.Common
         private void InitializeDictionary(IEnumerable<string> additionalDictionaryFolders)
         {
             string affixFile, userWordsFile, dllPath = Path.Combine(Path.GetDirectoryName(
-                Assembly.GetExecutingAssembly().Location), "NHunspell");
+                Assembly.GetExecutingAssembly().Location), "Hunspell");
 
             // Look for all available dictionaries and get the one for the requested culture
             var dictionaries = SpellCheckerDictionary.AvailableDictionaries(additionalDictionaryFolders);
