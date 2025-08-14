@@ -32,7 +32,7 @@ using VisualStudio.SpellChecker.Definitions;
 namespace VisualStudio.SpellChecker.Common
 {
     /// <summary>
-    /// This class implements the spelling dictionary service.  The spelling dictionary utilizes NHunspell to
+    /// This class implements the spelling dictionary service.  The spelling dictionary utilizes Hunspell to
     /// perform the spell checking.
     /// </summary>
     public sealed class SpellingDictionary

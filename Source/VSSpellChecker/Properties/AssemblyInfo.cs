@@ -1,4 +1,4 @@
-﻿//===============================================================================================================
+//===============================================================================================================
 // System  : Visual Studio Spell Checker Package
 // File    : AssemblyInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
@@ -30,5 +30,5 @@ using System.Resources;
 [assembly: NeutralResourcesLanguage("en")]
 
 // These should match the version in Directory.Build.props
-[assembly: AssemblyVersion("2025.7.30.0")]
-[assembly: AssemblyFileVersion("2025.7.30.0")]
+[assembly: AssemblyVersion("2025.8.14.0")]
+[assembly: AssemblyFileVersion("2025.8.14.0")]

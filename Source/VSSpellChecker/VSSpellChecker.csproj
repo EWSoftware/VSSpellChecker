@@ -196,16 +196,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="$(PkgNHunspell)\Content\Hunspellx64.dll">
-      <Link>Hunspellx64.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="$(PkgNHunspell)\Content\Hunspellx86.dll">
-      <Link>Hunspellx86.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
     <Content Include="License.rtf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -372,7 +362,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NHunspell" GeneratePathProperty="true" />
+    <PackageReference Include="WeCantSpell.Hunspell" GeneratePathProperty="true" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Hunspell\README_de_DE.txt">

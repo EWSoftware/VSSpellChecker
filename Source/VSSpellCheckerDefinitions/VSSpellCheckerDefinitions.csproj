@@ -23,6 +23,8 @@
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Configurations>Debug;Release</Configurations>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)SpellChecker.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup>

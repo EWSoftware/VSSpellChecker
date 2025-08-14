@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GlobalDictionary.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/31/2025
+// Updated : 08/14/2025
 // Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the global dictionary
@@ -15,6 +15,7 @@
 //    Date     Who  Comments
 //===============================================================================================================
 // 04/14/2013  EFW  Created the code
+// 08/01/2025  EFW  NHunspell updated to WeCantSpell.Hunspell
 //===============================================================================================================
 
 // Ignore Spelling: Resharper Hunspellx
@@ -28,7 +29,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-using NHunspell;
+using WeCantSpell.Hunspell;
 
 using VisualStudio.SpellChecker.Common.Configuration;
 
@@ -43,11 +44,10 @@ namespace VisualStudio.SpellChecker.Common
         //=====================================================================
 
         private static Dictionary<string, GlobalDictionary> globalDictionaries;
-        private static SpellEngine spellEngine;
 
         private readonly List<WeakReference> registeredServices;
         private readonly HashSet<string> dictionaryWords, ignoredWords, recognizedWords;
-        private SpellFactory spellFactory;
+        private WordList spellFactory;
         private string dictionaryFile, dictionaryWordsFile;
         private bool isDisposed;
 
@@ -114,7 +114,6 @@ namespace VisualStudio.SpellChecker.Common
             {
                 if(spellFactory != null)
                 {
-                    spellFactory.Dispose();
                     spellFactory = null;
 
                     registeredServices.Clear();
@@ -139,8 +138,8 @@ namespace VisualStudio.SpellChecker.Common
         {
             try
             {
-                if(this.IsInitialized && spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
-                    return spellFactory.Spell(word);
+                if(this.IsInitialized && spellFactory != null && !String.IsNullOrWhiteSpace(word))
+                    return spellFactory.Check(word);
             }
             catch(Exception ex)
             {
@@ -161,8 +160,8 @@ namespace VisualStudio.SpellChecker.Common
         {
             try
             {
-                if(this.IsInitialized && spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
-                    return spellFactory.Spell(word.ToUpper(this.Culture));
+                if(this.IsInitialized && spellFactory != null && !String.IsNullOrWhiteSpace(word))
+                    return spellFactory.Check(word.ToUpper(this.Culture));
             }
             catch(Exception ex)
             {
@@ -182,7 +181,7 @@ namespace VisualStudio.SpellChecker.Common
         {
             try
             {
-                if(this.IsInitialized && spellFactory != null && !spellFactory.IsDisposed && !String.IsNullOrWhiteSpace(word))
+                if(this.IsInitialized && spellFactory != null && !String.IsNullOrWhiteSpace(word))
                     return spellFactory.Suggest(word).Select(w => new SpellingSuggestion(this.Culture, w));
             }
             catch(Exception ex)
@@ -343,21 +342,6 @@ namespace VisualStudio.SpellChecker.Common
             {
                 globalDictionaries ??= [];
 
-                if(spellEngine == null)
-                {
-                    // If other packages are installed that use NHunSpell (Resharper for instance), don't set
-                    // the native DLL path again if we see the native Hunspell DLLs in the existing path or it
-                    // tries to load them a second time and fails.  We'll just use their copy which should be
-                    // fine since it hasn't changed in a long time (I know, never say never).
-                    if(String.IsNullOrWhiteSpace(Hunspell.NativeDllPath) || !Directory.EnumerateFiles(
-                      Hunspell.NativeDllPath, "Hunspellx*.dll").Any())
-                    {
-                        Hunspell.NativeDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                    }
-
-                    spellEngine = new SpellEngine();
-                }
-
                 // The configuration editor should disallow creating a configuration without at least one
                 // language but if someone edits the file manually, they could remove them all.  If that
                 // happens, just use the English-US dictionary.
@@ -452,16 +436,9 @@ namespace VisualStudio.SpellChecker.Common
 
             lock(syncRoot)
             {
-                if(spellEngine != null && !isDisposed)
+                if(!isDisposed)
                 {
-                    spellEngine.AddLanguage(new LanguageConfig
-                    {
-                        LanguageCode = this.Culture.Name,
-                        HunspellAffFile = affixFile,
-                        HunspellDictFile = dictionaryFile
-                    });
-
-                    spellFactory = spellEngine[this.Culture.Name];
+                    spellFactory = WordList.CreateFromFiles(dictionaryFile, affixFile);
 
                     if(String.IsNullOrWhiteSpace(userWordsFile))
                     {
@@ -497,12 +474,6 @@ namespace VisualStudio.SpellChecker.Common
                         gd.Dispose();
 
                     globalDictionaries.Clear();
-                }
-
-                if(spellEngine != null)
-                {
-                    spellEngine.Dispose();
-                    spellEngine = null;
                 }
             }
         }
@@ -679,54 +650,17 @@ namespace VisualStudio.SpellChecker.Common
         {
             lock(syncRoot)
             {
-                // Since we're using the factory, we've got to get at the internals using reflection
-                Type sf = spellFactory.GetType();
-
-                FieldInfo fi = sf.GetField("processors", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                int releaseCount = 0, processors = (int)fi.GetValue(spellFactory);
-
-                fi = sf.GetField("hunspellSemaphore", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                Semaphore hunspellSemaphore = (Semaphore)fi.GetValue(spellFactory);
-
-                fi = sf.GetField("hunspells", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
-
-                if(hunspellSemaphore != null && hunspells != null)
+                if(spellFactory != null)
                 {
                     try
                     {
-                        // Make sure we get all semaphores since we will be touching all spellers
-                        while(releaseCount < processors)
-                        {
-                            // Don't wait too long.  If we can't get them all, we just won't add the words
-                            // as suggestions this time around.
-                            if(!hunspellSemaphore.WaitOne(2000))
-                                break;
-
-                            releaseCount++;
-                        }
-
-                        if(releaseCount == processors)
-                        {
-                            foreach(var hs in hunspells.ToArray())
-                            {
-                                if(!hs.Spell(word))
-                                    hs.Add(word.ToLower(this.Culture));
-                            }
-                        }
+                        if(!spellFactory.Check(word))
+                            spellFactory.Add(word.ToLower(this.Culture));
                     }
                     catch(Exception ex)
                     {
                         // Ignore any exceptions.  Worst case, some words won't be added as suggestions.
                         System.Diagnostics.Debug.WriteLine(ex);
-                    }
-                    finally
-                    {
-                        if(releaseCount != 0)
-                            hunspellSemaphore.Release(releaseCount);
                     }
                 }
             }
@@ -740,60 +674,20 @@ namespace VisualStudio.SpellChecker.Common
         {
             lock(syncRoot)
             {
-                // Since we're using the factory, we've got to get at the internals using reflection
-                Type sf = spellFactory.GetType();
-
-                FieldInfo fi = sf.GetField("processors", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                int releaseCount = 0, processors = (int)fi.GetValue(spellFactory);
-
-                fi = sf.GetField("hunspellSemaphore", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                Semaphore hunspellSemaphore = (Semaphore)fi.GetValue(spellFactory);
-
-                fi = sf.GetField("hunspells", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
-
-                if(hunspellSemaphore != null && hunspells != null)
+                if(spellFactory != null)
                 {
                     try
                     {
-                        // Make sure we get all semaphores since we will be touching all spellers
-                        while(releaseCount < processors)
+                        foreach(string word in dictionaryWords.Concat(recognizedWords))
                         {
-                            // Don't wait too long.  If we can't get them all, we just won't add the words
-                            // as suggestions this time around.
-                            if(!hunspellSemaphore.WaitOne(2000))
-                                break;
-
-                            releaseCount++;
-                        }
-
-                        lock(recognizedWords)
-                        {
-                            if(releaseCount == processors)
-                            {
-                                foreach(var hs in hunspells.ToArray())
-                                {
-                                    foreach(string word in dictionaryWords.Concat(recognizedWords))
-                                    {
-                                        if(!hs.Spell(word))
-                                            hs.Add(word.ToLower(this.Culture));
-                                    }
-                                }
-                            }
+                            if(!spellFactory.Check(word))
+                                spellFactory.Add(word.ToLower(this.Culture));
                         }
                     }
                     catch(Exception ex)
                     {
                         // Ignore any exceptions.  Worst case, some words won't be added as suggestions.
                         System.Diagnostics.Debug.WriteLine(ex);
-                    }
-                    finally
-                    {
-                        if(releaseCount != 0)
-                            hunspellSemaphore.Release(releaseCount);
                     }
                 }
             }
@@ -825,54 +719,17 @@ namespace VisualStudio.SpellChecker.Common
         {
             lock(syncRoot)
             {
-                // Since we're using the factory, we've got to get at the internals using reflection
-                Type sf = spellFactory.GetType();
-
-                FieldInfo fi = sf.GetField("processors", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                int releaseCount = 0, processors = (int)fi.GetValue(spellFactory);
-
-                fi = sf.GetField("hunspellSemaphore", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                Semaphore hunspellSemaphore = (Semaphore)fi.GetValue(spellFactory);
-
-                fi = sf.GetField("hunspells", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                Stack<Hunspell> hunspells = (Stack<Hunspell>)fi.GetValue(spellFactory);
-
-                if(hunspellSemaphore != null && hunspells != null)
+                if(spellFactory != null)
                 {
                     try
                     {
-                        // Make sure we get all semaphores since we will be touching all spellers
-                        while(releaseCount < processors)
-                        {
-                            // Don't wait too long.  If we can't get them all, we just won't add the words
-                            // as suggestions this time around.
-                            if(!hunspellSemaphore.WaitOne(2000))
-                                break;
-
-                            releaseCount++;
-                        }
-
-                        if(releaseCount == processors)
-                        {
-                            foreach(var hs in hunspells.ToArray())
-                            {
-                                if(hs.Spell(word))
-                                    hs.Remove(word.ToLower(this.Culture));
-                            }
-                        }
+                        if(spellFactory.Check(word))
+                            spellFactory.Remove(word.ToLower(this.Culture));
                     }
                     catch(Exception ex)
                     {
                         // Ignore any exceptions.  Worst case, some words won't be added as suggestions.
                         System.Diagnostics.Debug.WriteLine(ex);
-                    }
-                    finally
-                    {
-                        if(releaseCount != 0)
-                            hunspellSemaphore.Release(releaseCount);
                     }
                 }
             }
