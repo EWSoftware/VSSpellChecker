@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <PropertyGroup>
     <!-- A target framework version is required by Visual Studio.  It can be any version with a targeting pack installed. -->
@@ -220,6 +220,7 @@
     <None Include="Content\VersionHistory\v2023.5.15.0.aml" />
     <None Include="Content\VersionHistory\v2024.12.14.0.aml" />
     <None Include="Content\VersionHistory\v2024.6.17.0.aml" />
+    <None Include="Content\VersionHistory\v2025.8.14.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2023.5.8.0.aml" />
     <None Include="Content\VSSpell001.aml" />
