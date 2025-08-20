@@ -2,8 +2,8 @@
 <topic id="508e7e8f-e00f-43f1-ad4c-5439ddec84b8" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>The package uses NHunspell to perform spell checking and comes with several dictionaries for various
-languages.  Since NHunspell makes use of Open Office dictionaries, you can download additional dictionaries for
+			<para>The package uses Hunspell to perform spell checking and comes with several dictionaries for various
+languages.  Since Hunspell makes use of Open Office dictionaries, you can download additional dictionaries for
 other languages.  Dictionaries for OpenOffice versions 2, 3, and 4 are supported.  To make them available to the
 spell checker, do the following:
 			</para>

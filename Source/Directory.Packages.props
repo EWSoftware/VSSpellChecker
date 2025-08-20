@@ -11,6 +11,6 @@
     <PackageVersion Include="Microsoft.VisualStudio.SDK" Version="17.14.40265" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading" Version="17.14.15" />
     <PackageVersion Include="Microsoft.VSSDK.BuildTools" Version="17.14.2094" />
-    <PackageVersion Include="NHunspell" Version="1.2.5554.16953" />
+    <PackageVersion Include="WeCantSpell.Hunspell" Version="6.0.1" />
   </ItemGroup>
 </Project>

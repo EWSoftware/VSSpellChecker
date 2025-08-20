@@ -5,7 +5,7 @@
 // Updated : 04/16/2023
 // Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
 //
-// This file contains a class that adds spell checking using NHunspell to any WPF text box within Visual Studio
+// This file contains a class that adds spell checking using Hunspell to any WPF text box within Visual Studio
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -43,7 +43,7 @@ using VisualStudio.SpellChecker.ProjectSpellCheck;
 namespace VisualStudio.SpellChecker.WpfTextBox
 {
     /// <summary>
-    /// This is used to add spell checking using NHunspell to any WPF text box within Visual Studio
+    /// This is used to add spell checking using Hunspell to any WPF text box within Visual Studio
     /// </summary>
     /// <remarks>Admittedly, this is a hack but it works quite well.  It uses a registered class handler to
     /// associate an instance of this class with any WPF text box when it gains focus for the first time.

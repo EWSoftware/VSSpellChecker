@@ -16,7 +16,7 @@ Lehenbauer.  This version has been extended as follows:</para>
 
 				<list class="bullet">
 					<listItem>
-						<para>It uses NHunSpell to perform the spell checking.  As such, custom dictionaries can be added to
+						<para>It uses Hunspell to perform the spell checking.  As such, custom dictionaries can be added to
 spell check in different languages (OpenOffice versions 2, 3, and 4 dictionaries are supported).</para>
 					</listItem>
 
