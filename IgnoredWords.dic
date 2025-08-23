@@ -24,6 +24,7 @@ mimetype
 mscorlib
 php
 plaintext
+preprocessor
 Recurse
 Resharper
 resheader

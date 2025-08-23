@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<topic id="f401145a-63b8-48ea-a70c-820b7d58eb15" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<!-- Ignore Spelling: gottfriedleibniz -->
+		<introduction>
+			<para>Changes made in this release:</para>
+
+			<alert class="important">
+				<para>As of this release, only Visual Studio 2022 and later are supported.  Support for Visual Studio
+2017 and 2019 has been dropped.  I do not use the older versions anymore, it will allow me to simplify
+the extension projects and keep the package references more up to date without the risk of breaking the build,
+and implement future features without regard to maintaining backward compatibility with the older versions.</para>
+			</alert>
+		</introduction>
+
+		<section>
+			<content>
+				<list class="bullet">
+					<listItem>
+						<para>Fixed handling of C++ <codeInline>#include/#import</codeInline> preprocessor filenames.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed creation of <localUri>AnalyzerCodePath.txt</localUri> so that it always contains the
+current version path.</para>
+					</listItem>
+
+					<listItem>
+						<para>In the code analyzer, removed <localUri>VSSpell002 - Ignore Word</localUri> and merged the
+action with <localUri>VSSpell001 - Correct Spelling</localUri> code fix.</para>
+					</listItem>
+
+					<listItem>
+						<para>Updated the English Australian, Canadian, British, and United States dictionaries with their
+large versions which contain more words.</para>
+					</listItem>
+
+					<listItem>
+						<para>Excluded <localUri>.slnx</localUri> files from the solution/project spell check.</para>
+					</listItem>
+
+					<listItem>
+						<para>Many thanks to <externalLink>
+							<linkText>gottfriedleibniz</linkText>
+							<linkAlternateText>gottfriedleibniz</linkAlternateText>
+							<linkUri>https://github.com/gottfriedleibniz</linkUri>
+							<linkTarget>_blank</linkTarget>
+						</externalLink> for replacing the <codeInline>NHunspell</codeInline> package
+that used native code assemblies with <codeInline>WeCantSpell.Hunspell</codeInline>, a purely managed code
+version of Hunspell that allows the spell checker extension to be installed and used in Visual Studio on ARM64
+PCs.</para>
+					</listItem>
+
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+			<link xlink:href="548dc6d7-6d08-4006-82b3-d5830be96f04" />
+		</relatedTopics>
+	</developerConceptualDocument>
+</topic>
