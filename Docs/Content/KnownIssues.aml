@@ -40,13 +40,13 @@ different identifiers (replace all).  Each must be corrected individually.</para
 						<para>Code analyzers are, naturally, designed to work with source code.  Unfortunately, they do not
 work well for updating non-code files or files outside of the project.  There are some provisions for updating
 non-code files as long as they are added to the additional file set used by code analyzers but that requires some
-extra steps to set up properly.  Files in the solution items or outside of the solution entirely such as those
-specified in the global spell checker configuration are inaccessible.  As such, there are no fixes offered to
-allow adding a word in a misspelled identifier to ignored words files in the solution or project or the global
-configuration nor to the dictionary itself.  If you want a word flagged by the code analyzer added to either of
-those files, you must do so manually or through the spell checker configuration editor.  Again, this limitation
-may be due to my lack of knowledge on code analyzers so feel free to offer an update with this functionality if
-you can provide one.</para>
+extra steps to set up properly in every project.  Files in the solution items or outside of the solution entirely
+such as those specified in the global spell checker configuration are not updateable.  As such, there are no
+fixes offered to allow adding a word in a misspelled identifier to ignored words files in the solution or project
+or the global configuration nor to the dictionary itself.  If you want a word flagged by the code analyzer added
+to either of those files, you must do so manually or through the spell checker configuration editor.  Another
+workaround is to copy and paste the misspelling into a comment or string temporarily and use the action from
+there to add the word.</para>
 					</listItem>
 
 				</list>

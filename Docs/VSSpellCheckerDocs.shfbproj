@@ -224,7 +224,6 @@
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2023.5.8.0.aml" />
     <None Include="Content\VSSpell001.aml" />
-    <None Include="Content\VSSpell002.aml" />
     <None Include="Content\Welcome.aml" />
   </ItemGroup>
   <ItemGroup>

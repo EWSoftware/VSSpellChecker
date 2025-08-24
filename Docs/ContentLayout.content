@@ -55,14 +55,9 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="spell check, code analyzer rules" />
     </HelpKeywords>
-    <Topic id="a7120f4c-5191-4442-b366-c3e792060569" visible="True" title="VSSpell001: Correct spelling of 'XXX'">
+    <Topic id="a7120f4c-5191-4442-b366-c3e792060569" visible="True" isSelected="true" title="VSSpell001: Correct spelling of 'XXX'">
       <HelpKeywords>
         <HelpKeyword index="K" term="code analyzer, VSSpell001" />
-      </HelpKeywords>
-    </Topic>
-    <Topic id="83ff9063-294f-4a18-b765-1510c86ad0d4" visible="True" title="VSSpell002: Ignore word 'XXX'">
-      <HelpKeywords>
-        <HelpKeyword index="K" term="code analyzer, VSSpell002" />
       </HelpKeywords>
     </Topic>
   </Topic>
@@ -164,7 +159,7 @@
     <HelpKeywords>
       <HelpKeyword index="K" term="version, history" />
     </HelpKeywords>
-    <Topic id="f401145a-63b8-48ea-a70c-820b7d58eb15" visible="True" isSelected="true" title="Version 2025.8.23.0">
+    <Topic id="f401145a-63b8-48ea-a70c-820b7d58eb15" visible="True" title="Version 2025.8.23.0">
       <HelpKeywords>
         <HelpKeyword index="K" term="versions, 2025.8.23.0" />
       </HelpKeywords>
