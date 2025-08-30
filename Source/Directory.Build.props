@@ -11,8 +11,8 @@
 
 		<!-- Update the version in VSSpellChecker\Properties\AssemblyInfo.cs as well.
 				 If necessary, update the strong name version in VSSpellCheckerDefinitions.csproj. -->
-		<Version>2025.8.23.0</Version>
-		<FileVersion>2025.8.23.0</FileVersion>
+		<Version>2025.8.30.0</Version>
+		<FileVersion>2025.8.30.0</FileVersion>
 
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>

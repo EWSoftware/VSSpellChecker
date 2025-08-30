@@ -17,12 +17,29 @@ and implement future features without regard to maintaining backward compatibili
 			<content>
 				<list class="bullet">
 					<listItem>
+						<para>Many thanks to <externalLink>
+							<linkText>gottfriedleibniz</linkText>
+							<linkAlternateText>gottfriedleibniz</linkAlternateText>
+							<linkUri>https://github.com/gottfriedleibniz</linkUri>
+							<linkTarget>_blank</linkTarget>
+						</externalLink> for replacing the <codeInline>NHunspell</codeInline> package
+that used native code assemblies with <codeInline>WeCantSpell.Hunspell</codeInline>, a purely managed code
+version of Hunspell that allows the spell checker extension to be installed and used in Visual Studio on ARM64
+PCs.</para>
+					</listItem>
+
+					<listItem>
 						<para>Fixed handling of C++ <codeInline>#include/#import</codeInline> preprocessor filenames.</para>
 					</listItem>
 
 					<listItem>
 						<para>Fixed creation of <localUri>AnalyzerCodePath.txt</localUri> so that it always contains the
 current version path.</para>
+					</listItem>
+
+					<listItem>
+						<para>Fixed the solution/project XML file classifier so that it does not HTML encode Unicode
+characters when getting adjusted offsets.</para>
 					</listItem>
 
 					<listItem>
@@ -36,19 +53,8 @@ large versions which contain more words.</para>
 					</listItem>
 
 					<listItem>
-						<para>Excluded <localUri>.slnx</localUri> files from the solution/project spell check.</para>
-					</listItem>
-
-					<listItem>
-						<para>Many thanks to <externalLink>
-							<linkText>gottfriedleibniz</linkText>
-							<linkAlternateText>gottfriedleibniz</linkAlternateText>
-							<linkUri>https://github.com/gottfriedleibniz</linkUri>
-							<linkTarget>_blank</linkTarget>
-						</externalLink> for replacing the <codeInline>NHunspell</codeInline> package
-that used native code assemblies with <codeInline>WeCantSpell.Hunspell</codeInline>, a purely managed code
-version of Hunspell that allows the spell checker extension to be installed and used in Visual Studio on ARM64
-PCs.</para>
+						<para>Excluded <localUri>.slnf</localUri> and <localUri>.slnx</localUri> files from the
+solution/project spell check.</para>
 					</listItem>
 
 				</list>

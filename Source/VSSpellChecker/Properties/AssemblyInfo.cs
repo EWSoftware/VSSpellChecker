@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : AssemblyInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/23/2025
+// Updated : 08/30/2025
 // Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // Visual Studio spell checker definition attributes.
@@ -30,5 +30,5 @@ using System.Resources;
 [assembly: NeutralResourcesLanguage("en")]
 
 // These should match the version in Directory.Build.props
-[assembly: AssemblyVersion("2025.8.23.0")]
-[assembly: AssemblyFileVersion("2025.8.23.0")]
+[assembly: AssemblyVersion("2025.8.30.0")]
+[assembly: AssemblyFileVersion("2025.8.30.0")]

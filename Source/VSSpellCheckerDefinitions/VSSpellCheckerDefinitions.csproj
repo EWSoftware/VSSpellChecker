@@ -10,7 +10,7 @@
 		<Title>Visual Studio Spell Checker Definitions</Title>
 		<AssemblyTitle>Visual Studio Spell Checker Definitions</AssemblyTitle>
 		<!-- This should only change if a breaking change is made that requires an update to the package -->
-		<Version>2025.8.23.0</Version>
+		<Version>2025.8.30.0</Version>
 		<Authors>Eric Woodruff</Authors>
 		<Description>This assembly contains interfaces and other supporting classes used to implement the Visual Studio spell checker extension</Description>
 		<PackageIconUrl>https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/NuGet/VSSpellChecker.png</PackageIconUrl>

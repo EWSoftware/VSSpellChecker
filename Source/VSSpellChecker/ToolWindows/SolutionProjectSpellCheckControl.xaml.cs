@@ -1015,6 +1015,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     .. openDocuments.Where(od =>
                         !spellCheckFiles.Any(f => f.CanonicalName.Equals(od, StringComparison.OrdinalIgnoreCase)) &&
                         !od.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) &&
+                        !od.EndsWith(".slnf", StringComparison.OrdinalIgnoreCase) &&
                         !od.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase) &&
                         !projectNames.Any(p => p.Equals(od, StringComparison.OrdinalIgnoreCase))).Select(
                             od => SpellCheckFileInfo.ForOpenDocument(od)),
