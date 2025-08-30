@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify XML file content
 //
@@ -16,6 +16,8 @@
 // ==============================================================================================================
 // 08/26/2015  EFW  Created the code
 //===============================================================================================================
+
+// Ignore Spelling: nnn
 
 using System;
 using System.IO;
@@ -40,7 +42,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         #region Private data members
         //=====================================================================
 
-        private static readonly Regex reXmlEncoding = new Regex("^<\\?xml.*?encoding\\s*=\\s*\"(?<Encoding>.*?)\".*?\\?>");
+        private static readonly Regex reXmlEncoding = new("^<\\?xml.*?encoding\\s*=\\s*\"(?<Encoding>.*?)\".*?\\?>");
+        private static readonly char[] htmlEncodedChars = ['<', '>', '&'];
 
         #endregion
 
@@ -66,10 +69,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                     if(encoding != Encoding.Default)
                     {
-                        using(StreamReader sr = new StreamReader(filename, encoding, true))
-                        {
-                            this.SetText(sr.ReadToEnd());
-                        }
+                        using StreamReader sr = new(filename, encoding, true);
+                        this.SetText(sr.ReadToEnd());
                     }
                 }
             }
@@ -87,135 +88,131 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <inheritdoc />
         public override IEnumerable<SpellCheckSpan> Parse()
         {
-            List<SpellCheckSpan> spans = new List<SpellCheckSpan>();
-            XmlReaderSettings rs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse };
-            Stack<string> elementNames = new Stack<string>();
+            List<SpellCheckSpan> spans = [];
+            XmlReaderSettings rs = new() { DtdProcessing = DtdProcessing.Parse };
+            Stack<string> elementNames = new();
             string elementName = String.Empty, value;
 
             // For parsing, convert carriage returns to spaces to maintain the correct offsets.  The XML reader
             // converts CR/LF pairs to a single LF which throws off the positions otherwise.
-            using(var stringStream = new StringReader(this.Text.Replace('\r', ' ')))
-            using(var reader = XmlReader.Create(stringStream, rs))
+            using var stringStream = new StringReader(this.Text.Replace('\r', ' '));
+            using var reader = XmlReader.Create(stringStream, rs);
+            IXmlLineInfo lineInfo = (IXmlLineInfo)reader;
+
+            try
             {
-                IXmlLineInfo lineInfo = (IXmlLineInfo)reader;
-                
-                try
+                while(!reader.EOF)
                 {
-                    while(!reader.EOF)
+                    switch(reader.NodeType)
                     {
-                        switch(reader.NodeType)
-                        {
-                            case XmlNodeType.Element:
-                                if(reader.HasAttributes)
+                        case XmlNodeType.Element:
+                            if(reader.HasAttributes)
+                            {
+                                for(int idx = 0; idx < reader.AttributeCount; idx++)
                                 {
-                                    for(int idx = 0; idx < reader.AttributeCount; idx++)
+                                    reader.MoveToAttribute(idx);
+
+                                    if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(reader.LocalName))
                                     {
-                                        reader.MoveToAttribute(idx);
+                                        // Set the approximate position of the value assuming the format:
+                                        // attrName="value".  The value may need to be encoded to get an
+                                        // accurate position.
+                                        value = reader.Value;
 
-                                        if(this.SpellCheckConfiguration.SpellCheckedXmlAttributes.Contains(reader.LocalName))
+                                        if(!value.Equals(this.Text.Substring(this.GetOffset(lineInfo.LineNumber,
+                                          lineInfo.LinePosition + reader.Settings.LinePositionOffset +
+                                          reader.Name.Length + 2), value.Length), StringComparison.Ordinal))
                                         {
-                                            // Set the approximate position of the value assuming the format:
-                                            // attrName="value".  The value may need to be encoded to get an
-                                            // accurate position (quotes excluded).
-                                            value = reader.Value;
-
-                                            if(!value.Equals(this.Text.Substring(this.GetOffset(lineInfo.LineNumber,
-                                              lineInfo.LinePosition + reader.Settings.LinePositionOffset +
-                                              reader.Name.Length + 2), value.Length), StringComparison.Ordinal))
-                                            {
-                                                value = WebUtility.HtmlEncode(value).Replace("&quot;", "\"").Replace(
-                                                    "&#39;", "'");
-                                            }
-
-                                            spans.Add(new SpellCheckSpan
-                                            {
-                                                Span = new Span(this.AdjustedOffset(this.GetOffset(lineInfo.LineNumber,
-                                                    lineInfo.LinePosition + reader.Settings.LinePositionOffset +
-                                                    reader.Name.Length + 2), value), value.Length),
-                                                Text = value,
-                                                Classification = RangeClassification.AttributeValue
-                                            });
+                                            value = HtmlEncode(value);
                                         }
+
+                                        spans.Add(new SpellCheckSpan
+                                        {
+                                            Span = new Span(this.AdjustedOffset(this.GetOffset(lineInfo.LineNumber,
+                                                lineInfo.LinePosition + reader.Settings.LinePositionOffset +
+                                                reader.Name.Length + 2), value), value.Length),
+                                            Text = value,
+                                            Classification = RangeClassification.AttributeValue
+                                        });
                                     }
-
-                                    reader.MoveToElement();
                                 }
 
-                                if(!reader.IsEmptyElement)
-                                {
-                                    elementNames.Push(elementName);
-                                    elementName = reader.LocalName;
-                                }
+                                reader.MoveToElement();
+                            }
 
-                                // Is it an element in which to skip the content?
-                                if(this.SpellCheckConfiguration.IgnoredXmlElements.Contains(reader.LocalName) ||
-                                  this.ShouldSkipElement(reader))
-                                {
-                                    reader.Skip();
-                                    continue;
-                                }
-                                break;
+                            if(!reader.IsEmptyElement)
+                            {
+                                elementNames.Push(elementName);
+                                elementName = reader.LocalName;
+                            }
 
-                            case XmlNodeType.EndElement:
-                                if(elementNames.Count != 0)
-                                    elementName = elementNames.Pop();
-                                else
-                                    elementName = String.Empty;
-                                break;
+                            // Is it an element in which to skip the content?
+                            if(this.SpellCheckConfiguration.IgnoredXmlElements.Contains(reader.LocalName) ||
+                              this.ShouldSkipElement(reader))
+                            {
+                                reader.Skip();
+                                continue;
+                            }
+                            break;
 
-                            case XmlNodeType.Comment:
-                                // Apply adjustments to the comments if necessary
-                                value = this.AdjustCommentText(reader.Value);
+                        case XmlNodeType.EndElement:
+                            if(elementNames.Count != 0)
+                                elementName = elementNames.Pop();
+                            else
+                                elementName = String.Empty;
+                            break;
 
-                                spans.Add(new SpellCheckSpan
-                                {
-                                    Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
-                                        value.Length),
-                                    Text = value,
-                                    Classification = RangeClassification.XmlFileComment
-                                });
-                                break;
+                        case XmlNodeType.Comment:
+                            // Apply adjustments to the comments if necessary
+                            value = this.AdjustCommentText(reader.Value);
 
-                            case XmlNodeType.CDATA:
-                                spans.Add(new SpellCheckSpan
-                                {
-                                    Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
-                                        reader.Value.Length),
-                                    Text = reader.Value,
-                                    Classification = RangeClassification.XmlFileCData
-                                });
-                                break;
+                            spans.Add(new SpellCheckSpan
+                            {
+                                Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
+                                    value.Length),
+                                Text = value,
+                                Classification = RangeClassification.XmlFileComment
+                            });
+                            break;
 
-                            case XmlNodeType.Text:
-                                // The value may need to be encoded to get an accurate position (quotes excluded)
-                                value = reader.Value;
+                        case XmlNodeType.CDATA:
+                            spans.Add(new SpellCheckSpan
+                            {
+                                Span = new Span(this.GetOffset(lineInfo.LineNumber, lineInfo.LinePosition),
+                                    reader.Value.Length),
+                                Text = reader.Value,
+                                Classification = RangeClassification.XmlFileCData
+                            });
+                            break;
 
-                                if(!value.Equals(this.Text.Substring(this.GetOffset(lineInfo.LineNumber,
-                                  lineInfo.LinePosition), value.Length).Replace('\r', ' '), StringComparison.Ordinal))
-                                {
-                                    value = WebUtility.HtmlEncode(value).Replace("&quot;", "\"").Replace(
-                                        "&#39;", "'");
-                                }
+                        case XmlNodeType.Text:
+                            // The value may need to be encoded to get an accurate position
+                            value = reader.Value;
 
-                                spans.AddRange(this.ClassifyText(elementName, value, this.GetOffset(
-                                    lineInfo.LineNumber, lineInfo.LinePosition)));
-                                break;
+                            if(!value.Equals(this.Text.Substring(this.GetOffset(lineInfo.LineNumber,
+                              lineInfo.LinePosition), value.Length).Replace('\r', ' '), StringComparison.Ordinal))
+                            {
+                                value = HtmlEncode(value);
+                            }
 
-                            default:
-                                break;
-                        }
+                            spans.AddRange(this.ClassifyText(elementName, value, this.GetOffset(
+                                lineInfo.LineNumber, lineInfo.LinePosition)));
+                            break;
 
-                        reader.Read();
+                        default:
+                            break;
                     }
-                }
-                catch(Exception ex)
-                {
-                    // Ignore exceptions.  Probably ill-formed content or an unknown entity.
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
 
-                return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
+                    reader.Read();
+                }
             }
+            catch(Exception ex)
+            {
+                // Ignore exceptions.  Probably ill-formed content or an unknown entity.
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+
+            return spans.Where(s => !this.IgnoredClassifications.Contains(s.Classification));
         }
 
         /// <summary>
@@ -259,6 +256,49 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 Text = text,
                 Classification = RangeClassification.InnerText
             };
+        }
+
+        /// <summary>
+        /// HTML encode a subset of characters to help get an accurate offset
+        /// </summary>
+        /// <param name="value">The value to encode</param>
+        /// <returns>The value with any ampersands and angle brackets HTML encoded</returns>
+        /// <remarks><see cref="WebUtility.HtmlEncode"/> uses strict conformance when encode characters and it
+        /// will encode any single quotes, double quotes, and Unicode characters which typically doesn't occur
+        /// in XML files.  Encoded Unicode characters then act as split locations which throws off the word
+        /// splitter resulting in incorrect partial words being spell checked.  By limiting it to ampersands and
+        /// angle brackets, we can correct this issue and still provide fairly accurate positions within the XML
+        /// file.</remarks>
+        private static string HtmlEncode(string value)
+        {
+            if(value.IndexOfAny(htmlEncodedChars) == -1)
+                return value;
+
+            StringBuilder sb = new(value.Length * 2);
+
+            foreach(char c in value)
+            {
+                switch(c)
+                {
+                    case '&':
+                        sb.Append("&amp;");
+                        break;
+
+                    case '<':
+                        sb.Append("&lt;");
+                        break;
+
+                    case '>':
+                        sb.Append("&gt;");
+                        break;
+
+                    default:
+                        sb.Append(c);
+                        break;
+                }
+            }
+
+            return sb.ToString();
         }
         #endregion
     }
