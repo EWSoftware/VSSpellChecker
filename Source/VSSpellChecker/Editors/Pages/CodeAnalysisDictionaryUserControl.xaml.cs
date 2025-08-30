@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeAnalysisDictionaryUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/16/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the code analysis dictionary configuration settings
 //
@@ -48,14 +48,14 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             InitializeComponent();
 
-            configPropertyControls = new[]
-            {
+            configPropertyControls =
+            [
                 (cboImportCADictionaries, nameof(CodeAnalysisDictionaryOptions.ImportCodeAnalysisDictionaries)),
                 (cboUnrecognizedWords, nameof(CodeAnalysisDictionaryOptions.TreatUnrecognizedWordsAsMisspelled)),
                 (cboDeprecatedTerms, nameof(CodeAnalysisDictionaryOptions.TreatDeprecatedTermsAsMisspelled)),
                 (cboCompoundTerms, nameof(CodeAnalysisDictionaryOptions.TreatCompoundTermsAsMisspelled)),
                 (cboCasingExceptions, nameof(CodeAnalysisDictionaryOptions.TreatCasingExceptionsAsIgnoredWords))
-            };
+            ];
         }
         #endregion
 
@@ -86,9 +86,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 throw new ArgumentNullException(nameof(properties));
 
             if(!isGlobal)
-                dataSource.AddRange(new[] { PropertyState.Inherited, PropertyState.Yes, PropertyState.No });
+                dataSource.AddRange([PropertyState.Inherited, PropertyState.Yes, PropertyState.No]);
             else
-                dataSource.AddRange(new[] { PropertyState.Yes, PropertyState.No });
+                dataSource.AddRange([PropertyState.Yes, PropertyState.No]);
 
             foreach(var configProp in configPropertyControls)
             {

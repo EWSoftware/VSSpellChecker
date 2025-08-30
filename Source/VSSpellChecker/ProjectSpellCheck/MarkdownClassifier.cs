@@ -34,9 +34,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         #region Private data members
         //=====================================================================
 
-        private static readonly Regex reCode = new Regex(@"(`[^`\r\n]+?`)|(^```.+?^```)|(^\$\$.+?^\$\$)",
+        private static readonly Regex reCode = new(@"(`[^`\r\n]+?`)|(^```.+?^```)|(^\$\$.+?^\$\$)",
             RegexOptions.Singleline | RegexOptions.Multiline);
-        private static readonly MatchEvaluator matchReplacement = new MatchEvaluator(ReplaceAngleBrackets);
+        private static readonly MatchEvaluator matchReplacement = new(ReplaceAngleBrackets);
 
         #endregion
 

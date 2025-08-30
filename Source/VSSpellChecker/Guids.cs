@@ -41,7 +41,7 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// Command set GUID
         /// </summary>
-        public static readonly Guid guidVSSpellCheckerCmdSet = new Guid(guidVSSpellCheckerCmdSetString);
+        public static readonly Guid guidVSSpellCheckerCmdSet = new(guidVSSpellCheckerCmdSetString);
         /// <summary>
         /// Spelling configuration file editor factory GUID string
         /// </summary>

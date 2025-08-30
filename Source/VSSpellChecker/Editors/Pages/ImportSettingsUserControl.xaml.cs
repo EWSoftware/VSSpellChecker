@@ -115,7 +115,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             bool isGlobal = configFilePath.Equals(SpellCheckerConfiguration.GlobalConfigurationFilePath,
                 StringComparison.OrdinalIgnoreCase);
 
-            OpenFileDialog dlg = new OpenFileDialog
+            OpenFileDialog dlg = new()
             {
                 Title = "Select a Configuration File to Import",
                 InitialDirectory = isGlobal ? Directory.GetCurrentDirectory() : configFilePath,

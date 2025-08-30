@@ -153,7 +153,7 @@ namespace VisualStudio.SpellChecker
             {
                 try
                 {
-                    if(!(this.GetService(typeof(SVsShellMonitorSelection)) is IVsMonitorSelection ms) ||
+                    if(this.GetService(typeof(SVsShellMonitorSelection)) is not IVsMonitorSelection ms ||
                       ms.AdviseSelectionEvents(this, out selectionMonitorCookie) != VSConstants.S_OK)
                     {
                         selectionMonitorCookie = 0;

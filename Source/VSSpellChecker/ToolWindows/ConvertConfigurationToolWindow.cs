@@ -131,7 +131,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     {
                         // Get the scope for handling hot keys.  The key used here doesn't matter.  We're just
                         // getting the scope to use.
-                        AccessKeyPressedEventArgs e = new AccessKeyPressedEventArgs("X");
+                        AccessKeyPressedEventArgs e = new("X");
 
                         ((UserControl)this.Content).RaiseEvent(e);
                         scope = e.Scope;

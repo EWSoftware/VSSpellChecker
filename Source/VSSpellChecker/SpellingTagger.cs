@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 12/29/2023
-// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling tagger
 //
@@ -169,8 +169,8 @@ namespace VisualStudio.SpellChecker
         /// <summary>
         /// This is used to get an enumerable list of ignore once word spans
         /// </summary>
-        public IEnumerable<Span> IgnoredOnceSpans => wordsIgnoredOnce.Select(
-            s => Span.FromBounds(s.StartIndex, s.EndIndex)).ToList();
+        public IEnumerable<Span> IgnoredOnceSpans => [.. wordsIgnoredOnce.Select(
+            s => Span.FromBounds(s.StartIndex, s.EndIndex))];
 
         #endregion
 
@@ -411,7 +411,7 @@ namespace VisualStudio.SpellChecker
 
             foreach(var change in e.Changes)
             {
-                SnapshotSpan changedSpan = new SnapshotSpan(snapshot, change.NewSpan);
+                SnapshotSpan changedSpan = new(snapshot, change.NewSpan);
 
                 var startLine = changedSpan.Start.GetContainingLine();
                 var endLine = (startLine.EndIncludingLineBreak < changedSpan.End) ?
@@ -483,11 +483,8 @@ namespace VisualStudio.SpellChecker
         {
             if(!isClosed && !dirtySpans.IsEmpty)
             {
-                if(timer == null)
-                {
-                    timer = new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.ApplicationIdle,
-                        StartUpdateTask, Dispatcher.CurrentDispatcher);
-                }
+                timer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(500), DispatcherPriority.ApplicationIdle,
+                    StartUpdateTask, Dispatcher.CurrentDispatcher);
 
                 timer.Stop();
                 timer.Start();
@@ -511,7 +508,7 @@ namespace VisualStudio.SpellChecker
                 {
                     // Empty the queue and normalize the dirty spans
                     ITextSnapshot snapshot = buffer.CurrentSnapshot;
-                    List<SnapshotSpan> spans = new List<SnapshotSpan>();
+                    List<SnapshotSpan> spans = [];
 
                     while(dirtySpans.TryDequeue(out SnapshotSpan s))
                         spans.Add(s.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive));
@@ -652,7 +649,7 @@ namespace VisualStudio.SpellChecker
         /// <returns>An enumerable list of misspelling tags</returns>
         private IEnumerable<MisspellingTag> GetMisspellingsInSpans(NormalizedSnapshotSpanCollection spans)
         {
-            List<Match> rangeExclusions = new List<Match>();
+            List<Match> rangeExclusions = [];
             SnapshotSpan errorSpan, deleteWordSpan;
             Span lastWord;
             string textToSplit, actualWord, textToCheck;
@@ -784,8 +781,8 @@ namespace VisualStudio.SpellChecker
                           configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
                         {
                             yield return new MisspellingTag(MisspellingType.DeprecatedTerm, errorSpan,
-                                new[] { new SpellingSuggestion(null, preferredTerm.CapitalizeIfNecessary(
-                                    Char.IsUpper(textToCheck[0]))) });
+                                [ new SpellingSuggestion(null, preferredTerm.CapitalizeIfNecessary(
+                                    Char.IsUpper(textToCheck[0]))) ]);
                             continue;
                         }
 
@@ -793,8 +790,8 @@ namespace VisualStudio.SpellChecker
                           configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
                         {
                             yield return new MisspellingTag(MisspellingType.CompoundTerm, errorSpan,
-                                new[] { new SpellingSuggestion(null, preferredTerm.CapitalizeIfNecessary(
-                                    Char.IsUpper(textToCheck[0]))) });
+                                [ new SpellingSuggestion(null, preferredTerm.CapitalizeIfNecessary(
+                                    Char.IsUpper(textToCheck[0]))) ]);
                             continue;
                         }
 

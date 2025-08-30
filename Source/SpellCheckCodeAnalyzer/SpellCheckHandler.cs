@@ -516,8 +516,8 @@ namespace VisualStudio.SpellChecker.CodeAnalyzer
                         }
                         else
                         {
-                            if(!(token.Parent?.Parent is XmlElementSyntax parentElement) ||
-                                !configuration.IgnoredXmlElements.Contains(parentElement.StartTag.Name.LocalName.Text))
+                            if(token.Parent?.Parent is not XmlElementSyntax parentElement ||
+                              !configuration.IgnoredXmlElements.Contains(parentElement.StartTag.Name.LocalName.Text))
                             {
                                 spans.Add(new SpellCheckSpan(token.Span, SpellCheckType.Comment,
                                     SpellCheckType.XmlDocComment, token.Text));

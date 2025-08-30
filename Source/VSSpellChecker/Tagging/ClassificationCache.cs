@@ -34,8 +34,7 @@ namespace VisualStudio.SpellChecker.Tagging
         //=====================================================================
 
         // Thread-safe dictionaries are used to ensure there are no issues if accessed from background tasks
-        private static readonly ConcurrentDictionary<string, ClassificationCache> contentTypes =
-            new ConcurrentDictionary<string, ClassificationCache>();
+        private static readonly ConcurrentDictionary<string, ClassificationCache> contentTypes = new();
 
         private readonly ConcurrentDictionary<string, byte> contentClassifications;
 

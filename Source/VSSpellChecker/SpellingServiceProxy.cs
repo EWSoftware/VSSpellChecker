@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellingServiceProxy.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the spelling service interface to expose the spell checker to
 // third-party tagger providers.
@@ -207,14 +207,12 @@ namespace VisualStudio.SpellChecker
                         projectFilename = projectItem.ContainingProject.FullName;
                     }
 
-                    if(bufferFilename == null)
-                        bufferFilename = projectFilename ?? solution.FullName;
+                    bufferFilename ??= projectFilename ?? solution.FullName;
 
                     if(bufferFilename != null)
                     {
-                        List<string> additionalGlobalConfigs = new List<string>(),
-                            additionalEditorConfigs = new List<string>(),
-                            codeAnalysisDictionaries = new List<string>();
+                        List<string> additionalGlobalConfigs = [], additionalEditorConfigs = [],
+                            codeAnalysisDictionaries = [];
 
                         foreach(var addConfig in SpellCheckFileInfo.ProjectAdditionalConfigurationFiles(projectFilename))
                         {

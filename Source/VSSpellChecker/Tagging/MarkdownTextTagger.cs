@@ -61,7 +61,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
             this.buffer = buffer;
             this.classifier = classifier;
-            this.ignoredClassifications = (ignoredClassifications ?? Enumerable.Empty<string>());
+            this.ignoredClassifications = ignoredClassifications ?? [];
 
             this.classifier.ClassificationChanged += ClassificationChanged;
         }

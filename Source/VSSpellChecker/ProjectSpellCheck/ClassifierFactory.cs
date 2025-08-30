@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ClassifierFactory.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/15/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to generate classifiers for files that need to be spell checked
 //
@@ -209,7 +209,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                 if(id != "None" && definitions.TryGetValue(id, out ClassifierDefinition definition) && (definition.Mnemonic == '&' ||
                   definition.Mnemonic == '_'))
+                {
                     return definition.Mnemonic;
+                }
             }
 
             return '&';
@@ -237,6 +239,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 id = FileIsXml(filename) ? "XML" : "PlainText";
 
             if(id != "None" && definitions.TryGetValue(id, out ClassifierDefinition definition))
+            {
                 switch(definition.ClassifierType)
                 {
                     case "PlainTextClassifier":
@@ -278,6 +281,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     default:
                         break;
                 }
+            }
 
             return classifier;
         }
@@ -292,31 +296,35 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             definitions = new Dictionary<string, ClassifierDefinition>(StringComparer.OrdinalIgnoreCase);
             extensionMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            List<string> locations = new List<string>
-            { 
+            List<string> locations =
+            [
                 Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     "Classifications.config"),
                 Path.Combine(SpellCheckerConfiguration.GlobalConfigurationFilePath, "Classifications.config")
-            };
+            ];
 
             try
             {
                 foreach(string configFile in locations)
+                {
                     if(File.Exists(configFile))
                     {
                         var config = XDocument.Load(configFile);
 
                         foreach(var classifier in config.Descendants("Classifier"))
+                        {
                             definitions[(string)classifier.Attribute("Id")] = new ClassifierDefinition
                             {
                                 ClassifierType = (string)classifier.Attribute("Type"),
                                 Mnemonic = ((string)classifier.Attribute("Mnemonic") ?? "&")[0],
                                 Configuration = classifier
                             };
+                        }
 
                         foreach(var extension in config.Descendants("Extension"))
                             extensionMap[(string)extension.Attribute("Value")] = (string)extension.Attribute("Classifier");
                     }
+                }
             }
             catch(Exception ex)
             {

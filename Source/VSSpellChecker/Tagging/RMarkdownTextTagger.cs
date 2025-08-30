@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RMarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 06/03/2024
-// Note    : Copyright 2017-2024, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2017-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for R markdown files when the R Tools for Visual Studio
 // package is installed (part of the Data Science and Analytical Applications workload).
@@ -97,7 +97,7 @@ namespace VisualStudio.SpellChecker.Tagging
             this.classifier = classifier;
             this.classifier.ClassificationChanged += this.ClassificationChanged;
 
-            this.ignoredClassifications = (ignoredClassifications ?? Enumerable.Empty<string>());
+            this.ignoredClassifications = (ignoredClassifications ?? []);
         }
         #endregion
 
@@ -107,7 +107,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <inheritdoc />
         public IEnumerable<ITagSpan<NaturalTextTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            List<SnapshotSpan> ignoredSpans = new List<SnapshotSpan>();
+            List<SnapshotSpan> ignoredSpans = [];
             string text;
             int start, end;
 
@@ -155,7 +155,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
                             if(end - start > 1)
                             {
-                                SnapshotSpan s = new SnapshotSpan(classificationSpan.Span.Start + start, end - start);
+                                SnapshotSpan s = new(classificationSpan.Span.Start + start, end - start);
                                 ignoredSpans.Add(s);
 
                                 classificationCache.Add(name);

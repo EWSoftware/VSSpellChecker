@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : RegexClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify text file content using a set of regular expressions
 //
@@ -69,7 +69,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             string expression, options;
 
-            expressions = new List<RegexClassification>();
+            expressions = [];
 
             if(classifierConfiguration != null)
                 foreach(XElement match in classifierConfiguration.Elements("Match"))
@@ -115,7 +115,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <inheritdoc />
         public override IEnumerable<SpellCheckSpan> Parse()
         {
-            List<SpellCheckSpan> spans = new List<SpellCheckSpan>();
+            List<SpellCheckSpan> spans = [];
             SpellCheckSpan current, next;
 
             foreach(var rc in expressions)
@@ -143,7 +143,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             this.AdjustClassifications(spans);
 
-            spans = spans.OrderBy(s => s.Span.Start).ToList();
+            spans = [.. spans.OrderBy(s => s.Span.Start)];
 
             // Merge intersecting spans and either remove or split entirely overlapped spans
             for(int idx = 0; idx < spans.Count - 1; idx++)

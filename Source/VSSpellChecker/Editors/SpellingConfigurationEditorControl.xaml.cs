@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 06/15/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit spell checker configuration settings files
 //
@@ -103,7 +103,8 @@ namespace VisualStudio.SpellChecker.Editors
             lastSelectedSection = -1;
 
             // The property pages will be listed in this order
-            Type[] propertyPages = new[] {
+            Type[] propertyPages = 
+            [
                 typeof(FileInfoUserControl),
                 typeof(GeneralSettingsUserControl),
                 typeof(CodeAnalyzerOptionsUserControl),
@@ -116,7 +117,7 @@ namespace VisualStudio.SpellChecker.Editors
                 typeof(ImportSettingsUserControl),
                 // Global only, should always be last
                 typeof(VisualStudioUserControl)
-            };
+            ];
 
             try
             {
@@ -169,13 +170,13 @@ namespace VisualStudio.SpellChecker.Editors
             if(configFile.IsGlobal)
             {
                 // There should only be one non-file section in a .globalconfig file
-                sections = new BindingList<SectionInfo>(configFile.Sections.Select(s => new SectionInfo(s)).ToList());
+                sections = new BindingList<SectionInfo>([.. configFile.Sections.Select(s => new SectionInfo(s))]);
                 btnAddSection.IsEnabled = false;
             }
             else
             {
-                sections = new BindingList<SectionInfo>(configFile.Sections.Where(s => s.IsFileSection).Select(
-                    s => new SectionInfo(s)).ToList());
+                sections = new BindingList<SectionInfo>([.. configFile.Sections.Where(s => s.IsFileSection).Select(
+                    s => new SectionInfo(s))]);
                 btnAddSection.IsEnabled = true;
             }
 
@@ -194,10 +195,7 @@ namespace VisualStudio.SpellChecker.Editors
                     lbSections.SelectedIndex = sections.IndexOf(match);
                 else
                 {
-                    var newSection = new EditorConfigSection(new[]
-                    {
-                        new SectionLine($"[{defaultFileGlob}]"),
-                    });
+                    var newSection = new EditorConfigSection([new SectionLine($"[{defaultFileGlob}]")]);
 
                     configFile.Sections.Add(newSection);
                     sections.Add(new SectionInfo(newSection));
@@ -334,10 +332,7 @@ namespace VisualStudio.SpellChecker.Editors
 
             if(form.ShowDialog() ?? false)
             {
-                var newSection = new EditorConfigSection(new[]
-                {
-                    new SectionLine($"[{form.FileGlob}]"),
-                });
+                var newSection = new EditorConfigSection([new SectionLine($"[{form.FileGlob}]")]);
 
                 if(!String.IsNullOrWhiteSpace(form.Comments))
                     newSection.SectionLines.Add(new SectionLine($"# VSSPELL: {form.Comments}"));

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ConvertConfigurationControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us), Franz Alex Gaisie-Essilfie
-// Updated : 05/01/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles conversion of the old configuration files to .editorconfig
 // settings.
@@ -91,7 +91,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             btnRefresh.IsEnabled = btnConvertSelected.IsEnabled = btnConvertAll.IsEnabled = false;
 
             configFiles = await Task.Run(() => this.GenerateConfigurationFileChanges()).ConfigureAwait(true);
-            editorConfigFiles = new Dictionary<string, string>();
+            editorConfigFiles = [];
 
             spSpinner.Visibility = lblProgress.Visibility = Visibility.Hidden;
             btnRefresh.IsEnabled = true;
@@ -191,14 +191,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // Sort the old configurations by folder and by type to ensure they are applied in the proper order.
             // This prevents a file configuration getting above a folder configuration if it's name sorts
             // alphabetically before the containing folder name.
-            return convertedConfigurations.OrderBy(c => c.LegacyConfiguration.IsGlobalConfiguration ? String.Empty :
+            return [.. convertedConfigurations.OrderBy(c => c.LegacyConfiguration.IsGlobalConfiguration ? String.Empty :
                 Path.GetDirectoryName(c.LegacyConfiguration.LegacyConfigurationFilename)).ThenBy(c =>
                 {
                     return c.LegacyConfiguration.IsGlobalConfiguration ? 0 :
                         c.LegacyConfiguration.IsSolutionConfiguration ? 1 :
                         c.LegacyConfiguration.IsProjectConfiguration ? 2 :
                         c.LegacyConfiguration.IsFolderConfiguration ? 3 : 4;
-                }).ThenBy(c => c.LegacyConfiguration.LegacyConfigurationFilename).ToList();
+                }).ThenBy(c => c.LegacyConfiguration.LegacyConfigurationFilename)];
         }
 
         /// <summary>
@@ -363,8 +363,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     // The global configuration is handled separately
                     if(oldFile.LegacyConfiguration.IsGlobalConfiguration)
                     {
-                        editorConfig = MergePropertiesIntoEditorConfigFile(oldFile.LegacyConfiguration.EditorConfigFilename,
-                            new[] { oldFile });
+                        editorConfig = MergePropertiesIntoEditorConfigFile(
+                            oldFile.LegacyConfiguration.EditorConfigFilename, [oldFile]);
 
                         editorConfig.Filename = SpellCheckerConfiguration.GlobalConfigurationFilename;
                         editorConfig.Save();
@@ -382,8 +382,8 @@ namespace VisualStudio.SpellChecker.ToolWindows
                         continue;
                     }
 
-                    editorConfig = MergePropertiesIntoEditorConfigFile(oldFile.LegacyConfiguration.EditorConfigFilename,
-                        new[] { oldFile });
+                    editorConfig = MergePropertiesIntoEditorConfigFile(
+                        oldFile.LegacyConfiguration.EditorConfigFilename, [oldFile]);
 
                     var existingConfig = dte2.Solution.FindProjectItemForFile(editorConfig.Filename);
 

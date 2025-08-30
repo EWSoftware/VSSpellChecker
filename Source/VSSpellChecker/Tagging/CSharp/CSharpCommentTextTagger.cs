@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CSharpCommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 01/09/2025
+// Updated : 08/30/2025
 // Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
@@ -134,7 +134,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
         public CSharpCommentTextTagger(ITextBuffer buffer)
         {
             this.buffer = buffer;
-            this.IgnoredXmlElements = this.SpellCheckedAttributes = Array.Empty<string>();
+            this.IgnoredXmlElements = this.SpellCheckedAttributes = [];
             this.SupportsOldStyleXmlDocComments = true;
 
             // Populate our cache initially
@@ -184,12 +184,14 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
                     ITextSnapshotLine line = lineStart.GetContainingLine();
                     State state = lineCache[line.LineNumber];
 
-                    List<SnapshotSpan> naturalTextSpans = new List<SnapshotSpan>();
+                    List<SnapshotSpan> naturalTextSpans = [];
                     _ = ScanLine(state, line, naturalTextSpans);
 
                     foreach(SnapshotSpan naturalTextSpan in naturalTextSpans)
+                    {
                         if(naturalTextSpan.IntersectsWith(span))
                             yield return new TagSpan<NaturalTextTag>(naturalTextSpan, new NaturalTextTag());
+                    }
 
                     // Advance to next line
                     lineStart = line.EndIncludingLineBreak;
@@ -225,7 +227,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
             // Now that lineCache is the appropriate size we can safely start rescanning.
             // If we hadn't updated lineCache, then rescanning could walk off the edge.
-            List<SnapshotSpan> changedSpans = new List<SnapshotSpan>();
+            List<SnapshotSpan> changedSpans = [];
 
             foreach(ITextChange change in e.Changes)
             {
@@ -280,7 +282,7 @@ namespace VisualStudio.SpellChecker.Tagging.CSharp
 
         private State ScanLine(State state, ITextSnapshotLine line, List<SnapshotSpan> naturalTextSpans = null)
         {
-            LineProgress p = new LineProgress(line, state, naturalTextSpans);
+            LineProgress p = new(line, state, naturalTextSpans);
 
             while(!p.EndOfLine)
             {

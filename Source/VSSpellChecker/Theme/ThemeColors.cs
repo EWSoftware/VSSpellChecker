@@ -55,7 +55,7 @@ namespace VisualStudio.SpellChecker.Theme
         /// <summary>
         /// This read-only property returns the theme color instance
         /// </summary>
-        public static ThemeColors Instance => instance ?? (instance = new ThemeColors());
+        public static ThemeColors Instance => instance ??= new ThemeColors();
 
         /// <summary>
         /// Button background color

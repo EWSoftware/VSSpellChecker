@@ -223,7 +223,7 @@ namespace VisualStudio.SpellChecker.Editors
                 return VSConstants.VS_E_INCOMPATIBLEDOCDATA;
 
             // --- Create the Document (editor)
-            TEditorPane newEditor = new TEditorPane();
+            TEditorPane newEditor = new();
             ppunkDocView = Marshal.GetIUnknownForObject(newEditor);
             ppunkDocData = Marshal.GetIUnknownForObject(newEditor);
             pbstrEditorCaption = "";

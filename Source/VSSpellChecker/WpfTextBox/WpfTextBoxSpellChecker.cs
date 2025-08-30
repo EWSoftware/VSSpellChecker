@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : WpfTextBoxSpellChecker.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/16/2023
-// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2016-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that adds spell checking using Hunspell to any WPF text box within Visual Studio
 //
@@ -55,8 +55,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         #region Private data members
         //=====================================================================
 
-        private static readonly ConcurrentDictionary<TextBox, WpfTextBoxSpellChecker> wpfSpellCheckers =
-            new ConcurrentDictionary<TextBox, WpfTextBoxSpellChecker>();
+        private static readonly ConcurrentDictionary<TextBox, WpfTextBoxSpellChecker> wpfSpellCheckers = new();
 
         private static SpellCheckerConfiguration configuration;
         private static SpellingDictionary dictionary;
@@ -69,7 +68,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         private readonly List<FileMisspelling> misspelledWords;
         private FileMisspelling selectedMisspelling;
 
-        private static readonly object syncRoot = new Object();
+        private static readonly object syncRoot = new();
 
         #endregion
 
@@ -95,7 +94,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
                 };
             }
 
-            misspelledWords = new List<FileMisspelling>();
+            misspelledWords = [];
 
             var adornerLayer = AdornerLayer.GetAdornerLayer(textBox);
 
@@ -275,7 +274,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         /// editor/tool window's name, it's usually sufficient.</remarks>
         private static string ElementName(FrameworkElement element)
         {
-            List<string> nameParts = new List<string>();
+            List<string> nameParts = [];
             string name;
             bool isWindow = false;
 
@@ -336,7 +335,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
             misspelledWords.Clear();
 
             // Always ignore URLs
-            rangeExclusions = CommonUtilities.Url.Matches(textToSplit).Cast<Match>().ToList();
+            rangeExclusions = [.. CommonUtilities.Url.Matches(textToSplit).Cast<Match>()];
 
             // Note the location of all XML elements if needed
             if(wordSplitter.Configuration.IgnoreXmlElementsInText)
@@ -440,7 +439,7 @@ namespace VisualStudio.SpellChecker.WpfTextBox
         /// <returns>An enumerable list of menu actions to add to the context menu</returns>
         private IEnumerable<FrameworkElement> MenuActions()
         {
-            List<FrameworkElement> commands = new List<FrameworkElement>();
+            List<FrameworkElement> commands = [];
 
             if(selectedMisspelling.MisspellingType == MisspellingType.MisspelledWord)
             {

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : XmlFilesUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/17/2023
-// Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2014-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the XML files spell checker configuration settings
 //
@@ -81,7 +81,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredXmlElements), out var spi))
             {
-                values.AddRange(spi.EditorConfigPropertyValue.Split(new[] { ',', ' ' },
+                values.AddRange(spi.EditorConfigPropertyValue.Split([',', ' '],
                     StringSplitOptions.RemoveEmptyEntries));
 
                 if(values.Count != 0 && values[0].Equals(SpellCheckerConfiguration.ClearInherited,
@@ -104,7 +104,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.SpellCheckedXmlAttributes), out spi))
             {
-                values.AddRange(spi.EditorConfigPropertyValue.Split(new[] { ',', ' ' },
+                values.AddRange(spi.EditorConfigPropertyValue.Split([',', ' '],
                     StringSplitOptions.RemoveEmptyEntries));
 
                 if(values.Count != 0 && values[0].Equals(SpellCheckerConfiguration.ClearInherited,
@@ -140,8 +140,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbIgnoredXmlElements.Items.Count != 0 || !chkInheritXmlSettings.IsChecked.Value || isGlobal)
             {
-                compareSet = new HashSet<string>(lbIgnoredXmlElements.Items.Cast<string>());
-                newValues = new List<string>(compareSet);
+                compareSet = [.. lbIgnoredXmlElements.Items.Cast<string>()];
+                newValues = [.. compareSet];
 
                 if(isGlobal && compareSet.SetEquals(SpellCheckerConfiguration.DefaultIgnoredXmlElements))
                     newValues.Clear();
@@ -161,8 +161,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(lbSpellCheckedAttributes.Items.Count != 0 || !chkInheritXmlSettings.IsChecked.Value || isGlobal)
             {
-                compareSet = new HashSet<string>(lbSpellCheckedAttributes.Items.Cast<string>());
-                newValues = new List<string>(compareSet);
+                compareSet = [.. lbSpellCheckedAttributes.Items.Cast<string>()];
+                newValues = [.. compareSet];
 
                 if(isGlobal && compareSet.SetEquals(SpellCheckerConfiguration.DefaultSpellCheckedAttributes))
                     newValues.Clear();
@@ -202,7 +202,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(txtIgnoredElement.Text.Length != 0)
             {
-                foreach(string word in txtIgnoredElement.Text.Split(new[] { ' ', '\t', ',', '.', '|' },
+                foreach(string word in txtIgnoredElement.Text.Split([' ', '\t', ',', '.', '|'],
                   StringSplitOptions.RemoveEmptyEntries))
                 {
                     idx = lbIgnoredXmlElements.Items.IndexOf(word);
@@ -285,7 +285,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(txtAttributeName.Text.Length != 0)
             {
-                foreach(string word in txtAttributeName.Text.Split(new[] { ' ', '\t', ',', '.', '|' },
+                foreach(string word in txtAttributeName.Text.Split([' ', '\t', ',', '.', '|'],
                   StringSplitOptions.RemoveEmptyEntries))
                 {
                     idx = lbSpellCheckedAttributes.Items.IndexOf(word);

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ConvertConfigurationInfoBar.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/09/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that implements the info bar used to offer converting the spell checker
 // configuration files to .editorconfig settings.
@@ -70,8 +70,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         {
             get
             {
-                if(instance == null)
-                    instance = new ConvertConfigurationInfoBar();
+                instance ??= new ConvertConfigurationInfoBar();
 
                 return instance;
             }
@@ -96,15 +95,16 @@ namespace VisualStudio.SpellChecker.ToolWindows
 
                 if(obj is IVsInfoBarHost host)
                 {
-                    InfoBarModel infoBarModel = new InfoBarModel(
-                        new[] { new InfoBarTextSpan("The spell checker extension's configuration is now stored " +
-                            "as .editorconfig settings.  The old .vsspell configuration files, including the " +
-                            "global configuration which will remain separate, must be converted.") },
-                        new[]
-                        {
+                    InfoBarModel infoBarModel = new(
+                        [
+                            new InfoBarTextSpan("The spell checker extension's configuration is now stored " +
+                                "as .editorconfig settings.  The old .vsspell configuration files, including the " +
+                                "global configuration which will remain separate, must be converted.")
+                        ],
+                        [
                             new InfoBarHyperlink("More Info", ConvertAction.MoreInfo),
                             new InfoBarHyperlink("Convert", ConvertAction.Convert)
-                        },
+                        ],
                         KnownMonikers.StatusInformation, true);
 
                     var factory = Utility.GetServiceFromPackage<IVsInfoBarUIFactory, SVsInfoBarUIFactory>(true);

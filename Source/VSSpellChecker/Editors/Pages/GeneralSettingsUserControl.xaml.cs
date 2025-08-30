@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : GeneralSettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/16/2023
-// Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2014-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the general spell checker configuration settings
 //
@@ -48,8 +48,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             InitializeComponent();
 
-            configPropertyControls = new[]
-            {
+            configPropertyControls =
+            [
                 (cboSpellCheckAsYouType, nameof(SpellCheckerConfiguration.SpellCheckAsYouType)),
                 (cboIncludeInProjectSpellCheck, nameof(SpellCheckerConfiguration.IncludeInProjectSpellCheck)),
                 (cboEnableCodeAnalyzers, nameof(SpellCheckerConfiguration.EnableCodeAnalyzers)),
@@ -62,7 +62,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 (cboIgnoreXmlInText, nameof(SpellCheckerConfiguration.IgnoreXmlElementsInText)),
                 (cboTreatUnderscoresAsSeparators, nameof(SpellCheckerConfiguration.TreatUnderscoreAsSeparator)),
                 (cboIgnoreMnemonics, nameof(SpellCheckerConfiguration.IgnoreMnemonics))
-            };
+            ];
         }
         #endregion
 
@@ -93,9 +93,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 throw new ArgumentNullException(nameof(properties));
 
             if(!isGlobal)
-                dataSource.AddRange(new[] { PropertyState.Inherited, PropertyState.Yes, PropertyState.No });
+                dataSource.AddRange([PropertyState.Inherited, PropertyState.Yes, PropertyState.No]);
             else
-                dataSource.AddRange(new[] { PropertyState.Yes, PropertyState.No });
+                dataSource.AddRange([PropertyState.Yes, PropertyState.No]);
 
             foreach(var configProp in configPropertyControls)
             {

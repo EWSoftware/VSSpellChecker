@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 01/09/2025
+// Updated : 08/30/2025
 // Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
@@ -156,9 +156,9 @@ namespace VisualStudio.SpellChecker.Tagging
             this.classifier = classifier;
             this.classifier.ClassificationChanged += ClassificationChanged;
 
-            this.ignoredXmlElements = (ignoredXmlElements ?? Enumerable.Empty<string>());
-            this.spellCheckedXmlAttributes = (spellCheckedXmlAttributes ?? Enumerable.Empty<string>());
-            this.ignoredClassifications = (ignoredClassifications ?? Enumerable.Empty<string>());
+            this.ignoredXmlElements = ignoredXmlElements ?? [];
+            this.spellCheckedXmlAttributes = spellCheckedXmlAttributes ?? [];
+            this.ignoredClassifications = ignoredClassifications ?? [];
         }
         #endregion
 

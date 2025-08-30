@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredClassificationsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/21/2023
-// Note    : Copyright 2018-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2018-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored classifications spell checker configuration settings
 //
@@ -141,12 +141,12 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             else
                 chkInheritIgnoredClassifications.IsChecked = true;
 
-            visualStudioItems = new BindingList<ClassificationItem>();
-            solutionSpellCheckItems = new BindingList<ClassificationItem>();
+            visualStudioItems = [];
+            solutionSpellCheckItems = [];
 
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredClassifications), out var spi))
             {
-                var classifications = spi.EditorConfigPropertyValue.Split(new[] { ',' },
+                var classifications = spi.EditorConfigPropertyValue.Split([','],
                     StringSplitOptions.RemoveEmptyEntries).ToList();
 
                 if(classifications.Count != 0 && classifications[0].Equals(SpellCheckerConfiguration.ClearInherited,
@@ -158,7 +158,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
                 foreach(string classInfo in classifications)
                 {
-                    var classProps = classInfo.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    var classProps = classInfo.Split(['|'], StringSplitOptions.RemoveEmptyEntries).ToList();
 
                     if(classProps.Count != 0)
                     {
@@ -229,7 +229,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             // Ignored classifications are grouped by content type with the key and values separated by
             // pipes.  Multiple classifications are separated by commas.
             var values = visualStudioItems.Where(v => v.IsSelected).Concat(solutionSpellCheckItems.Where(
-              s => s.IsSelected)).GroupBy(c => c.ContentType).Select(g => 
+              s => s.IsSelected)).GroupBy(c => c.ContentType).Select(g =>
                 $"{g.Key}|{String.Join("|", g.Select(c => c.Classification))}").ToList();
 
             // For the global configuration, if it matches the default set, don't store it
@@ -294,7 +294,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            BindingList<ClassificationItem> items = new BindingList<ClassificationItem>();
+            BindingList<ClassificationItem> items = [];
 
             // Add classifications from the cache
             foreach(var contentType in ClassificationCache.ContentTypes)

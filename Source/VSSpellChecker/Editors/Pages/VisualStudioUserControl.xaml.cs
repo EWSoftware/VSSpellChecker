@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VisualStudioUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/15/2023
-// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2016-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the Visual Studio WPF text box spell checker configuration
 // settings.
@@ -91,13 +91,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 if(properties.TryGetValue(nameof(SpellCheckerConfiguration.VisualStudioIdExclusions),
                   out var exclusions))
                 {
-                    expressions = exclusions.EditorConfigPropertyValue.ToRegexes().OrderBy(
-                        exp => exp.ToString()).ToList();
+                    expressions = [.. exclusions.EditorConfigPropertyValue.ToRegexes().OrderBy(
+                        exp => exp.ToString())];
                 }
                 else
                 {
-                    expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioIdExclusions.Select(
-                        p => new Regex(p)));
+                    expressions = [.. SpellCheckerConfiguration.DefaultVisualStudioIdExclusions.Select(
+                        p => new Regex(p))];
                 }
             }
 
@@ -112,7 +112,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             }
 
             btnEditExpression.IsEnabled = btnRemoveExpression.IsEnabled = (expressions.Count != 0);
-            
+
             this.HasChanges = false;
         }
 
@@ -202,8 +202,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 }
             }
             else
+            {
                 if(lbExclusionExpressions.Items.Count != 0)
                     lbExclusionExpressions.SelectedIndex = 0;
+            }
         }
 
         /// <summary>
@@ -229,8 +231,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 if(idx < 0)
                     idx = 0;
                 else
+                {
                     if(idx >= lbExclusionExpressions.Items.Count)
                         idx = lbExclusionExpressions.Items.Count - 1;
+                }
 
                 lbExclusionExpressions.SelectedIndex = idx;
             }
@@ -243,8 +247,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         /// <param name="e">The event arguments</param>
         private void btnDefaultIDs_Click(object sender, RoutedEventArgs e)
         {
-            expressions = new List<Regex>(SpellCheckerConfiguration.DefaultVisualStudioIdExclusions.Select(
-                p => new Regex(p)));
+            expressions = [.. SpellCheckerConfiguration.DefaultVisualStudioIdExclusions.Select(
+                p => new Regex(p))];
 
             this.LoadConfiguration(true, null);
 

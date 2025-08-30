@@ -116,7 +116,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         public abstract void Invoke(CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        /// <returns>This action does not participate in telemetry logging and alway returns false</returns>
+        /// <returns>This action does not participate in telemetry logging and always returns false</returns>
         public bool TryGetTelemetryId(out Guid telemetryId)
         {
             telemetryId = Guid.Empty;

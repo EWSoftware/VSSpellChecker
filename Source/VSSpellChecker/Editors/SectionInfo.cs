@@ -90,7 +90,6 @@ namespace VisualStudio.SpellChecker.Editors
         }
         #endregion
 
-
         #region INotifyPropertyChanged Members
         //=====================================================================
 
@@ -117,7 +116,7 @@ namespace VisualStudio.SpellChecker.Editors
         /// </summary>
         public void RefreshSectionDescription()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             if(this.Section.IsGlobal)
             {

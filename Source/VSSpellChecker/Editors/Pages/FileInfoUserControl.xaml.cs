@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileInfoUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/14/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to provide some information about the settings file
 //
@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -72,7 +71,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
           string sectionId)
         {
             // Nothing to do for this one
-            return Enumerable.Empty<(string PropertyName, string PropertyValue)>();
+            return [];
         }
 
 #pragma warning disable 67

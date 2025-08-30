@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : CodeClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify source code file content using a set of regular expressions
 //
@@ -112,7 +112,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     // addition, we don't have to deal with the comment delimiters which may appear within an
                     // element between attributes when it spans more than one line which the XML reader doesn't
                     // like.
-                    HtmlDocument doc = new HtmlDocument();
+                    HtmlDocument doc = new();
                     doc.LoadHtml(span.Text);
 
                     var docSpans = new List<SpellCheckSpan>();
@@ -141,14 +141,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             string comment;
 
             foreach(var span in spans)
+            {
                 switch(span.Classification)
                 {
                     case RangeClassification.NormalStringLiteral:
                         if(span.Text[0] == '@' || span.Text[0] == 'R')
                             span.Classification = RangeClassification.VerbatimStringLiteral;
                         else
+                        {
                             if(span.Text[0] == '$')
                                 span.Classification = RangeClassification.InterpolatedStringLiteral;
+                        }
                         break;
 
                     case RangeClassification.SingleLineComment:
@@ -156,11 +159,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                         if(quadSlashDelimiter != null && comment.Length >= quadSlashDelimiter.Length &&
                           comment.Substring(0, quadSlashDelimiter.Length) == quadSlashDelimiter)
+                        {
                             span.Classification = RangeClassification.QuadSlashComment;
+                        }
                         else
+                        {
                             if(xmlDocCommentDelimiter != null && comment.Length >= xmlDocCommentDelimiter.Length &&
                               comment.Substring(0, xmlDocCommentDelimiter.Length) == xmlDocCommentDelimiter)
+                            {
                                 span.Classification = RangeClassification.XmlDocComments;
+                            }
+                        }
                         break;
 
                     case RangeClassification.DelimitedComments:
@@ -168,12 +177,15 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
                         if(oldStyleDocCommentDelimiter != null && comment.Length >= oldStyleDocCommentDelimiter.Length &&
                           comment.Substring(0, oldStyleDocCommentDelimiter.Length) == oldStyleDocCommentDelimiter)
+                        {
                             span.Classification = RangeClassification.XmlDocComments;
+                        }
                         break;
 
                     default:
                         break;
                 }
+            }
         }
         #endregion
 
@@ -267,8 +279,10 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         }
 
                     if(!this.SpellCheckConfiguration.IgnoredXmlElements.Contains(node.Name) && node.HasChildNodes)
+                    {
                         foreach(HtmlNode subnode in node.ChildNodes)
                             this.ParseNode(subnode, spans);
+                    }
                     break;
             }
         }

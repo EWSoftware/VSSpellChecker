@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckCommands.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/22/2018
-// Note    : Copyright 2015-2018, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class for the spell checker's routed UI commands
 //
@@ -29,156 +29,89 @@ namespace VisualStudio.SpellChecker.ToolWindows
         #region Replace command
         //=====================================================================
 
-        private static RoutedUICommand replace;
-
         /// <summary>
         /// Replace a word
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand Replace
-        {
-            get
-            {
-                if(replace == null)
-                    replace = new RoutedUICommand("Replace", "Replace", typeof(SpellCheckCommands));
+        public static RoutedUICommand Replace { get; } = new RoutedUICommand("Replace", "Replace",
+            typeof(SpellCheckCommands));
 
-                return replace;
-            }
-        }
         #endregion
 
         #region Replace All command
         //=====================================================================
 
-        private static RoutedUICommand replaceAll;
-
         /// <summary>
         /// Replace all occurrences of a word
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand ReplaceAll
-        {
-            get
-            {
-                if(replaceAll == null)
-                    replaceAll = new RoutedUICommand("Replace All", "ReplaceAll", typeof(SpellCheckCommands));
+        public static RoutedUICommand ReplaceAll { get; } = new RoutedUICommand("Replace All", "ReplaceAll",
+            typeof(SpellCheckCommands));
 
-                return replaceAll;
-            }
-        }
         #endregion
 
         #region Ignore Once command
         //=====================================================================
 
-        private static RoutedUICommand ignoreOnce;
-
         /// <summary>
         /// Ignore the occurrence of a word once
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand IgnoreOnce
-        {
-            get
-            {
-                if(ignoreOnce == null)
-                    ignoreOnce = new RoutedUICommand("Ignore Once", "IgnoreOnce", typeof(SpellCheckCommands));
+        public static RoutedUICommand IgnoreOnce { get; } = new RoutedUICommand("Ignore Once", "IgnoreOnce",
+            typeof(SpellCheckCommands));
 
-                return ignoreOnce;
-            }
-        }
         #endregion
 
         #region Ignore All command
         //=====================================================================
 
-        private static RoutedUICommand ignoreAll;
-
         /// <summary>
         /// Ignore all occurrences of a word
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand IgnoreAll
-        {
-            get
-            {
-                if(ignoreAll == null)
-                    ignoreAll = new RoutedUICommand("Ignore All", "IgnoreAll", typeof(SpellCheckCommands));
+        public static RoutedUICommand IgnoreAll { get; } = new RoutedUICommand("Ignore All", "IgnoreAll",
+            typeof(SpellCheckCommands));
 
-                return ignoreAll;
-            }
-        }
         #endregion
 
         #region Ignore File command
         //=====================================================================
 
-        private static RoutedUICommand ignoreFile;
-
         /// <summary>
         /// Ignore all issues within a file
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand IgnoreFile
-        {
-            get
-            {
-                if(ignoreFile == null)
-                    ignoreFile = new RoutedUICommand("Ignore Issues in This File", "IgnoreFile",
-                        typeof(SpellCheckCommands));
+        public static RoutedUICommand IgnoreFile { get; } = new RoutedUICommand("Ignore Issues in This File",
+            "IgnoreFile", typeof(SpellCheckCommands));
 
-                return ignoreFile;
-            }
-        }
         #endregion
 
         #region Ignore Project command
         //=====================================================================
 
-        private static RoutedUICommand ignoreProject;
-
         /// <summary>
         /// Ignore all issues within a project
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand IgnoreProject
-        {
-            get
-            {
-                if(ignoreProject == null)
-                    ignoreProject = new RoutedUICommand("Ignore Issues in This Project", "IgnoreProject",
-                        typeof(SpellCheckCommands));
+        public static RoutedUICommand IgnoreProject { get; } = new RoutedUICommand("Ignore Issues in This Project",
+            "IgnoreProject", typeof(SpellCheckCommands));
 
-                return ignoreProject;
-            }
-        }
         #endregion
 
         #region Go To Issue command
         //=====================================================================
 
-        private static RoutedUICommand goToIssue;
-
         /// <summary>
         /// Open the related file and go to the spelling issue
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand GoToIssue
-        {
-            get
-            {
-                if(goToIssue == null)
-                    goToIssue = new RoutedUICommand("Go To Issue", "GoToIssue", typeof(SpellCheckCommands));
+        public static RoutedUICommand GoToIssue { get; } = new RoutedUICommand("Go To Issue", "GoToIssue",
+            typeof(SpellCheckCommands));
 
-                return goToIssue;
-            }
-        }
         #endregion
 
         #region Add to Dictionary command
         //=====================================================================
-
-        private static RoutedUICommand addToDictionary;
 
         /// <summary>
         /// Add a word to the dictionary
@@ -186,105 +119,57 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// <remarks>This command has no default key binding.  If a parameter is specified, it should be a
         /// <see cref="CultureInfo"/> instance used to specify to which dictionary the word is added.  If null
         /// or not a culture instance, the word is added to the first available dictionary.</remarks>
-        public static RoutedUICommand AddToDictionary
-        {
-            get
-            {
-                if(addToDictionary == null)
-                    addToDictionary = new RoutedUICommand("Add to Dictionary", "AddToDictionary",
-                        typeof(SpellCheckCommands));
+        public static RoutedUICommand AddToDictionary { get; } = new RoutedUICommand("Add to Dictionary",
+            "AddToDictionary", typeof(SpellCheckCommands));
 
-                return addToDictionary;
-            }
-        }
         #endregion
 
         #region Export All Issues command
         //=====================================================================
 
-        private static RoutedUICommand exportAllIssues;
-
         /// <summary>
         /// Export all issues to a CSV file
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand ExportAllIssues
-        {
-            get
-            {
-                if(exportAllIssues == null)
-                    exportAllIssues = new RoutedUICommand("Export All Issues", "ExportAllIssues",
-                        typeof(SpellCheckCommands));
+        public static RoutedUICommand ExportAllIssues { get; } = new RoutedUICommand("Export All Issues",
+            "ExportAllIssues", typeof(SpellCheckCommands));
 
-                return exportAllIssues;
-            }
-        }
         #endregion
 
         #region Export Project Issues command
         //=====================================================================
 
-        private static RoutedUICommand exportProjectIssues;
-
         /// <summary>
         /// Export project issues to a CSV file
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand ExportProjectIssues
-        {
-            get
-            {
-                if(exportProjectIssues == null)
-                    exportProjectIssues = new RoutedUICommand("Export Project Issues", "ExportProjectIssues",
-                        typeof(SpellCheckCommands));
+        public static RoutedUICommand ExportProjectIssues { get; } = new RoutedUICommand("Export Project Issues",
+            "ExportProjectIssues", typeof(SpellCheckCommands));
 
-                return exportProjectIssues;
-            }
-        }
         #endregion
 
         #region Export File Issues command
         //=====================================================================
 
-        private static RoutedUICommand exportFileIssues;
-
         /// <summary>
         /// Export file issues to a CSV file
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand ExportFileIssues
-        {
-            get
-            {
-                if(exportFileIssues == null)
-                    exportFileIssues = new RoutedUICommand("Export File Issues", "ExportFileIssues",
-                        typeof(SpellCheckCommands));
+        public static RoutedUICommand ExportFileIssues { get; } = new RoutedUICommand("Export File Issues",
+            "ExportFileIssues", typeof(SpellCheckCommands));
 
-                return exportFileIssues;
-            }
-        }
         #endregion
 
         #region Copy as Ignore Spelling Directive command
         //=====================================================================
 
-        private static RoutedUICommand copyAsDirective;
-
         /// <summary>
         /// Copy as Ignore Spelling directive
         /// </summary>
         /// <remarks>This command has no default key binding</remarks>
-        public static RoutedUICommand CopyAsDirective
-        {
-            get
-            {
-                if(copyAsDirective == null)
-                    copyAsDirective = new RoutedUICommand("Copy as Ignore Spelling Directive", "CopyAsDirective",
-                        typeof(SpellCheckCommands));
+        public static RoutedUICommand CopyAsDirective { get; } = new RoutedUICommand("Copy as Ignore Spelling Directive",
+            "CopyAsDirective", typeof(SpellCheckCommands));
 
-                return copyAsDirective;
-            }
-        }
         #endregion
     }
 }

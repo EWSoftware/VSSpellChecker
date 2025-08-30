@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : TextClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains an abstract base class used to implement text classification for the content of various
 // file types.
@@ -118,7 +118,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Filename = filename;
             this.SpellCheckConfiguration = spellCheckConfiguration;
 
-            ignoredClassifications = new List<RangeClassification>();
+            ignoredClassifications = [];
 
             // Get the ignored classifications based on the extension.  If there are none, check for the
             // file type.
@@ -137,17 +137,17 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             }
 
             foreach(string exclusion in exclusions)
+            {
                 if(Enum.TryParse(exclusion, out RangeClassification rangeType))
                     ignoredClassifications.Add(rangeType);
+            }
 
             if(!File.Exists(filename))
                 this.SetText(String.Empty);
             else
             {
-                using(StreamReader sr = new StreamReader(filename, Encoding.Default, true))
-                {
-                    this.SetText(sr.ReadToEnd());
-                }
+                using StreamReader sr = new(filename, Encoding.Default, true);
+                this.SetText(sr.ReadToEnd());
             }
         }
         #endregion
@@ -170,6 +170,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             lineOffsets = new List<int>((length / 10) + 1) { 0 };
 
             for(int i = 0; i < length; i++)
+            {
                 switch(text[i])
                 {
                     case '\r':
@@ -183,6 +184,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         lineOffsets.Add(i + 1);
                         break;
                 }
+            }
 
             lineOffsets.Add(length + 1);
         }

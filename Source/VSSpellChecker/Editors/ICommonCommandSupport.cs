@@ -22,7 +22,7 @@
 namespace VisualStudio.SpellChecker.Editors
 {
     /// <summary>
-    /// This interface allows implementor editor panes to declare and execute common
+    /// This interface allows implementer editor panes to declare and execute common
     /// commands supported by them.
     /// </summary>
     public interface ICommonCommandSupport

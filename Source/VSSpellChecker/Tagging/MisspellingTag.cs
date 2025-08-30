@@ -2,9 +2,9 @@
 // System  : Visual Studio Spell Checker Package
 // File    : MisspellingTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 03/21/2023
-// Note    : Copyright 2010-2023, Microsoft Corporation, All rights reserved
-//           Portions Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
+//           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that represents a misspelling tag
 //
@@ -91,7 +91,7 @@ namespace VisualStudio.SpellChecker.Tagging
 
             this.MisspellingType = misspellingType;
             this.Span = this.DeleteWordSpan = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
-            this.Suggestions = suggestions ?? Array.Empty<SpellingSuggestion>();
+            this.Suggestions = suggestions ?? [];
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace VisualStudio.SpellChecker.Tagging
             this.MisspellingType = MisspellingType.DoubledWord;
             this.Span = span.Snapshot.CreateTrackingSpan(span, SpanTrackingMode.EdgeExclusive);
             this.DeleteWordSpan = deleteWordSpan.Snapshot.CreateTrackingSpan(deleteWordSpan, SpanTrackingMode.EdgeExclusive);
-            this.Suggestions = Array.Empty<SpellingSuggestion>();
+            this.Suggestions = [];
         }
         #endregion
 

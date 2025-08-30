@@ -36,7 +36,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
         private Regex expression;
 
-        private static readonly Regex reComment = new Regex(@"^.*?(?<Comment>\(\?\#[^\)]*?\))$");
+        private static readonly Regex reComment = new(@"^.*?(?<Comment>\(\?\#[^\)]*?\))$");
 
         #endregion
 

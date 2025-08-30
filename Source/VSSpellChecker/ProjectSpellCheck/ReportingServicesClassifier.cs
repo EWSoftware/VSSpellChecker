@@ -38,9 +38,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         #region Private data members
         //=====================================================================
 
-        private static readonly Regex reComments = new Regex(@"\s*('.*?|Rem(\t| ).*?|Rem)([\r\n]{1,2}|$)",
+        private static readonly Regex reComments = new(@"\s*('.*?|Rem(\t| ).*?|Rem)([\r\n]{1,2}|$)",
             RegexOptions.Multiline | RegexOptions.IgnoreCase);
-        private static readonly Regex reStringLiterals = new Regex("\"(.|\"\")*?\"");
+        private static readonly Regex reStringLiterals = new("\"(.|\"\")*?\"");
 
         #endregion
 

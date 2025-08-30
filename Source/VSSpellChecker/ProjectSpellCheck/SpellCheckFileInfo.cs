@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellCheckFileInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to hold information about a file that will be spell checked
 //
@@ -39,8 +39,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         #region Private data members
         //=====================================================================
 
-        private static readonly SpellCheckFileInfo IgnoredHierarchyItem = new SpellCheckFileInfo();
-        private static readonly char[] validChars = new[] { '\b', '\t', '\r', '\n', '\x07', '\x0B', '\x0C' };
+        private static readonly SpellCheckFileInfo IgnoredHierarchyItem = new();
+        private static readonly char[] validChars = ['\b', '\t', '\r', '\n', '\x07', '\x0B', '\x0C'];
 
         #endregion
 
@@ -147,7 +147,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
-            List<SpellCheckFileInfo> projectFiles = new List<SpellCheckFileInfo>();
+            List<SpellCheckFileInfo> projectFiles = [];
 
             try
             {
@@ -185,7 +185,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         {
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
-            List<SpellCheckFileInfo> projectFiles = new List<SpellCheckFileInfo>();
+            List<SpellCheckFileInfo> projectFiles = [];
 
             try
             {
@@ -207,8 +207,8 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     {
                         ProcessHierarchyNodeRecursively(hierarchy, VSConstants.VSITEMID_ROOT, projectFiles);
 
-                        projectFiles = projectFiles.OrderBy(
-                            p => Path.GetFileName(p.ProjectFile)).ThenBy(p => p.Filename).ToList();
+                        projectFiles = [.. projectFiles.OrderBy(
+                            p => Path.GetFileName(p.ProjectFile)).ThenBy(p => p.Filename)];
 
                         // Set the solution file for each project file
                         foreach(var file in projectFiles)
@@ -238,13 +238,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 
 #pragma warning disable VSTHRD010
-            List<SpellCheckFileInfo> projectFiles = new List<SpellCheckFileInfo>();
+            List<SpellCheckFileInfo> projectFiles = [];
             var dte2 = Utility.GetServiceFromPackage<DTE2, SDTE>(false);
 
             if(dte2 == null)
                 return projectFiles;
 
-            List<string> projects = new List<string>(), folders = new List<string>(), files = new List<string>();
+            List<string> projects = [], folders = [], files = [];
             bool entireSolution = false;
 
             // This is a bit complicated but we need to figure out which items are selected and then filter down
@@ -375,7 +375,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             if(entireSolution)
                 return allFiles;
 
-            HashSet<string> filenames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> filenames = new(StringComparer.OrdinalIgnoreCase);
 
             foreach(string projectName in projects)
             {
@@ -618,15 +618,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                 // If it's not there, ignore it
                 if(File.Exists(filename))
                 {
-                    using(StreamReader sr = new StreamReader(filename, true))
-                    {
-                        var fileChars = new char[5120];
+                    using StreamReader sr = new(filename, true);
+                    var fileChars = new char[5120];
 
-                        // Note the length as it may be less than the maximum
-                        int length = sr.Read(fileChars, 0, fileChars.Length);
+                    // Note the length as it may be less than the maximum
+                    int length = sr.Read(fileChars, 0, fileChars.Length);
 
-                        result = fileChars.Take(length).Any(c => c < 32 && !validChars.Contains(c));
-                    }
+                    result = fileChars.Take(length).Any(c => c < 32 && !validChars.Contains(c));
                 }
             }
             catch(Exception ex)

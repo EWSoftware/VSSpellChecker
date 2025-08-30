@@ -106,7 +106,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         }
 
         /// <inheritdoc />
-        /// <returns>This action does not participate in telemetry logging and alway returns false</returns>
+        /// <returns>This action does not participate in telemetry logging and always returns false</returns>
         public bool TryGetTelemetryId(out Guid telemetryId)
         {
             telemetryId = Guid.Empty;

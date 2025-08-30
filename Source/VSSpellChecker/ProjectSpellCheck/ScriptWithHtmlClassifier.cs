@@ -70,7 +70,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             var spans = base.Parse().ToList();
 
             // Parse as HTML and exclude the parts we don't want based on the results
-            HtmlDocument doc = new HtmlDocument();
+            HtmlDocument doc = new();
             doc.LoadHtml(this.Text);
 
             var htmlSpans = new List<SpellCheckSpan>();

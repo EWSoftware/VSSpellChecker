@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
-// Updated : 03/21/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class that represents a misspelling withing a project file
 //
@@ -165,7 +165,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.MisspellingType = misspellingType;
             this.Span = this.DeleteWordSpan = span;
             this.Word = word;
-            this.Suggestions = suggestions ?? Array.Empty<SpellingSuggestion>();
+            this.Suggestions = suggestions ?? [];
             this.SuggestionsDetermined = (suggestions != null);
             this.ActualBounds = Rect.Empty;
         }
@@ -194,7 +194,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
             this.Span = span;
             this.DeleteWordSpan = deleteWordSpan;
             this.Word = word;
-            this.Suggestions = Array.Empty<SpellingSuggestion>();
+            this.Suggestions = [];
             this.SuggestionsDetermined = true;
             this.ActualBounds = Rect.Empty;
         }

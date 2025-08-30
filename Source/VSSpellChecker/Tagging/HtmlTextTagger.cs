@@ -107,7 +107,7 @@ namespace VisualStudio.SpellChecker.Tagging
         /// <inheritdoc />
         public IEnumerable<ITagSpan<NaturalTextTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
-            NormalizedSnapshotSpanCollection classifiedSpans = new NormalizedSnapshotSpanCollection(
+            NormalizedSnapshotSpanCollection classifiedSpans = new(
                 spans.SelectMany(span => classifier.GetClassificationSpans(span)).Select(c => c.Span));
 
             NormalizedSnapshotSpanCollection plainSpans = NormalizedSnapshotSpanCollection.Difference(spans,

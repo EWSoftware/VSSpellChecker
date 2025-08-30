@@ -33,7 +33,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
     /// Typically, the directives will be placed in comments.  All file types are supported.</remarks>
     internal class InlineIgnoredWord
     {
-        internal static readonly Regex reIgnoreSpelling = new Regex(
+        internal static readonly Regex reIgnoreSpelling = new(
             @"Ignore spelling:\s*?(?<IgnoredWords>[^\r\n/]+)(?<CaseSensitive>/matchCase)?", RegexOptions.IgnoreCase);
 
         /// <summary>

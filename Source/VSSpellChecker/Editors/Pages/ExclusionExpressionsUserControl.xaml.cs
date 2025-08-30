@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : ExclusionExpressionsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/16/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the exclusion expression spell checker configuration settings
 //
@@ -90,7 +90,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.ExclusionExpressions), out var spi))
             {
-                expressions = spi.EditorConfigPropertyValue.ToRegexes().ToList();
+                expressions = [.. spi.EditorConfigPropertyValue.ToRegexes()];
 
                 if(expressions.Count != 0 && expressions[0].ToString().Equals(SpellCheckerConfiguration.ClearInherited,
                   StringComparison.OrdinalIgnoreCase))
@@ -100,7 +100,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 }
             }
             else
-                expressions = new List<Regex>();
+                expressions = [];
 
             foreach(var exp in expressions.OrderBy(e => e.ToString()))
             {
@@ -112,7 +112,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 lbExclusionExpressions.Items.Add(displayText);
             }
 
-            btnEditExpression.IsEnabled = btnRemoveExpression.IsEnabled = (expressions.Count != 0);
+            btnEditExpression.IsEnabled = btnRemoveExpression.IsEnabled = expressions.Count != 0;
 
             this.HasChanges = false;
         }

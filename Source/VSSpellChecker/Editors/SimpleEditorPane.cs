@@ -18,7 +18,7 @@
 // 02/06/2015  EFW  Added the code to the project and updated it to support WPF user controls
 //===============================================================================================================
 
-// Ignore Spelling: hier itemid pn prg pguid pva cmdexecopt grf attribs
+// Ignore Spelling: pn pguid prg Cmdexecopt pva
 
 using System;
 using System.Globalization;
@@ -398,7 +398,7 @@ namespace VisualStudio.SpellChecker.Editors
         {
             get
             {
-                if(!(this.UIControl is ICommonCommandSupport commandSupport))
+                if(this.UIControl is not ICommonCommandSupport commandSupport)
                     commandSupport = this as ICommonCommandSupport;
 
                 return commandSupport;
@@ -435,7 +435,7 @@ namespace VisualStudio.SpellChecker.Editors
                 return VSConstants.E_INVALIDARG;
 
             // --- Wrap parameters into argument type instance
-            QueryStatusArgs statusArgs = new QueryStatusArgs(pguidCmdGroup)
+            QueryStatusArgs statusArgs = new(pguidCmdGroup)
             {
                 CommandCount = cCmds,
                 Commands = prgCmds,
@@ -519,11 +519,10 @@ namespace VisualStudio.SpellChecker.Editors
         /// Typically, only the first 2 arguments are used (to identify which command
         /// should be run).
         /// </remarks>
-        public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt,
-          IntPtr pvaIn, IntPtr pvaOut)
+        public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
         {
             // --- Wrap parameters into argument type instance
-            ExecArgs execArgs = new ExecArgs(pguidCmdGroup, nCmdID)
+            ExecArgs execArgs = new(pguidCmdGroup, nCmdID)
             {
                 CommandExecOpt = nCmdexecopt,
                 PvaIn = pvaIn,
@@ -1082,7 +1081,7 @@ namespace VisualStudio.SpellChecker.Editors
                 IVsQueryEditQuerySave2 queryEditQuerySave = (IVsQueryEditQuerySave2)GetService(typeof(SVsQueryEditQuerySave));
 
                 // Now call the QueryEdit method to find the edit status of this file
-                string[] documents = { filename };
+                string[] documents = [filename];
 
                 // This function can pop up a dialog to ask the user to checkout the file.
                 // When this dialog is visible, it is possible to receive other request to change
@@ -1185,7 +1184,7 @@ namespace VisualStudio.SpellChecker.Editors
                     {
                         // Get the scope for handling hot keys.  The key used here doesn't matter.
                         // We're just getting the scope to use.
-                        AccessKeyPressedEventArgs e = new AccessKeyPressedEventArgs("X");
+                        AccessKeyPressedEventArgs e = new("X");
 
                         ((UserControl)base.Content).RaiseEvent(e);
                         scope = e.Scope;

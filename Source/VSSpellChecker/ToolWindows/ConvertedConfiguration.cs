@@ -55,7 +55,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         public ConvertedConfiguration(string legacyConfigurationFilename)
         {
             this.LegacyConfiguration = new SpellCheckerLegacyConfiguration(legacyConfigurationFilename);
-            this.Sections = this.LegacyConfiguration.ConvertLegacyConfiguration().ToList();
+            this.Sections = [.. this.LegacyConfiguration.ConvertLegacyConfiguration()];
         }
         #endregion
 

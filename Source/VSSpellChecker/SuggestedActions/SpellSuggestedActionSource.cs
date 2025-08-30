@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SpellSuggestedActionSource.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/29/2023
-// Note    : Copyright 2016-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2016-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to implement the suggestion source for spelling light bulbs
 //
@@ -94,8 +94,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 
 #pragma warning restore VSTHRD010
 
-                return new SpellSuggestedActionSource(dictionary,
-                    config?.IgnoredWordsFiles ?? Enumerable.Empty<string>(),
+                return new SpellSuggestedActionSource(dictionary, config?.IgnoredWordsFiles ?? [],
                     tagAggregatorFactory.CreateTagAggregator<MisspellingTag>(textView));
             }
         }
@@ -173,13 +172,13 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 
                     if(misspelling.Tag.MisspellingType != MisspellingType.DoubledWord)
                     {
-                        yield return new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(displayText,
-                            GetMisspellingSuggestedActions(errorSpan, misspelling.Tag)) }, null,
+                        yield return new SuggestedActionSet(null, [ new SuggestedActionSubmenu(displayText,
+                            GetMisspellingSuggestedActions(errorSpan, misspelling.Tag)) ], null,
                             SuggestedActionSetPriority.Low);
                     }
                     else
-                        yield return new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(displayText,
-                            GetDoubledWordSuggestedActions(errorSpan, misspelling.Tag.DeleteWordSpan)) }, null,
+                        yield return new SuggestedActionSet(null, [ new SuggestedActionSubmenu(displayText,
+                            GetDoubledWordSuggestedActions(errorSpan, misspelling.Tag.DeleteWordSpan)) ], null,
                             SuggestedActionSetPriority.Low);
                 }
             }
@@ -199,7 +198,7 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         }
 
         /// <inheritdoc />
-        /// <returns>This provider does not participate in telemetry logging and alway returns false</returns>
+        /// <returns>This provider does not participate in telemetry logging and always returns false</returns>
         public bool TryGetTelemetryId(out Guid telemetryId)
         {
             telemetryId = Guid.Empty;
@@ -246,8 +245,8 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         private IEnumerable<SuggestedActionSet> GetMisspellingSuggestedActions(SnapshotSpan errorSpan,
           MisspellingTag misspelling)
         {
-            List<SuggestedActionSet> actionSets = new List<SuggestedActionSet>();
-            List<ISuggestedAction> actions = new List<ISuggestedAction>();
+            List<SuggestedActionSet> actionSets = [];
+            List<ISuggestedAction> actions = [];
             ITrackingSpan trackingSpan = errorSpan.Snapshot.CreateTrackingSpan(errorSpan,
                 SpanTrackingMode.EdgeExclusive);
 
@@ -268,19 +267,19 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                 actionSets.Add(new SuggestedActionSet(null, actions, null, SuggestedActionSetPriority.Low));
 
             // Ignore and Add to Dictionary/Ignored Words List operations
-            actions = new List<ISuggestedAction>
-            {
+            actions =
+            [
                 new SpellDictionarySuggestedAction(trackingSpan, dictionary, "Ignore Once",
                     DictionaryAction.IgnoreOnce, null),
                 new SpellDictionarySuggestedAction(trackingSpan, dictionary, "Ignore All",
                     DictionaryAction.IgnoreAll, null)
-            };
+            ];
 
             actionSets.Add(new SuggestedActionSet(null, actions, null, SuggestedActionSetPriority.Low));
 
             if(misspelling.MisspellingType == MisspellingType.MisspelledWord)
             {
-                actions = new List<ISuggestedAction>();
+                actions = [];
 
                 if(dictionary.Dictionaries.Count() == 1)
                 {
@@ -298,11 +297,11 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                             String.Empty, DictionaryAction.AddWord, d.Culture));
                     }
 
-                    actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu("Add to Dictionary",
-                        new[] { new SuggestedActionSet(null, actions) }) }, null, SuggestedActionSetPriority.Low));
+                    actionSets.Add(new SuggestedActionSet(null, [ new SuggestedActionSubmenu("Add to Dictionary",
+                        [new SuggestedActionSet(null, actions)]) ], null, SuggestedActionSetPriority.Low));
                 }
 
-                actions = new List<ISuggestedAction>();
+                actions = [];
 
                 if(ignoredWordsFiles.Count() == 1)
                 {
@@ -330,8 +329,8 @@ namespace VisualStudio.SpellChecker.SuggestedActions
 
                     if(actions.Count != 0)
                     {
-                        actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(
-                            "Add to Ignored Words File", new[] { new SuggestedActionSet(null, actions) }) }, null,
+                        actionSets.Add(new SuggestedActionSet(null, [ new SuggestedActionSubmenu(
+                            "Add to Ignored Words File", [new SuggestedActionSet(null, actions)]) ], null,
                             SuggestedActionSetPriority.Low));
                     }
                 }
@@ -349,18 +348,18 @@ namespace VisualStudio.SpellChecker.SuggestedActions
         private IEnumerable<SuggestedActionSet> GetDoubledWordSuggestedActions(SnapshotSpan errorSpan,
           ITrackingSpan deleteWordSpan)
         {
-            List<SuggestedActionSet> actionSets = new List<SuggestedActionSet>();
+            List<SuggestedActionSet> actionSets = [];
 
             ITrackingSpan trackingSpan = errorSpan.Snapshot.CreateTrackingSpan(errorSpan,
                 SpanTrackingMode.EdgeExclusive);
 
             // Add Dictionary operations (ignore all)
-            List<ISuggestedAction> doubledWordActions = new List<ISuggestedAction>
-            {
+            List<ISuggestedAction> doubledWordActions =
+            [
                 new DoubledWordSuggestedAction(deleteWordSpan),
                 new SpellDictionarySuggestedAction(trackingSpan, dictionary, "Ignore Once",
                     DictionaryAction.IgnoreOnce, null)
-            };
+            ];
 
             actionSets.Add(new SuggestedActionSet(null, doubledWordActions, null, SuggestedActionSetPriority.Low));
 
@@ -392,9 +391,9 @@ namespace VisualStudio.SpellChecker.SuggestedActions
                         iwf, String.Empty));
                 }
 
-                actionSets.Add(new SuggestedActionSet(null, new[] { new SuggestedActionSubmenu(
-                    "Add to Ignored Words File", new[] { new SuggestedActionSet(null,
-                    ignoredWordsFileActions) }) }, null, SuggestedActionSetPriority.Low));
+                actionSets.Add(new SuggestedActionSet(null, [ new SuggestedActionSubmenu(
+                    "Add to Ignored Words File", [ new SuggestedActionSet(null, ignoredWordsFileActions) ]) ],
+                    null, SuggestedActionSetPriority.Low));
             }
 
             return actionSets;

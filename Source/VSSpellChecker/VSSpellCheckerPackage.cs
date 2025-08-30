@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 04/22/2023
-// Note    : Copyright 2013-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the class that defines the Visual Studio Spell Checker package
 //
@@ -136,9 +136,9 @@ namespace VisualStudio.SpellChecker
             // Add our command handlers for menu items (commands must exist in the .vsct file)
             if((await this.GetServiceAsync(typeof(IMenuCommandService)).ConfigureAwait(true) is OleMenuCommandService mcs))
             {
-                CommandID commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet,
+                CommandID commandId = new(GuidList.guidVSSpellCheckerCmdSet,
                     (int)PkgCmdIDList.SpellCheckerConfiguration);
-                OleMenuCommand menuItem = new OleMenuCommand(SpellCheckerConfigurationExecuteHandler, commandId);
+                OleMenuCommand menuItem = new(SpellCheckerConfigurationExecuteHandler, commandId);
                 mcs.AddCommand(menuItem);
 
                 commandId = new CommandID(GuidList.guidVSSpellCheckerCmdSet, (int)PkgCmdIDList.SpellCheckInteractive);
@@ -288,10 +288,10 @@ namespace VisualStudio.SpellChecker
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            if(!(sender is OleMenuCommand command))
+            if(sender is not OleMenuCommand command)
                 return;
 
-            if(!(this.GetService(typeof(SVsShellMonitorSelection)) is IVsMonitorSelection ms))
+            if(this.GetService(typeof(SVsShellMonitorSelection)) is not IVsMonitorSelection ms)
                 return;
 
             int result = ms.GetCurrentElementValue((uint)VSConstants.VSSELELEMID.SEID_DocumentFrame, out object value);
@@ -479,8 +479,7 @@ namespace VisualStudio.SpellChecker
                             {
                                 var editorConfig = new EditorConfigFile { Filename = editorConfigFile };
                                 
-                                editorConfig.Sections.Add(
-                                    new EditorConfigSection(new[] { new SectionLine($"[{fileGlob}]") }));
+                                editorConfig.Sections.Add(new EditorConfigSection([new SectionLine($"[{fileGlob}]")]));
                                 editorConfig.Save();
                             }
 
@@ -665,7 +664,7 @@ namespace VisualStudio.SpellChecker
             editorConfigLocation = fileGlob = null;
 
             // Only allow the option if a single item is selected
-            if(!(GetGlobalService(typeof(SDTE)) is DTE2 dte2) || dte2.SelectedItems.Count != 1)
+            if(GetGlobalService(typeof(SDTE)) is not DTE2 dte2 || dte2.SelectedItems.Count != 1)
                 return false;
 
             SelectedItem item = dte2.SelectedItems.Item(1);

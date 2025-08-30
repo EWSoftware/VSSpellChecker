@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/01/2025
+// Updated : 08/30/2025
 // Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a utility class with extension and utility methods.
@@ -53,7 +53,7 @@ namespace VisualStudio.SpellChecker
         /// </summary>
         public const string EmbeddedPeekTextView = "EMBEDDED_PEEK_TEXT_VIEW";
 
-        private static readonly Regex reAutoGenCodeFilename = new Regex(
+        private static readonly Regex reAutoGenCodeFilename = new(
             "(#ExternalSource\\(|#line\\s\\d*\\s)\"(?<Filename>.*?)\"");
 
         #endregion
@@ -396,7 +396,7 @@ namespace VisualStudio.SpellChecker
             }
 
             // If not part of an active solution, we can write to it if not read-only
-            if(!(Package.GetGlobalService(typeof(SDTE)) is DTE2 dte) || dte.Solution == null ||
+            if(Package.GetGlobalService(typeof(SDTE)) is not DTE2 dte || dte.Solution == null ||
               String.IsNullOrWhiteSpace(dte.Solution.FullName) ||
               !dictionaryWordsFile.StartsWith(Path.GetDirectoryName(dte.Solution.FullName), StringComparison.OrdinalIgnoreCase))
             {
@@ -450,7 +450,7 @@ namespace VisualStudio.SpellChecker
             else
                 fieldValue = value.ToString();
 
-            if(fieldValue.IndexOfAny(new[] { ',', '\"'}) != -1)
+            if(fieldValue.IndexOfAny([',', '\"']) != -1)
                 fieldValue = "\"" + fieldValue.Replace("\"", "\"\"") + "\"";
 
             if(writeSeparator)

@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : HtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/22/2023
-// Note    : Copyright 2015-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to classify HTML file content
 //
@@ -40,16 +40,16 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
         private string pageLanguage;
 
-        private static readonly Regex reAspPhpScript = new Regex(@"<(%|\?).*?(\1)>", RegexOptions.Singleline);
-        private static readonly Regex rePageLanguage = new Regex("\xFE%@.*Language=\"(?<Language>.*?)\".*?%\xFF",
+        private static readonly Regex reAspPhpScript = new(@"<(%|\?).*?(\1)>", RegexOptions.Singleline);
+        private static readonly Regex rePageLanguage = new("\xFE%@.*Language=\"(?<Language>.*?)\".*?%\xFF",
             RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        private static readonly Regex reScript = new Regex(@"\xFE(%|\?).*?(\1)\xFF", RegexOptions.Singleline);
-        private static readonly Regex reScriptElement = new Regex(@"<script.*?(?<!(%|\?))>",
+        private static readonly Regex reScript = new(@"\xFE(%|\?).*?(\1)\xFF", RegexOptions.Singleline);
+        private static readonly Regex reScriptElement = new(@"<script.*?(?<!(%|\?))>",
             RegexOptions.IgnoreCase | RegexOptions.Singleline);
-        private static readonly Regex reScriptLanguage = new Regex(@"type=(?<Language>[^\s]*)",
+        private static readonly Regex reScriptLanguage = new(@"type=(?<Language>[^\s]*)",
             RegexOptions.IgnoreCase);
 
-        private static readonly MatchEvaluator matchReplacement = new MatchEvaluator(ReplaceAngleBrackets);
+        private static readonly MatchEvaluator matchReplacement = new(ReplaceAngleBrackets);
 
         private readonly Dictionary<string, TextClassifier> classifiers;
 
@@ -84,9 +84,9 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
         /// <inheritdoc />
         public override IEnumerable<SpellCheckSpan> Parse()
         {
-            List<SpellCheckSpan> spans = new List<SpellCheckSpan>();
+            List<SpellCheckSpan> spans = [];
 
-            HtmlDocument doc = new HtmlDocument();
+            HtmlDocument doc = new();
             doc.LoadHtml(this.Text);
 
             this.ParseNode(doc.DocumentNode, spans);
@@ -306,12 +306,14 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
 
             // Add any trailing literal text
             if(lastPos < text.Length)
+            {
                 spans.Add(new SpellCheckSpan
                 {
                     Span = new Span(offset, text.Length - lastPos),
                     Text = text.Substring(lastPos),
                     Classification = RangeClassification.InnerText
                 });
+            }
         }
 
         /// <summary>
@@ -368,6 +370,7 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                     c = ClassifierFactory.GetClassifier("~~.vb", this.SpellCheckConfiguration);
                 }
                 else
+                {
                     if(!String.IsNullOrWhiteSpace(language) &&
                       (language.IndexOf("JavaScript", StringComparison.OrdinalIgnoreCase) != -1 ||
                       language.IndexOf("TypeScript", StringComparison.OrdinalIgnoreCase) != -1))
@@ -379,12 +382,13 @@ namespace VisualStudio.SpellChecker.ProjectSpellCheck
                         // Anything else is considered a C-style script language (C#, PHP, etc.).
                         c = ClassifierFactory.GetClassifier("~~.cs", this.SpellCheckConfiguration);
                     }
+                }
 
                 classifiers.Add(language ?? String.Empty, c);
             }
 
             return c;
         }
-#endregion
+        #endregion
     }
 }

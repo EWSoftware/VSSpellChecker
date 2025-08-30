@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : IgnoredWordsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/31/2025
+// Updated : 08/30/2025
 // Note    : Copyright 2014-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the ignored words and ignored keywords spell checker
@@ -94,8 +94,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredWords), out var spi))
             {
-                words.AddRange(spi.EditorConfigPropertyValue.Split(new[] { '|' },
-                    StringSplitOptions.RemoveEmptyEntries));
+                words.AddRange(spi.EditorConfigPropertyValue.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
 
                 if(words.Count != 0 && words[0].Equals(SpellCheckerConfiguration.ClearInherited,
                   StringComparison.OrdinalIgnoreCase))
@@ -134,8 +133,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.IgnoredKeywords), out spi))
             {
                 words.Clear();
-                words.AddRange(spi.EditorConfigPropertyValue.Split(new[] { '|' },
-                    StringSplitOptions.RemoveEmptyEntries));
+                words.AddRange(spi.EditorConfigPropertyValue.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
 
                 foreach(string el in words)
                     lbIgnoredKeywords.Items.Add(el);
@@ -248,7 +246,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(ignoredWordTextBox.Text.Length != 0)
             {
-                foreach(string word in ignoredWordTextBox.Text.Split(new[] { ' ', '\t', ',', '.', '|' },
+                foreach(string word in ignoredWordTextBox.Text.Split([' ', '\t', ',', '.', '|'],
                   StringSplitOptions.RemoveEmptyEntries))
                 {
                     string addWord = word;
@@ -337,7 +335,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             var ignoredWordsListBox = sender == btnImportIgnoredWords ? lbIgnoredWords : lbIgnoredKeywords;
 
-            OpenFileDialog dlg = new OpenFileDialog
+            OpenFileDialog dlg = new()
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|" +
@@ -346,7 +344,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 CheckFileExists = true
             };
 
-            if((dlg.ShowDialog() ?? false))
+            if(dlg.ShowDialog() ?? false)
             {
                 try
                 {
@@ -397,7 +395,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             var ignoredWordsListBox = sender == btnExportIgnoredWords ? lbIgnoredWords : lbIgnoredKeywords;
 
-            SaveFileDialog dlg = new SaveFileDialog
+            SaveFileDialog dlg = new()
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 FileName = "IgnoredWords.dic",
@@ -407,7 +405,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     "All Files (*.*)|*.*"
             };
 
-            if((dlg.ShowDialog() ?? false))
+            if(dlg.ShowDialog() ?? false)
             {
                 try
                 {
@@ -461,7 +459,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             string configFilePath = Path.GetDirectoryName(this.ConfigurationFilename);
 
-            OpenFileDialog dlg = new OpenFileDialog
+            OpenFileDialog dlg = new()
             {
                 InitialDirectory = Directory.Exists(configFilePath) ? configFilePath :
                     Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),

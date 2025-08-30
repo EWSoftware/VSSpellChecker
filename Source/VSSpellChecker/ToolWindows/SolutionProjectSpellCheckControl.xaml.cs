@@ -2,7 +2,7 @@
 // System  : Visual Studio Spell Checker Package
 // File    : SolutionProjectSpellCheckControl.cs
 // Authors : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 03/19/2025
+// Updated : 08/30/2025
 // Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
 //
 // This file contains the user control that handles spell checking a document interactively
@@ -77,7 +77,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
         /// </summary>
         public SolutionProjectSpellCheckControl()
         {
-            projectNames = new List<string>();
+            projectNames = [];
 
             InitializeComponent();
 
@@ -252,7 +252,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             this.CancelSpellCheck(false);
 
             if(cboSpellCheckTarget.Items.Count == 0)
-                this.UpdateProjects(new[] { projectName });
+                this.UpdateProjects([projectName]);
             else
             {
                 projectNames.Add(projectName);
@@ -272,7 +272,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             string match = projectNames.FirstOrDefault(p => p.Equals(projectName, StringComparison.OrdinalIgnoreCase));
 
             if(cboSpellCheckTarget.Items.Count == 4 && match != null)
-                this.UpdateProjects(Array.Empty<string>());
+                this.UpdateProjects([]);
             else
             {
                 int idx = projectNames.IndexOf(match);
@@ -512,7 +512,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                                 // window frame.  From there, we can get the view, then the editor adapter, and
                                 // then the tagger.
                                 Guid logicalView = VSConstants.LOGVIEWID_Primary;
-                                uint[] id = new uint[1] { itemid };
+                                uint[] id = [itemid];
 
                                 var shellOpenDoc = Utility.GetServiceFromPackage<IVsUIShellOpenDocument, IVsUIShellOpenDocument>(false);
 
@@ -610,16 +610,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
           List<string> EditorConfigs, List<string> CodeAnalysisDictionaries)> additionalConfigFiles,
           HashSet<string> openDocuments)
         {
-            BindingList<FileMisspelling> issues = new BindingList<FileMisspelling>();
-            List<InlineIgnoredWord> inlineIgnored = new List<InlineIgnoredWord>();
+            BindingList<FileMisspelling> issues = [];
+            List<InlineIgnoredWord> inlineIgnored = [];
             TextClassifier classifier;
             string documentText;
             IEnumerable<Span> ignoredWordSpans = null;
 
             try
             {
-                if(wordSplitter == null)
-                    wordSplitter = new TaggerWordSplitter { DetectWordsSpanningStringLiterals = true };
+                wordSplitter ??= new TaggerWordSplitter { DetectWordsSpanningStringLiterals = true };
 
                 foreach(var file in spellCheckFiles)
                 {
@@ -803,7 +802,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 textToSplit = span.Text;
 
                 // Always ignore URLs
-                rangeExclusions = CommonUtilities.Url.Matches(textToSplit).Cast<Match>().ToList();
+                rangeExclusions = [.. CommonUtilities.Url.Matches(textToSplit).Cast<Match>()];
 
                 // Note the location of all XML elements if needed
                 if(wordSplitter.Configuration.IgnoreXmlElementsInText)
@@ -879,7 +878,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                           wordSplitter.Configuration.DeprecatedTerms.TryGetValue(textToCheck, out string preferredTerm))
                         {
                             yield return new FileMisspelling(MisspellingType.DeprecatedTerm, errorSpan,
-                                actualWord, new[] { new SpellingSuggestion(null, preferredTerm) });
+                                actualWord, [new SpellingSuggestion(null, preferredTerm)]);
                             continue;
                         }
 
@@ -887,7 +886,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                           wordSplitter.Configuration.CompoundTerms.TryGetValue(textToCheck, out preferredTerm))
                         {
                             yield return new FileMisspelling(MisspellingType.CompoundTerm, errorSpan,
-                                actualWord, new[] { new SpellingSuggestion(null, preferredTerm) });
+                                actualWord, [new SpellingSuggestion(null, preferredTerm)]);
                             continue;
                         }
 
@@ -968,9 +967,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
             }
 
             Dictionary<string, (List<string> GlobalConfigs, List<string> EditorConfigs,
-                List<string> CodeAnalysisDictionaries)> additionalConfigFiles = new Dictionary<string,
-                (List<string> GlobalConfigs, List<string> EditorConfigs, List<string> CodeAnalysisDictionaries)>(
-                StringComparer.OrdinalIgnoreCase);
+                List<string> CodeAnalysisDictionaries)> additionalConfigFiles = new(StringComparer.OrdinalIgnoreCase);
             List<SpellCheckFileInfo> spellCheckFiles;
 
             if(!Int32.TryParse(txtMaxIssues.Text, out int maxIssues))
@@ -993,15 +990,15 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // Get the files to spell check.  This must be done on the UI thread as it interacts with the
             // project system.  It should be fast even for large projects.
             if(cboSpellCheckTarget.SelectedIndex == 0 || cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 1)
-                spellCheckFiles = SpellCheckFileInfo.AllProjectFiles(null).ToList();
+                spellCheckFiles = [.. SpellCheckFileInfo.AllProjectFiles(null)];
             else
             {
                 if(cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 2)
-                    spellCheckFiles = SpellCheckFileInfo.SelectedProjectFiles().ToList();
+                    spellCheckFiles = [.. SpellCheckFileInfo.SelectedProjectFiles()];
                 else
                 {
                     string selectedProjectName = projectNames[cboSpellCheckTarget.SelectedIndex - 1];
-                    spellCheckFiles = SpellCheckFileInfo.AllProjectFiles(selectedProjectName).ToList();
+                    spellCheckFiles = [.. SpellCheckFileInfo.AllProjectFiles(selectedProjectName)];
                 }
             }
 
@@ -1012,21 +1009,22 @@ namespace VisualStudio.SpellChecker.ToolWindows
             // If limited to open documents, filter the list and add items not in the solution
             if(cboSpellCheckTarget.SelectedIndex == cboSpellCheckTarget.Items.Count - 1)
             {
-                spellCheckFiles = spellCheckFiles.Where(f => openDocuments.Contains(f.CanonicalName)).Concat(
-                    openDocuments.Where(od =>
+                spellCheckFiles =
+                [
+                    .. spellCheckFiles.Where(f => openDocuments.Contains(f.CanonicalName)),
+                    .. openDocuments.Where(od =>
                         !spellCheckFiles.Any(f => f.CanonicalName.Equals(od, StringComparison.OrdinalIgnoreCase)) &&
                         !od.EndsWith(".sln", StringComparison.OrdinalIgnoreCase) &&
                         !od.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase) &&
                         !projectNames.Any(p => p.Equals(od, StringComparison.OrdinalIgnoreCase))).Select(
-                            od => SpellCheckFileInfo.ForOpenDocument(od))).ToList();
+                            od => SpellCheckFileInfo.ForOpenDocument(od)),
+                ];
             }
 
             // Track the code analysis dictionaries used by each project and exclude them from being spell checked
             foreach(var addFiles in SpellCheckFileInfo.ProjectAdditionalConfigurationFiles(null).GroupBy(f => f.ProjectFile))
             {
-                List<string> additionalGlobalConfigs = new List<string>(),
-                    additionalEditorConfigs = new List<string>(),
-                    cadFiles = new List<string>();
+                List<string> additionalGlobalConfigs = [], additionalEditorConfigs = [], cadFiles = [];
 
                 // Typically there is only one but multiple files are supported
                 foreach(var c in addFiles)
@@ -1053,7 +1051,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 var excludeFiles = new HashSet<string>(additionalConfigFiles.Values.SelectMany(
                     c => c.CodeAnalysisDictionaries), StringComparer.OrdinalIgnoreCase);
 
-                spellCheckFiles = spellCheckFiles.Where(s => !excludeFiles.Contains(s.CanonicalName)).ToList();
+                spellCheckFiles = [.. spellCheckFiles.Where(s => !excludeFiles.Contains(s.CanonicalName))];
             }
 
             try
@@ -1289,7 +1287,7 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 {
                     int idx = dgIssues.SelectedIndex;
 
-                    dgIssues.ItemsSource = new BindingList<FileMisspelling>(sort.ToList());
+                    dgIssues.ItemsSource = new BindingList<FileMisspelling>([.. sort]);
                     dgIssues.SelectedIndex = idx;
 
                     e.Column.SortDirection = direction;
@@ -1793,14 +1791,14 @@ namespace VisualStudio.SpellChecker.ToolWindows
                 var currentIssue = issues[idx];
 
                 if(e.Command == SpellCheckCommands.ExportProjectIssues)
-                    issues = issues.Where(i => i.ProjectName == currentIssue.ProjectName).ToList();
+                    issues = [.. issues.Where(i => i.ProjectName == currentIssue.ProjectName)];
                 else
-                    issues = issues.Where(i => i.Filename == currentIssue.Filename).ToList();
+                    issues = [.. issues.Where(i => i.Filename == currentIssue.Filename)];
             }
 
             if(issues.Count != 0)
             {
-                SaveFileDialog dlg = new SaveFileDialog
+                SaveFileDialog dlg = new()
                 {
                     InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     FileName = "SpellingIssues.csv",
@@ -1808,11 +1806,11 @@ namespace VisualStudio.SpellChecker.ToolWindows
                     Filter = "Spelling Issues Files (*.csv)|*.csv|All Files (*.*)|*.*"
                 };
 
-                if((dlg.ShowDialog() ?? false))
+                if(dlg.ShowDialog() ?? false)
                 {
                     try
                     {
-                        using(StreamWriter sw = new StreamWriter(dlg.FileName))
+                        using(StreamWriter sw = new(dlg.FileName))
                         {
                             sw.WriteLine("Project,File,Line #,Issue,Word,Text");
 

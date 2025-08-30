@@ -2,8 +2,8 @@
 // System  : Visual Studio Spell Checker Package
 // File    : DictionarySettingsUserControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/06/2023
-// Note    : Copyright 2014-2023, Eric Woodruff, All rights reserved
+// Updated : 08/30/2025
+// Note    : Copyright 2014-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit the spell checker dictionary settings
 //
@@ -61,7 +61,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             InitializeComponent();
 
-            selectedLanguages = new List<string>();
+            selectedLanguages = [];
         }
         #endregion
 
@@ -97,9 +97,9 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             var dataSource = new List<PropertyState>();
 
             if(!isGlobal)
-                dataSource.AddRange(new[] { PropertyState.Inherited, PropertyState.Yes, PropertyState.No });
+                dataSource.AddRange([PropertyState.Inherited, PropertyState.Yes, PropertyState.No]);
             else
-                dataSource.AddRange(new[] { PropertyState.Yes, PropertyState.No });
+                dataSource.AddRange([PropertyState.Yes, PropertyState.No]);
 
             cboDetermineResxLang.ItemsSource = dataSource;
             cboDetermineResxLang.SelectedValue = properties.ToPropertyState(
@@ -115,7 +115,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.AdditionalDictionaryFolders), out var spi))
             {
-                folders.AddRange(spi.EditorConfigPropertyValue.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries));
+                folders.AddRange(spi.EditorConfigPropertyValue.Split(['|'], StringSplitOptions.RemoveEmptyEntries));
 
                 if(folders.Count != 0 && folders[0].ToString().Equals(SpellCheckerConfiguration.ClearInherited,
                   StringComparison.OrdinalIgnoreCase))
@@ -136,11 +136,13 @@ namespace VisualStudio.SpellChecker.Editors.Pages
 
             if(properties.TryGetValue(nameof(SpellCheckerConfiguration.DictionaryLanguages), out spi))
             {
-                selectedLanguages.AddRange(spi.EditorConfigPropertyValue.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                selectedLanguages.AddRange(spi.EditorConfigPropertyValue.Split([','], StringSplitOptions.RemoveEmptyEntries));
 
                 for(int idx = 0; idx < selectedLanguages.Count; idx++)
+                {
                     if(selectedLanguages[idx].Equals(SpellCheckerConfiguration.Inherited, StringComparison.OrdinalIgnoreCase))
                         selectedLanguages[idx] = String.Empty;
+                }
             }
 
             this.LoadAvailableLanguages();
@@ -341,7 +343,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
             string addFoldersPropName = SpellCheckerConfiguration.EditorConfigSettingsFor(
                 nameof(SpellCheckerConfiguration.AdditionalDictionaryFolders)).PropertyName;
 
-            foreach(string configFile in configFiles.Except(new[] { this.ConfigurationFilename }))
+            foreach(string configFile in configFiles.Except([this.ConfigurationFilename]))
             {
                 var editorConfig = EditorConfigFile.FromFile(configFile);
 
@@ -351,8 +353,8 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                     foreach(var prop in addFolderProp.SpellCheckerProperties.Where(
                         p => p.PropertyName.StartsWith(addFoldersPropName, StringComparison.OrdinalIgnoreCase)))
                     {
-                        foreach(string addFolder in prop.PropertyValue.Split(new[] { '|' },
-                            StringSplitOptions.RemoveEmptyEntries))
+                        foreach(string addFolder in prop.PropertyValue.Split(['|'],
+                          StringSplitOptions.RemoveEmptyEntries))
                         {
                             yield return addFolder;
                         }
@@ -374,18 +376,18 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             string configFilePath = Path.GetDirectoryName(this.ConfigurationFilename);
 
-            using(FolderBrowserDlg dlg = new FolderBrowserDlg())
+            using FolderBrowserDlg dlg = new()
             {
-                dlg.Description = "Select an additional dictionary folder";
-                dlg.SelectedPath = !isGlobal && Directory.Exists(configFilePath) ? configFilePath :
-                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                Description = "Select an additional dictionary folder",
+                SelectedPath = !isGlobal && Directory.Exists(configFilePath) ? configFilePath :
+                    Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
 
-                if(dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    txtAdditionalFolder.Text = dlg.SelectedPath;
+            if(dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                txtAdditionalFolder.Text = dlg.SelectedPath;
 
-                    btnAddFolder_Click(sender, e);
-                }
+                btnAddFolder_Click(sender, e);
             }
         }
 
@@ -459,8 +461,10 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 if(idx < 0)
                     idx = 0;
                 else
+                {
                     if(idx >= lbAdditionalFolders.Items.Count)
                         idx = lbAdditionalFolders.Items.Count - 1;
+                }
 
                 lbAdditionalFolders.SelectedIndex = idx;
             }
@@ -795,7 +799,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
                 return;
             }
 
-            OpenFileDialog dlg = new OpenFileDialog
+            OpenFileDialog dlg = new()
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 Filter = "User Dictionary Files (*.dic,*.xml)|*.dic;*.xml|" +
@@ -869,7 +873,7 @@ namespace VisualStudio.SpellChecker.Editors.Pages
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            SaveFileDialog dlg = new SaveFileDialog
+            SaveFileDialog dlg = new()
             {
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                 FileName = "UserDictionary.dic",
