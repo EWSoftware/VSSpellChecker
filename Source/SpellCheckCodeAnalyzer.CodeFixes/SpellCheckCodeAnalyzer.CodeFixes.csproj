@@ -5,9 +5,9 @@
 		<AssemblyName>VisualStudio.SpellChecker.CodeFixes</AssemblyName>
 		<RootNamespace>VisualStudio.SpellChecker.CodeFixes</RootNamespace>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Title>Visual Studio Spell Checker Code Fixes</Title>
-		<AssemblyTitle>Visual Studio Spell Checker Code Fixes</AssemblyTitle>
-		<Description>This assembly contains spell checker code fixes</Description>
+		<Title>Spell Check My Code Analyzer Fixes</Title>
+		<AssemblyTitle>Spell Check My Code Analyzer Fixes</AssemblyTitle>
+		<Description>This assembly contains spell checker code analyzer fixes</Description>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Configurations>Debug;Release</Configurations>
 		<NoWarn>NU1701,NU1702</NoWarn>

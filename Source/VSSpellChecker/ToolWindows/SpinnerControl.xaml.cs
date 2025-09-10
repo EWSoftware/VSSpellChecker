@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : SpinnerControl.cs
 // Author  : blackspikeltd (https://github.com/blackspikeltd/Xaml-Spinners-WPF)
 // Updated : 08/24/2015

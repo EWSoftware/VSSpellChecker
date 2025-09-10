@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<topic id="7be3a6a1-c374-4384-9b5b-5dc1b01d4307" revisionNumber="1">
+	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
+		<introduction>
+			<para>Changes made in this release:</para>
+		</introduction>
+
+		<section>
+			<content>
+
+				<list class="bullet">
+					<listItem>
+						<para>After 12 years, Microsoft decided that they don't like me using "Visual Studio" in the title of
+the extension and sent me a DMCA notice.  As such, I have had to change the name of the package and also update
+the logo to remove any implied association with their trademarks.  Henceforth, the title of the package will be
+"Spell Check My Code".</para>
+					</listItem>
+
+					<listItem>
+						<para>Enabled installation in Visual Studio 2026.</para>
+					</listItem>
+				</list>
+
+			</content>
+		</section>
+
+		<relatedTopics>
+
+		</relatedTopics>
+
+	</developerConceptualDocument>
+</topic>

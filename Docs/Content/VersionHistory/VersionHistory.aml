@@ -2,13 +2,19 @@
 <topic id="548dc6d7-6d08-4006-82b3-d5830be96f04" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>This topic describes the various changes made to the Visual Studio Spell Checker over the life of the
-project.  Select a version below to see a description of its changes.</para>
+			<para>This topic describes the various changes made to the Spell Check My Code extension over the life of the project.
+Select a version below to see a description of its changes.</para>
 		</introduction>
 
 		<section>
 			<content>
 				<list class="bullet">
+					<listItem>
+						<para>
+							<link xlink:href="7be3a6a1-c374-4384-9b5b-5dc1b01d4307" />
+						</para>
+					</listItem>
+
 					<listItem>
 						<para>
 							<link xlink:href="f401145a-63b8-48ea-a70c-820b7d58eb15" />

@@ -7,13 +7,13 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageId>EWSoftware.VSSpellChecker</PackageId>
-		<Title>Visual Studio Spell Checker Definitions</Title>
-		<AssemblyTitle>Visual Studio Spell Checker Definitions</AssemblyTitle>
+		<Title>Spell Check My Code Definitions</Title>
+		<AssemblyTitle>Spell Check My Code Definitions</AssemblyTitle>
 		<!-- This should only change if a breaking change is made that requires an update to the package -->
 		<Version>2025.8.30.0</Version>
 		<Authors>Eric Woodruff</Authors>
-		<Description>This assembly contains interfaces and other supporting classes used to implement the Visual Studio spell checker extension</Description>
-		<PackageIconUrl>https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/NuGet/VSSpellChecker.png</PackageIconUrl>
+		<Description>This assembly contains interfaces and other supporting classes used to implement a spell checker extension for Visual Studio</Description>
+		<PackageIconUrl>https://raw.githubusercontent.com/EWSoftware/VSSpellChecker/master/Source/VSSpellCheckerDefinitions/VSSpellChecker.png</PackageIconUrl>
 		<PackageIcon>VSSpellChecker.png</PackageIcon>
 		<RepositoryUrl>https://github.com/EWSoftware/VSSpellChecker</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>

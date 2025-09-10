@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : SimpleEditorPane.cs
 // Author  : Istvan Novak
 // Updated : 04/27/2023

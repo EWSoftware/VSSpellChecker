@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : FileMisspelling.cs
 // Authors : Eric Woodruff
 // Updated : 08/30/2025

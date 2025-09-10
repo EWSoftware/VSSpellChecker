@@ -1,5 +1,5 @@
 //===============================================================================================================
-// System  : Visual Studio Spell Checker Definitions
+// System  : Spell Check My Code Definitions
 // File    : ISpellingService.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 07/29/2022

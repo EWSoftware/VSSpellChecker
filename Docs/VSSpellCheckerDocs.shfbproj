@@ -41,7 +41,7 @@
       <Argument Key="RequestExampleUrl" Value="" />
     </TransformComponentArguments>
     <DocumentationSources>
-      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj" />
+      <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj" configuration="Release" />
     </DocumentationSources>
     <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
     <HelpFileFormat>Website</HelpFileFormat>
@@ -57,7 +57,7 @@
     <PresentationStyle>Default2022</PresentationStyle>
     <Preliminary>False</Preliminary>
     <NamingMethod>Guid</NamingMethod>
-    <HelpTitle>Visual Studio Spell Checker Documentation</HelpTitle>
+    <HelpTitle>VS Spell Checker Documentation</HelpTitle>
     <FeedbackEMailAddress>Eric%40EWoodruff.us</FeedbackEMailAddress>
     <CopyrightText>Copyright \xA9 2013-2025, Eric Woodruff, All rights reserved</CopyrightText>
     <CopyrightHref>https://GitHub.com/EWSoftware/VSSpellChecker</CopyrightHref>
@@ -89,7 +89,7 @@
 &amp;lt%3bdiv data-type=&amp;quot%3bad&amp;quot%3b data-publisher=&amp;quot%3bewsoftware.github.io&amp;quot%3b data-format=&amp;quot%3b728x90&amp;quot%3b data-zone=&amp;quot%3bVSSpellChecker&amp;quot%3b&amp;gt%3b&amp;lt%3b/div&amp;gt%3b
 </WebsiteAdContent>
     <AppendMarkdownFileExtensionsToUrls>False</AppendMarkdownFileExtensionsToUrls>
-    <ProjectSummary>Visual Studio Spell Checker.  Written by Eric Woodruff %28&amp;lt%3ba href=&amp;quot%3bmailto:Eric%40EWoodruff.us%3fSubject=Visual Studio Spell Checker&amp;quot%3b&amp;gt%3bEric%40EWoodruff.us&amp;lt%3b/a&amp;gt%3b%29.  For the latest version visit &amp;lt%3ba href=&amp;quot%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;lt%3b/a&amp;gt%3b.</ProjectSummary>
+    <ProjectSummary>VS Spell Checker.  Written by Eric Woodruff %28&amp;lt%3ba href=&amp;quot%3bmailto:Eric%40EWoodruff.us%3fSubject=VS Spell Checker&amp;quot%3b&amp;gt%3bEric%40EWoodruff.us&amp;lt%3b/a&amp;gt%3b%29.  For the latest version visit &amp;lt%3ba href=&amp;quot%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3bhttps://GitHub.com/EWSoftware/VSSpellChecker&amp;lt%3b/a&amp;gt%3b.</ProjectSummary>
     <VisibleItems>InheritedMembers, InheritedFrameworkMembers, Protected, ProtectedInternalAsProtected, NonBrowsable</VisibleItems>
     <PlugInConfigurations>
       <PlugInConfig id="Output Deployment" enabled="True">
@@ -221,6 +221,7 @@
     <None Include="Content\VersionHistory\v2024.12.14.0.aml" />
     <None Include="Content\VersionHistory\v2024.6.17.0.aml" />
     <None Include="Content\VersionHistory\v2025.8.30.0.aml" />
+    <None Include="Content\VersionHistory\v2025.9.10.0.aml" />
     <None Include="Content\VersionHistory\VersionHistory.aml" />
     <None Include="Content\VersionHistory\v2023.5.8.0.aml" />
     <None Include="Content\VSSpell001.aml" />

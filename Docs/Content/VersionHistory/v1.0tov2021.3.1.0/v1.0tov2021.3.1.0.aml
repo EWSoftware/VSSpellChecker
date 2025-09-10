@@ -2,9 +2,8 @@
 <topic id="70695fc7-f468-4a3d-a46b-3658d373670a" revisionNumber="1">
 	<developerConceptualDocument xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:xlink="http://www.w3.org/1999/xlink">
 		<introduction>
-			<para>The topics in this section describe the various changes made to the Visual Studio Spell Checker
-for versions 1.0.0.0 through 2021.3.1.0.  Select a version below to see a description of its changes.
-			</para>
+			<para>The topics in this section describe the various changes made to the spell checker for versions
+1.0.0.0 through 2021.3.1.0.  Select a version below to see a description of its changes.</para>
 		</introduction>
 
 		<section>

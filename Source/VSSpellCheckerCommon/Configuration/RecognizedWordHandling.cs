@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : RecognizedWordHandling.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 01/29/2023

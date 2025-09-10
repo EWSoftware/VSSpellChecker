@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : ICommonCommandSupport.cs
 // Author  : Istvan Novak
 // Updated : 02/06/2015

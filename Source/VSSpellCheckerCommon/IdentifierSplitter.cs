@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : IdentifierSplitter.cs
 // Author  : Eric Woodruff
 // Updated : 03/22/2023

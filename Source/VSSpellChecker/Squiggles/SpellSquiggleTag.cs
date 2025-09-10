@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : SpellSquiggleTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
 // Updated : 04/14/2013

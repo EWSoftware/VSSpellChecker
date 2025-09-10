@@ -6,8 +6,8 @@
 is the default branch for all current and future development.
 
 The VSLegacy and VSLegacy2017-2019 branches are for Visual Studio 2013/2015 and 2017/2019 respectively and are
-being retained for legacy support only.  In order to build the Visual Studio Spell Checker projects
-you will need the following tools:</para>
+being retained for legacy support only.  In order to build the spell checker projects you will need the
+following tools:</para>
 
 			<list class="bullet">
 				<listItem>

@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : RMarkdownTextTagger.cs
 // Authors : Eric Woodruff
 // Updated : 08/30/2025

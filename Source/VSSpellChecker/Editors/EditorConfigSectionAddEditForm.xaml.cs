@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : EditorConfigSectionAddEditForm.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 04/13/2023

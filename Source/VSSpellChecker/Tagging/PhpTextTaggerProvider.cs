@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : PhpTextTaggerProvider.cs
 // Authors : Miloslav Beňo (DevSense - http://www.devsense.com/)
 // Updated : 06/03/2024

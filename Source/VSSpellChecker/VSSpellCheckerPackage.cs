@@ -1,11 +1,11 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : VSSpellCheckerPackage.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 08/30/2025
 // Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
-// This file contains the class that defines the Visual Studio Spell Checker package
+// This file contains the class that defines the Spell Check My Code Package
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -48,7 +48,7 @@ using VisualStudio.SpellChecker.ToolWindows;
 namespace VisualStudio.SpellChecker
 {
     /// <summary>
-    /// This is the class that implements the Visual Studio Spell Checker package
+    /// This is the class that implements the Spell Check My Code Package
     /// </summary>
     /// <remarks>The minimum requirement for a class to be considered a valid package for Visual Studio is to
     /// implement the <c>IVsPackage</c> interface and register itself with the shell.  This package uses the

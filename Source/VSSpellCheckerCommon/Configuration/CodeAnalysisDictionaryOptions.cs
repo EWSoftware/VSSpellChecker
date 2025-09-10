@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : CodeAnalysisDictionaryOptions.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 02/28/2023

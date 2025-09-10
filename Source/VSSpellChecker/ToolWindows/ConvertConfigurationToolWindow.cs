@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : ConvertConfigurationToolWindow.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 03/19/2023

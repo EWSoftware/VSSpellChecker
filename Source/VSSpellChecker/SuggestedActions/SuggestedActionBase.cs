@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : SuggestedActionBase.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 04/10/2019

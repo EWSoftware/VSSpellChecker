@@ -53,7 +53,7 @@ them.</para>
 <linkTarget>_blank</linkTarget>
 </externalLink>) using the <ui>Tools | Extension and Updates</ui> option (Visual Studio 2017) or
 <ui>Extensions | Manage Extensions</ui> option (Visual Studio 2019 or later).  Select the online marketplace and
-search for "Visual Studio Spell Checker".  Include the quote marks for an exact match and find the one created by
+search for "spell check my code".  Include the quote marks for an exact match and find the one created by
 <legacyItalic>EWSoftware</legacyItalic>.  Once found, you can click the <ui>Download</ui> button to download and
 install it.</para>
 

@@ -5,8 +5,8 @@
 		<AssemblyName>VisualStudio.SpellChecker.CodeAnalyzer</AssemblyName>
 		<RootNamespace>VisualStudio.SpellChecker.CodeAnalyzer</RootNamespace>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Title>Visual Studio Spell Checker Code Analyzers</Title>
-		<AssemblyTitle>Visual Studio Spell Checker Code Analyzers</AssemblyTitle>
+		<Title>Spell Check My Code Analyzers</Title>
+		<AssemblyTitle>Spell Check My Code Analyzers</AssemblyTitle>
 		<Description>This assembly contains spell checker code analyzers</Description>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<PlatformTarget>AnyCPU</PlatformTarget>

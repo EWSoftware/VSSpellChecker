@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : ScriptWithHtmlClassifier.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 03/22/2023

@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : MultiLanguageSpellingSuggestion.cs
 // Author  : Franz Alex Gaisie-Essilfie
 // Updated : 03/21/2023

@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : EditorConfigPropertyAttribute.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 02/05/2023

@@ -1,5 +1,5 @@
 //===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : SpellingEventArgs.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
 // Updated : 03/15/2023

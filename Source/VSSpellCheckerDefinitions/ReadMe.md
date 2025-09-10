@@ -1,4 +1,4 @@
-# Visual Studio Spell Checker Definitions
+# Spell Check My Code Definitions
 For Visual Studio 2022 and later target .NET 4.7.x.
 
 See the project help content for usage and API information:

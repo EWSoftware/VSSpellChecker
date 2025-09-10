@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="E1019027-EE37-4B1A-AD4C-25CAA92CA2D5" Version="2025.8.30.0" Language="en-US" Publisher="EWSoftware" />
-        <DisplayName>Visual Studio Spell Checker (VS2022 and Later)</DisplayName>
+        <Identity Id="E1019027-EE37-4B1A-AD4C-25CAA92CA2D5" Version="2025.9.10.0" Language="en-US" Publisher="EWSoftware" />
+        <DisplayName>Spell Check My Code (VS2022 and Later)</DisplayName>
         <Description xml:space="preserve">An editor extension that checks the spelling of comments, strings, and plain text as you type or interactively with a tool window.  It can also spell check an entire solution, project, or selected items.  Options are available to define multiple languages to spell check against, define ignored words, control how elements and attributes in XML and MAML files are spell checked, and much more.</Description>
         <MoreInfo>https://ewsoftware.github.io/VSSpellChecker</MoreInfo>
         <License>License.rtf</License>
@@ -13,10 +13,10 @@
         <Tags>spell checker;spell;spellcheck;spelling;spell as you type</Tags>
     </Metadata>
     <Installation InstalledByMsi="false">
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 19.0)">
             <ProductArchitecture>amd64</ProductArchitecture>
         </InstallationTarget>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 19.0)">
             <ProductArchitecture>arm64</ProductArchitecture>
         </InstallationTarget>
     </Installation>

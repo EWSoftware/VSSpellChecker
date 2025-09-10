@@ -1,11 +1,11 @@
 //===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : AssemblyInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/30/2025
+// Updated : 09/10/2025
 // Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
-// Visual Studio spell checker definition attributes.
+// Spell Check My Code definition attributes.
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker
@@ -22,13 +22,13 @@ using System.Resources;
 
 // General assembly information
 [assembly: AssemblyCompany("Eric Woodruff")]
-[assembly: AssemblyProduct("Visual Studio Spell Checker")]
-[assembly: AssemblyTitle("Visual Studio Spell Checker Package")]
+[assembly: AssemblyProduct("Spell Check My Code")]
+[assembly: AssemblyTitle("Spell Check My Code Package")]
 [assembly: AssemblyCopyright("Copyright \xA9 2013-2025, Eric Woodruff, All Rights Reserved.\r\n" +
         "Portions Copyright \xA9 2010-2025, Microsoft Corporation, All Rights Reserved.")]
-[assembly: AssemblyDescription("This assembly contains a package that implement the Visual Studio spell checker")]
+[assembly: AssemblyDescription("This assembly contains a package that implement a spell checker for Visual Studio")]
 [assembly: NeutralResourcesLanguage("en")]
 
 // These should match the version in Directory.Build.props
-[assembly: AssemblyVersion("2025.8.30.0")]
-[assembly: AssemblyFileVersion("2025.8.30.0")]
+[assembly: AssemblyVersion("2025.9.10.0")]
+[assembly: AssemblyFileVersion("2025.9.10.0")]

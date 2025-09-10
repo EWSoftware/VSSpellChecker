@@ -5,9 +5,9 @@
 		<AssemblyName>VisualStudio.SpellChecker.Common</AssemblyName>
 		<RootNamespace>VisualStudio.SpellChecker.Common</RootNamespace>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<Title>Visual Studio Spell Checker Common Code</Title>
-		<AssemblyTitle>Visual Studio Spell Checker Common Code</AssemblyTitle>
-		<Description>This assembly contains interfaces and other supporting classes used to implement the Visual Studio spell checker</Description>
+		<Title>Spell Check My Code Common Code</Title>
+		<AssemblyTitle>Spell Check My Code Common Code</AssemblyTitle>
+		<Description>This assembly contains interfaces and other supporting classes used to implement a spell checker for Visual Studio</Description>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<Configurations>Debug;Release</Configurations>
 		<NoWarn>NU1701,NU1702</NoWarn>

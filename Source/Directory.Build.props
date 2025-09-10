@@ -1,8 +1,8 @@
 <Project>
 	<PropertyGroup>
 		<Company>Eric Woodruff</Company>
-		<Product>Visual Studio Spell Checker Package</Product>
-		<Title>EWSoftware Windows Forms List Controls Library</Title>
+		<Product>Spell Check My Code Package</Product>
+		<Title>Spell Check My Code Package</Title>
 		<Copyright>Copyright (c) 2013-2025, Eric Woodruff, All Rights Reserved.  Portions Copyright (c) 2010-2025, Microsoft Corporation, All Rights Reserved.</Copyright>
 
 		<NeutralLanguage>en</NeutralLanguage>
@@ -11,8 +11,8 @@
 
 		<!-- Update the version in VSSpellChecker\Properties\AssemblyInfo.cs as well.
 				 If necessary, update the strong name version in VSSpellCheckerDefinitions.csproj. -->
-		<Version>2025.8.30.0</Version>
-		<FileVersion>2025.8.30.0</FileVersion>
+		<Version>2025.9.10.0</Version>
+		<FileVersion>2025.9.10.0</FileVersion>
 
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisMode>AllEnabledByDefault</AnalysisMode>

@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Definitions
+// System  : Spell Check My Code Definitions
 // File    : ISpellingIssue.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 08/25/2015

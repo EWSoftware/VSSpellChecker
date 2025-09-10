@@ -446,6 +446,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
@@ -560,7 +561,7 @@
 
 IF NOT EXIST "$(SolutionDir)..\Deployment\" MD "$(SolutionDir)..\Deployment\"
 
-Copy "$(TargetDir)$(TargetName).vsix" "$(SolutionDir)..\Deployment\$(TargetName).vsix"
+Copy "$(TargetDir)$(TargetName).vsix" "$(SolutionDir)..\Deployment\SpellCheckMyCodeVS2022AndLater.vsix"
 
 :Exit
 </PostBuildEvent>

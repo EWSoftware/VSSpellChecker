@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : Utility.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 08/30/2025
@@ -62,7 +62,7 @@ namespace VisualStudio.SpellChecker
         //=====================================================================
 
         /// <summary>
-        /// Get a service from the Visual Studio Spell Checker package
+        /// Get a service from the Spell Check My Code Package
         /// </summary>
         /// <param name="throwOnError">True to throw an exception if the service cannot be obtained,
         /// false to return null.</param>

@@ -1,5 +1,5 @@
 //===============================================================================================================
-// System  : Visual Studio Spell Checker Definitions
+// System  : Spell Check My Code Definitions
 // File    : INaturalTextTag.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer
 // Updated : 02/19/2015

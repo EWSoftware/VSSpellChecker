@@ -1,11 +1,11 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker
+// System  : Spell Check My Code
 // File    : AssemblyInfoShared.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 07/30/2025
 // Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
-// Visual Studio spell checker common assembly attributes
+// Spell Check My Code common assembly attributes
 //
 // This code is published under the Microsoft Public License (Ms-PL).  A copy of the license should be
 // distributed with the code and can be found at the project website: https://github.com/EWSoftware/VSSpellChecker

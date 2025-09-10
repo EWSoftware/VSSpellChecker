@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : LineType.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 01/30/2023

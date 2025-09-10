@@ -1,5 +1,5 @@
 ﻿//===============================================================================================================
-// System  : Visual Studio Spell Checker Package
+// System  : Spell Check My Code Package
 // File    : IgnoredCharacterClass.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
 // Updated : 06/12/2014
