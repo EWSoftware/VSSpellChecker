@@ -1,0 +1,121 @@
+---
+uid: e23551ac-52f5-4505-b2d2-0728c7607fd3
+alt-uid: VisualStudioWPFTextBoxes
+title: Visual Studio WPF Text Boxes
+keywords: "configuration, WPF text boxes"
+---
+
+This category lets you enable spell checking for WPF text boxes within any Visual Studio tool window
+or designer/editor.  Exclusion expressions can be added to disable spell checking in text boxes in which it is
+not appropriate or not wanted.
+
+<autoOutline excludeRelatedTopics="true" lead="none" />
+
+
+## Options
+
+To enable the option, check the checkbox.  To disable this option, uncheck the checkbox.  The
+change becomes effectively immediately once the global configuration is saved.  If disabled, the event used to
+connect the spell checker will remain active for the current session but will do nothing.  Restart Visual Studio
+to disable it completely.
+
+
+Exclusion expressions consist of a regular expression that is used to match one or more fully
+qualified control names.  Since text boxes and their parent controls are not always named, the window GUID or
+type name is used to prefix all IDs.  The remainder of the ID consists of as many IDs as are present in the text
+box's parent control hierarchy.  While this results in some very long names, it does help ensure that the IDs
+are unique and will be matched to the correct control.  Quantifiers within the regular expression can be used to
+match multiple controls with common prefixes.
+
+
+To add a new expressions, click the **Add** button.  A dialog box will appear in which you can
+enter the expression and indicate which options if any should be used with it.  The Ignore Case option is really
+the only useful option here.  The Multi-line and Single Line options will not have any effect.  A comment can
+also be entered to describe the entry.  To edit an expression, select it in the list and click the **Edit**
+button or double click it.  The same dialog box will appear in which you can modify the expression settings.  To
+remove an expression, select it in the list and click the **Remove** button.  To reset the list to the
+default set of ignored Visual Studio control IDs, click the **Default** button.
+
+
+``` none{title=" "}
+vsspell_enable_wpf_text_box_spell_checking = [true|false]
+vsspell_visual_studio_id_exclusions = [regEx1(?@@PND@@/Options/)]...
+
+These option only have an effect in the global spell checker configuration file.
+regEx1(?@@PND@@/Options/)... = One or more regular expressions to use and their options.
+				
+```
+
+
+## Spell Checking
+
+As noted, spell checking will only be available in WPF text boxes.  If the tool window or editor
+uses standard Windows text boxes, spell checking will not occur.  You can typically tell the type of text box by
+right clicking in it to bring up the context menu.  If the only options available are Cut, Copy, and Paste it is
+most likely a WPF text box.  If you see other options for setting the reading order, inserting Unicode
+characters, and Open IME, it is most likely a standard Windows text box and will not be supported.
+
+
+Spell checking will not occur until the text box actually gains the keyboard focus.  Once it does,
+any misspelled words will be underlined.  Right click on a misspelled word to show the context menu.  It will
+contain any suggested replacements, an option to add the word to the global dictionary, and an option to ignore
+the word.  See below for known issues and limitations.
+
+
+
+## Excluding Text Boxes
+
+There are many standard tool windows and dialog boxes in Visual Studio as well as many more
+provided by third-party extensions.  It is almost certain that you will run across a text box in which spell
+checking is enabled but it is not appropriate.  You can use the exclusion expression options described above to
+exclude all of the tool window controls or just specific ones within it.  In order to get the control ID, hold
+down the Left Control key and right click in the text box.  An extra **Copy Name to Clipboard** option will
+be shown in the context menu.  Select it and the control name will be copied to the clipboard.  You can then use
+the global configuration editor to add the ID or an expression based on it to exclude the unwanted text boxes.
+
+
+The IDs are always prefixed with the tool windows GUID or the dialog box's type name.  You can use
+the ID as given or use the regular expression options to exclude all or selected text boxes from being spell
+checked based on one or more parts of the ID.  The default IDs supplied with the spell checker show various
+examples.
+
+
+
+## Known Issues and Limitations
+
+The following are the known issues and limitations with the WPF text box spell checking option.
+
+
+- Only WPF text boxes are supported.  See above for the method to use in determining the type of
+text box.  If it still looks like a WPF text box but spell checking is not occurring, it may be getting excluded
+by ID.  The above noted method of getting the control ID should help you determine if that is the case.
+- Due to the way it needs to be implemented, spell checking will be enabled in every single WPF
+text box whether you want it or not.  Use the exclusion expressions to disable it where not appropriate such as
+when it is embedded in part of another control such as an editable search combo box.
+- The text box spell checking options can only be set in the global configuration and the text
+boxes will only use the global configuration settings.  Solution, project, folder, and file settings will not be
+applied as it is not possible to do so reliably.  What this means is that any custom file editors, such as those
+found in the Sandcastle Help File Builder for content layout files for example, will only use the global settings,
+not the ones for the related solution or project.  If this is not acceptable, you can disable spell checking for
+text boxes within those editors and rely on the Solution/Project spell checking option to find spelling errors.
+An example would be where your global language setting is English but a particular project is spell checked in a
+different language thus resulting in false reports on all of the foreign words.
+- Changing the Visual Studio theme will typically cause any current spelling error highlights to
+disappear and not come back.  Switching to another window and back, hiding the window and then showing it again,
+or closing and reopening it will reconnect the spell checker once the text box regains the focus.
+- Docking and undocking tool windows and some other actions will result in similar behavior as
+noted above where current highlights disappear and spell checking stops.  The solution to get it going again is
+the same.
+- A solid magenta underline is used to note the spelling errors rather than a squiggle like the
+one used in the text editor.  My WPF skills are meager at best and I could not get a squiggle underline to work
+reliably (the wave tended to shift both horizontally and vertically based on the location and didn't look right).
+If you've got better WPF skills and want to have a go at implementing a squiggle underline that stays fixed and
+looks the same regardless of location, feel free to submit the changes if you can get it working.
+
+
+
+## See Also
+
+
+**Other Resources**  
+[](@fb81c214-0fe0-4d62-a172-d7928d5b91d5)  

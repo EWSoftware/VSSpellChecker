@@ -23,7 +23,8 @@
       <Argument Key="RobotsMetadata" Value="" />
       <Argument Key="BibliographyDataFile" Value="" />
       <Argument Key="RootBreadcrumbTitleText" Value="Spell Checker" />
-      <Argument Key="CollapsibleSections" Value="True" />
+      <Argument Key="ResizableTocColumn" Value="False" />
+      <Argument Key="CollapsibleSections" Value="False" />
       <Argument Key="LogoFile" Value="" />
       <Argument Key="LogoHeight" Value="" />
       <Argument Key="LogoWidth" Value="" />
@@ -37,8 +38,11 @@
       <Argument Key="EnumMemberSortOrder" Value="Value" />
       <Argument Key="FlagsEnumValueFormat" Value="IntegerValue" />
       <Argument Key="FlagsEnumSeparatorSize" Value="0" />
+      <Argument Key="IncludeIntegerEnumSeparators" Value="true" />
       <Argument Key="BaseSourceCodeUrl" Value="https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/" />
       <Argument Key="RequestExampleUrl" Value="" />
+      <Argument Key="ShowParametersOnAllMethods" Value="False" />
+      <Argument Key="AlwaysShowTopLevelAutoOutline" Value="False" />
     </TransformComponentArguments>
     <DocumentationSources>
       <DocumentationSource sourceFile="..\Source\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj" configuration="Release" />
@@ -57,7 +61,7 @@
     <PresentationStyle>Default2022</PresentationStyle>
     <Preliminary>False</Preliminary>
     <NamingMethod>Guid</NamingMethod>
-    <HelpTitle>VS Spell Checker Documentation</HelpTitle>
+    <HelpTitle>Spell Check My Code Documentation</HelpTitle>
     <FeedbackEMailAddress>Eric%40EWoodruff.us</FeedbackEMailAddress>
     <CopyrightText>Copyright \xA9 2013-2025, Eric Woodruff, All rights reserved</CopyrightText>
     <CopyrightHref>https://GitHub.com/EWSoftware/VSSpellChecker</CopyrightHref>
@@ -67,7 +71,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2025.8.31.0</HelpFileVersion>
+    <HelpFileVersion>2025.12.12.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -143,87 +147,89 @@
     <Folder Include="media" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Content\ClassifierDefinition.aml" />
-    <None Include="Content\CodeAnalyzer.aml" />
-    <None Include="Content\CommonProblems.aml" />
-    <None Include="Content\ConfigOptions\CodeAnalysisDictionaries.aml" />
-    <None Include="Content\ConfigOptions\ConfigOptions.aml" />
-    <None Include="Content\ConfigOptions\CodeAnalyzerOptions.aml" />
-    <None Include="Content\ConfigOptions\DictionarySettings.aml" />
-    <None Include="Content\ConfigOptions\IgnoredClassifications.aml" />
-    <None Include="Content\ConfigOptions\ExclusionExpressions.aml" />
-    <None Include="Content\ConfigOptions\GeneralSettings.aml" />
-    <None Include="Content\ConfigOptions\IgnoredWords.aml" />
-    <None Include="Content\ConfigOptions\ImportSettings.aml" />
-    <None Include="Content\ConfigOptions\VisualStudioWPFTextBoxes.aml" />
-    <None Include="Content\ConfigOptions\XMLFiles.aml" />
-    <None Include="Content\Contributing.aml" />
-    <None Include="Content\ConvertingToEditorConfig.aml" />
-    <None Include="Content\CorrectingIssues.aml" />
-    <None Include="Content\CustomDictionaries.aml" />
-    <None Include="Content\IgnoreSpellingDirective.aml" />
-    <None Include="Content\Installation.aml" />
-    <None Include="Content\KnownIssues.aml" />
-    <None Include="Content\ShortcutKeys.aml" />
-    <None Include="Content\SolutionProjectSpellCheck.aml" />
-    <None Include="Content\SpellCheckAsYouType.aml" />
-    <None Include="Content\SpellCheckCurrentDoc.aml" />
-    <None Include="Content\SpellCheckOptions.aml" />
-    <None Include="Content\SystemRequirements.aml" />
-    <None Include="Content\ThirdPartyContentTypes.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0.0.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0.0.1.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0tov2021.3.1.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.2.23.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.6.14.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.9.7.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.11.8.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.2.21.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.3.1.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.8.15.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.9.19.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.10.15.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.3.12.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.5.28.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.7.28.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.12.29.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.3.26.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.8.26.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.10.27.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.8.25.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.8.3.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.4.14.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.5.5.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.7.8.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.3.28.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.4.18.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.6.11.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.8.24.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2021.1.23.0.aml" />
-    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2021.3.1.0.aml" />
-    <None Include="Content\VersionHistory\v2022.1.3.0.aml" />
-    <None Include="Content\VersionHistory\v2022.12.29.0.aml" />
-    <None Include="Content\VersionHistory\v2022.9.6.0.aml" />
-    <None Include="Content\VersionHistory\v2023.12.29.0.aml" />
-    <None Include="Content\VersionHistory\v2023.3.4.0.aml" />
-    <None Include="Content\VersionHistory\v2023.5.15.0.aml" />
-    <None Include="Content\VersionHistory\v2024.12.14.0.aml" />
-    <None Include="Content\VersionHistory\v2024.6.17.0.aml" />
-    <None Include="Content\VersionHistory\v2025.8.30.0.aml" />
-    <None Include="Content\VersionHistory\v2025.9.10.0.aml" />
-    <None Include="Content\VersionHistory\VersionHistory.aml" />
-    <None Include="Content\VersionHistory\v2023.5.8.0.aml" />
-    <None Include="Content\VSSpell001.aml" />
-    <None Include="Content\Welcome.aml" />
+    <None Include="Content\Contributing.md" />
+    <None Include="Content\SystemRequirements.md" />
+    <None Include="Content\KnownIssues.md" />
+    <None Include="Content\ClassifierDefinition.md" />
+    <None Include="Content\ThirdPartyContentTypes.md" />
+    <None Include="Content\CustomDictionaries.md" />
+    <None Include="Content\ConvertingToEditorConfig.md" />
+    <None Include="Content\IgnoreSpellingDirective.md" />
+    <None Include="Content\SpellCheckCurrentDoc.md" />
+    <None Include="Content\SpellCheckAsYouType.md" />
+    <None Include="Content\ShortcutKeys.md" />
+    <None Include="Content\Installation.md" />
+    <None Include="Content\VersionHistory\v2025.12.12.0.md" />
+    <None Include="Content\Welcome.md" />
+    <None Include="Content\CommonProblems.md" />
+    <None Include="Content\CorrectingIssues.md" />
+    <None Include="Content\SpellCheckOptions.md" />
+    <None Include="Content\SolutionProjectSpellCheck.md" />
+    <None Include="Content\ConfigOptions\VisualStudioWPFTextBoxes.md" />
+    <None Include="Content\ConfigOptions\ImportSettings.md" />
+    <None Include="Content\ConfigOptions\IgnoredClassifications.md" />
+    <None Include="Content\ConfigOptions\CodeAnalysisDictionaries.md" />
+    <None Include="Content\ConfigOptions\XMLFiles.md" />
+    <None Include="Content\ConfigOptions\ExclusionExpressions.md" />
+    <None Include="Content\ConfigOptions\IgnoredWords.md" />
+    <None Include="Content\ConfigOptions\DictionarySettings.md" />
+    <None Include="Content\ConfigOptions\CodeAnalyzerOptions.md" />
+    <None Include="Content\ConfigOptions\GeneralSettings.md" />
+    <None Include="Content\ConfigOptions\ConfigOptions.md" />
+    <None Include="Content\VSSpell001.md" />
+    <None Include="Content\CodeAnalyzer.md" />
+    <None Include="Content\VersionHistory\v2022.1.3.0.md" />
+    <None Include="Content\VersionHistory\v2022.9.6.0.md" />
+    <None Include="Content\VersionHistory\v2022.12.29.0.md" />
+    <None Include="Content\VersionHistory\v2023.3.4.0.md" />
+    <None Include="Content\VersionHistory\v2023.5.8.0.md" />
+    <None Include="Content\VersionHistory\v2023.5.15.0.md" />
+    <None Include="Content\VersionHistory\v2023.12.29.0.md" />
+    <None Include="Content\VersionHistory\v2024.6.17.0.md" />
+    <None Include="Content\VersionHistory\v2024.12.14.0.md" />
+    <None Include="Content\VersionHistory\v2025.8.30.0.md" />
+    <None Include="Content\VersionHistory\v2025.9.10.0.md" />
+    <None Include="Content\VersionHistory\VersionHistory.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0.0.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0.0.1.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.2.23.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.6.14.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2014.9.7.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.2.21.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.3.1.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.8.15.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.9.19.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2015.11.8.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.3.12.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.5.28.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.7.28.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2016.10.15.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.3.26.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.8.26.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2017.12.29.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.8.3.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.8.25.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2018.10.27.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.4.14.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.5.5.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2019.7.8.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.3.28.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.4.18.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.6.11.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2020.8.24.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2021.1.23.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v2021.3.1.0.md" />
+    <None Include="Content\VersionHistory\v1.0tov2021.3.1.0\v1.0tov2021.3.1.0.md" />
   </ItemGroup>
   <ItemGroup>
     <ContentLayout Include="ContentLayout.content" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="media\PayPal.gif">
+    <Image Include="media\PayPal.gif">
       <ImageId>PayPal</ImageId>
       <AlternateText>Pay Pal</AlternateText>
-    </Content>
+      <CopyToMedia>True</CopyToMedia>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Image Include="media\ActiveDocToolWindow.png">

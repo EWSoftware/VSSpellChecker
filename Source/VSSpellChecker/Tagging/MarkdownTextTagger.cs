@@ -2,8 +2,8 @@
 // System  : Spell Check My Code Package
 // File    : MarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 12/29/2022
-// Note    : Copyright 2016-2022, Eric Woodruff, All rights reserved
+// Updated : 12/07/2025
+// Note    : Copyright 2016-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for markdown files when the Markdown Editor extension by Mads
 // Kristensen is installed (https://github.com/madskristensen/MarkdownEditor).
@@ -28,111 +28,111 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace VisualStudio.SpellChecker.Tagging
+namespace VisualStudio.SpellChecker.Tagging;
+
+/// <summary>
+/// This class provides tags for markdown files when the Markdown Editor extension is installed
+/// </summary>
+internal class MarkdownTextTagger : ITagger<NaturalTextTag>, IDisposable
 {
+    #region Private data members
+    //=====================================================================
+
+    private readonly ITextBuffer buffer;
+    private readonly IEnumerable<string> ignoredClassifications;
+    private readonly ClassificationCache classificationCache;
+    private IClassifier classifier;
+
+    #endregion
+
+    #region Constructor
+    //=====================================================================
+
     /// <summary>
-    /// This class provides tags for markdown files when the Markdown Editor extension is installed
+    /// Constructor
     /// </summary>
-    internal class MarkdownTextTagger : ITagger<NaturalTextTag>, IDisposable
+    /// <param name="buffer">The text buffer</param>
+    /// <param name="classifier">The classifier</param>
+    /// <param name="ignoredClassifications">An optional enumerable list of ignored classifications for
+    /// the buffer's content type</param>
+    public MarkdownTextTagger(ITextBuffer buffer, IClassifier classifier, IEnumerable<string> ignoredClassifications)
     {
-        #region Private data members
-        //=====================================================================
+        classificationCache = ClassificationCache.CacheFor(buffer.ContentType.TypeName);
 
-        private readonly ITextBuffer buffer;
-        private readonly IEnumerable<string> ignoredClassifications;
-        private readonly ClassificationCache classificationCache;
-        private IClassifier classifier;
+        this.buffer = buffer;
+        this.classifier = classifier;
+        this.ignoredClassifications = ignoredClassifications ?? [];
 
-        #endregion
+        this.classifier.ClassificationChanged += ClassificationChanged;
+    }
+    #endregion
 
-        #region Constructor
-        //=====================================================================
+    #region ITagger<NaturalTextTag> Members
+    //=====================================================================
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="buffer">The text buffer</param>
-        /// <param name="classifier">The classifier</param>
-        /// <param name="ignoredClassifications">An optional enumerable list of ignored classifications for
-        /// the buffer's content type</param>
-        public MarkdownTextTagger(ITextBuffer buffer, IClassifier classifier, IEnumerable<string> ignoredClassifications)
+    /// <inheritdoc />
+    public IEnumerable<ITagSpan<NaturalTextTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+    {
+        if(classifier == null || spans == null || spans.Count == 0)
+            yield break;
+
+        foreach(var snapshotSpan in spans)
         {
-            classificationCache = ClassificationCache.CacheFor(buffer.ContentType.TypeName);
+            Debug.Assert(snapshotSpan.Snapshot.TextBuffer == buffer);
 
-            this.buffer = buffer;
-            this.classifier = classifier;
-            this.ignoredClassifications = ignoredClassifications ?? [];
-
-            this.classifier.ClassificationChanged += ClassificationChanged;
-        }
-        #endregion
-
-        #region ITagger<NaturalTextTag> Members
-        //=====================================================================
-
-        /// <inheritdoc />
-        public IEnumerable<ITagSpan<NaturalTextTag>> GetTags(NormalizedSnapshotSpanCollection spans)
-        {
-            if(classifier == null || spans == null || spans.Count == 0)
-                yield break;
-
-            foreach(var snapshotSpan in spans)
+            foreach(ClassificationSpan classificationSpan in classifier.GetClassificationSpans(snapshotSpan))
             {
-                Debug.Assert(snapshotSpan.Snapshot.TextBuffer == buffer);
+                string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant();
 
-                foreach(ClassificationSpan classificationSpan in classifier.GetClassificationSpans(snapshotSpan))
+                switch(name)
                 {
-                    string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant();
+                    case "keyword":     // Markers only, these contain nothing that can be spell checked
+                    case "markup node":
+                    case "operator":
+                    case "url":
+                        break;
 
-                    switch(name)
-                    {
-                        case "keyword":     // Markers only, these contain nothing that can be spell checked
-                        case "markup node":
-                        case "operator":
-                            break;
+                    default:
+                        // "md_code" will most likely contain a fair number of false reports but the
+                        // classification can be excluded if necessary through the configuration or
+                        // specific unwanted words through the Ignore Spelling directive.
+                        classificationCache.Add(name);
 
-                        default:
-                            // "md_code" will most likely contain a fair number of false reports but the
-                            // classification can be excluded if necessary through the configuration or
-                            // specific unwanted words through the Ignore Spelling directive.
-                            classificationCache.Add(name);
-
-                            if(!ignoredClassifications.Contains(name))
-                                yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
-                            break;
-                    }
+                        if(!ignoredClassifications.Contains(name))
+                            yield return new TagSpan<NaturalTextTag>(classificationSpan.Span, new NaturalTextTag());
+                        break;
                 }
             }
         }
-
-        /// <inheritdoc />
-        public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
-
-        /// <summary>
-        /// This is used to raise the <see cref="TagsChanged"/> event
-        /// </summary>
-        /// <param name="sender">The sender of the event</param>
-        /// <param name="e">The event arguments</param>
-        private void ClassificationChanged(object sender, ClassificationChangedEventArgs e)
-        {
-            this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(e.ChangeSpan));
-        }
-        #endregion
-
-        #region IDisposable implementation
-        //=====================================================================
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            if(classifier != null)
-            {
-                classifier.ClassificationChanged -= ClassificationChanged;
-                classifier = null;
-            }
-
-            GC.SuppressFinalize(this);
-        }
-        #endregion
     }
+
+    /// <inheritdoc />
+    public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+
+    /// <summary>
+    /// This is used to raise the <see cref="TagsChanged"/> event
+    /// </summary>
+    /// <param name="sender">The sender of the event</param>
+    /// <param name="e">The event arguments</param>
+    private void ClassificationChanged(object sender, ClassificationChangedEventArgs e)
+    {
+        this.TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(e.ChangeSpan));
+    }
+    #endregion
+
+    #region IDisposable implementation
+    //=====================================================================
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if(classifier != null)
+        {
+            classifier.ClassificationChanged -= ClassificationChanged;
+            classifier = null;
+        }
+
+        GC.SuppressFinalize(this);
+    }
+    #endregion
 }

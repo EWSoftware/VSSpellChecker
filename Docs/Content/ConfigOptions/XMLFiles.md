@@ -1,0 +1,52 @@
+---
+uid: db9ee77f-6932-4df7-bd06-e94f20fc7450
+alt-uid: XMLFiles
+title: XML Files
+keywords: "configuration, XML files"
+---
+XML files are given special handling to ignore the content of certain elements entirely and to include the values
+of certain attributes when spell checking is performed.  This can greatly reduce the number of false reports when
+working with XML files.  The options are divided into two sections in this category.
+
+- **Ignored XML Elements** - This section lets you manage the list of ignored XML elements.  If an element name
+  appears in this list, its inner text will be ignored when spell checking is performed.  All other elements not
+  in the list will have their inner text spell checked.
+
+  ``` none{title=" "}
+  vsspell_ignored_xml_elements_[sectionId] = [clear_inherited],[element1,element2,...]
+
+  sectionId = The unique ID for the section
+  clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+  prior values from other property instances are inherited.
+  element1,element2,... = A comma-separated list of XML element names to ignore.
+  ```
+- **Spell Checked Attributes** - This section lets you manage the list of attribute names that will have their
+  values spell checked.  The values for all other attributes not in the list will be ignored.
+
+  ``` none{title=" "}
+  vsspell_spell_checked_xml_attributes_[sectionId] = [clear_inherited],[attribute1,attribute2,...]
+
+  sectionId = The unique ID for the section
+  clear_inherited = If specified, clear all prior values and use only the settings in this property.  If omitted,
+  prior values from other property instances are inherited.
+  attribute1,attribute2,... = A comma-separated list of XML attribute names to spell check.
+  ```
+
+Each section contains a text box in which you can enter one or more element or attribute names.  Click the
+**Add** button to add the name(s) to the list.  XML is case sensitive so enter the names exactly as they appear
+in the files.  The list box shows the current entries in each section.  Select an entry and click the **Remove**
+button to remove it.  Clicking the **Default** button will reset the associated list to the default set of
+elements or attributes.
+
+For non-global settings, an option is available to inherit the ignored XML elements and spell checked attributes
+from configurations above the current one.  If enabled, any elements and attributes in the current configuration
+are added to those.  If disabled, the settings in the current configuration will replace the inherited lists of
+elements and attributes.  If not inherited and a list is left empty, it effectively clears the list of elements
+or attributes.
+
+When the inherited option is enabled, the **Default** buttons clear the list of elements or attributes.  If not
+inherited, they will set the list to the same one used in the global configuration.
+
+## See Also
+**Other Resources**  
+[](@fb81c214-0fe0-4d62-a172-d7928d5b91d5)  
