@@ -2,7 +2,7 @@
 // System  : Spell Check My Code Package
 // File    : AssemblyInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 12/12/2025
+// Updated : 12/13/2025
 // Note    : Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
 // Spell Check My Code definition attributes.
@@ -30,5 +30,5 @@ using System.Resources;
 [assembly: NeutralResourcesLanguage("en")]
 
 // These should match the version in Directory.Build.props
-[assembly: AssemblyVersion("2025.12.12.0")]
-[assembly: AssemblyFileVersion("2025.12.12.0")]
+[assembly: AssemblyVersion("2025.12.13.0")]
+[assembly: AssemblyFileVersion("2025.12.13.0")]

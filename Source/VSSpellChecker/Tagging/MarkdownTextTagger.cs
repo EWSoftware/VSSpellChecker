@@ -2,7 +2,7 @@
 // System  : Spell Check My Code Package
 // File    : MarkdownTextTagger.cs
 // Authors : Eric Woodruff
-// Updated : 12/07/2025
+// Updated : 12/13/2025
 // Note    : Copyright 2016-2025, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to provide tags for markdown files when the Markdown Editor extension by Mads
@@ -76,12 +76,16 @@ internal class MarkdownTextTagger : ITagger<NaturalTextTag>, IDisposable
         if(classifier == null || spans == null || spans.Count == 0)
             yield break;
 
+        List<SnapshotSpan> classifiedSpans = [];
+
         foreach(var snapshotSpan in spans)
         {
             Debug.Assert(snapshotSpan.Snapshot.TextBuffer == buffer);
 
             foreach(ClassificationSpan classificationSpan in classifier.GetClassificationSpans(snapshotSpan))
             {
+                classifiedSpans.Add(classificationSpan.Span);
+
                 string name = classificationSpan.ClassificationType.Classification.ToLowerInvariant();
 
                 switch(name)
@@ -103,6 +107,16 @@ internal class MarkdownTextTagger : ITagger<NaturalTextTag>, IDisposable
                         break;
                 }
             }
+        }
+
+        // Plain text spans must be handled separately
+        NormalizedSnapshotSpanCollection classified = new(classifiedSpans),
+            plainSpans = NormalizedSnapshotSpanCollection.Difference(spans, classified);
+
+        foreach(var span in plainSpans)
+        {
+            if(!String.IsNullOrWhiteSpace(span.GetText()))
+                yield return new TagSpan<NaturalTextTag>(span, new NaturalTextTag());
         }
     }
 

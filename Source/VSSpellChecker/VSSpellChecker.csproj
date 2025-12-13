@@ -158,7 +158,6 @@
     <Compile Include="Tagging\NaturalTextTag.cs" />
     <Compile Include="Tagging\PhpTextTaggerProvider.cs" />
     <Compile Include="Tagging\PlainTextTagger.cs" />
-    <Compile Include="Tagging\RMarkdownTextTagger.cs" />
     <Compile Include="Theme\TeamFoundationColors.cs" />
     <Compile Include="Theme\ThemeColorId.cs" />
     <Compile Include="Theme\ThemeColors.cs" />

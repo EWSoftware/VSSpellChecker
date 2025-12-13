@@ -2,7 +2,7 @@
 // System  : Spell Check My Code Package
 // File    : CommentTextTagger.cs
 // Authors : Noah Richards, Roman Golovin, Michael Lehenbauer, Eric Woodruff
-// Updated : 12/07/2025
+// Updated : 12/13/2025
 // Note    : Copyright 2010-2025, Microsoft Corporation, All rights reserved
 //           Portions Copyright 2013-2025, Eric Woodruff, All rights reserved
 //
@@ -82,7 +82,7 @@ internal class CommentTextTagger : ITagger<NaturalTextTag>, IDisposable
         /// service is unavailable.</returns>
         public ITagger<T> CreateTagger<T>(ITextView view, ITextBuffer buffer) where T : ITag
         {
-            if(view == null || buffer == null || buffer.ContentType.IsOfType("R Markdown"))
+            if(view == null || buffer == null)
                 return null;
 
 #pragma warning disable VSTHRD010
@@ -90,13 +90,6 @@ internal class CommentTextTagger : ITagger<NaturalTextTag>, IDisposable
 
             if(config == null)
                 return null;
-
-            // Markdown has its own tagger
-            if(buffer.ContentType.IsOfType("Markdown") || buffer.ContentType.IsOfType("code++.Markdown"))
-            {
-                return new MarkdownTextTagger(buffer, classifierAggregatorService.GetClassifier(view),
-                    config.IgnoredClassificationsFor(buffer.ContentType.TypeName)) as ITagger<T>;
-            }
 
             // Due to an issue with the built-in C# classifier, we avoid using it.  This also lets us provide
             // configuration options to exclude certain elements from being spell checked if not wanted.
