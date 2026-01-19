@@ -24,14 +24,12 @@
       <Argument Key="BibliographyDataFile" Value="" />
       <Argument Key="RootBreadcrumbTitleText" Value="Spell Checker" />
       <Argument Key="ResizableTocColumn" Value="False" />
-      <Argument Key="CollapsibleSections" Value="False" />
       <Argument Key="LogoFile" Value="" />
       <Argument Key="LogoHeight" Value="" />
       <Argument Key="LogoWidth" Value="" />
       <Argument Key="LogoAltText" Value="" />
       <Argument Key="LogoPlacement" Value="Left" />
       <Argument Key="LogoAlignment" Value="Left" />
-      <Argument Key="LogoUrl" Value="" />
       <Argument Key="MaxVersionParts" Value="4" />
       <Argument Key="DefaultLanguage" Value="cs" />
       <Argument Key="IncludeEnumValues" Value="True" />
@@ -39,6 +37,7 @@
       <Argument Key="FlagsEnumValueFormat" Value="IntegerValue" />
       <Argument Key="FlagsEnumSeparatorSize" Value="0" />
       <Argument Key="IncludeIntegerEnumSeparators" Value="true" />
+      <Argument Key="ProjectUrl" Value="https://github.com/EWSoftware/VSSpellChecker" />
       <Argument Key="BaseSourceCodeUrl" Value="https://github.com/EWSoftware/VSSpellChecker/blob/master/Source/" />
       <Argument Key="RequestExampleUrl" Value="" />
       <Argument Key="ShowParametersOnAllMethods" Value="False" />
@@ -58,7 +57,7 @@
     <SyntaxFilters>Standard</SyntaxFilters>
     <SdkLinkTarget>Blank</SdkLinkTarget>
     <RootNamespaceContainer>False</RootNamespaceContainer>
-    <PresentationStyle>Default2022</PresentationStyle>
+    <PresentationStyle>Themed2026</PresentationStyle>
     <Preliminary>False</Preliminary>
     <NamingMethod>Guid</NamingMethod>
     <HelpTitle>Spell Check My Code Documentation</HelpTitle>
