@@ -19,10 +19,11 @@ checker, do the following:
   [LibreOffice dictionary repository](https://cgit.freedesktop.org/libreoffice/dictionaries/tree "LibreOffice dictionary repository").
   Locate the language you want to use and download the *.aff* and *.dic* dictionary files for it.
 - To make the dictionaries available to all solutions and projects, the *.aff* and *.dic* file pairs will need to
-  be copied into the local application data folder which equates to one of the following folders based on your
-  operating system:
-  - Windows Vista or later: *%LOCALAPPDATA%\EWSoftware\Visual Studio Spell Checker*
-  - Windows XP: *%USERPROFILE%\Local Settings\Application Data\EWSoftware\Visual Studio Spell Checker*
+  be copied into the local application data folder (*%LOCALAPPDATA%\EWSoftware\Visual Studio Spell Checker*).
+
+  **NOTE:** Do not place custom dictionaries in the *.\\DefaultDictionaries* subfolder under the application data folder.
+  This is a cache folder for the default dictionaries only and may be overwritten by the package when it is
+  updated.
 - Dictionaries can be stored in another location of your choosing.  If you do this, you will need to edit the
   global configuration and add the folder to the **Additional Dictionary Folders** list in the **Dictionary
   Settings** category.

@@ -62,7 +62,7 @@
     <NamingMethod>Guid</NamingMethod>
     <HelpTitle>Spell Check My Code Documentation</HelpTitle>
     <FeedbackEMailAddress>Eric%40EWoodruff.us</FeedbackEMailAddress>
-    <CopyrightText>Copyright \xA9 2013-2025, Eric Woodruff, All rights reserved</CopyrightText>
+    <CopyrightText>Copyright \xA9 2013-2026, Eric Woodruff, All rights reserved</CopyrightText>
     <CopyrightHref>https://GitHub.com/EWSoftware/VSSpellChecker</CopyrightHref>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <NamespaceSummaries>
@@ -70,7 +70,7 @@
     </NamespaceSummaries>
     <ComponentConfigurations>
     </ComponentConfigurations>
-    <HelpFileVersion>2025.12.12.0</HelpFileVersion>
+    <HelpFileVersion>2026.6.5.0</HelpFileVersion>
     <SaveComponentCacheCapacity>0</SaveComponentCacheCapacity>
     <SourceCodeBasePath>..\Source\</SourceCodeBasePath>
     <WarnOnMissingSourceContext>True</WarnOnMissingSourceContext>
@@ -159,6 +159,7 @@
     <None Include="Content\ShortcutKeys.md" />
     <None Include="Content\Installation.md" />
     <None Include="Content\VersionHistory\v2025.12.12.0.md" />
+    <None Include="Content\VersionHistory\v2026.6.5.0.md" />
     <None Include="Content\Welcome.md" />
     <None Include="Content\CommonProblems.md" />
     <None Include="Content\CorrectingIssues.md" />

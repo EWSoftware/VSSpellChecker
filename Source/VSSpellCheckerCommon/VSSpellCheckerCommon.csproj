@@ -18,6 +18,57 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="Dictionaries\de_DE.aff" />
+	  <EmbeddedResource Include="Dictionaries\de_DE.dic" />
+	  <EmbeddedResource Include="Dictionaries\en_AU.aff" />
+	  <EmbeddedResource Include="Dictionaries\en_AU.dic" />
+	  <EmbeddedResource Include="Dictionaries\en_CA.aff" />
+	  <EmbeddedResource Include="Dictionaries\en_CA.dic" />
+	  <EmbeddedResource Include="Dictionaries\en_GB.aff" />
+	  <EmbeddedResource Include="Dictionaries\en_GB.dic" />
+	  <EmbeddedResource Include="Dictionaries\en_NZ.aff" />
+	  <EmbeddedResource Include="Dictionaries\en_NZ.dic" />
+	  <EmbeddedResource Include="Dictionaries\en_US.aff" />
+	  <EmbeddedResource Include="Dictionaries\en_US.dic" />
+	  <EmbeddedResource Include="Dictionaries\en_ZA.aff" />
+	  <EmbeddedResource Include="Dictionaries\en_ZA.dic" />
+	  <EmbeddedResource Include="Dictionaries\es_ES.aff" />
+	  <EmbeddedResource Include="Dictionaries\es_ES.dic" />
+	  <EmbeddedResource Include="Dictionaries\fr_FR.aff" />
+	  <EmbeddedResource Include="Dictionaries\fr_FR.dic" />
+	  <EmbeddedResource Include="Dictionaries\it_IT.aff" />
+	  <EmbeddedResource Include="Dictionaries\it_IT.dic" />
+	  <EmbeddedResource Include="Dictionaries\LGPL-License.txt" />
+	  <EmbeddedResource Include="Dictionaries\pt_BR.aff" />
+	  <EmbeddedResource Include="Dictionaries\pt_BR.dic" />
+	  <EmbeddedResource Include="Dictionaries\pt_PT.aff" />
+	  <EmbeddedResource Include="Dictionaries\pt_PT.dic" />
+	  <EmbeddedResource Include="Dictionaries\README_de_DE.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_en_AU.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_en_CA.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_en_GB.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_en_NZ.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_en_US.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_en_ZA.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_es_ES.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_fr_FR.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_it_IT.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_pt_BR.TXT" />
+	  <EmbeddedResource Include="Dictionaries\README_pt_PT.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_ru_RU.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_sl_SI.txt" />
+	  <EmbeddedResource Include="Dictionaries\README_sr.txt" />
+	  <EmbeddedResource Include="Dictionaries\ru_RU.aff" />
+	  <EmbeddedResource Include="Dictionaries\ru_RU.dic" />
+	  <EmbeddedResource Include="Dictionaries\sl_SI.aff" />
+	  <EmbeddedResource Include="Dictionaries\sl_SI.dic" />
+	  <EmbeddedResource Include="Dictionaries\sr-Latn.aff" />
+	  <EmbeddedResource Include="Dictionaries\sr-Latn.dic" />
+	  <EmbeddedResource Include="Dictionaries\sr.aff" />
+	  <EmbeddedResource Include="Dictionaries\sr.dic" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="WeCantSpell.Hunspell" />
 		<ProjectReference Include="..\VSSpellCheckerDefinitions\VSSpellCheckerDefinitions.csproj" />
 	</ItemGroup>

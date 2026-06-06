@@ -7,6 +7,7 @@ keywords: "version, history"
 This topic describes the various changes made to the Spell Check My Code extension over the life of the project.
 Select a version below to see a description of its changes.
 
+- [](@v2026.6.5.0)
 - [](@v2025.12.12.0)
 - [](@7be3a6a1-c374-4384-9b5b-5dc1b01d4307)
 - [](@f401145a-63b8-48ea-a70c-820b7d58eb15)

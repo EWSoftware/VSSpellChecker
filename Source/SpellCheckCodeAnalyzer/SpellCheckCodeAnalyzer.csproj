@@ -24,6 +24,16 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+		<!-- Declared here explicitly so MSBuild marks it copy-local (Private=true -> CopyLocal=true) in
+			 this project, which puts it in @(ReferenceCopyLocalPaths) so the EmbedAnalyzerDependencies
+			 target below can embed it as a resource.  Without this declaration it only arrives
+			 transitively through the VSSpellCheckerCommon ProjectReference and is resolved with
+			 Private=false/CopyLocal=false, so it never appears in @(ReferenceCopyLocalPaths).
+			 ExcludeAssets prevents it from being treated as an analyzer package itself. -->
+		<PackageReference Include="WeCantSpell.Hunspell">
+			<ExcludeAssets>contentfiles;analyzers;buildtransitive</ExcludeAssets>
+			<Private>true</Private>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -34,5 +44,43 @@
 		<Compile Update="Resources.Designer.cs" DesignTime="True" AutoGen="True" DependentUpon="Resources.resx" />
 		<EmbeddedResource Update="Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
 	</ItemGroup>
+
+	<!--
+		Embed all copy-local dependency DLLs directly into the analyzer assembly so it is self-contained.
+		Roslyn may copy the analyzer to a cache folder without its dependency DLLs; the embedded-resource
+		resolver in CSharpSpellCheckCodeAnalyzer loads them from the stream regardless of load location.
+
+		When MarkPackageReferencesAsExternallyResolved=true (the SDK default), NuGet packages resolved
+		by ResolvePackageAssets land in @(RuntimeCopyLocalItems), NOT in @(ReferenceCopyLocalPaths).
+		Project-reference outputs go through RAR and appear in @(ReferenceCopyLocalPaths).  We must
+		therefore source from both groups to capture all dependencies.
+
+		We populate _CoreCompileResourceInputs directly rather than going through EmbeddedResource ->
+		CreateManifestResourceNames because EmbeddedResource items added inside a target body are not
+		visible to the CreateManifestResourceNames target pass, leaving ManifestResourceName unset so
+		Csc silently drops them.
+	-->
+	<Target Name="EmbedAnalyzerDependencies"
+		BeforeTargets="CoreCompile"
+		DependsOnTargets="ResolveReferences;ResolvePackageAssets">
+		<ItemGroup>
+			<!-- Project-reference outputs (go through RAR -> ReferenceCopyLocalPaths) -->
+			<_EmbedDependencyDll Include="@(ReferenceCopyLocalPaths)"
+				Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll'" />
+			<!-- NuGet package outputs (go through ResolvePackageAssets -> RuntimeCopyLocalItems).
+				 Filter to only the packages this project declares directly that need to travel
+				 with the analyzer at runtime: specifically WeCantSpell.Hunspell and its own
+				 transitive runtime dependencies.  Roslyn and system assemblies are already in the host. -->
+			<_EmbedDependencyDll Include="@(RuntimeCopyLocalItems)"
+				Condition="'%(RuntimeCopyLocalItems.Extension)' == '.dll' and
+									 ('%(RuntimeCopyLocalItems.NuGetPackageId)' == 'WeCantSpell.Hunspell' or
+										'%(RuntimeCopyLocalItems.NuGetPackageId)' == 'System.Text.Encoding.CodePages' or
+										'%(RuntimeCopyLocalItems.NuGetPackageId)' == 'System.Runtime.CompilerServices.Unsafe')" />
+			<_CoreCompileResourceInputs Include="@(_EmbedDependencyDll)"
+				LogicalName="%(_EmbedDependencyDll.Filename)%(_EmbedDependencyDll.Extension)"
+				ManifestResourceName="%(_EmbedDependencyDll.Filename)%(_EmbedDependencyDll.Extension)"
+				WithCulture="false" />
+		</ItemGroup>
+	</Target>
 
 </Project>
