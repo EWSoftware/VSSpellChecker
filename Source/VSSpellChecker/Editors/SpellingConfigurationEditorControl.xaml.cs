@@ -2,8 +2,8 @@
 // System  : Spell Check My Code Package
 // File    : SpellConfigurationEditorControl.xaml.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 08/30/2025
-// Note    : Copyright 2015-2025, Eric Woodruff, All rights reserved
+// Updated : 11/11/2026
+// Note    : Copyright 2015-2026, Eric Woodruff, All rights reserved
 //
 // This file contains a user control used to edit spell checker configuration settings files
 //
@@ -361,8 +361,8 @@ namespace VisualStudio.SpellChecker.Editors
 
                 sections.RemoveAt(idx);
 
-                // Adjust the index when there is a root section
-                if(configFile.Sections[0].IsRoot)
+                // Adjust the index when there is a root section or a blank first section
+                if(configFile.Sections[0].IsRoot || configFile.Sections[0].IsBlankSection)
                     configFile.Sections.RemoveAt(idx + 1);
                 else
                     configFile.Sections.RemoveAt(idx);
@@ -444,8 +444,8 @@ namespace VisualStudio.SpellChecker.Editors
                 sections.RemoveAt(currentIndex);
                 sections.Insert(newIndex, sectionToMove);
 
-                // Adjust the index when there is a root section
-                if(configFile.Sections[0].IsRoot)
+                // Adjust the index when there is a root section or a blank first section
+                if(configFile.Sections[0].IsRoot || configFile.Sections[0].IsBlankSection)
                 {
                     configFile.Sections.RemoveAt(currentIndex + 1);
                     configFile.Sections.Insert(newIndex + 1, sectionToMove.Section);

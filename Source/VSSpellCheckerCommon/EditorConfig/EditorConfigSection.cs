@@ -2,8 +2,8 @@
 // System  : Spell Check My Code Package
 // File    : EditorConfigSection.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 07/31/2025
-// Note    : Copyright 2023-2025, Eric Woodruff, All rights reserved
+// Updated : 11/11/2026
+// Note    : Copyright 2023-2026, Eric Woodruff, All rights reserved
 //
 // This file contains the class used to represent and .editorconfig file section
 //
@@ -94,6 +94,13 @@ namespace VisualStudio.SpellChecker.Common.EditorConfig
                 return rootProperty?.PropertyValue?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
             }
         }
+
+        /// <summary>
+        /// This is used to see if the section is blank (no section header or properties)
+        /// </summary>
+        /// <remarks>This will only occur for the first section if there are comments followed by a blank line
+        /// which prevents the comments from being associated with the following section header.</remarks>
+        public bool IsBlankSection => this.SectionLines.All(l => l.LineType != LineType.SectionHeader && l.LineType != LineType.Property);
 
         /// <summary>
         /// This is used to get the section header containing the file glob

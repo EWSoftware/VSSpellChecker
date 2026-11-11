@@ -2,8 +2,8 @@
 // System  : Spell Check My Code Package
 // File    : SectionInfo.cs
 // Author  : Eric Woodruff  (Eric@EWoodruff.us)
-// Updated : 05/15/2023
-// Note    : Copyright 2023, Eric Woodruff, All rights reserved
+// Updated : 11/11/2026
+// Note    : Copyright 2023-2026, Eric Woodruff, All rights reserved
 //
 // This file contains a class used to contain information about an .editorconfig section
 //
@@ -145,11 +145,9 @@ namespace VisualStudio.SpellChecker.Editors
                     sb.Append(' ');
                 }
             }
-            else
-            {
-                if(!spellcheckerProperties.Any())
-                    sb.Append(" (No spell checker settings)");
-            }
+
+            if(!spellcheckerProperties.Any())
+                sb.Append(" (No spell checker settings)");
 
             this.SectionDescription = sb.ToString().Trim();
             this.ContainsOtherSettings = this.Section.SectionLines.Except(spellcheckerProperties).Any(
